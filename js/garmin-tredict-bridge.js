@@ -2907,60 +2907,60 @@
       const curR = Number(s.repetitions || avgReps || 10);
       const rIdx = s.roundIndex !== undefined ? s.roundIndex : sIdx;
       return `
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;">
-          <span style="font-weight:700;font-size:13px;color:#334155;">Set ${sIdx + 1}</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#121024;border:1px solid rgba(167, 139, 250, 0.25);border-radius:8px;">
+          <span style="font-weight:700;font-size:13px;color:#FFFFFF;">Set ${sIdx + 1}</span>
           <div style="display:flex;align-items:center;gap:6px;">
-            <input type="number" step="0.5" min="0" value="${curW}" onchange="window.updateGarminSingleSet(decodeURIComponent('${encAct}'), ${rIdx}, this.value, null)" style="width:55px;padding:5px;border:1px solid #CBD5E1;border-radius:6px;font-size:13px;font-weight:700;text-align:center;color:#0F172A;background:#FFFFFF;" title="Kilo (kg)" /> <span style="font-size:12px;color:#64748B;">kg</span>
-            <span style="color:#94A3B8;font-weight:700;">×</span>
-            <input type="number" step="1" min="1" value="${curR}" onchange="window.updateGarminSingleSet(decodeURIComponent('${encAct}'), ${rIdx}, null, this.value)" style="width:48px;padding:5px;border:1px solid #CBD5E1;border-radius:6px;font-size:13px;font-weight:700;text-align:center;color:#0F172A;background:#FFFFFF;" title="Tekrar" /> <span style="font-size:12px;color:#64748B;">tkr</span>
+            <input type="number" step="0.5" min="0" value="${curW}" onchange="window.updateGarminSingleSet(decodeURIComponent('${encAct}'), ${rIdx}, this.value, null)" style="width:55px;padding:5px;border:1px solid rgba(167, 139, 250, 0.35);border-radius:6px;font-size:13px;font-weight:700;text-align:center;color:#FFFFFF;background:#181530;" title="Kilo (kg)" /> <span style="font-size:12px;color:#E2E8F0;">kg</span>
+            <span style="color:#E2E8F0;font-weight:700;">×</span>
+            <input type="number" step="1" min="1" value="${curR}" onchange="window.updateGarminSingleSet(decodeURIComponent('${encAct}'), ${rIdx}, null, this.value)" style="width:48px;padding:5px;border:1px solid rgba(167, 139, 250, 0.35);border-radius:6px;font-size:13px;font-weight:700;text-align:center;color:#FFFFFF;background:#181530;" title="Tekrar" /> <span style="font-size:12px;color:#E2E8F0;">tkr</span>
           </div>
         </div>
       `;
     }).join('');
 
-    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.65);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px);';
+    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(6,5,12,0.8);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px);';
     modal.innerHTML = `
-      <div style="background:#FFFFFF;border-radius:16px;max-width:440px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);color:#0F172A;overflow:hidden;">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">
+      <div style="background:#181530;border:1.5px solid rgba(167, 139, 250, 0.28);border-radius:16px;max-width:440px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 25px -5px rgba(0,0,0,0.6);color:#FFFFFF;overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(167, 139, 250, 0.22);background:#121024;">
           <div>
-            <div style="font-size:11px;font-weight:800;color:#0284C7;text-transform:uppercase;letter-spacing:0.5px;">Hareketi Düzenle</div>
-            <div style="font-size:15px;font-weight:800;color:#0F172A;margin-top:2px;">🏋️ ${escHtml(originalLabel)}</div>
+            <div style="font-size:11px;font-weight:800;color:#7DD3FC;text-transform:uppercase;letter-spacing:0.5px;">Hareketi Düzenle</div>
+            <div style="font-size:15px;font-weight:800;color:#FFFFFF;margin-top:2px;">🏋️ ${escHtml(originalLabel)}</div>
           </div>
-          <button type="button" onclick="window.closeGarminExerciseEditModal()" style="background:#E2E8F0;border:none;border-radius:50%;width:32px;height:32px;font-size:14px;font-weight:700;color:#475569;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+          <button type="button" onclick="window.closeGarminExerciseEditModal()" style="background:#2C2550;border:1px solid rgba(167, 139, 250, 0.35);border-radius:50%;width:32px;height:32px;font-size:14px;font-weight:700;color:#F3E8FF;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
         </div>
 
         <div style="padding:16px 18px;overflow-y:auto;flex:1;">
           <!-- 1. Hareketi Eşle / Değiştir -->
           <div style="margin-bottom:16px;">
-            <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">⇄ Kütüphanedeki Hareketi Seç / Eşle:</label>
-            <select onchange="window.resolveGarminUndefinedGroup(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'), this.value); window.openGarminExerciseEditModal(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'));" style="width:100%;padding:9px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;color:#0F172A;background:#FFFFFF;font-weight:600;cursor:pointer;">
+            <label style="display:block;font-size:12px;font-weight:700;color:#E2E8F0;margin-bottom:6px;">⇄ Kütüphanedeki Hareketi Seç / Eşle:</label>
+            <select onchange="window.resolveGarminUndefinedGroup(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'), this.value); window.openGarminExerciseEditModal(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'));" style="width:100%;padding:9px 12px;border:1px solid rgba(167, 139, 250, 0.35);border-radius:8px;font-size:13px;color:#FFFFFF;background:#121024;font-weight:600;cursor:pointer;">
               <option value="">(Mevcut Eşleşme): ${escHtml(originalLabel)}</option>
               ${allOptions}
             </select>
           </div>
 
           <!-- 2. Tüm Setleri Hızlı Ayarla -->
-          <div style="background:#F1F5F9;border:1px solid #E2E8F0;border-radius:10px;padding:12px;margin-bottom:16px;">
-            <div style="font-size:12px;font-weight:700;color:#0F172A;margin-bottom:8px;">⚡ Tüm Setleri Tek Seferde Güncelle:</div>
+          <div style="background:#121024;border:1px solid rgba(167, 139, 250, 0.25);border-radius:10px;padding:12px;margin-bottom:16px;">
+            <div style="font-size:12px;font-weight:700;color:#FFFFFF;margin-bottom:8px;">⚡ Tüm Setleri Tek Seferde Güncelle:</div>
             <div style="display:flex;align-items:center;gap:6px;">
-              <input type="number" step="0.5" min="0" id="modalBulkWeight" value="${g.weight || 0}" style="width:65px;padding:7px;border:1px solid #CBD5E1;border-radius:6px;font-size:13px;font-weight:700;text-align:center;color:#0F172A;background:#FFFFFF;" /> <span style="font-size:12px;color:#64748B;">kg</span>
-              <span style="color:#94A3B8;font-weight:700;">×</span>
-              <input type="number" step="1" min="1" id="modalBulkReps" value="${avgReps}" style="width:55px;padding:7px;border:1px solid #CBD5E1;border-radius:6px;font-size:13px;font-weight:700;text-align:center;color:#0F172A;background:#FFFFFF;" /> <span style="font-size:12px;color:#64748B;">tkr</span>
-              <button type="button" onclick="window.updateGarminGroupWeightAndReps(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'), document.getElementById('modalBulkWeight').value, document.getElementById('modalBulkReps').value); window.openGarminExerciseEditModal(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'));" style="background:#0F172A;color:#FFFFFF;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;flex:1;">Uygula</button>
+              <input type="number" step="0.5" min="0" id="modalBulkWeight" value="${g.weight || 0}" style="width:65px;padding:7px;border:1px solid rgba(167, 139, 250, 0.35);border-radius:6px;font-size:13px;font-weight:700;text-align:center;color:#FFFFFF;background:#181530;" /> <span style="font-size:12px;color:#E2E8F0;">kg</span>
+              <span style="color:#E2E8F0;font-weight:700;">×</span>
+              <input type="number" step="1" min="1" id="modalBulkReps" value="${avgReps}" style="width:55px;padding:7px;border:1px solid rgba(167, 139, 250, 0.35);border-radius:6px;font-size:13px;font-weight:700;text-align:center;color:#FFFFFF;background:#181530;" /> <span style="font-size:12px;color:#E2E8F0;">tkr</span>
+              <button type="button" onclick="window.updateGarminGroupWeightAndReps(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'), document.getElementById('modalBulkWeight').value, document.getElementById('modalBulkReps').value); window.openGarminExerciseEditModal(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'));" style="background:#6D28D9;color:#FFFFFF;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;flex:1;">Uygula</button>
             </div>
           </div>
 
           <!-- 3. Tekil Setler -->
           <div>
-            <div style="font-size:12px;font-weight:700;color:#334155;margin-bottom:8px;">Tekil Set Ağırlık ve Tekrarları:</div>
+            <div style="font-size:12px;font-weight:700;color:#E2E8F0;margin-bottom:8px;">Tekil Set Ağırlık ve Tekrarları:</div>
             <div style="display:flex;flex-direction:column;gap:6px;">
               ${modalSetRows}
             </div>
           </div>
         </div>
 
-        <div style="padding:12px 18px;border-top:1px solid #E2E8F0;background:#F8FAFC;">
-          <button type="button" onclick="window.closeGarminExerciseEditModal()" style="width:100%;background:#16A34A;color:#FFFFFF;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 2px 4px rgba(22,163,74,0.2);">
+        <div style="padding:12px 18px;border-top:1px solid rgba(167, 139, 250, 0.22);background:#121024;">
+          <button type="button" onclick="window.closeGarminExerciseEditModal()" style="width:100%;background:#15803D;color:#FFFFFF;border:1px solid #22C55E;border-radius:8px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;">
             ✓ Tamamla ve Kapat
           </button>
         </div>
@@ -3146,17 +3146,17 @@
       // ── KARDİYO (YÜRÜYÜŞ / KOŞU): YALIN TEK SATIRLIK BİLDİRİM ──
       if (isCardio) {
         return `
-          <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-left:4px solid #0284C7;border-radius:10px;padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+          <div style="background:#181530;border:1px solid rgba(167, 139, 250, 0.25);border-left:4px solid #38BDF8;border-radius:10px;padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;box-shadow:0 2px 6px rgba(0,0,0,0.25);">
             <div style="min-width:0;">
               <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                <span style="font-size:13px;font-weight:700;color:#0F172A;">🏃 ${escHtml(displayTitle)}</span>
-                <span style="background:#E0F2FE;color:#0369A1;font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;">Kardiyo (Doğrudan Puanlandı)</span>
+                <span style="font-size:13px;font-weight:700;color:#FFFFFF;">🏃 ${escHtml(displayTitle)}</span>
+                <span style="background:#0C4A6E;border:1px solid #38BDF8;color:#BAE6FD;font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;">Kardiyo (Doğrudan Puanlandı)</span>
               </div>
-              <div style="font-size:11.5px;color:#64748B;margin-top:2px;">
+              <div style="font-size:11.5px;color:#E2E8F0;margin-top:2px;">
                 📅 ${escHtml(dateStr)} • ❤️ Ort. ${avgHr} / Zirve ${maxHr} bpm • 🔥 ${cal} kcal
               </div>
             </div>
-            <button type="button" onclick="window.dismissGarminStrengthActivity(decodeURIComponent('${encAct}'))" title="Bildirimi Kaldır" style="background:#F1F5F9;border:1px solid #CBD5E1;color:#64748B;border-radius:6px;padding:4px 8px;font-size:11.5px;font-weight:700;cursor:pointer;flex-shrink:0;">
+            <button type="button" onclick="window.dismissGarminStrengthActivity(decodeURIComponent('${encAct}'))" title="Bildirimi Kaldır" style="background:#2C2550;border:1px solid rgba(167, 139, 250, 0.35);color:#F3E8FF;border-radius:6px;padding:4px 8px;font-size:11.5px;font-weight:700;cursor:pointer;flex-shrink:0;">
               Sil
             </button>
           </div>
@@ -3181,16 +3181,16 @@
         const summaryText = `${weightSummary} × ~${avgReps} tkr`;
 
         return `
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;margin-top:6px;gap:8px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#121024;border:1px solid rgba(167, 139, 250, 0.25);border-radius:10px;margin-top:6px;gap:8px;">
             <div style="min-width:0;flex:1;">
-              <div style="font-size:13.5px;font-weight:800;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              <div style="font-size:13.5px;font-weight:800;color:#FFFFFF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                 🏋️ ${escHtml(originalLabel)}
               </div>
-              <div style="font-size:11.5px;color:#64748B;margin-top:2px;">
+              <div style="font-size:11.5px;color:#E2E8F0;margin-top:2px;">
                 ${g.sets.length} Set • ${summaryText}
               </div>
             </div>
-            <button type="button" onclick="window.openGarminExerciseEditModal(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'))" title="Bu Hareketi Düzenle" style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:#0F172A;cursor:pointer;display:inline-flex;align-items:center;gap:4px;flex-shrink:0;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+            <button type="button" onclick="window.openGarminExerciseEditModal(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'))" title="Bu Hareketi Düzenle" style="background:#2C2550;border:1px solid rgba(167, 139, 250, 0.4);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:#F3E8FF;cursor:pointer;display:inline-flex;align-items:center;gap:4px;flex-shrink:0;">
               ✏️ Düzenle
             </button>
           </div>
@@ -3202,32 +3202,32 @@
       const safeActKey = String(act.id || '').replace(/[^a-zA-Z0-9_]/g, '_');
 
       return `
-        <div style="background:#FFFFFF;border:1.5px solid #F59E0B;border-radius:12px;padding:12px 14px;margin-bottom:10px;box-shadow:0 2px 6px rgba(245,158,11,0.08);">
+        <div style="background:#181530;border:1.5px solid #F59E0B;border-radius:12px;padding:12px 14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
             <div style="min-width:0;flex:1;">
               <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                <span style="font-size:13.5px;font-weight:800;color:#0F172A;">⌚ ${escHtml(displayTitle)}</span>
-                <span style="background:#FEF3C7;color:#B45309;font-size:11px;font-weight:800;padding:2px 6px;border-radius:6px;">⏳ Onay Bekliyor</span>
+                <span style="font-size:13.5px;font-weight:800;color:#FFFFFF;">⌚ ${escHtml(displayTitle)}</span>
+                <span style="background:#451A03;border:1px solid #D97706;color:#FDE68A;font-size:11px;font-weight:800;padding:2px 6px;border-radius:6px;">⏳ Onay Bekliyor</span>
               </div>
-              <div style="font-size:11.5px;color:#64748B;margin-top:2px;">
+              <div style="font-size:11.5px;color:#E2E8F0;margin-top:2px;">
                 📅 ${escHtml(dateStr)} • ❤️ Ort. ${avgHr} / Zirve ${maxHr} bpm • 🔥 ${cal} kcal • 🏋️ ${totalSets} Set (${groups.length} Hareket)
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-              <button type="button" onclick="window.approveGarminStrengthActivity(decodeURIComponent('${encAct}'))" style="background:#16A34A;color:#FFFFFF;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 1px 3px rgba(22,163,74,0.3);">
+              <button type="button" onclick="window.approveGarminStrengthActivity(decodeURIComponent('${encAct}'))" style="background:#15803D;color:#FFFFFF;border:1px solid #22C55E;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;">
                 ✓ Onayla
               </button>
-              <button type="button" onclick="window.dismissGarminStrengthActivity(decodeURIComponent('${encAct}'))" title="Saat Kaydını Sil" style="background:#FEE2E2;color:#DC2626;border:none;border-radius:6px;padding:6px 9px;font-size:12px;font-weight:700;cursor:pointer;">
+              <button type="button" onclick="window.dismissGarminStrengthActivity(decodeURIComponent('${encAct}'))" title="Saat Kaydını Sil" style="background:#7F1D1D;color:#FECACA;border:1px solid #EF4444;border-radius:6px;padding:6px 9px;font-size:12px;font-weight:700;cursor:pointer;">
                 ✕ Sil
               </button>
             </div>
           </div>
 
           <!-- Talep Halinde Açılır Detay & Düzenleme Çekmecesi (Varsayılan Kapalı) -->
-          <div style="margin-top:8px;padding-top:8px;border-top:1px dashed #E2E8F0;">
-            <button type="button" onclick="const d = document.getElementById('details_${safeActKey}'); const isHid = d.style.display==='none'; d.style.display = isHid ? 'block' : 'none'; this.querySelector('.arrow').textContent = isHid ? '▲ Kapat' : '▼ İncele / Düzenle';" style="background:none;border:none;color:#0284C7;font-size:12px;font-weight:700;cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:4px;">
+          <div style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(167, 139, 250, 0.25);">
+            <button type="button" onclick="const d = document.getElementById('details_${safeActKey}'); const isHid = d.style.display==='none'; d.style.display = isHid ? 'block' : 'none'; this.querySelector('.arrow').textContent = isHid ? '▲ Kapat' : '▼ İncele / Düzenle';" style="background:none;border:none;color:#7DD3FC;font-size:12px;font-weight:700;cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:4px;">
               <span>👁️ Hareket Detayları (${groups.length} Hareket)</span>
-              <span class="arrow" style="font-size:11px;background:#E0F2FE;padding:2px 6px;border-radius:4px;">▼ İncele / Düzenle</span>
+              <span class="arrow" style="font-size:11px;background:#0C4A6E;border:1px solid #38BDF8;color:#BAE6FD;padding:2px 6px;border-radius:4px;">▼ İncele / Düzenle</span>
             </button>
           </div>
 
@@ -3240,17 +3240,17 @@
 
     // Üst Bar: Minimalist ve sade
     container.innerHTML = `
-      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:10px 14px;margin-bottom:12px;">
+      <div style="background:#121024;border:1px solid rgba(167, 139, 250, 0.25);border-radius:12px;padding:10px 14px;margin-bottom:12px;">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
           <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-size:13px;font-weight:800;color:#0F172A;">⌚ Saat Senkronizasyonu</span>
-            <span style="font-size:11px;font-weight:700;background:#E0F2FE;color:#0284C7;padding:2px 7px;border-radius:10px;">${pendingActivities.length ? `${pendingActivities.length} Bildirim` : 'Güncel'}</span>
+            <span style="font-size:13px;font-weight:800;color:#FFFFFF;">⌚ Saat Senkronizasyonu</span>
+            <span style="font-size:11px;font-weight:700;background:#0C4A6E;border:1px solid #38BDF8;color:#BAE6FD;padding:2px 7px;border-radius:10px;">${pendingActivities.length ? `${pendingActivities.length} Bildirim` : 'Güncel'}</span>
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
-            <button type="button" onclick="window.injectMockGarminStrengthActivity()" style="background:none;border:none;color:#64748B;font-size:11px;font-weight:600;cursor:pointer;padding:2px 4px;">
+            <button type="button" onclick="window.injectMockGarminStrengthActivity()" style="background:none;border:none;color:#E2E8F0;font-size:11px;font-weight:600;cursor:pointer;padding:2px 4px;">
               🧪 Test
             </button>
-            <button type="button" onclick="window.syncGarminActivitiesFromTredict()" style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:6px;padding:3px 8px;font-size:11.5px;font-weight:700;color:#0F172A;cursor:pointer;">
+            <button type="button" onclick="window.syncGarminActivitiesFromTredict()" style="background:#2C2550;border:1px solid rgba(167, 139, 250, 0.35);border-radius:6px;padding:3px 8px;font-size:11.5px;font-weight:700;color:#F3E8FF;cursor:pointer;">
               🔄 Eşitle (${metrics.activityCount})
             </button>
           </div>
@@ -3289,39 +3289,39 @@
     const isExpanded = container.dataset.expanded === 'true';
 
     container.innerHTML = `
-      <div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:12px;padding:12px 16px;color:#0F172A;box-shadow:0 2px 6px rgba(15,23,42,0.05);">
+      <div style="background:#121024;border:1px solid rgba(167, 139, 250, 0.25);border-radius:12px;padding:12px 16px;color:#FFFFFF;box-shadow:0 4px 12px rgba(0,0,0,0.25);">
         <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <strong style="font-size:14.5px;color:#0F172A;">⌚ 7. Şef: Garmin Sağlık &amp; Kardiyak Efor (Garmin fr945)</strong>
-            <span style="background:#DBEAFE;color:#0369A1;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:700;">❤️ Ort. ${m.avgHr} bpm</span>
-            <span style="background:#DCFCE7;color:#15803D;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:700;">📉 HRR ${m.avgHrr} bpm/dk</span>
-            <span style="background:#F1F5F9;color:#334155;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:700;">🚣🏃 Kürek • Koşu • Yürüyüş Aktif</span>
+            <strong style="font-size:14.5px;color:#FFFFFF;">⌚ 7. Şef: Garmin Sağlık &amp; Kardiyak Efor (Garmin fr945)</strong>
+            <span style="background:#0C4A6E;border:1px solid #38BDF8;color:#BAE6FD;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:700;">❤️ Ort. ${m.avgHr} bpm</span>
+            <span style="background:#14532D;border:1px solid #22C55E;color:#BBF7D0;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:700;">📉 HRR ${m.avgHrr} bpm/dk</span>
+            <span style="background:#2C2550;border:1px solid rgba(167, 139, 250, 0.35);color:#F3E8FF;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:700;">🚣🏃 Kürek • Koşu • Yürüyüş Aktif</span>
           </div>
-          <button type="button" onclick="window.toggleGarminAnalyticsDrawer(this)" style="background:#0F172A;color:#FFFFFF;border:none;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">
+          <button type="button" onclick="window.toggleGarminAnalyticsDrawer(this)" style="background:#6D28D9;color:#FFFFFF;border:none;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">
             💡 Sağlık &amp; Efor Analizi ${isExpanded ? '▲ Gizle' : '▼ Göster'}
           </button>
         </div>
-        <div id="garminAnalyticsDrawer" style="display:${isExpanded ? 'block' : 'none'};margin-top:12px;padding-top:12px;border-top:1px solid #E2E8F0;">
+        <div id="garminAnalyticsDrawer" style="display:${isExpanded ? 'block' : 'none'};margin-top:12px;padding-top:12px;border-top:1px solid rgba(167, 139, 250, 0.22);">
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;">
-            <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px;">
-              <div style="font-size:11.5px;color:#475569;font-weight:700;">KARDİYAK YÜK &amp; ZİRVE NABIZ</div>
-              <div style="font-size:16px;font-weight:800;color:#0F172A;margin-top:2px;">${m.avgHr} bpm / ${m.peakHr} bpm</div>
-              <div style="font-size:12px;color:#334155;margin-top:4px;">${escHtml(m.loadAdvice)}</div>
+            <div style="background:#181530;border:1px solid rgba(167, 139, 250, 0.25);border-radius:8px;padding:10px;">
+              <div style="font-size:11.5px;color:#E2E8F0;font-weight:700;">KARDİYAK YÜK &amp; ZİRVE NABIZ</div>
+              <div style="font-size:16px;font-weight:800;color:#FFFFFF;margin-top:2px;">${m.avgHr} bpm / ${m.peakHr} bpm</div>
+              <div style="font-size:12px;color:#E2E8F0;margin-top:4px;">${escHtml(m.loadAdvice)}</div>
             </div>
-            <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px;">
-              <div style="font-size:11.5px;color:#475569;font-weight:700;">SET ARASI TOPARLANMA (HRR)</div>
-              <div style="font-size:16px;font-weight:800;color:#15803D;margin-top:2px;">-${m.avgHrr} bpm / dinlenme</div>
-              <div style="font-size:12px;color:#334155;margin-top:4px;">${escHtml(m.restAdvice)}</div>
+            <div style="background:#181530;border:1px solid rgba(167, 139, 250, 0.25);border-radius:8px;padding:10px;">
+              <div style="font-size:11.5px;color:#E2E8F0;font-weight:700;">SET ARASI TOPARLANMA (HRR)</div>
+              <div style="font-size:16px;font-weight:800;color:#4ADE80;margin-top:2px;">-${m.avgHrr} bpm / dinlenme</div>
+              <div style="font-size:12px;color:#E2E8F0;margin-top:4px;">${escHtml(m.restAdvice)}</div>
             </div>
-            <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px;">
-              <div style="font-size:11.5px;color:#475569;font-weight:700;">KÜREK • KOŞU • YÜRÜYÜŞ EFORU (Garmin fr945)</div>
-              <div style="font-size:15px;font-weight:800;color:#0369A1;margin-top:2px;">🚣 38 spm • 🏃 136W (8:31/km) • 🚶 2.3 km</div>
-              <div style="font-size:12px;color:#334155;margin-top:4px;">Kondisyon kategorisinde hipertrofi setini şişirmeden doğrudan kardiyak efor ve nabız zonu olarak analiz edilir.</div>
+            <div style="background:#181530;border:1px solid rgba(167, 139, 250, 0.25);border-radius:8px;padding:10px;">
+              <div style="font-size:11.5px;color:#E2E8F0;font-weight:700;">KÜREK • KOŞU • YÜRÜYÜŞ EFORU (Garmin fr945)</div>
+              <div style="font-size:15px;font-weight:800;color:#7DD3FC;margin-top:2px;">🚣 38 spm • 🏃 136W (8:31/km) • 🚶 2.3 km</div>
+              <div style="font-size:12px;color:#E2E8F0;margin-top:4px;">Kondisyon kategorisinde hipertrofi setini şişirmeden doğrudan kardiyak efor ve nabız zonu olarak analiz edilir.</div>
             </div>
-            <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px;">
-              <div style="font-size:11.5px;color:#475569;font-weight:700;">KÜTÜPHANE ↔ GARMIN KAS TEYİDİ</div>
-              <div style="font-size:16px;font-weight:800;color:#0369A1;margin-top:2px;">${auditSummary.exactCount} Tam • ${auditSummary.unmappedNotedCount} İsimsiz+Notlu</div>
-              <div style="font-size:12px;color:#334155;margin-top:4px;">Kürek (<code>indoor_row</code>), Yürüyüş (<code>walk</code>) ve Koşu (<code>run</code>) resmi Garmin FIT koduyla tam uyumludur.</div>
+            <div style="background:#181530;border:1px solid rgba(167, 139, 250, 0.25);border-radius:8px;padding:10px;">
+              <div style="font-size:11.5px;color:#E2E8F0;font-weight:700;">KÜTÜPHANE ↔ GARMIN KAS TEYİDİ</div>
+              <div style="font-size:16px;font-weight:800;color:#7DD3FC;margin-top:2px;">${auditSummary.exactCount} Tam • ${auditSummary.unmappedNotedCount} İsimsiz+Notlu</div>
+              <div style="font-size:12px;color:#E2E8F0;margin-top:4px;">Kürek (<code>indoor_row</code>), Yürüyüş (<code>walk</code>) ve Koşu (<code>run</code>) resmi Garmin FIT koduyla tam uyumludur.</div>
             </div>
           </div>
         </div>
@@ -3358,36 +3358,36 @@
     modal = document.createElement('div');
     modal.id = 'garminSetupModal';
     modal.className = 'modal-overlay';
-    modal.style.background = 'rgba(15, 23, 42, 0.58)';
+    modal.style.background = 'rgba(6, 5, 12, 0.8)';
     modal.onclick = function (e) {
       if (e.target === modal) window.closeGarminSetupModal();
     };
     modal.innerHTML = `
-      <div class="modal-box" style="background:#FFFFFF;color:#0F172A;border:1px solid #CBD5E1;border-radius:14px;max-width:420px;width:94%;padding:16px;box-shadow:0 20px 45px rgba(15,23,42,0.22);">
+      <div class="modal-box" style="background:#181530;color:#FFFFFF;border:1.5px solid rgba(167, 139, 250, 0.28);border-radius:14px;max-width:420px;width:94%;padding:16px;box-shadow:0 20px 45px rgba(0,0,0,0.6);">
         <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-          <span class="modal-title" style="font-size:15px;font-weight:800;color:#0F172A;">⌚ Saat Bağlantı Ayarları</span>
-          <button type="button" class="modal-close" aria-label="Kapat" onclick="window.closeGarminSetupModal()" style="background:#F1F5F9;color:#0F172A;border:1px solid #CBD5E1;border-radius:8px;width:30px;height:30px;font-weight:800;cursor:pointer;">✕</button>
+          <span class="modal-title" style="font-size:15px;font-weight:800;color:#FFFFFF;">⌚ Saat Bağlantı Ayarları</span>
+          <button type="button" class="modal-close" aria-label="Kapat" onclick="window.closeGarminSetupModal()" style="background:#2C2550;color:#F3E8FF;border:1px solid rgba(167, 139, 250, 0.35);border-radius:8px;width:30px;height:30px;font-weight:800;cursor:pointer;">✕</button>
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;">
           <div>
-            <label for="garminModalTredictInput" style="display:block;font-size:12px;font-weight:800;color:#0F172A;margin-bottom:4px;">Tredict Bağlantı Anahtarı</label>
-            <input id="garminModalTredictInput" type="password" autocomplete="off" placeholder="Tredict anahtarını girin" style="width:100%;box-sizing:border-box;background:#F8FAFC;color:#0F172A;border:1px solid #CBD5E1;border-radius:8px;padding:8px 10px;font-size:13px;">
-            <div style="font-size:11px;color:#475569;margin-top:2px;">Kuvvet antrenmanı takvim aktarımı</div>
+            <label for="garminModalTredictInput" style="display:block;font-size:12px;font-weight:800;color:#FFFFFF;margin-bottom:4px;">Tredict Bağlantı Anahtarı</label>
+            <input id="garminModalTredictInput" type="password" autocomplete="off" placeholder="Tredict anahtarını girin" style="width:100%;box-sizing:border-box;background:#121024;color:#FFFFFF;border:1px solid rgba(167, 139, 250, 0.35);border-radius:8px;padding:8px 10px;font-size:13px;">
+            <div style="font-size:11px;color:#E2E8F0;margin-top:2px;">Kuvvet antrenmanı takvim aktarımı</div>
           </div>
           <div>
-            <label for="garminModalIntervalsInput" style="display:block;font-size:12px;font-weight:800;color:#0F172A;margin-bottom:4px;">Intervals.icu Anahtarı (Opsiyonel)</label>
-            <input id="garminModalIntervalsInput" type="password" autocomplete="off" placeholder="İsteğe bağlı" style="width:100%;box-sizing:border-box;background:#F8FAFC;color:#0F172A;border:1px solid #CBD5E1;border-radius:8px;padding:8px 10px;font-size:13px;">
-            <div style="font-size:11px;color:#475569;margin-top:2px;">Günlük adım ve nabız</div>
+            <label for="garminModalIntervalsInput" style="display:block;font-size:12px;font-weight:800;color:#FFFFFF;margin-bottom:4px;">Intervals.icu Anahtarı (Opsiyonel)</label>
+            <input id="garminModalIntervalsInput" type="password" autocomplete="off" placeholder="İsteğe bağlı" style="width:100%;box-sizing:border-box;background:#121024;color:#FFFFFF;border:1px solid rgba(167, 139, 250, 0.35);border-radius:8px;padding:8px 10px;font-size:13px;">
+            <div style="font-size:11px;color:#E2E8F0;margin-top:2px;">Günlük adım ve nabız</div>
           </div>
           <div>
-            <label for="garminModalGatewayInput" style="display:block;font-size:12px;font-weight:800;color:#0F172A;margin-bottom:4px;">Özel Bulut Adresi (Opsiyonel)</label>
-            <input id="garminModalGatewayInput" type="url" autocomplete="off" placeholder="https://celik-kodu.vercel.app" style="width:100%;box-sizing:border-box;background:#F8FAFC;color:#0F172A;border:1px solid #CBD5E1;border-radius:8px;padding:8px 10px;font-size:13px;">
-            <div style="font-size:11px;color:#475569;margin-top:2px;">Varsayılan boş bırakılabilir</div>
+            <label for="garminModalGatewayInput" style="display:block;font-size:12px;font-weight:800;color:#FFFFFF;margin-bottom:4px;">Özel Bulut Adresi (Opsiyonel)</label>
+            <input id="garminModalGatewayInput" type="url" autocomplete="off" placeholder="https://celik-kodu.vercel.app" style="width:100%;box-sizing:border-box;background:#121024;color:#FFFFFF;border:1px solid rgba(167, 139, 250, 0.35);border-radius:8px;padding:8px 10px;font-size:13px;">
+            <div style="font-size:11px;color:#E2E8F0;margin-top:2px;">Varsayılan boş bırakılabilir</div>
           </div>
           <div id="garminSetupStatusMsg" style="display:none;border-radius:8px;padding:8px 10px;font-size:12px;font-weight:700;"></div>
           <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
-            <button id="garminSetupSaveBtn" type="button" onclick="window.saveAndTestGarminSetupFromModal()" style="flex:1;min-width:150px;background:#0F172A;color:#FFFFFF;border:none;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:800;cursor:pointer;">Test Et ve Kaydet</button>
-            <button id="garminSetupClearBtn" type="button" onclick="window.disconnectGarminForUser()" style="background:#FEF2F2;color:#B91C1C;border:1px solid #FECACA;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;">Kaldır</button>
+            <button id="garminSetupSaveBtn" type="button" onclick="window.saveAndTestGarminSetupFromModal()" style="flex:1;min-width:150px;background:#6D28D9;color:#FFFFFF;border:none;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:800;cursor:pointer;">Test Et ve Kaydet</button>
+            <button id="garminSetupClearBtn" type="button" onclick="window.disconnectGarminForUser()" style="background:#7F1D1D;color:#FECACA;border:1px solid #EF4444;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;">Kaldır</button>
           </div>
         </div>
       </div>
@@ -3405,11 +3405,11 @@
       return;
     }
     const palette = {
-      ok: { bg: '#DCFCE7', color: '#15803D', border: '#86EFAC' },
-      warn: { bg: '#FEF3C7', color: '#B45309', border: '#FDE68A' },
-      err: { bg: '#FEE2E2', color: '#B91C1C', border: '#FCA5A5' },
-      info: { bg: '#F1F5F9', color: '#334155', border: '#CBD5E1' }
-    }[tone] || { bg: '#F1F5F9', color: '#334155', border: '#CBD5E1' };
+      ok: { bg: '#14532D', color: '#BBF7D0', border: '#22C55E' },
+      warn: { bg: '#451A03', color: '#FDE68A', border: '#D97706' },
+      err: { bg: '#7F1D1D', color: '#FECACA', border: '#EF4444' },
+      info: { bg: '#2C2550', color: '#F3E8FF', border: '#8B5CF6' }
+    }[tone] || { bg: '#2C2550', color: '#F3E8FF', border: '#8B5CF6' };
     el.style.display = 'block';
     el.style.background = palette.bg;
     el.style.color = palette.color;
@@ -3558,22 +3558,23 @@
 
     const enabled = isGarminEnabledForCurrentUser();
     const hasCreds = hasGarminCredentialsConfigured(u.id);
-    const badgeBg = enabled && hasCreds ? '#DCFCE7' : (hasCreds ? '#F1F5F9' : '#FEF3C7');
-    const badgeColor = enabled && hasCreds ? '#15803D' : (hasCreds ? '#334155' : '#B45309');
+    const badgeBg = enabled && hasCreds ? '#14532D' : (hasCreds ? '#2C2550' : '#451A03');
+    const badgeColor = enabled && hasCreds ? '#BBF7D0' : (hasCreds ? '#F3E8FF' : '#FDE68A');
+    const badgeBorder = enabled && hasCreds ? '#22C55E' : (hasCreds ? 'rgba(167, 139, 250, 0.4)' : '#D97706');
     const badgeText = enabled && hasCreds ? 'Açık' : (hasCreds ? 'Kapalı' : 'Kurulum Gerekli');
 
     card.innerHTML = `
-      <div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:10px;padding:10px 14px;color:#0F172A;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+      <div style="background:#121024;border:1px solid rgba(167, 139, 250, 0.25);border-radius:10px;padding:10px 14px;color:#FFFFFF;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
         <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-          <strong style="font-size:13.5px;color:#0F172A;">⌚ Saat Bağlantısı:</strong>
-          <span style="background:${badgeBg};color:${badgeColor};border-radius:999px;padding:2px 8px;font-size:11.5px;font-weight:800;">${badgeText}</span>
+          <strong style="font-size:13.5px;color:#FFFFFF;">⌚ Saat Bağlantısı:</strong>
+          <span style="background:${badgeBg};color:${badgeColor};border:1px solid ${badgeBorder};border-radius:999px;padding:2px 8px;font-size:11.5px;font-weight:800;">${badgeText}</span>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
-          <button type="button" onclick="window.openGarminSetupModal()" style="background:#0F172A;color:#FFFFFF;border:none;border-radius:6px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;">
+          <button type="button" onclick="window.openGarminSetupModal()" style="background:#6D28D9;color:#FFFFFF;border:none;border-radius:6px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;">
             ${hasCreds ? 'Ayarlar' : 'Saat Bağla'}
           </button>
           ${hasCreds ? `
-            <button type="button" onclick="window.toggleGarminIntegrationForUser(${!enabled})" style="background:#F1F5F9;color:#334155;border:1px solid #CBD5E1;border-radius:6px;padding:5px 11px;font-size:12px;font-weight:700;cursor:pointer;">
+            <button type="button" onclick="window.toggleGarminIntegrationForUser(${!enabled})" style="background:#2C2550;color:#F3E8FF;border:1px solid rgba(167, 139, 250, 0.35);border-radius:6px;padding:5px 11px;font-size:12px;font-weight:700;cursor:pointer;">
               ${enabled ? 'Kapat' : 'Aç'}
             </button>
           ` : ''}

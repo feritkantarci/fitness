@@ -243,8 +243,8 @@
             if (!bar) return;
             const timePart = stats.totalIsometricSecsCompleted > 0 ? ` • ${stats.totalIsometricSecsCompleted} sn` : '';
             bar.innerHTML = `
-                <span>Toplam: ${Math.round(stats.totalVolumeKg).toLocaleString('tr-TR')} kg</span>
-                <span>${stats.totalSetsCompleted} Set • ${stats.totalRepsCompleted} Tekrar${timePart}</span>
+                <span style="color:#FFFFFF;">Toplam: ${Math.round(stats.totalVolumeKg).toLocaleString('tr-TR')} kg</span>
+                <span style="color:#E2E8F0;">${stats.totalSetsCompleted} Set • ${stats.totalRepsCompleted} Tekrar${timePart}</span>
             `;
         }
 
@@ -266,15 +266,15 @@
             if (!container) return;
             const matches = filterEditLogDbExercises(editingWorkoutLogState.swapQuery || '');
             if (matches.length === 0) {
-                container.innerHTML = `<div style="font-size:11.5px; color:#64748B; padding:6px;">Sonuç bulunamadı</div>`;
+                container.innerHTML = `<div style="font-size:11.5px; color:#E2E8F0; padding:6px;">Sonuç bulunamadı</div>`;
                 return;
             }
             container.innerHTML = matches.map(dbEx => {
                 const cleanTitle = String(dbEx.name || '').replace(/\s*\([^)]*\)/g, '').trim() || dbEx.name;
                 return `
-                    <button type="button" class="edit-log-picker-item" onclick="selectEditLogSwapExercise(${exIdx}, decodeURIComponent('${encodeURIComponent(dbEx.id)}'))">
-                        <span>${escapeHTML(cleanTitle)}</span>
-                        <span style="font-size:10.5px; color:#64748B; font-weight:700;">${escapeHTML(dbEx.equipment || '')}</span>
+                    <button type="button" class="edit-log-picker-item" style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); color:#FFFFFF;" onclick="selectEditLogSwapExercise(${exIdx}, decodeURIComponent('${encodeURIComponent(dbEx.id)}'))">
+                        <span style="color:#FFFFFF;">${escapeHTML(cleanTitle)}</span>
+                        <span style="font-size:10.5px; color:#E2E8F0; font-weight:700;">${escapeHTML(dbEx.equipment || '')}</span>
                     </button>
                 `;
             }).join('');
@@ -289,7 +289,7 @@
 
             const exercises = editingWorkoutLogState.draft.exercises || [];
             if (exercises.length === 0) {
-                container.innerHTML = `<div style="padding:14px; text-align:center; background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:10px; font-size:12px; color:#475569;">Henüz hareket yok. Aşağıdan hareket ekleyin.</div>`;
+                container.innerHTML = `<div style="padding:14px; text-align:center; background:#121024; border:1px dashed rgba(167, 139, 250, 0.35); border-radius:10px; font-size:12px; color:#E2E8F0;">Henüz hareket yok. Aşağıdan hareket ekleyin.</div>`;
                 if (modalBox) modalBox.scrollTop = savedModalScroll;
                 return;
             }
@@ -308,36 +308,36 @@
                     const metricUnit = isCardio ? 'dk' : (isTime ? 'sn' : 'tk');
                     return `
                         <div class="edit-log-set-row ${st.completed ? '' : 'is-skipped'}">
-                            <span style="font-size:11.5px; font-weight:900; color:#475569;">S${sIdx + 1}</span>
-                            ${isCardio ? `<span style="font-size:11px; font-weight:800; color:#0369A1; text-align:center;">Kardiyo</span>` : `<input type="number" class="edit-log-num-input" step="any" min="0" max="1000" inputmode="decimal" aria-label="${escapeHTML(cleanName)} Set ${sIdx + 1} ${weightUnit}" placeholder="${weightUnit}" value="${st.weight}" oninput="onEditLogSetFieldInput(${exIdx}, ${sIdx}, 'weight', this.value)">`}
-                            <span style="font-size:11.5px; font-weight:800; color:#64748B; text-align:center;">×</span>
-                            <input type="number" class="edit-log-num-input" step="1" min="0" max="3600" inputmode="numeric" aria-label="${escapeHTML(cleanName)} Set ${sIdx + 1} ${metricUnit}" placeholder="${metricUnit}" value="${st.reps}" oninput="onEditLogSetFieldInput(${exIdx}, ${sIdx}, 'reps', this.value)">
-                            <button type="button" class="edit-log-status-btn ${st.completed ? 'done' : 'skipped'}" onclick="toggleEditLogSetCompleted(${exIdx}, ${sIdx})">${st.completed ? '✓ Tamam' : 'Atlandı'}</button>
-                            <button type="button" class="edit-log-del-set-btn" aria-label="Seti sil" onclick="removeEditLogSet(${exIdx}, ${sIdx})">✕</button>
+                            <span style="font-size:11.5px; font-weight:900; color:#E2E8F0;">S${sIdx + 1}</span>
+                            ${isCardio ? `<span style="font-size:11px; font-weight:800; color:#7DD3FC; text-align:center;">Kardiyo</span>` : `<input type="number" class="edit-log-num-input" style="background:#181530 !important; color:#FFFFFF !important; border:1px solid rgba(167, 139, 250, 0.35) !important;" step="any" min="0" max="1000" inputmode="decimal" aria-label="${escapeHTML(cleanName)} Set ${sIdx + 1} ${weightUnit}" placeholder="${weightUnit}" value="${st.weight}" oninput="onEditLogSetFieldInput(${exIdx}, ${sIdx}, 'weight', this.value)">`}
+                            <span style="font-size:11.5px; font-weight:800; color:#E2E8F0; text-align:center;">×</span>
+                            <input type="number" class="edit-log-num-input" style="background:#181530 !important; color:#FFFFFF !important; border:1px solid rgba(167, 139, 250, 0.35) !important;" step="1" min="0" max="3600" inputmode="numeric" aria-label="${escapeHTML(cleanName)} Set ${sIdx + 1} ${metricUnit}" placeholder="${metricUnit}" value="${st.reps}" oninput="onEditLogSetFieldInput(${exIdx}, ${sIdx}, 'reps', this.value)">
+                            <button type="button" class="edit-log-status-btn ${st.completed ? 'done' : 'skipped'}" style="${st.completed ? 'background:#14532D; border-color:#22C55E; color:#BBF7D0;' : 'background:#1E293B; border-color:#475569; color:#E2E8F0;'}" onclick="toggleEditLogSetCompleted(${exIdx}, ${sIdx})">${st.completed ? '✓ Tamam' : 'Atlandı'}</button>
+                            <button type="button" class="edit-log-del-set-btn" style="background:#7F1D1D; border:1px solid #EF4444; color:#FECACA;" aria-label="Seti sil" onclick="removeEditLogSet(${exIdx}, ${sIdx})">✕</button>
                         </div>
                     `;
                 }).join('');
 
                 return `
-                    <div class="edit-log-ex-card">
+                    <div class="edit-log-ex-card" style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25);">
                         <div class="edit-log-ex-head">
                             <div style="min-width:0; flex:1;">
-                                <div class="edit-log-ex-title">${escapeHTML(cleanName + extraSuffix)}</div>
-                                <div style="font-size:11px; font-weight:700; color:#475569;" id="editLogExCardVol_${exIdx}">${isCardio ? 'Kardiyo Süresi • Süre (dk)' : `${Math.round(exVol).toLocaleString('tr-TR')} kg • ${isBw ? 'Vücut Ağırlığı' : 'Kilo'} / ${isTime ? 'Süre (sn)' : 'Tekrar'}`}</div>
+                                <div class="edit-log-ex-title" style="color:#FFFFFF;">${escapeHTML(cleanName + extraSuffix)}</div>
+                                <div style="font-size:11px; font-weight:700; color:#E2E8F0;" id="editLogExCardVol_${exIdx}">${isCardio ? 'Kardiyo Süresi • Süre (dk)' : `${Math.round(exVol).toLocaleString('tr-TR')} kg • ${isBw ? 'Vücut Ağırlığı' : 'Kilo'} / ${isTime ? 'Süre (sn)' : 'Tekrar'}`}</div>
                             </div>
                             <div style="display:flex; gap:5px; flex-shrink:0;">
-                                <button type="button" class="edit-log-mini-btn" onclick="toggleEditLogSwapPicker(${exIdx})">${isSwapOpen ? 'Kapat' : 'Değiştir'}</button>
-                                <button type="button" class="edit-log-mini-btn danger" onclick="removeEditLogExercise(${exIdx})">Sil</button>
+                                <button type="button" class="edit-log-mini-btn" style="background:#2C2550; border:1px solid rgba(167, 139, 250, 0.4); color:#F3E8FF;" onclick="toggleEditLogSwapPicker(${exIdx})">${isSwapOpen ? 'Kapat' : 'Değiştir'}</button>
+                                <button type="button" class="edit-log-mini-btn danger" style="background:#7F1D1D; border:1px solid #EF4444; color:#FECACA;" onclick="removeEditLogExercise(${exIdx})">Sil</button>
                             </div>
                         </div>
                         ${isSwapOpen ? `
                             <div style="margin-bottom:8px;">
-                                <input type="text" class="form-input edit-log-input" placeholder="Yeni hareket ara..." value="${escapeHTML(editingWorkoutLogState.swapQuery || '')}" oninput="onEditLogSwapSearchInput(this.value)">
+                                <input type="text" class="form-input edit-log-input" style="background:#181530 !important; color:#FFFFFF !important; border:1px solid rgba(167, 139, 250, 0.35) !important;" placeholder="Yeni hareket ara..." value="${escapeHTML(editingWorkoutLogState.swapQuery || '')}" oninput="onEditLogSwapSearchInput(this.value)">
                                 <div id="editLogSwapResults_${exIdx}" class="edit-log-picker-list"></div>
                             </div>
                         ` : ''}
                         <div>${setsHtml}</div>
-                        <button type="button" class="edit-log-secondary-btn" style="margin-top:6px; padding:6px 8px; font-size:11.5px;" onclick="addEditLogSet(${exIdx})">+ Set Ekle</button>
+                        <button type="button" class="edit-log-secondary-btn" style="margin-top:6px; padding:6px 8px; font-size:11.5px; background:#181530; border:1px dashed rgba(167, 139, 250, 0.45); color:#E2E8F0;" onclick="addEditLogSet(${exIdx})">+ Set Ekle</button>
                     </div>
                 `;
             }).join('');
@@ -500,15 +500,15 @@
             if (!container) return;
             const matches = filterEditLogDbExercises(inp ? inp.value : '');
             if (matches.length === 0) {
-                container.innerHTML = `<div style="font-size:11.5px; color:#64748B; padding:6px;">Sonuç bulunamadı</div>`;
+                container.innerHTML = `<div style="font-size:11.5px; color:#E2E8F0; padding:6px;">Sonuç bulunamadı</div>`;
                 return;
             }
             container.innerHTML = matches.map(dbEx => {
                 const cleanTitle = String(dbEx.name || '').replace(/\s*\([^)]*\)/g, '').trim() || dbEx.name;
                 return `
-                    <button type="button" class="edit-log-picker-item" onclick="appendExerciseToEditLog(decodeURIComponent('${encodeURIComponent(dbEx.id)}'))">
-                        <span>${escapeHTML(cleanTitle)}</span>
-                        <span style="font-size:10.5px; color:#64748B; font-weight:700;">${escapeHTML(dbEx.equipment || '')}</span>
+                    <button type="button" class="edit-log-picker-item" style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); color:#FFFFFF;" onclick="appendExerciseToEditLog(decodeURIComponent('${encodeURIComponent(dbEx.id)}'))">
+                        <span style="color:#FFFFFF;">${escapeHTML(cleanTitle)}</span>
+                        <span style="font-size:10.5px; color:#E2E8F0; font-weight:700;">${escapeHTML(dbEx.equipment || '')}</span>
                     </button>
                 `;
             }).join('');
@@ -769,7 +769,7 @@
             const { exercises } = workoutDetailsModalState;
 
             if (!exercises || exercises.length === 0) {
-                listEl.innerHTML = `<div style="text-align:center; padding:16px; color:#64748B; font-size:13px;">Kayıtlı hareket bulunamadı.</div>`;
+                listEl.innerHTML = `<div style="text-align:center; padding:16px; color:#E2E8F0; font-size:13px;">Kayıtlı hareket bulunamadı.</div>`;
                 return;
             }
 
@@ -779,20 +779,20 @@
                 const completedSetsCount = setsArr.filter(s => s && s.completed).length || Number(ex.completedSets || setsArr.length || 1);
 
                 return `
-                    <div style="display:flex; justify-content:space-between; align-items:center; background:#FFFFFF; border:1px solid #E2E8F0; border-radius:10px; padding:10px 12px; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#121024; border:1px solid rgba(167, 139, 250, 0.25); border-radius:10px; padding:10px 12px; box-shadow:0 2px 8px rgba(0,0,0,0.25);">
                         <div style="min-width:0; flex:1; display:flex; align-items:center; gap:8px;">
-                            <span style="font-size:11px; font-weight:800; color:#64748B; background:#F1F5F9; border-radius:6px; padding:2px 7px;">
+                            <span style="font-size:11px; font-weight:800; color:#F3E8FF; background:#2C2550; border:1px solid rgba(167, 139, 250, 0.35); border-radius:6px; padding:2px 7px;">
                                 ${idx + 1}
                             </span>
-                            <span style="font-size:13px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                            <span style="font-size:13px; font-weight:800; color:#FFFFFF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                                 ${escapeHTML(cleanExTitle)}
                             </span>
                         </div>
                         <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
-                            <span style="font-size:11px; font-weight:700; color:#64748B;">
+                            <span style="font-size:11px; font-weight:700; color:#E2E8F0;">
                                 ${completedSetsCount} Set
                             </span>
-                            <button type="button" onclick="window.openWorkoutExerciseDetailSubModal(${idx})" style="height:28px; width:28px; background:#E0F2FE; border:1px solid #BAE6FD; color:#0369A1; border-radius:50%; font-size:12px; font-weight:900; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;" title="Set Detaylarını Gör">
+                            <button type="button" onclick="window.openWorkoutExerciseDetailSubModal(${idx})" style="height:28px; width:28px; background:#0C4A6E; border:1px solid #38BDF8; color:#BAE6FD; border-radius:50%; font-size:12px; font-weight:900; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;" title="Set Detaylarını Gör">
                                 ℹ️
                             </button>
                         </div>
@@ -813,6 +813,8 @@
         function updateWorkoutDetailsModalStats(l) {
             const statsEl = document.getElementById('workoutDetailsStats');
             if (statsEl) {
+                statsEl.style.background = '#121024';
+                statsEl.style.borderColor = 'rgba(167, 139, 250, 0.25)';
                 const totalVol = (l.totalVolumeKg > 0) ? `${Math.round(l.totalVolumeKg).toLocaleString('tr-TR')} kg` : '0 kg';
                 const durSecs = Number(l.durationSecs || 0);
                 const durMin = Number(l.duration || 0);
@@ -823,16 +825,16 @@
 
                 statsEl.innerHTML = `
                     <div>
-                        <div style="font-size:10.5px; font-weight:700; color:#64748B;">Toplam Tonaj</div>
-                        <div style="font-size:13.5px; font-weight:900; color:#B45309; margin-top:2px;">🏋️ ${totalVol}</div>
+                        <div style="font-size:10.5px; font-weight:700; color:#E2E8F0;">Toplam Tonaj</div>
+                        <div style="font-size:13.5px; font-weight:900; color:#FCD34D; margin-top:2px;">🏋️ ${totalVol}</div>
                     </div>
                     <div>
-                        <div style="font-size:10.5px; font-weight:700; color:#64748B;">Set / Tekrar</div>
-                        <div style="font-size:13.5px; font-weight:900; color:#0F172A; margin-top:2px;">🎯 ${setsReps}</div>
+                        <div style="font-size:10.5px; font-weight:700; color:#E2E8F0;">Set / Tekrar</div>
+                        <div style="font-size:13.5px; font-weight:900; color:#FFFFFF; margin-top:2px;">🎯 ${setsReps}</div>
                     </div>
                     <div>
-                        <div style="font-size:10.5px; font-weight:700; color:#64748B;">Toplam Süre</div>
-                        <div style="font-size:13.5px; font-weight:900; color:#0F172A; margin-top:2px;">⏱️ ${durStr}</div>
+                        <div style="font-size:10.5px; font-weight:700; color:#E2E8F0;">Toplam Süre</div>
+                        <div style="font-size:13.5px; font-weight:900; color:#FFFFFF; margin-top:2px;">⏱️ ${durStr}</div>
                     </div>
                 `;
             }
@@ -840,7 +842,15 @@
             const musclesContainer = document.getElementById('workoutDetailsMusclesContainer');
             const musclesEl = document.getElementById('workoutDetailsMuscles');
             const countTextEl = document.getElementById('workoutDetailsMusclesCountText');
+            const toggleBtn = document.getElementById('workoutDetailsMusclesToggleBtn');
+            if (toggleBtn) {
+                toggleBtn.style.background = '#14532D';
+                toggleBtn.style.borderColor = '#22C55E';
+                toggleBtn.style.color = '#BBF7D0';
+            }
             if (musclesEl && musclesContainer) {
+                musclesEl.style.background = '#121024';
+                musclesEl.style.borderColor = 'rgba(167, 139, 250, 0.25)';
                 const mList = Array.isArray(l.muscleGroups) ? l.muscleGroups : [];
                 const shortMuscles = [];
                 mList.forEach(rawM => {
@@ -862,7 +872,7 @@
                     musclesContainer.style.display = 'block';
                     if (countTextEl) countTextEl.textContent = `💪 ${shortMuscles.length} Kas`;
                     musclesEl.innerHTML = shortMuscles.map(m => `
-                        <span style="background:#F0FDF4; border:1px solid #BBF7D0; color:#15803D; font-size:11px; font-weight:700; padding:2px 7px; border-radius:6px;">
+                        <span style="background:#14532D; border:1px solid #22C55E; color:#BBF7D0; font-size:11px; font-weight:700; padding:2px 7px; border-radius:6px;">
                             ${escapeHTML(m)}
                         </span>
                     `).join('');
@@ -1119,43 +1129,43 @@
             if (footerEl) footerEl.style.display = 'none';
 
             bodyEl.innerHTML = `
-                <div style="font-size:11px; font-weight:800; color:#0284C7; text-transform:uppercase; margin-bottom:8px;">
+                <div style="font-size:11px; font-weight:800; color:#7DD3FC; text-transform:uppercase; margin-bottom:8px;">
                     ✏️ Setleri ve Ağırlıkları Düzenle
                 </div>
                 <div style="display:flex; flex-direction:column; gap:8px;">
                     ${editSets.map((st, sIdx) => `
-                        <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1px solid #CBD5E1; border-radius:8px; padding:6px 10px; gap:6px;">
-                            <span style="font-size:11px; font-weight:800; color:#0F172A; background:#E2E8F0; border-radius:4px; padding:3px 6px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:#121024; border:1px solid rgba(167, 139, 250, 0.25); border-radius:8px; padding:6px 10px; gap:6px;">
+                            <span style="font-size:11px; font-weight:800; color:#F3E8FF; background:#2C2550; border:1px solid rgba(167, 139, 250, 0.35); border-radius:4px; padding:3px 6px;">
                                 S${st.setNo || sIdx + 1}
                             </span>
                             <div style="display:flex; align-items:center; gap:3px;">
-                                <input type="number" id="subModalEditWeight_${sIdx}" step="0.5" min="0" value="${st.weight ?? 0}" style="width:58px; height:32px; text-align:center; font-weight:800; border:1px solid #CBD5E1; border-radius:6px; font-size:13px; color:#0F172A; background:#FFFFFF;">
-                                <span style="font-size:11px; font-weight:700; color:#64748B;">kg</span>
+                                <input type="number" id="subModalEditWeight_${sIdx}" step="0.5" min="0" value="${st.weight ?? 0}" style="width:58px; height:32px; text-align:center; font-weight:800; border:1px solid rgba(167, 139, 250, 0.35); border-radius:6px; font-size:13px; color:#FFFFFF; background:#181530;">
+                                <span style="font-size:11px; font-weight:700; color:#E2E8F0;">kg</span>
                             </div>
-                            <span style="color:#94A3B8; font-weight:700;">×</span>
+                            <span style="color:#E2E8F0; font-weight:700;">×</span>
                             <div style="display:flex; align-items:center; gap:3px;">
-                                <input type="number" id="subModalEditReps_${sIdx}" step="1" min="0" value="${st.reps ?? 10}" style="width:48px; height:32px; text-align:center; font-weight:800; border:1px solid #CBD5E1; border-radius:6px; font-size:13px; color:#0F172A; background:#FFFFFF;">
-                                <span style="font-size:11px; font-weight:700; color:#64748B;">${isCardio ? 'dk' : (isTime ? 'sn' : 'tk')}</span>
+                                <input type="number" id="subModalEditReps_${sIdx}" step="1" min="0" value="${st.reps ?? 10}" style="width:48px; height:32px; text-align:center; font-weight:800; border:1px solid rgba(167, 139, 250, 0.35); border-radius:6px; font-size:13px; color:#FFFFFF; background:#181530;">
+                                <span style="font-size:11px; font-weight:700; color:#E2E8F0;">${isCardio ? 'dk' : (isTime ? 'sn' : 'tk')}</span>
                             </div>
-                            <button type="button" onclick="window.toggleSubModalEditSetCompleted(${sIdx})" style="padding:4px 7px; border-radius:6px; font-size:11px; font-weight:800; border:1px solid ${st.completed ? '#BBF7D0' : '#CBD5E1'}; background:${st.completed ? '#F0FDF4' : '#F1F5F9'}; color:${st.completed ? '#15803D' : '#64748B'}; cursor:pointer;">
+                            <button type="button" onclick="window.toggleSubModalEditSetCompleted(${sIdx})" style="padding:4px 7px; border-radius:6px; font-size:11px; font-weight:800; border:1px solid ${st.completed ? '#22C55E' : '#475569'}; background:${st.completed ? '#14532D' : '#1E293B'}; color:${st.completed ? '#BBF7D0' : '#E2E8F0'}; cursor:pointer;">
                                 ${st.completed ? '✓' : '—'}
                             </button>
-                            <button type="button" onclick="window.removeSubModalEditSet(${sIdx})" style="background:none; border:none; color:#DC2626; font-size:13px; cursor:pointer; padding:2px 4px;" title="Seti Sil">
+                            <button type="button" onclick="window.removeSubModalEditSet(${sIdx})" style="background:none; border:none; color:#FCA5A5; font-size:13px; cursor:pointer; padding:2px 4px;" title="Seti Sil">
                                 🗑️
                             </button>
                         </div>
                     `).join('')}
                 </div>
 
-                <button type="button" onclick="window.addSubModalEditSet()" style="width:100%; margin-top:8px; padding:7px; background:#F8FAFC; border:1px dashed #CBD5E1; color:#0284C7; font-size:11.5px; font-weight:800; border-radius:8px; cursor:pointer;">
+                <button type="button" onclick="window.addSubModalEditSet()" style="width:100%; margin-top:8px; padding:7px; background:#121024; border:1px dashed rgba(167, 139, 250, 0.45); color:#7DD3FC; font-size:11.5px; font-weight:800; border-radius:8px; cursor:pointer;">
                     ➕ Set Ekle
                 </button>
 
-                <div style="display:flex; gap:8px; margin-top:14px; padding-top:10px; border-top:1px solid #E2E8F0;">
-                    <button type="button" onclick="window.saveSubModalExerciseEdit()" style="flex:1; background:#0F172A; border:none; color:#FFFFFF; border-radius:10px; padding:10px; font-size:13px; font-weight:800; cursor:pointer;">
+                <div style="display:flex; gap:8px; margin-top:14px; padding-top:10px; border-top:1px solid rgba(167, 139, 250, 0.25);">
+                    <button type="button" onclick="window.saveSubModalExerciseEdit()" style="flex:1; background:#6D28D9; border:none; color:#FFFFFF; border-radius:10px; padding:10px; font-size:13px; font-weight:800; cursor:pointer;">
                         💾 Kaydet
                     </button>
-                    <button type="button" onclick="window.cancelSubModalExerciseEdit()" style="flex:1; background:#F1F5F9; border:1px solid #CBD5E1; color:#334155; border-radius:10px; padding:10px; font-size:13px; font-weight:800; cursor:pointer;">
+                    <button type="button" onclick="window.cancelSubModalExerciseEdit()" style="flex:1; background:#2C2550; border:1px solid rgba(167, 139, 250, 0.35); color:#F3E8FF; border-radius:10px; padding:10px; font-size:13px; font-weight:800; cursor:pointer;">
                         ✕ İptal
                     </button>
                 </div>
@@ -1178,6 +1188,9 @@
             const subModalEditBtn = document.getElementById('subModalExerciseEditBtn');
             if (footerEl) footerEl.style.display = 'flex';
             if (subModalEditBtn) {
+                subModalEditBtn.style.background = '#2C2550';
+                subModalEditBtn.style.borderColor = 'rgba(167, 139, 250, 0.4)';
+                subModalEditBtn.style.color = '#F3E8FF';
                 subModalEditBtn.onclick = function () {
                     window.startSubModalExerciseEdit(idx);
                 };
@@ -1209,36 +1222,38 @@
             const cleanExTitle = String(ex.name || '').replace(/\s*\([^)]*\)/g, '').trim() || ex.name;
 
             if (catEl) {
+                catEl.style.color = '#E2E8F0';
                 catEl.textContent = `${idx + 1}. Egzersiz ${ex.muscle ? `• ${ex.muscle}` : ''}`;
             }
             if (titleEl) {
+                titleEl.style.color = '#FFFFFF';
                 titleEl.textContent = cleanExTitle;
             }
 
             bodyEl.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid #F1F5F9;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid rgba(167, 139, 250, 0.25);">
                     <div style="display:flex; gap:4px; flex-wrap:wrap;">
-                        ${ex.equipment ? `<span style="font-size:10.5px; font-weight:700; background:#F1F5F9; border:1px solid #CBD5E1; color:#334155; padding:2px 6px; border-radius:4px; text-transform:capitalize;">🔧 ${escapeHTML(ex.equipment)}</span>` : ''}
+                        ${ex.equipment ? `<span style="font-size:10.5px; font-weight:700; background:#2C2550; border:1px solid rgba(167, 139, 250, 0.35); color:#F3E8FF; padding:2px 6px; border-radius:4px; text-transform:capitalize;">🔧 ${escapeHTML(ex.equipment)}</span>` : ''}
                     </div>
-                    ${volText ? `<span style="font-size:11.5px; font-weight:800; color:#B45309; background:#FEF3C7; border:1px solid #FCD34D; border-radius:6px; padding:2px 7px;">🏋️ ${volText}</span>` : ''}
+                    ${volText ? `<span style="font-size:11.5px; font-weight:800; color:#FDE68A; background:#451A03; border:1px solid #D97706; border-radius:6px; padding:2px 7px;">🏋️ ${volText}</span>` : ''}
                 </div>
 
-                <div style="font-size:12px; font-weight:800; color:#0F172A; margin-bottom:6px;">Tamamlanan Setler:</div>
+                <div style="font-size:12px; font-weight:800; color:#FFFFFF; margin-bottom:6px;">Tamamlanan Setler:</div>
                 <div style="display:flex; flex-direction:column; gap:6px;">
                     ${safeSetsArr.map((st, sIdx) => {
                         const wDisp = (typeof formatSetWeightDisplay === 'function') ? formatSetWeightDisplay(isBw, st.weight) : (Number(st.weight) > 0 ? `${st.weight} kg` : (isBw ? 'Vücut Ağ.' : '0 kg'));
                         const rDisp = (typeof formatSetMetricDisplay === 'function') ? formatSetMetricDisplay(ex, st.reps) : `${st.reps} tk`;
                         return st.completed ? `
-                            <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:8px 12px;">
-                                <span style="font-size:12px; font-weight:800; color:#0F172A;">Set ${st.setNo || sIdx + 1}</span>
-                                <span style="background:#F0FDF4; border:1px solid #BBF7D0; color:#15803D; font-size:12px; font-weight:800; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:#121024; border:1px solid rgba(167, 139, 250, 0.25); border-radius:8px; padding:8px 12px;">
+                                <span style="font-size:12px; font-weight:800; color:#FFFFFF;">Set ${st.setNo || sIdx + 1}</span>
+                                <span style="background:#14532D; border:1px solid #22C55E; color:#BBF7D0; font-size:12px; font-weight:800; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;">
                                     ${isCardio ? `${rDisp} ✓` : `${wDisp} × ${rDisp} ✓`}
                                 </span>
                             </div>
                         ` : `
-                            <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:8px; padding:8px 12px; opacity:0.6;">
-                                <span style="font-size:12px; font-weight:800; color:#94A3B8;">Set ${st.setNo || sIdx + 1}</span>
-                                <span style="font-size:11.5px; font-weight:600; color:#94A3B8; text-decoration:line-through;">Atlandı</span>
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:#121024; border:1px dashed rgba(167, 139, 250, 0.3); border-radius:8px; padding:8px 12px;">
+                                <span style="font-size:12px; font-weight:800; color:#E2E8F0;">Set ${st.setNo || sIdx + 1}</span>
+                                <span style="font-size:11.5px; font-weight:600; color:#E2E8F0; text-decoration:line-through;">Atlandı</span>
                             </div>
                         `;
                     }).join('')}
@@ -1261,15 +1276,39 @@
         function renderWorkoutDetailsCurrentCard(direction = 0) {
             if (!workoutDetailsModalState) return;
             const { exercises, currentIndex } = workoutDetailsModalState;
+            const navEl = document.getElementById('workoutDetailsCarouselNav');
             const counterEl = document.getElementById('workoutDetailsCarouselCounter');
             const dotsEl = document.getElementById('workoutDetailsCarouselDots');
             const prevBtn = document.getElementById('workoutDetailsPrevBtn');
             const nextBtn = document.getElementById('workoutDetailsNextBtn');
             const cardEl = document.getElementById('workoutDetailsActiveCard');
 
+            if (navEl) {
+                navEl.style.background = '#121024';
+                navEl.style.borderColor = 'rgba(167, 139, 250, 0.25)';
+            }
+            if (counterEl) {
+                counterEl.style.color = '#FFFFFF';
+            }
+            if (prevBtn) {
+                prevBtn.style.background = '#181530';
+                prevBtn.style.borderColor = 'rgba(167, 139, 250, 0.35)';
+                prevBtn.style.color = '#FFFFFF';
+            }
+            if (nextBtn) {
+                nextBtn.style.background = '#181530';
+                nextBtn.style.borderColor = 'rgba(167, 139, 250, 0.35)';
+                nextBtn.style.color = '#FFFFFF';
+            }
+            if (cardEl) {
+                cardEl.style.background = '#121024';
+                cardEl.style.borderColor = 'rgba(167, 139, 250, 0.25)';
+                cardEl.style.color = '#FFFFFF';
+            }
+
             if (!exercises || exercises.length === 0) {
                 if (counterEl) counterEl.textContent = 'Hareket Yok';
-                if (cardEl) cardEl.innerHTML = `<div style="text-align:center; padding:20px; color:#64748B; font-size:13px;">Kayıtlı hareket bulunamadı.</div>`;
+                if (cardEl) cardEl.innerHTML = `<div style="text-align:center; padding:20px; color:#E2E8F0; font-size:13px;">Kayıtlı hareket bulunamadı.</div>`;
                 return;
             }
 
@@ -1280,7 +1319,7 @@
             if (dotsEl) {
                 if (exercises.length <= 15) {
                     dotsEl.innerHTML = exercises.map((_, i) => `
-                        <span onclick="window.jumpToWorkoutDetailsExercise(${i})" style="cursor:pointer; height:6px; width:${i === currentIndex ? '18px' : '6px'}; background:${i === currentIndex ? '#0F172A' : '#CBD5E1'}; border-radius:3px; transition:all 0.2s ease;"></span>
+                        <span onclick="window.jumpToWorkoutDetailsExercise(${i})" style="cursor:pointer; height:6px; width:${i === currentIndex ? '18px' : '6px'}; background:${i === currentIndex ? '#A78BFA' : 'rgba(167, 139, 250, 0.35)'}; border-radius:3px; transition:all 0.2s ease;"></span>
                     `).join('');
                 } else {
                     dotsEl.innerHTML = '';
@@ -1330,54 +1369,54 @@
                 const isTime = (typeof isExerciseTimeBased === 'function') ? isExerciseTimeBased(ex) : false;
                 const editSets = workoutDetailsModalState.cardEditSets || [];
                 cardEl.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid #E2E8F0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid rgba(167, 139, 250, 0.25);">
                         <div>
-                            <span style="font-size:11px; font-weight:800; color:#0284C7; text-transform:uppercase; letter-spacing:0.5px;">
+                            <span style="font-size:11px; font-weight:800; color:#7DD3FC; text-transform:uppercase; letter-spacing:0.5px;">
                                 ✏️ SETLERİ DÜZENLE
                             </span>
-                            <h4 style="font-size:14.5px; font-weight:900; color:#0F172A; margin:2px 0 0 0; line-height:1.25;">
+                            <h4 style="font-size:14.5px; font-weight:900; color:#FFFFFF; margin:2px 0 0 0; line-height:1.25;">
                                 ${escapeHTML(cleanExTitle)}
                             </h4>
                         </div>
-                        <span style="font-size:11px; font-weight:700; color:#64748B;">
+                        <span style="font-size:11px; font-weight:700; color:#E2E8F0;">
                             ${editSets.length} Set
                         </span>
                     </div>
 
                     <div style="display:flex; flex-direction:column; gap:8px;">
                         ${editSets.map((st, sIdx) => `
-                            <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1px solid #CBD5E1; border-radius:8px; padding:6px 10px; gap:6px;">
-                                <span style="font-size:11px; font-weight:800; color:#0F172A; background:#E2E8F0; border-radius:4px; padding:3px 6px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:#181530; border:1px solid rgba(167, 139, 250, 0.25); border-radius:8px; padding:6px 10px; gap:6px;">
+                                <span style="font-size:11px; font-weight:800; color:#F3E8FF; background:#2C2550; border:1px solid rgba(167, 139, 250, 0.35); border-radius:4px; padding:3px 6px;">
                                     S${st.setNo || sIdx + 1}
                                 </span>
                                 <div style="display:flex; align-items:center; gap:3px;">
-                                    <input type="number" id="cardEditWeight_${sIdx}" step="0.5" min="0" value="${st.weight ?? 0}" style="width:58px; height:32px; text-align:center; font-weight:800; border:1px solid #CBD5E1; border-radius:6px; font-size:13px; color:#0F172A; background:#FFFFFF;">
-                                    <span style="font-size:11px; font-weight:700; color:#64748B;">kg</span>
+                                    <input type="number" id="cardEditWeight_${sIdx}" step="0.5" min="0" value="${st.weight ?? 0}" style="width:58px; height:32px; text-align:center; font-weight:800; border:1px solid rgba(167, 139, 250, 0.35); border-radius:6px; font-size:13px; color:#FFFFFF; background:#121024;">
+                                    <span style="font-size:11px; font-weight:700; color:#E2E8F0;">kg</span>
                                 </div>
-                                <span style="color:#94A3B8; font-weight:700;">×</span>
+                                <span style="color:#E2E8F0; font-weight:700;">×</span>
                                 <div style="display:flex; align-items:center; gap:3px;">
-                                    <input type="number" id="cardEditReps_${sIdx}" step="1" min="0" value="${st.reps ?? 10}" style="width:48px; height:32px; text-align:center; font-weight:800; border:1px solid #CBD5E1; border-radius:6px; font-size:13px; color:#0F172A; background:#FFFFFF;">
-                                    <span style="font-size:11px; font-weight:700; color:#64748B;">${isCardio ? 'dk' : (isTime ? 'sn' : 'tk')}</span>
+                                    <input type="number" id="cardEditReps_${sIdx}" step="1" min="0" value="${st.reps ?? 10}" style="width:48px; height:32px; text-align:center; font-weight:800; border:1px solid rgba(167, 139, 250, 0.35); border-radius:6px; font-size:13px; color:#FFFFFF; background:#121024;">
+                                    <span style="font-size:11px; font-weight:700; color:#E2E8F0;">${isCardio ? 'dk' : (isTime ? 'sn' : 'tk')}</span>
                                 </div>
-                                <button type="button" onclick="window.toggleCardEditSetCompleted(${sIdx})" style="padding:4px 7px; border-radius:6px; font-size:11px; font-weight:800; border:1px solid ${st.completed ? '#BBF7D0' : '#CBD5E1'}; background:${st.completed ? '#F0FDF4' : '#F1F5F9'}; color:${st.completed ? '#15803D' : '#64748B'}; cursor:pointer;">
+                                <button type="button" onclick="window.toggleCardEditSetCompleted(${sIdx})" style="padding:4px 7px; border-radius:6px; font-size:11px; font-weight:800; border:1px solid ${st.completed ? '#22C55E' : '#475569'}; background:${st.completed ? '#14532D' : '#1E293B'}; color:${st.completed ? '#BBF7D0' : '#E2E8F0'}; cursor:pointer;">
                                     ${st.completed ? '✓' : '—'}
                                 </button>
-                                <button type="button" onclick="window.removeCardEditSet(${sIdx})" style="background:none; border:none; color:#DC2626; font-size:13px; cursor:pointer; padding:2px 4px;" title="Seti Sil">
+                                <button type="button" onclick="window.removeCardEditSet(${sIdx})" style="background:none; border:none; color:#FCA5A5; font-size:13px; cursor:pointer; padding:2px 4px;" title="Seti Sil">
                                     🗑️
                                 </button>
                             </div>
                         `).join('')}
                     </div>
 
-                    <button type="button" onclick="window.addCardEditSet()" style="width:100%; margin-top:8px; padding:7px; background:#F8FAFC; border:1px dashed #CBD5E1; color:#0284C7; font-size:11.5px; font-weight:800; border-radius:8px; cursor:pointer;">
+                    <button type="button" onclick="window.addCardEditSet()" style="width:100%; margin-top:8px; padding:7px; background:#181530; border:1px dashed rgba(167, 139, 250, 0.45); color:#7DD3FC; font-size:11.5px; font-weight:800; border-radius:8px; cursor:pointer;">
                         ➕ Set Ekle
                     </button>
 
-                    <div style="display:flex; gap:8px; margin-top:12px; padding-top:10px; border-top:1px solid #E2E8F0;">
-                        <button type="button" onclick="window.saveDetailCardExerciseEdit()" style="flex:1; background:#0F172A; border:none; color:#FFFFFF; border-radius:8px; padding:9px; font-size:12.5px; font-weight:800; cursor:pointer;">
+                    <div style="display:flex; gap:8px; margin-top:12px; padding-top:10px; border-top:1px solid rgba(167, 139, 250, 0.25);">
+                        <button type="button" onclick="window.saveDetailCardExerciseEdit()" style="flex:1; background:#6D28D9; border:none; color:#FFFFFF; border-radius:8px; padding:9px; font-size:12.5px; font-weight:800; cursor:pointer;">
                             💾 Kaydet
                         </button>
-                        <button type="button" onclick="window.cancelDetailCardExerciseEdit()" style="flex:1; background:#F1F5F9; border:1px solid #CBD5E1; color:#334155; border-radius:8px; padding:9px; font-size:12.5px; font-weight:800; cursor:pointer;">
+                        <button type="button" onclick="window.cancelDetailCardExerciseEdit()" style="flex:1; background:#2C2550; border:1px solid rgba(167, 139, 250, 0.35); color:#F3E8FF; border-radius:8px; padding:9px; font-size:12.5px; font-weight:800; cursor:pointer;">
                             ✕ İptal
                         </button>
                     </div>
@@ -1388,26 +1427,26 @@
             const cardHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:8px;">
                     <div style="min-width:0; flex:1;">
-                        <span style="font-size:11px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:0.5px;">
+                        <span style="font-size:11px; font-weight:700; color:#E2E8F0; text-transform:uppercase; letter-spacing:0.5px;">
                             ${currentIndex + 1}. Egzersiz ${ex.muscle ? `• ${escapeHTML(ex.muscle)}` : ''}
                         </span>
-                        <h4 style="font-size:15px; font-weight:900; color:#0F172A; margin:2px 0 0 0; line-height:1.25;">
+                        <h4 style="font-size:15px; font-weight:900; color:#FFFFFF; margin:2px 0 0 0; line-height:1.25;">
                             ${escapeHTML(cleanExTitle)}
                         </h4>
                     </div>
                     <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
                         ${volText ? `
-                            <span style="font-size:11px; font-weight:800; color:#B45309; background:#FEF3C7; border:1px solid #FCD34D; border-radius:6px; padding:3px 7px; white-space:nowrap;">
+                            <span style="font-size:11px; font-weight:800; color:#FDE68A; background:#451A03; border:1px solid #D97706; border-radius:6px; padding:3px 7px; white-space:nowrap;">
                                 🏋️ ${volText}
                             </span>
                         ` : ''}
-                        <button type="button" onclick="window.startDetailCardExerciseEdit()" style="background:#F1F5F9; border:1px solid #CBD5E1; color:#0F172A; border-radius:7px; padding:3px 8px; font-size:11px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="Bu Hareketi Düzenle">
+                        <button type="button" onclick="window.startDetailCardExerciseEdit()" style="background:#2C2550; border:1px solid rgba(167, 139, 250, 0.4); color:#F3E8FF; border-radius:7px; padding:3px 8px; font-size:11px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="Bu Hareketi Düzenle">
                             ✏️ Düzenle
                         </button>
                     </div>
                 </div>
 
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid #F1F5F9; font-size:11.5px; color:#64748B; font-weight:700;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid rgba(167, 139, 250, 0.2); font-size:11.5px; color:#E2E8F0; font-weight:700;">
                     <span>Toplam ${completedSetsCount} / ${safeSetsArr.length} Set</span>
                     ${ex.equipment ? `<span style="text-transform:capitalize;">🔧 ${escapeHTML(ex.equipment)}</span>` : ''}
                 </div>
@@ -1418,25 +1457,25 @@
                         const wDisp = (typeof formatSetWeightDisplay === 'function') ? formatSetWeightDisplay(isBw, st.weight) : (Number(st.weight) > 0 ? `${st.weight} kg` : (isBw ? 'Vücut Ağ.' : '0 kg'));
                         const rDisp = (typeof formatSetMetricDisplay === 'function') ? formatSetMetricDisplay(ex, st.reps) : `${st.reps} tk`;
                         return st.completed ? `
-                            <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:8px 12px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:#181530; border:1px solid rgba(167, 139, 250, 0.25); border-radius:8px; padding:8px 12px;">
                                 <div style="display:flex; align-items:center; gap:8px;">
-                                    <span style="font-size:11px; font-weight:800; color:#0F172A; background:#E2E8F0; border-radius:4px; padding:2px 6px;">
+                                    <span style="font-size:11px; font-weight:800; color:#F3E8FF; background:#2C2550; border:1px solid rgba(167, 139, 250, 0.35); border-radius:4px; padding:2px 6px;">
                                         S${st.setNo || idx + 1}
                                     </span>
-                                    <span style="font-size:12.5px; font-weight:800; color:#0F172A;">
+                                    <span style="font-size:12.5px; font-weight:800; color:#FFFFFF;">
                                         ${isCardio ? 'Kardiyo Süresi' : `<strong>${wDisp}</strong>`}
                                     </span>
                                 </div>
-                                <span style="background:#F0FDF4; border:1px solid #BBF7D0; color:#15803D; font-size:12px; font-weight:800; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;">
+                                <span style="background:#14532D; border:1px solid #22C55E; color:#BBF7D0; font-size:12px; font-weight:800; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;">
                                     ${rDisp} ✓
                                 </span>
                             </div>
                         ` : `
-                            <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:8px; padding:8px 12px; opacity:0.6;">
-                                <span style="font-size:11px; font-weight:800; color:#94A3B8; background:#E2E8F0; border-radius:4px; padding:2px 6px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:#181530; border:1px dashed rgba(167, 139, 250, 0.3); border-radius:8px; padding:8px 12px;">
+                                <span style="font-size:11px; font-weight:800; color:#E2E8F0; background:#2C2550; border-radius:4px; padding:2px 6px;">
                                     S${st.setNo || idx + 1}
                                 </span>
-                                <span style="font-size:11.5px; font-weight:600; color:#94A3B8; text-decoration:line-through;">
+                                <span style="font-size:11.5px; font-weight:600; color:#E2E8F0; text-decoration:line-through;">
                                     Set Atlandı
                                 </span>
                             </div>
@@ -1445,7 +1484,7 @@
                 </div>
 
                 <!-- SWIPE GUIDANCE -->
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:8px; border-top:1px dashed #E2E8F0; font-size:11px; color:#94A3B8; font-weight:600; user-select:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:8px; border-top:1px dashed rgba(167, 139, 250, 0.25); font-size:11px; color:#E2E8F0; font-weight:600; user-select:none;">
                     <span style="cursor:pointer;" onclick="window.navigateWorkoutDetailsExercise(-1)">${currentIndex > 0 ? '◀ Önceki' : ''}</span>
                     <span>👈 Sağa / Sola Kaydırın 👉</span>
                     <span style="cursor:pointer;" onclick="window.navigateWorkoutDetailsExercise(1)">${currentIndex < exercises.length - 1 ? 'Sonraki ▶' : ''}</span>
@@ -1559,26 +1598,29 @@
                 const modalBox = document.getElementById('workoutDetailsModalBox');
                 if (!modal) return;
 
+                const viewModeBtn = document.getElementById('workoutDetailsViewModeBtn');
+                if (viewModeBtn) {
+                    viewModeBtn.style.background = '#2C2550';
+                    viewModeBtn.style.borderColor = 'rgba(167, 139, 250, 0.4)';
+                    viewModeBtn.style.color = '#F3E8FF';
+                }
+
                 const subtitleEl = document.getElementById('workoutDetailsSubtitle');
                 if (subtitleEl) {
+                    subtitleEl.style.color = '#CBD5E1';
                     const locType = l.locationType || (l.locationName === 'Ev' ? 'ev' : 'salon');
                     const locName = l.locationName || (locType === 'ev' ? 'Ev' : (locType === 'acik_hava' ? 'Açık Hava' : 'Spor Salonu'));
                     const isEv = locType === 'ev';
                     const isPark = locType === 'acik_hava';
                     const locIcon = isEv ? '🏠' : (isPark ? '🌲' : '🏋️');
-                    const locBadgeStyle = isEv
-                        ? 'background:rgba(59, 130, 246, 0.15); border:1px solid rgba(59, 130, 246, 0.4); color:#1D4ED8;'
-                        : (isPark
-                            ? 'background:rgba(16, 185, 129, 0.15); border:1px solid rgba(16, 185, 129, 0.4); color:#047857;'
-                            : 'background:rgba(217, 119, 6, 0.15); border:1px solid rgba(217, 119, 6, 0.4); color:#92400E;');
 
                     subtitleEl.innerHTML = `
-                        <span style="font-size:12px; font-weight:700; color:#0F172A; white-space:nowrap;">📅 ${escapeHTML(l.dateFormatted || l.date)}</span>
-                        <span style="${locBadgeStyle} border-radius:4px; padding:1px 6px; font-size:10.5px; font-weight:700; white-space:nowrap;">
+                        <span style="font-size:12px; font-weight:700; color:#CBD5E1; white-space:nowrap;">📅 ${escapeHTML(l.dateFormatted || l.date)}</span>
+                        <span style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); color:#E2E8F0; border-radius:6px; padding:2px 7px; font-size:11px; font-weight:600; white-space:nowrap;">
                             ${locIcon} ${escapeHTML(locName)}
                         </span>
                         ${l.healthSummary && l.healthSummary.heartrateAvg ? `
-                            <span style="background:#DCFCE7; border:1px solid #86EFAC; color:#15803D; border-radius:4px; padding:1px 6px; font-size:10.5px; font-weight:700; white-space:nowrap;">
+                            <span style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); color:#E2E8F0; border-radius:6px; padding:2px 7px; font-size:11px; font-weight:600; white-space:nowrap;">
                                 ⌚ ❤️ ${Number(l.healthSummary.heartrateAvg)} bpm${l.healthSummary.calories ? ` • 🔥 ${Number(l.healthSummary.calories)} kcal` : ''}
                             </span>
                         ` : ''}
@@ -1587,6 +1629,7 @@
 
                 const titleEl = document.getElementById('workoutDetailsTitle');
                 if (titleEl) {
+                    titleEl.style.color = '#FFFFFF';
                     const cleanProgramTitle = String(l.program || l.programName || l.title || 'Antrenman Seansı').replace(/\s*\([^)]*\)/g, '').trim() || 'Antrenman Seansı';
                     titleEl.textContent = cleanProgramTitle;
                 }
@@ -1612,6 +1655,9 @@
 
                 const notesEl = document.getElementById('workoutDetailsNotes');
                 if (notesEl) {
+                    notesEl.style.background = '#121024';
+                    notesEl.style.borderColor = 'rgba(252, 211, 77, 0.35)';
+                    notesEl.style.color = '#FDE68A';
                     if (l.notes) {
                         notesEl.style.display = 'block';
                         notesEl.textContent = `📝 Not: ${l.notes}`;
@@ -1764,13 +1810,25 @@
             startOfWeek.setHours(0,0,0,0);
             const thisWeek = allLogs.filter(l => new Date(l.date) >= startOfWeek).length;
 
-            if (document.getElementById('statTotalWorkouts')) document.getElementById('statTotalWorkouts').innerText = total;
-            if (document.getElementById('statWeekWorkouts')) document.getElementById('statWeekWorkouts').innerText = `${thisWeek}/3`;
-            if (document.getElementById('statStreak')) document.getElementById('statStreak').innerText = streak;
+            const statTotalEl = document.getElementById('statTotalWorkouts');
+            const statWeekEl = document.getElementById('statWeekWorkouts');
+            const statStreakEl = document.getElementById('statStreak');
+            if (statTotalEl) {
+                statTotalEl.innerText = total;
+                if (statTotalEl.style && typeof statTotalEl.style.setProperty === 'function') statTotalEl.style.setProperty('color', '#FCD34D', 'important');
+            }
+            if (statWeekEl) {
+                statWeekEl.innerText = `${thisWeek}/3`;
+                if (statWeekEl.style && typeof statWeekEl.style.setProperty === 'function') statWeekEl.style.setProperty('color', '#7DD3FC', 'important');
+            }
+            if (statStreakEl) {
+                statStreakEl.innerText = streak;
+                if (statStreakEl.style && typeof statStreakEl.style.setProperty === 'function') statStreakEl.style.setProperty('color', '#4ADE80', 'important');
+            }
 
             if (allLogs.length === 0) {
                 container.innerHTML = `
-                    <div style="background:var(--bg-surface); padding:20px; text-align:center; border:1px dashed var(--border); border-radius:10px; color:var(--text-secondary); font-size:12px;">
+                    <div style="background:#121024; padding:20px; text-align:center; border:1px dashed rgba(167, 139, 250, 0.3); border-radius:12px; color:#E2E8F0; font-size:12.5px;">
                         Henüz kayıtlı antrenman seansınız yok. Bugün ilk antrenmanınızı yapıp kaydedin! 🚀
                     </div>
                 `;
@@ -1790,7 +1848,7 @@
             if (distinctLocations.length > 0) {
                 filterBarHTML = `
                     <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:12px;" class="hide-scrollbar">
-                        <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:20px; white-space:nowrap; ${currentHistoryLocationFilter === 'all' ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="filterHistoryByLocation('all')">
+                        <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; border-radius:20px; white-space:nowrap; ${currentHistoryLocationFilter === 'all' ? 'background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); background-color:#6D28D9; color:#FFFFFF; border:1px solid #A78BFA; font-weight:800;' : 'background:#121024; color:#E2E8F0; border:1px solid rgba(167, 139, 250, 0.28); font-weight:700;'}" onclick="filterHistoryByLocation('all')">
                             Tüm Mekanlar (${locationCounts['all']})
                         </button>
                         ${distinctLocations.map(loc => {
@@ -1799,7 +1857,7 @@
                             const icon = isEv ? '🏠' : (isPark ? '🌲' : '🏋️');
                             const isActive = currentHistoryLocationFilter === loc;
                             return `
-                                <button class="btn btn-outline" style="font-size:11px; padding:4px 10px; border-radius:20px; white-space:nowrap; ${isActive ? 'background:var(--gold); color:#000; font-weight:800;' : ''}" onclick="filterHistoryByLocation(decodeURIComponent('${encodeURIComponent(loc)}'))">
+                                <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; border-radius:20px; white-space:nowrap; ${isActive ? 'background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); background-color:#6D28D9; color:#FFFFFF; border:1px solid #A78BFA; font-weight:800;' : 'background:#121024; color:#E2E8F0; border:1px solid rgba(167, 139, 250, 0.28); font-weight:700;'}" onclick="filterHistoryByLocation(decodeURIComponent('${encodeURIComponent(loc)}'))">
                                     ${icon} ${escapeHTML(loc)} (${locationCounts[loc]})
                                 </button>
                             `;
@@ -1814,7 +1872,7 @@
 
             if (logs.length === 0) {
                 container.innerHTML = filterBarHTML + `
-                    <div style="background:var(--bg-surface); padding:16px; text-align:center; border:1px dashed var(--border); border-radius:10px; color:var(--text-secondary); font-size:12px;">
+                    <div style="background:#121024; padding:16px; text-align:center; border:1px dashed rgba(167, 139, 250, 0.3); border-radius:12px; color:#E2E8F0; font-size:12px;">
                         "${escapeHTML(currentHistoryLocationFilter)}" mekanında kayıtlı antrenman seansı bulunamadı.
                     </div>
                 `;
@@ -1839,83 +1897,30 @@
                 const durStr = l.durationFormatted || `${l.duration} Dk`;
                 const rpeLabel = l.rpe ? (l.rpe.split(' ')[0] + ' ' + (l.rpe.split(' ')[1] || '')) : 'RPE 8';
 
-                const locType = l.locationType || (l.locationName === 'Ev' ? 'ev' : 'salon');
-                const locName = l.locationName || (locType === 'ev' ? 'Ev' : 'Spor Salonu');
-                const isEv = locType === 'ev';
-                const isPark = locType === 'acik_hava';
-                const locIcon = isEv ? '🏠' : (isPark ? '🌲' : '🏋️');
-                const locBadgeStyle = isEv
-                    ? 'background:rgba(59, 130, 246, 0.15); border:1px solid rgba(59, 130, 246, 0.4); color:#1D4ED8;'
-                    : (isPark
-                        ? 'background:rgba(16, 185, 129, 0.15); border:1px solid rgba(16, 185, 129, 0.4); color:#047857;'
-                        : 'background:rgba(217, 119, 6, 0.15); border:1px solid rgba(217, 119, 6, 0.4); color:#92400E;');
-
                 const safeLogKey = String(l.id || Math.random().toString(36).slice(2)).replace(/[^a-zA-Z0-9_]/g, '_');
-                const shortMuscles = [];
-                (l.muscleGroups || []).forEach(rawM => {
-                    let s = String(rawM || '').replace(/[()]/g, '').trim();
-                    if (!s) return;
-                    let tag = s;
-                    if (/kanat|sırt|kürek|trapez/i.test(s)) tag = 'Sırt';
-                    else if (/göğüs/i.test(s)) tag = 'Göğüs';
-                    else if (/omuz/i.test(s)) tag = 'Omuz';
-                    else if (/ön bacak|arka bacak|bacak|kalf|baldır|diz/i.test(s)) tag = 'Bacak';
-                    else if (/kalça/i.test(s)) tag = 'Kalça';
-                    else if (/triceps|arka kol/i.test(s)) tag = 'Triceps';
-                    else if (/biceps|ön kol|pazı/i.test(s)) tag = 'Biceps';
-                    else if (/karın|core|korse/i.test(s)) tag = 'Karın';
-                    if (tag && !shortMuscles.includes(tag)) shortMuscles.push(tag);
-                });
-
                 const cleanProgramTitle = String(l.program || l.title || 'Antrenman Seansı').replace(/\s*\([^)]*\)/g, '').trim();
 
                 return `
-                    <div class="log-history-card">
+                    <div class="log-history-card" style="background:#121024 !important; border:1px solid rgba(167, 139, 250, 0.25) !important; border-radius:16px !important; padding:14px 16px !important; margin-bottom:12px !important; color:#FFFFFF !important;">
                         <div class="log-card-header" style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
                             <div style="min-width:0; flex:1;">
-                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:2px;">
-                                    <span class="log-date" style="font-size:12px; font-weight:700; color:#0F172A; white-space:nowrap;">📅 ${escapeHTML(l.dateFormatted || l.date)}</span>
-                                    <span style="${locBadgeStyle} border-radius:4px; padding:1px 6px; font-size:10.5px; font-weight:700; white-space:nowrap;">
-                                        ${locIcon} ${escapeHTML(locName)}
-                                    </span>
-                                    ${l.healthSummary && l.healthSummary.heartrateAvg ? `
-                                        <span style="background:#DCFCE7; border:1px solid #86EFAC; color:#15803D; border-radius:4px; padding:1px 6px; font-size:10.5px; font-weight:700; white-space:nowrap;">
-                                            ⌚ ❤️ ${Number(l.healthSummary.heartrateAvg)} bpm${l.healthSummary.calories ? ` • 🔥 ${Number(l.healthSummary.calories)} kcal` : ''}
-                                        </span>
-                                    ` : ''}
+                                <div style="display:flex; align-items:center; gap:6px; margin-bottom:2px;">
+                                    <span class="log-date" style="font-size:12px; font-weight:700; color:#CBD5E1 !important; white-space:nowrap;">📅 ${escapeHTML(l.dateFormatted || l.date)}</span>
                                 </div>
-                                <h3 style="font-size:14.5px; font-weight:800; color:#0F172A; line-height:1.25;">${escapeHTML(cleanProgramTitle)}</h3>
+                                <h3 style="font-size:14.5px; font-weight:800; color:#FFFFFF !important; line-height:1.25; margin:2px 0 0 0;">${escapeHTML(cleanProgramTitle)}</h3>
                             </div>
                             <div style="display:flex; align-items:center; gap:6px; flex-shrink:0; white-space:nowrap;">
-                                ${shortMuscles.length > 0 ? `
-                                    <div style="position:relative; display:inline-block;">
-                                        <button type="button" onclick="window.toggleHistoryMuscleBubble('${safeLogKey}', event)" style="background:#F0FDF4; border:1px solid #86EFAC; color:#15803D; border-radius:8px; padding:4px 8px; font-size:11.5px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; height:30px;" title="Çalışan Kasları Gör">
-                                            <span>💪 ${shortMuscles.length} Kas</span>
-                                            <span style="font-size:9px;">▼</span>
-                                        </button>
-                                        <div id="bubble_muscles_${safeLogKey}" style="display:none; position:absolute; right:0; top:calc(100% + 6px); z-index:9999; background:#FFFFFF; border:1px solid #CBD5E1; border-radius:12px; padding:10px 12px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.2); width:230px; animation:popIn 0.15s ease-out;">
-                                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:5px; border-bottom:1px solid #F1F5F9;">
-                                                <span style="font-size:11.5px; font-weight:800; color:#0F172A;">🎯 Çalışan Kaslar</span>
-                                                <button type="button" onclick="window.toggleHistoryMuscleBubble('${safeLogKey}', event)" style="background:none; border:none; color:#64748B; font-size:11px; font-weight:700; cursor:pointer;">✕</button>
-                                            </div>
-                                            <div style="display:flex; flex-wrap:wrap; gap:4px;">
-                                                ${shortMuscles.map(m => `<span style="background:#F0FDF4; border:1px solid #BBF7D0; color:#15803D; font-size:11px; font-weight:700; padding:2px 7px; border-radius:6px;">${escapeHTML(m)}</span>`).join('')}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ` : ''}
-
-                                <!-- SEÇENEK B: ÜÇ NOKTA BUTONU VE AÇILIR MENÜ -->
+                                <!-- ÜÇ NOKTA BUTONU VE AÇILIR MENÜ -->
                                 <div style="position:relative; display:inline-block;">
-                                    <button type="button" onclick="window.toggleHistoryActionMenu('${safeLogKey}', event)" title="Seans İşlemleri" style="height:30px; width:30px; background:#F1F5F9; border:1px solid #CBD5E1; color:#334155; border-radius:8px; font-size:15px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;">
+                                    <button type="button" onclick="window.toggleHistoryActionMenu('${safeLogKey}', event)" title="Seans İşlemleri" style="height:30px; width:30px; background:#2C2550; border:1px solid rgba(167, 139, 250, 0.35); color:#F3E8FF; border-radius:8px; font-size:15px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;">
                                         ⋮
                                     </button>
-                                    <div id="menu_actions_${safeLogKey}" style="display:none; position:absolute; right:0; top:calc(100% + 6px); z-index:9999; background:#FFFFFF; border:1px solid #CBD5E1; border-radius:12px; padding:6px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.2); width:150px; animation:popIn 0.15s ease-out;">
-                                        <button type="button" class="btn-view-log" onclick="window.toggleHistoryActionMenu('${safeLogKey}'); window.openWorkoutDetailsModal(decodeURIComponent('${encodeURIComponent(l.id)}'));" style="width:100%; text-align:left; background:none; border:none; padding:8px 10px; border-radius:6px; font-size:12px; font-weight:700; color:#0F172A; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                                    <div id="menu_actions_${safeLogKey}" style="display:none; position:absolute; right:0; top:calc(100% + 6px); z-index:9999; background:#181530; border:1px solid rgba(167, 139, 250, 0.35); border-radius:12px; padding:6px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.6); width:150px; animation:popIn 0.15s ease-out;">
+                                        <button type="button" class="btn-view-log" onclick="window.toggleHistoryActionMenu('${safeLogKey}'); window.openWorkoutDetailsModal(decodeURIComponent('${encodeURIComponent(l.id)}'));" style="width:100%; text-align:left; background:none; border:none; padding:8px 10px; border-radius:6px; font-size:12px; font-weight:700; color:#FFFFFF; cursor:pointer; display:flex; align-items:center; gap:8px;">
                                             <span>👁️</span> <span>Görüntüle</span>
                                         </button>
-                                        <div style="height:1px; background:#F1F5F9; margin:4px 0;"></div>
-                                        <button type="button" class="btn-delete-log" onclick="window.toggleHistoryActionMenu('${safeLogKey}'); deleteWorkoutLog(decodeURIComponent('${encodeURIComponent(l.id)}'));" style="width:100%; text-align:left; background:none; border:none; padding:8px 10px; border-radius:6px; font-size:12px; font-weight:700; color:#DC2626; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                                        <div style="height:1px; background:rgba(167, 139, 250, 0.2); margin:4px 0;"></div>
+                                        <button type="button" class="btn-delete-log" onclick="window.toggleHistoryActionMenu('${safeLogKey}'); deleteWorkoutLog(decodeURIComponent('${encodeURIComponent(l.id)}'));" style="width:100%; text-align:left; background:none; border:none; padding:8px 10px; border-radius:6px; font-size:12px; font-weight:700; color:#FCA5A5; cursor:pointer; display:flex; align-items:center; gap:8px;">
                                             <span>🗑️</span> <span>Seansı Sil</span>
                                         </button>
                                     </div>
@@ -1924,22 +1929,22 @@
                         </div>
 
                         <!-- STATS ROW -->
-                        <div class="log-stats-bar">
+                        <div class="log-stats-bar" style="background:#181530 !important; border:1px solid rgba(167, 139, 250, 0.22) !important; color:#FFFFFF !important;">
                             <div class="log-stat-item">
-                                <span class="log-stat-label">Toplam Tonaj</span>
-                                <span class="log-stat-val">🏋️ ${totalVol}</span>
+                                <span class="log-stat-label" style="color:#E2E8F0 !important;">Toplam Tonaj</span>
+                                <span class="log-stat-val" style="color:#FCD34D !important;">🏋️ ${totalVol}</span>
                             </div>
                             <div class="log-stat-item">
-                                <span class="log-stat-label">Set / Tekrar</span>
-                                <span class="log-stat-val">🎯 ${setsReps}</span>
+                                <span class="log-stat-label" style="color:#E2E8F0 !important;">Set / Tekrar</span>
+                                <span class="log-stat-val" style="color:#FFFFFF !important;">🎯 ${setsReps}</span>
                             </div>
                             <div class="log-stat-item">
-                                <span class="log-stat-label">Toplam Süre</span>
-                                <span class="log-stat-val">⏱️ ${durStr}</span>
+                                <span class="log-stat-label" style="color:#E2E8F0 !important;">Toplam Süre</span>
+                                <span class="log-stat-val" style="color:#7DD3FC !important;">⏱️ ${durStr}</span>
                             </div>
                         </div>
 
-                        ${l.notes ? `<div class="log-notes-box" style="margin-top:6px;">📝 ${escapeHTML(l.notes)}</div>` : ''}
+                        ${l.notes ? `<div class="log-notes-box" style="margin-top:6px; background:#181530 !important; border:1px solid rgba(167, 139, 250, 0.22) !important; color:#E2E8F0 !important; padding:8px 10px; border-radius:8px; font-size:12px;">📝 ${escapeHTML(l.notes)}</div>` : ''}
                     </div>
                 `;
             }).join('');

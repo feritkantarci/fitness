@@ -3037,7 +3037,19 @@ Aşağıdaki JSON şemasında çıktı ver:
             }
 
             if (mode === 'next') {
-                saveNextWeeklySchedule(JSON.parse(JSON.stringify(plan.draftSchedule)), uid);
+                const nextDraft = JSON.parse(JSON.stringify(plan.draftSchedule));
+                saveNextWeeklySchedule(nextDraft, uid);
+                if (typeof getWeekDaysMapForDateStr === 'function' && typeof saveDateScheduleOverride === 'function') {
+                    try {
+                        const { map } = getWeekDaysMapForDateStr(null, 1);
+                        [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+                            const dYMD = map && map[d] ? map[d].dateYMD : null;
+                            if (dYMD && nextDraft && nextDraft[d]) {
+                                saveDateScheduleOverride(dYMD, nextDraft[d], uid);
+                            }
+                        });
+                    } catch (_) {}
+                }
                 activePlannerWeek = 'next';
                 switchTab('activeWorkoutTab');
                 renderActiveWorkout();
@@ -9891,14 +9903,18 @@ KESİN KURALLAR:
                         daySlot.exercises = clonedActive.exercises;
                         daySlot.desc = `${clonedActive.exercises.length} Hareket • ${clonedActive.duration || 45} Dk`;
                         daySlot.updatedAt = nowTs;
-                        if (isNextWk && typeof saveNextWeeklySchedule === 'function') {
-                            saveNextWeeklySchedule(sched);
-                        } else if (typeof saveWeeklySchedule === 'function') {
-                            saveWeeklySchedule(sched);
-                        }
-                        const targetYMD = activeWorkoutSession.scheduledDateStr || (!isNextWk && candidateDayIdx === todayIdx ? todayYMD : '');
-                        if (targetYMD && typeof saveDateScheduleOverride === 'function') {
-                            saveDateScheduleOverride(targetYMD, daySlot);
+                        const targetYMD = activeWorkoutSession.scheduledDateStr || (typeof resolveScheduleDateStr === 'function' ? resolveScheduleDateStr(candidateDayIdx, null, isNextWk ? 1 : 0) : (!isNextWk && candidateDayIdx === todayIdx ? todayYMD : ''));
+                        if (typeof syncDayPlanToDateAndWeek === 'function') {
+                            syncDayPlanToDateAndWeek(candidateDayIdx, targetYMD, daySlot, null, isNextWk);
+                        } else {
+                            if (isNextWk && typeof saveNextWeeklySchedule === 'function') {
+                                saveNextWeeklySchedule(sched);
+                            } else if (typeof saveWeeklySchedule === 'function') {
+                                saveWeeklySchedule(sched);
+                            }
+                            if (targetYMD && typeof saveDateScheduleOverride === 'function') {
+                                saveDateScheduleOverride(targetYMD, daySlot);
+                            }
                         }
                     }
                 } catch(e) {}
@@ -10029,13 +10045,17 @@ KESİN KURALLAR:
                         extraCardioSessions: existingCardio,
                         updatedAt: nowTs
                     };
-                    schedule[dayIdx] = updatedPlanObj;
-                    if (activePlannerWeek === 'next') {
-                        saveNextWeeklySchedule(schedule);
+                    if (typeof syncDayPlanToDateAndWeek === 'function') {
+                        syncDayPlanToDateAndWeek(dayIdx, preservedDateStr, updatedPlanObj, user ? user.id : null, activePlannerWeek === 'next');
                     } else {
-                        saveWeeklySchedule(schedule);
-                        if (preservedDateStr && typeof saveDateScheduleOverride === 'function') {
-                            saveDateScheduleOverride(preservedDateStr, updatedPlanObj);
+                        schedule[dayIdx] = updatedPlanObj;
+                        if (activePlannerWeek === 'next') {
+                            saveNextWeeklySchedule(schedule);
+                        } else {
+                            saveWeeklySchedule(schedule);
+                            if (preservedDateStr && typeof saveDateScheduleOverride === 'function') {
+                                saveDateScheduleOverride(preservedDateStr, updatedPlanObj);
+                            }
                         }
                     }
 

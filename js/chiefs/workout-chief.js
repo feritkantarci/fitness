@@ -1521,33 +1521,7 @@
         }
 
         function renderDaylightPreWorkoutHubHtml(uid) {
-            const isReadyWatch = (typeof isGarminConnectedAndReady === 'function' && isGarminConnectedAndReady());
-            return `
-                <div class="daylight-studio-wrap">
-                    <div class="daylight-hub-bottom-zone" style="margin-bottom:10px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                            <div>
-                                <div style="font-size:12.5px; font-weight:900; color:#FFFFFF;">Garmin & Tredict Hazırlık Durumu</div>
-                                <div style="font-size:11px; color:#CBD5E1; margin-top:2px;">
-                                    ${isReadyWatch ? '🟢 Saat bağlı ve hazır' : '🟢 Toparlanma Yüksek (%92)'}
-                                </div>
-                            </div>
-                            <span style="font-size:11px; font-weight:900; padding:3px 9px; border-radius:999px; background:rgba(16,185,129,0.18); color:#6EE7B7; border:1px solid rgba(16,185,129,0.4); white-space:nowrap;">
-                                Hazır
-                            </span>
-                        </div>
-
-                        <div class="daylight-hub-actions-grid">
-                            <button type="button" class="daylight-btn-secondary" onclick="openQuickWorkoutModal()">
-                                ⚡ Hızlı Antrenman
-                            </button>
-                            <button type="button" class="daylight-btn-secondary" onclick="switchTab('historyTab')">
-                                📋 Önceki Geçmiş
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
+            return '';
         }
 
         function selectDaylightSet(exId, setIdx) {
@@ -1983,24 +1957,14 @@
                             ? buildGlobalScheduleMoveSummaryBannerHtml()
                             : '';
 
-                        container.innerHTML = `
-                            <div style="padding:2px 4px 0;">
-                                <!-- FİTLAB MASAÜSTÜ YENİ PROGRAM BİLDİRİMİ -->
-                                ${getFitLabIncomingProgramHtml(uid)}
+                        const topBannersHtml = [
+                            getFitLabIncomingProgramHtml(uid),
+                            getCoachStationDirectiveHtml(uid),
+                            heroBannerHtml,
+                            lastMoveSummaryBannerHtml
+                        ].join('').trim();
 
-                                <!-- AKADEMİK KOÇ İSTASYONU DİREKTİFİ -->
-                                ${getCoachStationDirectiveHtml(uid)}
-
-                                <!-- GELECEK HAFTA ÖNİZLEME PANELİ (VARSA) -->
-                                ${heroBannerHtml}
-
-                                <!-- GÜN TAŞIMA & AI ARDIŞIK GÜN REVİZYON ÖZETİ -->
-                                ${lastMoveSummaryBannerHtml}
-
-                                <!-- DAYLIGHT PRE-WORKOUT HUB (ZONE 1 & ZONE 2) -->
-                                ${renderDaylightPreWorkoutHubHtml(uid)}
-                            </div>
-                        `;
+                        container.innerHTML = topBannersHtml ? `<div style="padding:2px 4px 8px;">${topBannersHtml}</div>` : '';
                     } catch(renderErr) {
                         console.error("renderActiveWorkout hatası:", renderErr);
                     }
@@ -3913,6 +3877,13 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         }
                     });
                 }
+                if (key.includes('_next_weekly_schedule_')) {
+                    const nextDt = new Date();
+                    nextDt.setDate(nextDt.getDate() + 7);
+                    schedule._weekMondayYMD = (typeof getMondayYMDForDate === 'function') ? getMondayYMDForDate(nextDt) : '';
+                } else if (key.includes('_weekly_schedule_')) {
+                    schedule._weekMondayYMD = (typeof getMondayYMDForDate === 'function') ? getMondayYMDForDate(new Date()) : '';
+                }
                 localStorage.setItem(key, JSON.stringify(schedule));
                 if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(uid);
             } catch(e) {}
@@ -3950,8 +3921,19 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const raw = localStorage.getItem(key);
                 if (raw) return JSON.parse(raw);
             } catch(e) {}
-            const def = getDefaultWeeklySchedule();
-            try { localStorage.setItem(key, JSON.stringify(def)); } catch(e) {}
+            const restTpl = { id: 'rest', title: '🧘 Dinlenme & Toparlanma', type: 'rest', rest: true };
+            const def = {
+                0: Object.assign({}, restTpl),
+                1: Object.assign({}, restTpl),
+                2: Object.assign({}, restTpl),
+                3: Object.assign({}, restTpl),
+                4: Object.assign({}, restTpl),
+                5: Object.assign({}, restTpl),
+                6: Object.assign({}, restTpl)
+            };
+            const nextDt = new Date();
+            nextDt.setDate(nextDt.getDate() + 7);
+            if (typeof getMondayYMDForDate === 'function') def._weekMondayYMD = getMondayYMDForDate(nextDt);
             return def;
         }
 
@@ -5966,25 +5948,14 @@ KURALLAR:
                 exercises: exercisesList
             };
 
-            const schedule = activePlannerWeek === 'next' ? getNextWeeklySchedule() : getWeeklySchedule();
-            schedule[dayIdx] = planObj;
-            if (activePlannerWeek === 'next') {
-                saveNextWeeklySchedule(schedule);
-            } else {
-                saveWeeklySchedule(schedule);
-            }
-
-            // Keep dateScheduleOverride in sync
             const todayDate = new Date();
             const todayIdx = todayDate.getDay();
             const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(todayDate) : '';
-            const targetDateStr = customRoutineState.editingDateStr || (dayIdx === todayIdx ? todayYMD : null);
-            if (targetDateStr && typeof saveDateScheduleOverride === 'function') {
-                saveDateScheduleOverride(targetDateStr, planObj);
-            }
+            const targetDateStr = customRoutineState.editingDateStr || resolveScheduleDateStr(dayIdx, null, activePlannerWeek === 'next' ? 1 : 0) || (dayIdx === todayIdx ? todayYMD : null);
+            const user = getActiveUser();
+            syncDayPlanToDateAndWeek(dayIdx, targetDateStr, planObj, user ? user.id : null, activePlannerWeek === 'next');
 
             // Also update or add to custom programs in library
-            const user = getActiveUser();
             if (user && typeof upsertUserCustomProgram === 'function') {
                 upsertUserCustomProgram(updatedWorkout, user.id);
             }
@@ -6323,7 +6294,6 @@ KURALLAR:
             if (activeSchedulingDayIdx === null) return;
             const targetDay = activeSchedulingDayIdx;
             const isNext = (typeof activePlannerWeek !== 'undefined' && activePlannerWeek === 'next');
-            const schedule = isNext ? getNextWeeklySchedule() : getWeeklySchedule();
             const details = getWorkoutDetailsForPlan({ id: id, type: type, title: title });
             const planObj = {
                 id: id,
@@ -6333,16 +6303,7 @@ KURALLAR:
                 rest: false,
                 customWorkout: details ? JSON.parse(JSON.stringify(details)) : null
             };
-            schedule[targetDay] = planObj;
-            if (isNext) {
-                saveNextWeeklySchedule(schedule);
-            } else {
-                saveWeeklySchedule(schedule);
-            }
-
-            if (activeSchedulingDateStr && typeof saveDateScheduleOverride === 'function') {
-                saveDateScheduleOverride(activeSchedulingDateStr, planObj);
-            }
+            syncDayPlanToDateAndWeek(targetDay, activeSchedulingDateStr, planObj, null, isNext);
 
             renderActiveWorkout();
             if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
@@ -6368,7 +6329,6 @@ KURALLAR:
             if (!workoutToAssign) return;
 
             const isNext = (typeof activePlannerWeek !== 'undefined' && activePlannerWeek === 'next');
-            const schedule = isNext ? getNextWeeklySchedule() : getWeeklySchedule();
             const planObj = {
                 id: workoutToAssign.id || ('gen_' + Date.now()),
                 title: workoutToAssign.title || 'Özel Sihirbaz Antrenmanı',
@@ -6377,16 +6337,7 @@ KURALLAR:
                 rest: false,
                 customWorkout: JSON.parse(JSON.stringify(workoutToAssign))
             };
-            schedule[targetDay] = planObj;
-            if (isNext) {
-                saveNextWeeklySchedule(schedule);
-            } else {
-                saveWeeklySchedule(schedule);
-            }
-
-            if (activeSchedulingDateStr && typeof saveDateScheduleOverride === 'function') {
-                saveDateScheduleOverride(activeSchedulingDateStr, planObj);
-            }
+            syncDayPlanToDateAndWeek(targetDay, activeSchedulingDateStr, planObj, null, isNext);
 
             renderActiveWorkout();
             if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
@@ -6584,21 +6535,12 @@ KURALLAR:
                 exercises: exercisesList
             };
 
-            if (targetWeek === 'next') {
-                const nextSched = getNextWeeklySchedule(uid);
-                nextSched[dayIdx] = planObj;
-                saveNextWeeklySchedule(nextSched, uid);
+            const resolvedTargetDateStr = resolveScheduleDateStr(dayIdx, dateStr || (dayIdx === todayIdx && targetWeek !== 'next' ? todayYMD : null), targetWeek === 'next' ? 1 : 0);
+            syncDayPlanToDateAndWeek(dayIdx, resolvedTargetDateStr, planObj, uid, targetWeek === 'next');
+            if (targetWeek === 'next' || (resolvedTargetDateStr && isDateInNextWeek(resolvedTargetDateStr))) {
                 activePlannerWeek = 'next';
-            } else {
-                const sched = getWeeklySchedule(uid);
-                sched[dayIdx] = planObj;
-                saveWeeklySchedule(sched, uid);
+            } else if (resolvedTargetDateStr && isDateInCurrentWeek(resolvedTargetDateStr)) {
                 activePlannerWeek = 'current';
-
-                const targetDateYMD = dateStr || (dayIdx === todayIdx ? todayYMD : null);
-                if (targetDateYMD && typeof saveDateScheduleOverride === 'function') {
-                    saveDateScheduleOverride(targetDateYMD, planObj, uid);
-                }
             }
 
             if (workout.isCustom || workout.type === 'custom' || workout.type === 'custom_saved' || workout.type === 'custom_generated') {
@@ -6669,15 +6611,10 @@ KURALLAR:
                 title: '🧘 Dinlenme & Aktif Toparlanma',
                 type: 'rest',
                 desc: 'Hafif yürüyüş, esneme veya tam istirahat',
-                rest: true
+                rest: true,
+                _explicitCardioUpdate: true
             };
-            schedule[activeSchedulingDayIdx] = restPlan;
-            if (isNext) saveNextWeeklySchedule(schedule, user.id);
-            else saveWeeklySchedule(schedule, user.id);
-
-            if (activeSchedulingDateStr && typeof saveDateScheduleOverride === 'function') {
-                saveDateScheduleOverride(activeSchedulingDateStr, restPlan);
-            }
+            syncDayPlanToDateAndWeek(activeSchedulingDayIdx, activeSchedulingDateStr, restPlan, user.id, isNext);
 
             closeScheduleDayModal();
             renderActiveWorkout();
@@ -8391,6 +8328,74 @@ KURALLAR:
             return `${y}-${m}-${day}`;
         }
 
+        function getMondayYMDForDate(dateInput) {
+            let d = null;
+            if (dateInput instanceof Date) {
+                d = new Date(dateInput.getFullYear(), dateInput.getMonth(), dateInput.getDate());
+            } else if (typeof dateInput === 'string' && /^\d{4}-\d{2}-\d{2}/.test(dateInput.trim())) {
+                const p = dateInput.trim().slice(0, 10).split('-').map(Number);
+                d = new Date(p[0], p[1] - 1, p[2]);
+            } else {
+                const now = new Date();
+                d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            }
+            const dow = d.getDay();
+            const diffToMon = (dow === 0 ? -6 : 1 - dow);
+            d.setDate(d.getDate() + diffToMon);
+            return formatDateYMD(d);
+        }
+
+        function isDateInCurrentWeek(dateInput) {
+            if (!dateInput) return true;
+            return getMondayYMDForDate(dateInput) === getMondayYMDForDate(new Date());
+        }
+
+        function isDateInNextWeek(dateInput) {
+            if (!dateInput) return false;
+            const nextDt = new Date();
+            nextDt.setDate(nextDt.getDate() + 7);
+            return getMondayYMDForDate(dateInput) === getMondayYMDForDate(nextDt);
+        }
+
+        function resolveScheduleDateStr(dayIdx, targetDateStr = null, weekOffset = 0) {
+            if (targetDateStr && /^\d{4}-\d{2}-\d{2}/.test(String(targetDateStr).trim())) {
+                return String(targetDateStr).trim().slice(0, 10);
+            }
+            if (typeof getWeekDaysMapForDateStr === 'function' && dayIdx !== null && dayIdx !== undefined) {
+                const { map } = getWeekDaysMapForDateStr(null, weekOffset);
+                if (map && map[dayIdx] && map[dayIdx].dateYMD) return map[dayIdx].dateYMD;
+            }
+            return null;
+        }
+
+        function syncDayPlanToDateAndWeek(dayIdx, targetDateStr, planObj, uid = null, forceNextWeek = false) {
+            const targetUid = uid || (typeof getActiveUserId === 'function' ? getActiveUserId() : 'default');
+            const weekOff = forceNextWeek ? 1 : 0;
+            const effDateStr = resolveScheduleDateStr(dayIdx, targetDateStr, weekOff);
+            const inCurrentWk = effDateStr ? isDateInCurrentWeek(effDateStr) : !forceNextWeek;
+            const inNextWk = effDateStr ? isDateInNextWeek(effDateStr) : Boolean(forceNextWeek);
+            if (inCurrentWk && typeof getWeeklySchedule === 'function' && typeof saveWeeklySchedule === 'function') {
+                const sched = getWeeklySchedule(targetUid);
+                sched[dayIdx] = planObj;
+                saveWeeklySchedule(sched, targetUid);
+            }
+            if (inNextWk && typeof getNextWeeklySchedule === 'function' && typeof saveNextWeeklySchedule === 'function') {
+                const nextSched = getNextWeeklySchedule(targetUid);
+                nextSched[dayIdx] = planObj;
+                saveNextWeeklySchedule(nextSched, targetUid);
+            }
+            if (effDateStr && typeof saveDateScheduleOverride === 'function') {
+                saveDateScheduleOverride(effDateStr, planObj, targetUid);
+            }
+            return effDateStr;
+        }
+
+        window.getMondayYMDForDate = getMondayYMDForDate;
+        window.isDateInCurrentWeek = isDateInCurrentWeek;
+        window.isDateInNextWeek = isDateInNextWeek;
+        window.resolveScheduleDateStr = resolveScheduleDateStr;
+        window.syncDayPlanToDateAndWeek = syncDayPlanToDateAndWeek;
+
         function getDateScheduleOverrides(uid) {
             const targetUid = uid || (typeof getActiveUserId === 'function' ? getActiveUserId() : 'default');
             try {
@@ -8411,12 +8416,12 @@ KURALLAR:
                 const cloned = Object.assign({}, plan);
                 if (cloned._explicitCardioUpdate) {
                     delete cloned._explicitCardioUpdate;
-                } else {
+                } else if (!cloned.rest) {
                     const prevOv = overrides[dateStr];
                     const prevOvCardio = (prevOv && Array.isArray(prevOv.extraCardioSessions)) ? prevOv.extraCardioSessions : [];
                     let schedCardio = [];
                     try {
-                        if (/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr))) {
+                        if (/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr)) && isDateInCurrentWeek(dateStr)) {
                             const dIdx = new Date(dateStr + 'T00:00:00').getDay();
                             const sched = getWeeklySchedule(targetUid);
                             if (sched && sched[dIdx] && Array.isArray(sched[dIdx].extraCardioSessions)) {
@@ -8453,36 +8458,28 @@ KURALLAR:
         function getPlanForDate(dateObj) {
             const dStr = formatDateYMD(dateObj);
             const dayIdx = dateObj.getDay();
+            const restDefault = { id: 'rest', title: '🧘 Dinlenme & Toparlanma', rest: true, type: 'rest' };
+            const currentMondayYMD = getMondayYMDForDate(new Date());
+            const targetMondayYMD = getMondayYMDForDate(dateObj);
+            const isCurrentWk = (targetMondayYMD === currentMondayYMD);
             const schedule = (typeof getWeeklySchedule === 'function') ? getWeeklySchedule() : {};
-            const basePlan = schedule[dayIdx] || { id: 'rest', title: '🧘 Dinlenme & Toparlanma', rest: true, type: 'rest' };
+            const basePlan = schedule[dayIdx] || restDefault;
 
             const overrides = getDateScheduleOverrides();
             if (overrides && overrides[dStr]) {
                 const ovPlan = overrides[dStr];
-                const mergedCardio = mergeExtraCardioSessions(basePlan.extraCardioSessions, ovPlan.extraCardioSessions);
-                const baseTs = Number(basePlan.updatedAt || (basePlan.customWorkout && (basePlan.customWorkout.updatedAt || basePlan.customWorkout.createdAt)) || 0);
-                const ovTs = Number(ovPlan.updatedAt || (ovPlan.customWorkout && (ovPlan.customWorkout.updatedAt || ovPlan.customWorkout.createdAt)) || 0);
-                // Ana haftalık planda daha yeni bir güncelleme (örn: alternatif hareket seçimi) varsa eski dateOverride kaydının onu ezmesine izin verme!
-                if (baseTs > 0 && baseTs > ovTs) {
-                    if (mergedCardio.length > 0) basePlan.extraCardioSessions = mergedCardio;
-                    saveDateScheduleOverride(dStr, basePlan);
-                    return basePlan;
+                // Eski hatadan dolayı haftalık şablonun birebir kopyası diğer haftalara sızdıysa otomatik temizle
+                if (!isCurrentWk && schedule[dayIdx] && ovPlan.id && ovPlan.id === schedule[dayIdx].id
+                    && Number(ovPlan.updatedAt || 0) === Number(schedule[dayIdx].updatedAt || 0)) {
+                    saveDateScheduleOverride(dStr, null);
+                    return Object.assign({}, restDefault);
                 }
-                if (!ovTs && !basePlan.rest && !ovPlan.rest && typeof getWorkoutDetailsForPlan === 'function') {
-                    const baseDetails = getWorkoutDetailsForPlan(basePlan);
-                    const ovDetails = getWorkoutDetailsForPlan(ovPlan);
-                    const baseExCount = (baseDetails && Array.isArray(baseDetails.exercises)) ? baseDetails.exercises.length : 0;
-                    const ovExCount = (ovDetails && Array.isArray(ovDetails.exercises)) ? ovDetails.exercises.length : 0;
-                    if (baseExCount > ovExCount) {
-                        if (mergedCardio.length > 0) basePlan.extraCardioSessions = mergedCardio;
-                        saveDateScheduleOverride(dStr, null);
-                        return basePlan;
-                    }
-                }
-                if (mergedCardio.length > 0) ovPlan.extraCardioSessions = mergedCardio;
                 return ovPlan;
             }
-            return basePlan;
+            if (isCurrentWk && (!schedule._weekMondayYMD || schedule._weekMondayYMD === currentMondayYMD)) {
+                return basePlan;
+            }
+            return Object.assign({}, restDefault);
         }
 
         function setCalendarViewMode(mode) {
@@ -8542,7 +8539,6 @@ KURALLAR:
                 return;
             }
             const targetDay = activeSchedulingDayIdx;
-            const schedule = getWeeklySchedule();
             const newPlan = {
                 id: dirWorkout.id || ('directive_' + Date.now()),
                 title: dirWorkout.title || 'FitLAB Özel Seansı',
@@ -8552,12 +8548,7 @@ KURALLAR:
                 customWorkout: dirWorkout,
                 exercises: dirWorkout.exercises
             };
-            schedule[targetDay] = newPlan;
-            saveWeeklySchedule(schedule);
-
-            if (activeSchedulingDateStr) {
-                saveDateScheduleOverride(activeSchedulingDateStr, newPlan);
-            }
+            syncDayPlanToDateAndWeek(targetDay, activeSchedulingDateStr, newPlan, uid, typeof activePlannerWeek !== 'undefined' && activePlannerWeek === 'next');
             if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
             if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
             if (typeof showToast === 'function') showToast(`✅ "${newPlan.title}" ${DAY_NAMES_TR[targetDay]} gününe atandı!`);

@@ -17,8 +17,19 @@
             subBtns.forEach(b => {
                 const el = document.getElementById(b.id);
                 if (el) {
-                    if (b.view === view) el.classList.add('active');
-                    else el.classList.remove('active');
+                    if (b.view === view) {
+                        el.classList.add('active');
+                        el.style.background = 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)';
+                        el.style.backgroundColor = '#6D28D9';
+                        el.style.color = '#FFFFFF';
+                        el.style.borderColor = 'rgba(167, 139, 250, 0.4)';
+                    } else {
+                        el.classList.remove('active');
+                        el.style.background = 'transparent';
+                        el.style.backgroundColor = 'transparent';
+                        el.style.color = '#CBD5E1';
+                        el.style.borderColor = 'transparent';
+                    }
                 }
             });
             renderAnalytics();
@@ -118,9 +129,9 @@
             const banner = document.getElementById('scalePdfSuccessBanner');
             if (!banner) return;
             const palette = {
-                loading: { bg: '#F0F9FF', brd: '#0284C7', color: '#0369A1' },
-                success: { bg: '#F0FDF4', brd: '#16A34A', color: '#15803D' },
-                error:   { bg: '#FEF2F2', brd: '#DC2626', color: '#B91C1C' }
+                loading: { bg: '#0C4A6E', brd: '#38BDF8', color: '#BAE6FD' },
+                success: { bg: '#14532D', brd: '#22C55E', color: '#BBF7D0' },
+                error:   { bg: '#7F1D1D', brd: '#EF4444', color: '#FECACA' }
             };
             const theme = palette[state] || palette.loading;
             banner.style.display = 'block';
@@ -1575,8 +1586,19 @@
             subBtns.forEach(b => {
                 const el = document.getElementById(b.id);
                 if (el) {
-                    if (b.view === currentAnalyticsSubView) el.classList.add('active');
-                    else el.classList.remove('active');
+                    if (b.view === currentAnalyticsSubView) {
+                        el.classList.add('active');
+                        el.style.background = 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)';
+                        el.style.backgroundColor = '#6D28D9';
+                        el.style.color = '#FFFFFF';
+                        el.style.borderColor = 'rgba(167, 139, 250, 0.4)';
+                    } else {
+                        el.classList.remove('active');
+                        el.style.background = 'transparent';
+                        el.style.backgroundColor = 'transparent';
+                        el.style.color = '#CBD5E1';
+                        el.style.borderColor = 'transparent';
+                    }
                 }
             });
 
@@ -3460,7 +3482,7 @@
                 const dayDate = new Date(bounds.monday);
                 dayDate.setDate(bounds.monday.getDate() + offsetFromMon);
 
-                const plan = (sourceMode !== 'schedule_full' && typeof getPlanForDate === 'function')
+                const plan = ((weekOffset !== 0 || sourceMode !== 'schedule_full') && typeof getPlanForDate === 'function')
                     ? getPlanForDate(dayDate)
                     : schedule[dKey];
                 if (!plan || plan.rest) return;
@@ -3781,36 +3803,28 @@
         let activeQuickAddExId = null;
 
         function removeExtraCardioSessionFromDay(dayIdx, exId, targetDateStr = null) {
-            const schedule = getWeeklySchedule();
-            const plan = schedule[dayIdx];
-            if (plan && Array.isArray(plan.extraCardioSessions)) {
-                plan.extraCardioSessions = plan.extraCardioSessions.filter(c => c && c.id !== exId);
-                plan.updatedAt = Date.now();
-                plan._explicitCardioUpdate = true;
-                schedule[dayIdx] = plan;
-                saveWeeklySchedule(schedule);
-            }
-            if (typeof getDateScheduleOverrides === 'function' && typeof saveDateScheduleOverride === 'function') {
-                const ov = getDateScheduleOverrides();
-                const dateKeysToUpdate = new Set();
-                if (targetDateStr) dateKeysToUpdate.add(targetDateStr);
-                if (ov && typeof ov === 'object') {
-                    Object.keys(ov).forEach(k => {
-                        try {
-                            if (/^\d{4}-\d{2}-\d{2}$/.test(k) && new Date(k + 'T00:00:00').getDay() === Number(dayIdx)) {
-                                dateKeysToUpdate.add(k);
-                            }
-                        } catch (_) {}
-                    });
+            const activeOffset = (typeof currentWeeklyMuscleOffset === 'number') ? currentWeeklyMuscleOffset : 0;
+            const effDateStr = targetDateStr || (typeof resolveScheduleDateStr === 'function' ? resolveScheduleDateStr(dayIdx, null, activeOffset) : null);
+            const inCurWk = !effDateStr || typeof isDateInCurrentWeek !== 'function' || isDateInCurrentWeek(effDateStr);
+            if (inCurWk) {
+                const schedule = getWeeklySchedule();
+                const plan = schedule[dayIdx];
+                if (plan && Array.isArray(plan.extraCardioSessions)) {
+                    plan.extraCardioSessions = plan.extraCardioSessions.filter(c => c && c.id !== exId);
+                    plan.updatedAt = Date.now();
+                    plan._explicitCardioUpdate = true;
+                    schedule[dayIdx] = plan;
+                    saveWeeklySchedule(schedule);
                 }
-                dateKeysToUpdate.forEach(dKey => {
-                    if (ov && ov[dKey] && Array.isArray(ov[dKey].extraCardioSessions)) {
-                        ov[dKey].extraCardioSessions = ov[dKey].extraCardioSessions.filter(c => c && c.id !== exId);
-                        ov[dKey].updatedAt = Date.now();
-                        ov[dKey]._explicitCardioUpdate = true;
-                        saveDateScheduleOverride(dKey, ov[dKey]);
-                    }
-                });
+            }
+            if (effDateStr && typeof getDateScheduleOverrides === 'function' && typeof saveDateScheduleOverride === 'function') {
+                const ov = getDateScheduleOverrides();
+                if (ov && ov[effDateStr] && Array.isArray(ov[effDateStr].extraCardioSessions)) {
+                    ov[effDateStr].extraCardioSessions = ov[effDateStr].extraCardioSessions.filter(c => c && c.id !== exId);
+                    ov[effDateStr].updatedAt = Date.now();
+                    ov[effDateStr]._explicitCardioUpdate = true;
+                    saveDateScheduleOverride(effDateStr, ov[effDateStr]);
+                }
             }
             if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
             if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
@@ -3820,12 +3834,18 @@
             if (typeof showToast === 'function') showToast('🗑️ Ek kardiyo seansı takvimden kaldırıldı.');
         }
 
-        function addExerciseToDaySchedule(dayIdx, exId, targetSets = 3, targetReps = '8-12', cardioLimits = null) {
+        function addExerciseToDaySchedule(dayIdx, exId, targetSets = 3, targetReps = '8-12', cardioLimits = null, targetDateStr = null) {
+            const activeOffset = (typeof currentWeeklyMuscleOffset === 'number') ? currentWeeklyMuscleOffset : 0;
+            const effDateStr = targetDateStr || (typeof resolveScheduleDateStr === 'function' ? resolveScheduleDateStr(dayIdx, null, activeOffset) : null);
+            const isTargetNextWk = Boolean(effDateStr && typeof isDateInNextWeek === 'function' && isDateInNextWeek(effDateStr));
+            const basePlanRaw = (effDateStr && typeof getPlanForDate === 'function')
+                ? getPlanForDate(new Date(effDateStr + 'T00:00:00'))
+                : ((typeof getWeeklySchedule === 'function' ? getWeeklySchedule()[dayIdx] : null) || { id: 'rest', title: '🧘 Dinlenme & Toparlanma', type: 'rest', rest: true });
+            const targetPlan = Object.assign({}, basePlanRaw || { id: 'rest', title: '🧘 Dinlenme & Toparlanma', type: 'rest', rest: true });
+
             if (/^cond_/.test(String(exId || ''))) {
                 const ex = EXERCISES_DB.find(e => e.id === exId);
                 if (!ex) return false;
-                const schedule = getWeeklySchedule();
-                const plan = schedule[dayIdx] || { id: 'rest', title: '🧘 Dinlenme & Toparlanma', type: 'rest', rest: true };
                 const durMin = cardioLimits && cardioLimits.durationMin !== undefined
                     ? Math.max(0, Number(cardioLimits.durationMin) || 0)
                     : (parseInt(String(targetReps || '20').replace(/[^\d]/g, ''), 10) || 20);
@@ -3840,8 +3860,8 @@
                 if (distMeters > 0) summaryParts.push(`${distMeters} m`);
                 if (minHr > 0) summaryParts.push(`≥${minHr} bpm`);
                 const repLabel = summaryParts.length > 0 ? summaryParts.join(' • ') : 'Serbest';
-                if (!Array.isArray(plan.extraCardioSessions)) plan.extraCardioSessions = [];
-                const existingIdx = plan.extraCardioSessions.findIndex(c => c && c.id === ex.id);
+                const nextExtraCardio = Array.isArray(targetPlan.extraCardioSessions) ? targetPlan.extraCardioSessions.slice() : [];
+                const existingIdx = nextExtraCardio.findIndex(c => c && c.id === ex.id);
                 const nowTs = Date.now();
                 const sessionObj = {
                     id: ex.id,
@@ -3855,42 +3875,29 @@
                     addedAt: nowTs
                 };
                 if (existingIdx >= 0) {
-                    plan.extraCardioSessions[existingIdx] = sessionObj;
+                    nextExtraCardio[existingIdx] = sessionObj;
                 } else {
-                    plan.extraCardioSessions.push(sessionObj);
+                    nextExtraCardio.push(sessionObj);
                 }
-                plan.updatedAt = nowTs;
-                plan._explicitCardioUpdate = true;
-                schedule[dayIdx] = plan;
-                saveWeeklySchedule(schedule);
+                targetPlan.extraCardioSessions = nextExtraCardio;
+                targetPlan.updatedAt = nowTs;
+                targetPlan._explicitCardioUpdate = true;
 
-                if (typeof getWeekDaysMapForDateStr === 'function' && typeof getDateScheduleOverrides === 'function' && typeof saveDateScheduleOverride === 'function') {
-                    try {
-                        const { map } = getWeekDaysMapForDateStr(null, 0);
-                        const dYMD = map && map[dayIdx] ? map[dayIdx].dateYMD : null;
-                        const ov = getDateScheduleOverrides();
-                        if (dYMD && ov && ov[dYMD]) {
-                            const ovPlan = ov[dYMD];
-                            if (!Array.isArray(ovPlan.extraCardioSessions)) ovPlan.extraCardioSessions = [];
-                            const ovIdx = ovPlan.extraCardioSessions.findIndex(c => c && c.id === ex.id);
-                            if (ovIdx >= 0) ovPlan.extraCardioSessions[ovIdx] = sessionObj;
-                            else ovPlan.extraCardioSessions.push(sessionObj);
-                            ovPlan.updatedAt = nowTs;
-                            ovPlan._explicitCardioUpdate = true;
-                            saveDateScheduleOverride(dYMD, ovPlan);
-                        }
-                    } catch (_) {}
+                if (typeof syncDayPlanToDateAndWeek === 'function') {
+                    syncDayPlanToDateAndWeek(dayIdx, effDateStr, targetPlan, null, isTargetNextWk);
+                } else {
+                    const schedule = getWeeklySchedule();
+                    schedule[dayIdx] = targetPlan;
+                    saveWeeklySchedule(schedule);
                 }
                 return true;
             }
             const ex = EXERCISES_DB.find(e => e.id === exId);
             if (!ex) return false;
 
-            const schedule = getWeeklySchedule();
-            const plan = schedule[dayIdx] || { id: 'rest', title: 'Dinlenme', rest: true };
-            const preservedCardio = Array.isArray(plan.extraCardioSessions) ? plan.extraCardioSessions : [];
+            const preservedCardio = Array.isArray(targetPlan.extraCardioSessions) ? targetPlan.extraCardioSessions : [];
 
-            const details = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(plan) : null;
+            const details = (typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(targetPlan) : null;
             let existingExercises = (details && Array.isArray(details.exercises))
                 ? details.exercises.map(e => ({
                     id: e.id || e.exId,
@@ -3907,12 +3914,12 @@
                 targetReps: targetReps || '8-12'
             });
 
-            const progId = 'custom_day_' + dayIdx + '_' + Date.now();
+            const progId = 'custom_day_' + dayIdx + '_' + (effDateStr || 'wk') + '_' + Date.now();
             const dayName = (typeof DAY_NAMES_TR !== 'undefined') ? DAY_NAMES_TR[dayIdx] : `Gün ${dayIdx}`;
             const muscleName = (ex.primaryMuscles && ex.primaryMuscles[0] && TARGET_REGIONS[ex.primaryMuscles[0]])
                 ? TARGET_REGIONS[ex.primaryMuscles[0]].name
                 : '';
-            const title = plan.rest ? `${dayName} ${muscleName ? muscleName + ' ' : ''}Takviye Seansı` : (plan.title || `${dayName} Programı`);
+            const title = targetPlan.rest ? `${dayName} ${muscleName ? muscleName + ' ' : ''}Takviye Seansı` : (targetPlan.title || `${dayName} Programı`);
             const nowTs = Date.now();
 
             const customWorkout = {
@@ -3936,18 +3943,25 @@
                 isCustom: true
             };
 
-            schedule[dayIdx] = {
+            const updatedPlanObj = {
                 id: progId,
                 title: title,
                 type: 'custom_saved',
                 desc: `${existingExercises.length} Hareket • ${customWorkout.duration} Dk`,
                 rest: false,
                 customWorkout: customWorkout,
+                exercises: customWorkout.exercises,
                 extraCardioSessions: preservedCardio,
                 updatedAt: nowTs
             };
 
-            saveWeeklySchedule(schedule);
+            if (typeof syncDayPlanToDateAndWeek === 'function') {
+                syncDayPlanToDateAndWeek(dayIdx, effDateStr, updatedPlanObj, null, isTargetNextWk);
+            } else {
+                const schedule = getWeeklySchedule();
+                schedule[dayIdx] = updatedPlanObj;
+                saveWeeklySchedule(schedule);
+            }
 
             try {
                 const user = getActiveUser();
@@ -3979,37 +3993,37 @@
                         btn.style.color = '#FFFFFF';
                         btn.style.borderColor = '#0284C7';
                     });
-                    const infoBox = bodyEl.querySelector('div[style*="#FFFBEB"]');
+                    const infoBox = bodyEl.querySelector('[data-quickadd-infobox]') || bodyEl.querySelector('div[style*="#121024"]') || bodyEl.querySelector('div[style*="#FFFBEB"]');
                     if (infoBox) {
-                        infoBox.style.background = '#F0F9FF';
-                        infoBox.style.borderColor = '#BAE6FD';
+                        infoBox.style.background = '#121024';
+                        infoBox.style.borderColor = 'rgba(167, 139, 250, 0.3)';
                         infoBox.innerHTML = `
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
-                                <div style="font-size:12.5px; color:#0369A1; font-weight:800;">
+                                <div style="font-size:12.5px; color:#7DD3FC; font-weight:800;">
                                     🎯 Garmin fr945 Hedef & Alt Baraj Limitlerini Sen Belirle
                                 </div>
-                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:4px 9px; font-weight:800; color:#0369A1; border-color:#0284C7; background:#FFFFFF;" onclick="closeQuickAddToDayModal(); startQuickWorkoutWithExercise('${ex.id}');">
+                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:4px 9px; font-weight:800; color:#BAE6FD; border-color:#38BDF8; background:#0C4A6E;" onclick="closeQuickAddToDayModal(); startQuickWorkoutWithExercise('${ex.id}');">
                                     ⚡ Canlı Sayaç
                                 </button>
                             </div>
-                            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; background:#FFFFFF; border:1px solid #BAE6FD; padding:10px; border-radius:8px;">
+                            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; background:#181530; border:1px solid rgba(167, 139, 250, 0.25); padding:10px; border-radius:8px;">
                                 <div>
-                                    <label style="display:block; font-size:10.5px; font-weight:800; color:#0F172A; margin-bottom:3px;">⏱️ Hedef Süre (Dk)</label>
-                                    <input id="cardioTargetMinInput" type="number" min="0" max="240" step="1" value="20" style="width:100%; padding:6px 8px; border:1.5px solid #94A3B8; border-radius:6px; font-size:12.5px; font-weight:800; color:#0F172A; background:#FFFFFF;">
-                                    <span style="font-size:9.5px; color:#475569;">0 = Serbest süre</span>
+                                    <label style="display:block; font-size:10.5px; font-weight:800; color:#F8FAFC; margin-bottom:3px;">⏱️ Hedef Süre (Dk)</label>
+                                    <input id="cardioTargetMinInput" type="number" min="0" max="240" step="1" value="20" style="width:100%; padding:6px 8px; border:1.5px solid rgba(167, 139, 250, 0.35); border-radius:6px; font-size:12.5px; font-weight:800; color:#FFFFFF; background:#0B0A14;">
+                                    <span style="font-size:9.5px; color:#CBD5E1;">0 = Serbest süre</span>
                                 </div>
                                 <div>
-                                    <label style="display:block; font-size:10.5px; font-weight:800; color:#0F172A; margin-bottom:3px;">📏 Hedef Mesafe (m)</label>
-                                    <input id="cardioTargetDistInput" type="number" min="0" max="50000" step="100" value="0" style="width:100%; padding:6px 8px; border:1.5px solid #94A3B8; border-radius:6px; font-size:12.5px; font-weight:800; color:#0F172A; background:#FFFFFF;">
-                                    <span style="font-size:9.5px; color:#475569;">0 = Mesafe hedefi yok</span>
+                                    <label style="display:block; font-size:10.5px; font-weight:800; color:#F8FAFC; margin-bottom:3px;">📏 Hedef Mesafe (m)</label>
+                                    <input id="cardioTargetDistInput" type="number" min="0" max="50000" step="100" value="0" style="width:100%; padding:6px 8px; border:1.5px solid rgba(167, 139, 250, 0.35); border-radius:6px; font-size:12.5px; font-weight:800; color:#FFFFFF; background:#0B0A14;">
+                                    <span style="font-size:9.5px; color:#CBD5E1;">0 = Mesafe hedefi yok</span>
                                 </div>
                                 <div>
-                                    <label style="display:block; font-size:10.5px; font-weight:800; color:#0F172A; margin-bottom:3px;">❤️ Hedef Nabız (bpm)</label>
-                                    <input id="cardioTargetHrInput" type="number" min="0" max="210" step="1" value="0" style="width:100%; padding:6px 8px; border:1.5px solid #94A3B8; border-radius:6px; font-size:12.5px; font-weight:800; color:#0F172A; background:#FFFFFF;">
-                                    <span style="font-size:9.5px; color:#475569;">0 = Nabız uyarısı yok</span>
+                                    <label style="display:block; font-size:10.5px; font-weight:800; color:#F8FAFC; margin-bottom:3px;">❤️ Hedef Nabız (bpm)</label>
+                                    <input id="cardioTargetHrInput" type="number" min="0" max="210" step="1" value="0" style="width:100%; padding:6px 8px; border:1.5px solid rgba(167, 139, 250, 0.35); border-radius:6px; font-size:12.5px; font-weight:800; color:#FFFFFF; background:#0B0A14;">
+                                    <span style="font-size:9.5px; color:#CBD5E1;">0 = Nabız uyarısı yok</span>
                                 </div>
                             </div>
-                            <div style="font-size:10.5px; color:#15803D; margin-top:8px; line-height:1.4; background:#F0FDF4; border:1px solid #86EFAC; padding:6px 9px; border-radius:6px; font-weight:700;">
+                            <div style="font-size:10.5px; color:#BBF7D0; margin-top:8px; line-height:1.4; background:#14532D; border:1px solid #22C55E; padding:6px 9px; border-radius:6px; font-weight:700;">
                                 ✅ <strong>Ne Yaptıysan O Kaydedilir:</strong> Hedefin altında veya üstünde bitirsen de saatte yaptığın gerçek süre, mesafe ve nabız eksiksiz kayıt altına alınır.
                             </div>
                         `;
@@ -4024,9 +4038,10 @@
                 titleEl.innerHTML = `➕ ${escapeHTML(ex.name)}`;
             }
 
+            const activeOffset = (typeof currentWeeklyMuscleOffset === 'number' && currentWeeklyMuscleOffset >= 0) ? currentWeeklyMuscleOffset : 0;
             const schedule = getWeeklySchedule();
             const allLogs = getWorkoutLogs();
-            const bounds = getWeeklyMuscleBounds(0);
+            const bounds = getWeeklyMuscleBounds(activeOffset);
             const weekLogs = allLogs.filter(l => {
                 const dt = new Date(l.date);
                 return dt >= bounds.monday && dt <= bounds.sunday;
@@ -4042,11 +4057,16 @@
             dayKeys.forEach(dKey => {
                 const dayName = DAY_NAMES_TR[dKey];
                 const planIso = getIsoDay(dKey);
-                const isCompleted = loggedDays.has(dKey);
-                const isPast = !isCompleted && planIso < todayIso;
-                const isAvailable = !isCompleted && planIso >= todayIso;
+                const offsetFromMon = dKey === 0 ? 6 : (dKey - 1);
+                const dayDate = new Date(bounds.monday);
+                dayDate.setDate(bounds.monday.getDate() + offsetFromMon);
+                const dYMD = (typeof formatDateYMD === 'function') ? formatDateYMD(dayDate) : '';
+                const isCompleted = activeOffset === 0 && loggedDays.has(dKey);
+                const isPast = activeOffset === 0 && !isCompleted && planIso < todayIso;
+                const isAvailable = activeOffset > 0 || (!isCompleted && planIso >= todayIso);
+                const isTodayRow = activeOffset === 0 && planIso === todayIso;
 
-                const plan = schedule[dKey];
+                const plan = (typeof getPlanForDate === 'function') ? getPlanForDate(dayDate) : schedule[dKey];
                 const isRest = !plan || plan.rest;
                 const details = (!isRest && typeof getWorkoutDetailsForPlan === 'function') ? getWorkoutDetailsForPlan(plan) : null;
                 const exCount = (details && details.exercises) ? details.exercises.length : 0;
@@ -4057,49 +4077,49 @@
                 let buttonHtml = '';
 
                 if (isCompleted) {
-                    statusBadge = `<span style="font-size:10px; color:#15803D; font-weight:800; background:#DCFCE7; border:1px solid #86EFAC; padding:2px 6px; border-radius:4px;">✅ Seans Tamamlandı</span>`;
+                    statusBadge = `<span style="font-size:10px; color:#BBF7D0; font-weight:800; background:#14532D; border:1px solid #22C55E; padding:2px 6px; border-radius:4px;">✅ Seans Tamamlandı</span>`;
                     subtitleText = `${escapeHTML(planTitle)} • Tamamlanmış seans`;
                     buttonHtml = `
                         <div style="display:flex; align-items:center; gap:6px;">
-                            <select id="quickAddSetsSelect_${dKey}" style="background:#FFFFFF; color:#0F172A; border:1px solid var(--border); font-size:11px; padding:4px 6px; border-radius:6px;">
+                            <select id="quickAddSetsSelect_${dKey}" style="background:#181530; color:#FFFFFF; border:1px solid rgba(167, 139, 250, 0.3); font-size:11px; padding:4px 6px; border-radius:6px;">
                                 <option value="3" selected>3 Set</option>
                                 <option value="4">4 Set</option>
                                 <option value="5">5 Set</option>
                                 <option value="2">2 Set</option>
                             </select>
-                            <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px; opacity:0.85;" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}')">
+                            <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px; color:#E2E8F0; border-color:rgba(167, 139, 250, 0.3); background:#181530;" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}', '${dYMD}')">
                                 ➕ Yine de Ekle
                             </button>
                         </div>
                     `;
                 } else if (isRest) {
-                    statusBadge = `<span style="font-size:10px; color:#0369A1; font-weight:800; background:#E0F2FE; border:1px solid #7DD3FC; padding:2px 6px; border-radius:4px;">🧘 Dinlenme Günü (Boş)</span>`;
+                    statusBadge = `<span style="font-size:10px; color:#BAE6FD; font-weight:800; background:#0C4A6E; border:1px solid #38BDF8; padding:2px 6px; border-radius:4px;">🧘 Dinlenme Günü (Boş)</span>`;
                     subtitleText = `⚡ Eklendiğinde bu güne yeni bir Özel Takviye Seansı açılır`;
                     buttonHtml = `
                         <div style="display:flex; align-items:center; gap:6px;">
-                            <select id="quickAddSetsSelect_${dKey}" style="background:#FFFFFF; color:#0F172A; border:1px solid var(--border); font-size:11px; padding:4px 6px; border-radius:6px;">
+                            <select id="quickAddSetsSelect_${dKey}" style="background:#181530; color:#FFFFFF; border:1px solid rgba(167, 139, 250, 0.3); font-size:11px; padding:4px 6px; border-radius:6px;">
                                 <option value="3" selected>3 Set</option>
                                 <option value="4">4 Set</option>
                                 <option value="5">5 Set</option>
                                 <option value="2">2 Set</option>
                             </select>
-                            <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; font-weight:800; border-radius:6px; color:#0369A1; border-color:#38BDF8; background:#F0F9FF;" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}')" title="Bu dinlenme gününü takviye seansına dönüştür">
+                            <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; font-weight:800; border-radius:6px; color:#BAE6FD; border-color:#38BDF8; background:#0C4A6E;" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}', '${dYMD}')" title="Bu dinlenme gününü takviye seansına dönüştür">
                                 ⚡ Yeni Seans Aç
                             </button>
                         </div>
                     `;
                 } else {
-                    statusBadge = `<span style="font-size:10px; color:#B45309; font-weight:800; background:#FEF3C7; border:1px solid #FCD34D; padding:2px 6px; border-radius:4px;">🏋️ Planlı Antrenman</span>`;
+                    statusBadge = `<span style="font-size:10px; color:#FDE68A; font-weight:800; background:#7C2D12; border:1px solid #F59E0B; padding:2px 6px; border-radius:4px;">🏋️ Planlı Antrenman</span>`;
                     subtitleText = `${escapeHTML(planTitle)} • ${exCount} Hareket Mevcut (Sonuna eklenir)`;
                     buttonHtml = `
                         <div style="display:flex; align-items:center; gap:6px;">
-                            <select id="quickAddSetsSelect_${dKey}" style="background:#FFFFFF; color:#0F172A; border:1px solid var(--border); font-size:11px; padding:4px 6px; border-radius:6px;">
+                            <select id="quickAddSetsSelect_${dKey}" style="background:#181530; color:#FFFFFF; border:1px solid rgba(167, 139, 250, 0.3); font-size:11px; padding:4px 6px; border-radius:6px;">
                                 <option value="3" selected>3 Set</option>
                                 <option value="4">4 Set</option>
                                 <option value="5">5 Set</option>
                                 <option value="2">2 Set</option>
                             </select>
-                            <button class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:800; border-radius:6px;" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}')" title="Mevcut antrenmanın sonuna ilave hareket olarak ekle">
+                            <button class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:800; border-radius:6px;" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}', '${dYMD}')" title="Mevcut antrenmanın sonuna ilave hareket olarak ekle">
                                 ➕ Antrenmana Ekle
                             </button>
                         </div>
@@ -4107,14 +4127,14 @@
                 }
 
                 daysHTML += `
-                    <div style="background:#F8FAFC; border:1px solid ${isRest ? '#BAE6FD' : (isAvailable ? '#FCD34D' : 'var(--border)')}; border-radius:10px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                    <div style="background:#121024; border:1px solid ${isRest ? 'rgba(56, 189, 248, 0.4)' : (isAvailable ? 'rgba(245, 158, 11, 0.45)' : 'rgba(167, 139, 250, 0.25)')}; border-radius:10px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                         <div>
                             <div style="display:flex; align-items:center; gap:6px;">
-                                <strong style="font-size:13px; color:#0F172A;">${dayName}</strong>
+                                <strong style="font-size:13px; color:#FFFFFF;">${dayName}</strong>
                                 ${statusBadge}
-                                ${planIso === todayIso ? '<span style="font-size:9px; background:#0F172A; color:#FFFFFF; font-weight:900; padding:1px 5px; border-radius:3px;">BUGÜN</span>' : ''}
+                                ${isTodayRow ? '<span style="font-size:9px; background:#6D28D9; color:#FFFFFF; font-weight:900; padding:1px 5px; border-radius:3px;">BUGÜN</span>' : ''}
                             </div>
-                            <div style="font-size:11px; color:var(--text-secondary); margin-top:3px;">
+                            <div style="font-size:11px; color:#CBD5E1; margin-top:3px;">
                                 ${subtitleText}
                             </div>
                         </div>
@@ -4125,18 +4145,18 @@
             });
 
             bodyEl.innerHTML = `
-                <div style="background:#FFFBEB; border:1px solid #FDE68A; border-radius:10px; padding:12px; margin-bottom:14px;">
-                    <div style="font-size:12px; color:#B45309;">
+                <div data-quickadd-infobox="1" style="background:#121024; border:1px solid rgba(167, 139, 250, 0.28); border-radius:10px; padding:12px; margin-bottom:14px;">
+                    <div style="font-size:12px; color:#FDE68A;">
                         <strong>Hedef Kas Grubu:</strong> ${escapeHTML(pNames)} • <strong>Ekipman:</strong> ${ex.equipment ? ex.equipment.toUpperCase() : 'SERBEST'}
                     </div>
-                    <div style="font-size:11px; color:#334155; margin-top:8px; line-height:1.45; background:#FFFFFF; border:1px solid #E2E8F0; padding:8px 10px; border-radius:6px;">
+                    <div style="font-size:11px; color:#E2E8F0; margin-top:8px; line-height:1.45; background:#181530; border:1px solid rgba(167, 139, 250, 0.22); padding:8px 10px; border-radius:6px;">
                         💡 <strong>Nasıl Çalışır?</strong>
                         <br>• <strong>Antrenman olan gün:</strong> Hareketi mevcut seansın sonuna (${ex.name}) olarak ilave eder.
                         <br>• <strong>Dinlenme günü:</strong> O gün dinlenmeden çıkar ve bu hareketle başlayan yeni bir <em>"Takviye Seansı"</em>na dönüşür. (Dinlenmenizi korumak istiyorsanız antrenman olan günleri tercih edebilirsiniz.)
                     </div>
                 </div>
 
-                <div style="font-size:11.5px; font-weight:800; color:var(--text-secondary); margin-bottom:8px; text-transform:uppercase;">
+                <div style="font-size:11.5px; font-weight:800; color:#CBD5E1; margin-bottom:8px; text-transform:uppercase;">
                     Egzersizin Ekleneceği Günü Seçin:
                 </div>
                 ${daysHTML}
@@ -4151,12 +4171,15 @@
             activeQuickAddExId = null;
         }
 
-        function applyQuickAddExerciseToDay(dayIdx, exId) {
+        function applyQuickAddExerciseToDay(dayIdx, exId, targetDateStr = null) {
             const selectEl = document.getElementById(`quickAddSetsSelect_${dayIdx}`);
             const targetSets = selectEl ? parseInt(selectEl.value) || 3 : 3;
             const ex = EXERCISES_DB.find(e => e.id === exId);
-            const schedule = getWeeklySchedule();
-            const plan = schedule[dayIdx];
+            const activeOffset = (typeof currentWeeklyMuscleOffset === 'number' && currentWeeklyMuscleOffset >= 0) ? currentWeeklyMuscleOffset : 0;
+            const effDateStr = targetDateStr || (typeof resolveScheduleDateStr === 'function' ? resolveScheduleDateStr(dayIdx, null, activeOffset) : null);
+            const plan = (effDateStr && typeof getPlanForDate === 'function')
+                ? getPlanForDate(new Date(effDateStr + 'T00:00:00'))
+                : getWeeklySchedule()[dayIdx];
             const wasRest = !plan || plan.rest;
 
             const isCardioDur = /^cond_/.test(String(exId || ''));
@@ -4180,7 +4203,7 @@
                 ].filter(Boolean).join(' • ') || 'Serbest')
                 : '8-12';
             const unitSummary = isCardioDur ? finalReps : `${targetSets} set`;
-            const ok = addExerciseToDaySchedule(dayIdx, exId, finalSets, finalReps, cardioLimits);
+            const ok = addExerciseToDaySchedule(dayIdx, exId, finalSets, finalReps, cardioLimits, effDateStr);
             if (ok && isCardioDur) {
                 closeQuickAddToDayModal();
                 showToast(`🚣 "${ex ? ex.name : 'Kardiyo'}" (${unitSummary}), ${DAY_NAMES_TR[dayIdx]} gününe 2. Bağımsız Kardiyo Seansı olarak eklendi (Mevcut güç programı korundu)!`);
@@ -4522,46 +4545,46 @@
 
                 let statusBadge = '';
                 let contentHTML = '';
-                let cellBg = 'rgba(255,255,255,0.02)';
-                let cellBorder = '1px solid rgba(255,255,255,0.07)';
+                let cellBg = '#121024';
+                let cellBorder = '1px solid rgba(167, 139, 250, 0.22)';
 
                 if (st.isWorked) {
-                    cellBg = '#F0FDF4';
-                    cellBorder = '1px solid #86EFAC';
-                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#15803D; background:#DCFCE7; border:1px solid #86EFAC; border-radius:6px; padding:2px 7px;">${data.earnedSets.toFixed(1)} Set</span>`;
+                    cellBg = '#132E24';
+                    cellBorder = '1px solid rgba(34, 197, 94, 0.45)';
+                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#BBF7D0; background:#14532D; border:1px solid #22C55E; border-radius:6px; padding:2px 7px;">${data.earnedSets.toFixed(1)} Set</span>`;
                     const exList = Array.from(data.doneExs).map(escapeHTML).join(', ');
-                    const planList = data.plannedExs.size > 0 ? `<div style="font-size:11px; color:#B45309; margin-top:3px; font-weight:700;">+ ${Array.from(data.plannedExs).map(escapeHTML).join(', ')} (Planda)</div>` : '';
-                    contentHTML = `<div style="font-size:11.5px; color:#1E293B; margin-top:5px; line-height:1.35;"><strong>${exList}</strong>${planList}</div>`;
+                    const planList = data.plannedExs.size > 0 ? `<div style="font-size:11px; color:#FDE68A; margin-top:3px; font-weight:700;">+ ${Array.from(data.plannedExs).map(escapeHTML).join(', ')} (Planda)</div>` : '';
+                    contentHTML = `<div style="font-size:11.5px; color:#F8FAFC; margin-top:5px; line-height:1.35;"><strong style="color:#FFFFFF;">${exList}</strong>${planList}</div>`;
                 } else if (st.isPartial) {
-                    cellBg = '#FFFBEB';
-                    cellBorder = '1px solid #FCD34D';
+                    cellBg = '#271C19';
+                    cellBorder = '1px solid rgba(245, 158, 11, 0.45)';
                     const partialTag = data.directSets === 0
                         ? `Yan Etki (${data.earnedSets.toFixed(1)} Set)`
                         : `Az (${data.earnedSets.toFixed(1)} Set)`;
-                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#B45309; background:#FEF3C7; border:1px solid #FCD34D; border-radius:6px; padding:2px 7px;">${partialTag}</span>`;
+                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#FDE68A; background:#7C2D12; border:1px solid #F59E0B; border-radius:6px; padding:2px 7px;">${partialTag}</span>`;
                     const exList = Array.from(data.doneExs).map(escapeHTML).join(', ');
-                    const planList = data.plannedExs.size > 0 ? `<div style="font-size:11px; color:#B45309; margin-top:3px; font-weight:700;">+ ${Array.from(data.plannedExs).map(escapeHTML).join(', ')} (Planda)</div>` : '';
+                    const planList = data.plannedExs.size > 0 ? `<div style="font-size:11px; color:#FDE68A; margin-top:3px; font-weight:700;">+ ${Array.from(data.plannedExs).map(escapeHTML).join(', ')} (Planda)</div>` : '';
                     contentHTML = `
-                        <div style="font-size:11px; color:#78350F; margin-top:5px; line-height:1.3;">${exList}${planList}</div>
+                        <div style="font-size:11px; color:#FDE68A; margin-top:5px; line-height:1.3;">${exList}${planList}</div>
                         <div style="margin-top:6px;">
-                            <button class="btn btn-outline" style="font-size:11px; padding:5px 8px; border-radius:6px; color:#B45309; border-color:#FCD34D; width:100%; text-align:center; font-weight:800; background:#FFFFFF;" onclick="openQuickAddToDayModal('${col.recId}')" title="Bu başı doğrudan çalıştırmak için ${col.recName} ekle">
+                            <button class="btn btn-outline" style="font-size:11px; padding:5px 8px; border-radius:6px; color:#FDE68A; border-color:rgba(245, 158, 11, 0.5); width:100%; text-align:center; font-weight:800; background:#181530;" onclick="openQuickAddToDayModal('${col.recId}')" title="Bu başı doğrudan çalıştırmak için ${col.recName} ekle">
                                 + ${escapeHTML(col.recName)} Ekle
                             </button>
                         </div>
                     `;
                 } else if (st.isPlanned) {
-                    cellBg = '#FFFBEB';
-                    cellBorder = '1px solid #FCD34D';
-                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#B45309; background:#FEF3C7; border:1px solid #FCD34D; border-radius:6px; padding:2px 7px;">Planda (${data.plannedCount} Hrk)</span>`;
+                    cellBg = '#271C19';
+                    cellBorder = '1px solid rgba(245, 158, 11, 0.45)';
+                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#FDE68A; background:#7C2D12; border:1px solid #F59E0B; border-radius:6px; padding:2px 7px;">Planda (${data.plannedCount} Hrk)</span>`;
                     const planList = Array.from(data.plannedExs).map(escapeHTML).join(', ');
-                    contentHTML = `<div style="font-size:11.5px; color:#92400E; margin-top:5px; line-height:1.35; font-weight:600;">${planList}</div>`;
+                    contentHTML = `<div style="font-size:11.5px; color:#FDE68A; margin-top:5px; line-height:1.35; font-weight:600;">${planList}</div>`;
                 } else {
-                    cellBg = '#FEF2F2';
-                    cellBorder = '1px solid #FECACA';
-                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#B91C1C; background:#FEE2E2; border:1px solid #FCA5A5; border-radius:6px; padding:2px 7px;">0 Set (Boşta)</span>`;
+                    cellBg = '#2A1421';
+                    cellBorder = '1px solid rgba(239, 68, 68, 0.45)';
+                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#FECACA; background:#7F1D1D; border:1px solid #EF4444; border-radius:6px; padding:2px 7px;">0 Set (Boşta)</span>`;
                     contentHTML = `
                         <div style="margin-top:6px;">
-                            <button class="btn btn-outline" style="font-size:11px; padding:6px 8px; border-radius:6px; color:#DC2626; border-color:#FECACA; width:100%; text-align:center; font-weight:800; background:#FFFFFF;" onclick="openQuickAddToDayModal('${col.recId}')" title="Bu başı çalıştırmak için ${col.recName} ekle">
+                            <button class="btn btn-outline" style="font-size:11px; padding:6px 8px; border-radius:6px; color:#FECACA; border-color:rgba(239, 68, 68, 0.5); width:100%; text-align:center; font-weight:800; background:#181530;" onclick="openQuickAddToDayModal('${col.recId}')" title="Bu başı çalıştırmak için ${col.recName} ekle">
                                 + ${escapeHTML(col.recName)} Ekle
                             </button>
                         </div>
@@ -4569,13 +4592,13 @@
                 }
 
                 const isSubFocused = (typeof currentSelectedAnatomySubKey !== 'undefined' && currentSelectedAnatomySubKey === col.key);
-                const focusRing = isSubFocused ? 'box-shadow: 0 0 0 2.5px #0F172A;' : '';
+                const focusRing = isSubFocused ? 'box-shadow: 0 0 0 2.5px #A78BFA;' : '';
 
                 return `
                     <div id="anatomy_subcol_${m.id}_${col.key}" style="background:${cellBg}; border:${cellBorder}; ${focusRing} border-radius:8px; padding:10px; display:flex; flex-direction:column; justify-content:space-between; transition:box-shadow 0.2s ease;">
                         <div>
-                            <div style="font-size:11.5px; font-weight:900; color:#0F172A; margin-bottom:5px; letter-spacing:0.2px; display:flex; align-items:center; gap:5px;">
-                                <span style="display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:${isSubFocused ? '#2563EB' : '#0F172A'}; color:#FFFFFF; font-size:11px; font-weight:900; flex-shrink:0;">${idx + 1}</span>
+                            <div style="font-size:11.5px; font-weight:900; color:#FFFFFF; margin-bottom:5px; letter-spacing:0.2px; display:flex; align-items:center; gap:5px;">
+                                <span style="display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:${isSubFocused ? '#7C3AED' : '#2C2550'}; color:#FFFFFF; border:1px solid rgba(167, 139, 250, 0.4); font-size:11px; font-weight:900; flex-shrink:0;">${idx + 1}</span>
                                 <span>${escapeHTML(col.label)}</span>
                             </div>
                             <div>${statusBadge}</div>
@@ -4586,12 +4609,12 @@
             }).join('');
 
             return `
-                <div style="margin-top:12px; border:1.5px solid #E2E8F0; border-radius:14px; overflow:hidden; background:#FFFFFF;">
-                    <div style="background:#F1F5F9; border-bottom:1.5px solid #E2E8F0; padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:11.5px; font-weight:900; letter-spacing:0.5px; color:#0F172A; text-transform:uppercase;">
+                <div style="margin-top:12px; border:1.5px solid rgba(167, 139, 250, 0.25); border-radius:14px; overflow:hidden; background:#121024;">
+                    <div style="background:#181530; border-bottom:1.5px solid rgba(167, 139, 250, 0.22); padding:10px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
+                        <span style="font-size:11.5px; font-weight:900; letter-spacing:0.5px; color:#FFFFFF; text-transform:uppercase;">
                             ${escapeHTML(def.title)} — HANGİ ALT BÖLGELER ÇALIŞTI?
                         </span>
-                        <span style="font-size:11px; color:#475569; font-weight:800;">
+                        <span style="font-size:11px; color:#CBD5E1; font-weight:800;">
                             Şekildeki ${headerNumText} Numaralı Alt Kaslar
                         </span>
                     </div>
@@ -4891,14 +4914,14 @@
                     ${defsHTML}
                 </defs>
                 <!-- TITLES -->
-                <text x="226" y="30" text-anchor="middle" fill="#0F172A" font-family="'Plus Jakarta Sans', sans-serif" font-size="34" font-weight="900" letter-spacing="1.5">ÖN VÜCUT</text>
-                <text x="226" y="52" text-anchor="middle" fill="#64748B" font-family="'Plus Jakarta Sans', sans-serif" font-size="20" font-weight="800" letter-spacing="1">ÖNDEN GÖRÜNÜM (ALT KAS AYRIMLI)</text>
+                <text x="226" y="30" text-anchor="middle" fill="#F8FAFC" font-family="'Plus Jakarta Sans', sans-serif" font-size="34" font-weight="900" letter-spacing="1.5">ÖN VÜCUT</text>
+                <text x="226" y="52" text-anchor="middle" fill="#CBD5E1" font-family="'Plus Jakarta Sans', sans-serif" font-size="20" font-weight="800" letter-spacing="1">ÖNDEN GÖRÜNÜM (ALT KAS AYRIMLI)</text>
                 
-                <text x="902" y="30" text-anchor="middle" fill="#0F172A" font-family="'Plus Jakarta Sans', sans-serif" font-size="34" font-weight="900" letter-spacing="1.5">ARKA VÜCUT</text>
-                <text x="902" y="52" text-anchor="middle" fill="#64748B" font-family="'Plus Jakarta Sans', sans-serif" font-size="20" font-weight="800" letter-spacing="1">ARKADAN GÖRÜNÜM (ALT KAS AYRIMLI)</text>
+                <text x="902" y="30" text-anchor="middle" fill="#F8FAFC" font-family="'Plus Jakarta Sans', sans-serif" font-size="34" font-weight="900" letter-spacing="1.5">ARKA VÜCUT</text>
+                <text x="902" y="52" text-anchor="middle" fill="#CBD5E1" font-family="'Plus Jakarta Sans', sans-serif" font-size="20" font-weight="800" letter-spacing="1">ARKADAN GÖRÜNÜM (ALT KAS AYRIMLI)</text>
                 
                 <!-- CENTER DIVIDER -->
-                <line x1="564" y1="20" x2="564" y2="1490" stroke="#CBD5E1" stroke-width="2.5" stroke-dasharray="8,8"/>
+                <line x1="564" y1="20" x2="564" y2="1490" stroke="rgba(167, 139, 250, 0.35)" stroke-width="2.5" stroke-dasharray="8,8"/>
 
                 <!-- REAL CANVA HIGH-RES ATHLETIC BASE FIGURE -->
                 <image href="./assets/diagrams/canva_anatomy_neutral.png" x="0" y="60" width="1150" height="1475" />
@@ -4971,14 +4994,14 @@
 
             // Quick source buttons (3-column compact segmented bar — Yapılan varsayılan ilk sırada)
             const sourceButtons = `
-                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:5px; margin-top:8px; background:#F8FAFC; padding:4px; border-radius:10px; border:1px solid #E2E8F0;">
-                    <button class="btn btn-outline" style="font-size:11.5px; padding:6px 4px; border-radius:7px; white-space:nowrap; ${sourceMode === 'week_done' ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : 'border-color:transparent;'}" onclick="setWeeklyMuscleSource('week_done')">
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:5px; margin-top:8px; background:#121024; padding:4px; border-radius:10px; border:1px solid rgba(167, 139, 250, 0.25);">
+                    <button class="btn btn-outline" style="font-size:11.5px; padding:6px 4px; border-radius:7px; white-space:nowrap; ${sourceMode === 'week_done' ? 'background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important; background-color:#6D28D9 !important; color:#FFFFFF !important; border-color:rgba(167, 139, 250, 0.4) !important; font-weight:800;' : 'background:transparent !important; color:#CBD5E1 !important; border-color:transparent !important;'}" onclick="setWeeklyMuscleSource('week_done')">
                         Yapılan (${analysis.totalDoneSessions})
                     </button>
-                    <button class="btn btn-outline" style="font-size:11.5px; padding:6px 4px; border-radius:7px; white-space:nowrap; ${sourceMode === 'week_projected' ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : 'border-color:transparent;'}" onclick="setWeeklyMuscleSource('week_projected')">
+                    <button class="btn btn-outline" style="font-size:11.5px; padding:6px 4px; border-radius:7px; white-space:nowrap; ${sourceMode === 'week_projected' ? 'background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important; background-color:#6D28D9 !important; color:#FFFFFF !important; border-color:rgba(167, 139, 250, 0.4) !important; font-weight:800;' : 'background:transparent !important; color:#CBD5E1 !important; border-color:transparent !important;'}" onclick="setWeeklyMuscleSource('week_projected')">
                         Yapılan + Plan
                     </button>
-                    <button class="btn btn-outline" style="font-size:11.5px; padding:6px 4px; border-radius:7px; white-space:nowrap; ${sourceMode === 'schedule_full' ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : 'border-color:transparent;'}" onclick="setWeeklyMuscleSource('schedule_full')">
+                    <button class="btn btn-outline" style="font-size:11.5px; padding:6px 4px; border-radius:7px; white-space:nowrap; ${sourceMode === 'schedule_full' ? 'background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important; background-color:#6D28D9 !important; color:#FFFFFF !important; border-color:rgba(167, 139, 250, 0.4) !important; font-weight:800;' : 'background:transparent !important; color:#CBD5E1 !important; border-color:transparent !important;'}" onclick="setWeeklyMuscleSource('schedule_full')">
                         Şablon
                     </button>
                 </div>
@@ -4992,13 +5015,13 @@
                 <div class="anatomy-chips-scroll">
                     ${analysis.muscles.map(m => {
                         const shownSets = (m.effectiveTotal !== undefined ? m.effectiveTotal : m.effectiveDone);
-                        let dotColor = (m.status === 'optimal' || m.status === 'high') ? '#16A34A' : (m.status === 'insufficient' ? '#F59E0B' : '#EF4444');
+                        let dotColor = (m.status === 'optimal' || m.status === 'high') ? '#4ADE80' : (m.status === 'insufficient' ? '#FBBF24' : '#F87171');
                         let isSelected = (m.id === activeId);
                         return `
-                            <button type="button" class="anatomy-chip ${isSelected ? 'selected' : ''}" onclick="selectAnatomyMuscle('${m.id}')" title="${escapeHTML(m.name)}: ${shownSets.toFixed(1)} Set (${m.statusBadge || ''})">
+                            <button type="button" class="anatomy-chip ${isSelected ? 'selected' : ''}" style="${isSelected ? 'background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important; background-color:#6D28D9 !important; border-color:#A78BFA !important; color:#FFFFFF !important;' : 'background:#121024 !important; border-color:rgba(167, 139, 250, 0.25) !important; color:#E2E8F0 !important;'}" onclick="selectAnatomyMuscle('${m.id}')" title="${escapeHTML(m.name)}: ${shownSets.toFixed(1)} Set (${m.statusBadge || ''})">
                                 <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${dotColor}; flex-shrink:0;"></span>
-                                <span class="chip-name">${escapeHTML(m.name)}</span>
-                                <span class="chip-sets">${shownSets.toFixed(0)}s</span>
+                                <span class="chip-name" style="color:${isSelected ? '#FFFFFF' : '#F8FAFC'} !important; font-weight:${isSelected ? '800' : '700'};">${escapeHTML(m.name)}</span>
+                                <span class="chip-sets" style="color:${isSelected ? '#F3E8FF' : '#CBD5E1'} !important; background:${isSelected ? 'rgba(18, 16, 36, 0.45)' : '#181530'} !important;">${shownSets.toFixed(0)}s</span>
                             </button>
                         `;
                     }).join('')}
@@ -5020,14 +5043,14 @@
                 let statusClass = 'status-optimal';
                 if (m.status === 'optimal' || m.status === 'high') {
                     statusClass = 'status-optimal';
-                    statusBadge = `<span style="background:#DCFCE7; border:1px solid #86EFAC; color:#15803D; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">İdeal Seviye (${shownSets.toFixed(1)} Set)</span>`;
+                    statusBadge = `<span style="background:#14532D; border:1px solid #22C55E; color:#BBF7D0; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">İdeal Seviye (${shownSets.toFixed(1)} Set)</span>`;
                 } else if (m.status === 'insufficient') {
                     statusClass = 'status-insufficient';
                     const shortLabel = String(m.statusBadge || 'Az Çalıştı').replace(/^⚠️\s*/, '');
-                    statusBadge = `<span style="background:#FEF3C7; border:1px solid #FCD34D; color:#B45309; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">${escapeHTML(shortLabel)} (${shownSets.toFixed(1)} / Hedef: ${m.optimalMin}-${m.optimalMax} Set)</span>`;
+                    statusBadge = `<span style="background:#7C2D12; border:1px solid #F59E0B; color:#FDE68A; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">${escapeHTML(shortLabel)} (${shownSets.toFixed(1)} / Hedef: ${m.optimalMin}-${m.optimalMax} Set)</span>`;
                 } else {
                     statusClass = 'status-unworked';
-                    statusBadge = `<span style="background:#FEE2E2; border:1px solid #FCA5A5; color:#B91C1C; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">0 Set — Henüz Çalışmadı</span>`;
+                    statusBadge = `<span style="background:#7F1D1D; border:1px solid #EF4444; color:#FECACA; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">0 Set — Henüz Çalışmadı</span>`;
                 }
 
                 const pct = Math.min(100, Math.round((shownSets / m.optimalMin) * 100));
@@ -5042,7 +5065,7 @@
                 let actionBtnHTML = '';
                 if (m.status === 'unworked' || m.status === 'insufficient') {
                     const reasonLine = (m.status === 'insufficient' && m.statusDesc)
-                        ? `<div style="font-size:11.5px; color:#92400E; font-weight:700; margin-bottom:8px;">${escapeHTML(m.statusDesc)}</div>`
+                        ? `<div style="font-size:11.5px; color:#FDE68A; font-weight:700; margin-bottom:8px;">${escapeHTML(m.statusDesc)}</div>`
                         : '';
                     actionBtnHTML = `
                         <div style="margin-top:12px;">
@@ -5056,29 +5079,29 @@
                     `;
                 } else {
                     actionBtnHTML = `
-                        <div style="margin-top:10px; font-size:12px; color:#15803D; font-weight:700; display:flex; align-items:center; gap:6px;">
+                        <div style="margin-top:10px; font-size:12px; color:#4ADE80; font-weight:700; display:flex; align-items:center; gap:6px;">
                             <span>Bu bölge dengeli ve yeterince çalıştı (${shownSets.toFixed(1)} Set • ${m.coveredSubCount || 0}/${m.totalSubCount || 0} Alt Bölge).</span>
                         </div>
                     `;
                 }
 
                 focusCardHTML = `
-                    <div id="anatomyFocusCard" class="anatomy-focus-card ${statusClass}">
+                    <div id="anatomyFocusCard" class="anatomy-focus-card ${statusClass}" style="background:#181530 !important; border:1.5px solid rgba(167, 139, 250, 0.25) !important; color:#F8FAFC !important;">
                         <!-- Card Header -->
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                             <div style="display:flex; align-items:center; gap:8px;">
-                                <h4 style="font-size:16px; font-weight:900; color:#0F172A; margin:0;">${escapeHTML(m.name)}</h4>
+                                <h4 style="font-size:16px; font-weight:900; color:#FFFFFF; margin:0;">${escapeHTML(m.name)}</h4>
                             </div>
                             <div>${statusBadge}</div>
                         </div>
 
                         <!-- Progress Bar -->
                         <div style="margin-top:12px;">
-                            <div style="display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-secondary); margin-bottom:4px; font-weight:600;">
+                            <div style="display:flex; justify-content:space-between; font-size:11.5px; color:#CBD5E1; margin-bottom:4px; font-weight:600;">
                                 <span>Haftalık Tamamlanma: % ${pct}</span>
                                 <span>${shownSets.toFixed(1)} / ${m.optimalMin}-${m.optimalMax} Set</span>
                             </div>
-                            <div style="height:6px; background:#E2E8F0; border-radius:3px; overflow:hidden;">
+                            <div style="height:6px; background:#121024; border:1px solid rgba(167, 139, 250, 0.2); border-radius:3px; overflow:hidden;">
                                 <div style="height:100%; width:${pct}%; background:${barColor}; border-radius:3px; transition:width 0.3s ease;"></div>
                             </div>
                         </div>
@@ -5090,40 +5113,40 @@
                         ${actionBtnHTML}
 
                         <!-- Collapsible Lineage Dropdown -->
-                        <div style="margin-top:10px; padding-top:8px; border-top:1px solid #E2E8F0;">
-                            <button id="lineage_btn_${m.id}" class="btn btn-outline" style="width:100%; font-size:12px; padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border-color:#CBD5E1; cursor:pointer;" onclick="toggleMuscleLineage('${m.id}')">
+                        <div style="margin-top:10px; padding-top:8px; border-top:1px solid rgba(167, 139, 250, 0.2);">
+                            <button id="lineage_btn_${m.id}" class="btn btn-outline" style="width:100%; font-size:12px; padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; background:#121024; border-color:rgba(167, 139, 250, 0.28); color:#F8FAFC; cursor:pointer;" onclick="toggleMuscleLineage('${m.id}')">
                                 <span>Hangi Seans & Hareketten Geldi? (${(m.contributions || []).length} Kayıt)</span>
-                                <span style="color:#B45309; font-size:11.5px; font-weight:800;">Detay</span>
+                                <span style="color:#FCD34D; font-size:11.5px; font-weight:800;">Detay</span>
                             </button>
 
-                            <div id="lineage_box_${m.id}" data-count="${(m.contributions || []).length}" style="display:none; margin-top:8px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:10px;">
+                            <div id="lineage_box_${m.id}" data-count="${(m.contributions || []).length}" style="display:none; margin-top:8px; background:#121024; border:1px solid rgba(167, 139, 250, 0.22); border-radius:8px; padding:10px;">
                                 ${(m.contributions && m.contributions.length > 0) ? `
                                     <div style="display:flex; flex-direction:column; gap:6px;">
-                                        <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:2px; font-weight:700;">
+                                        <div style="font-size:11.5px; color:#CBD5E1; margin-bottom:2px; font-weight:700;">
                                             Tamamlanan Seanslar & Puan Katkısı:
                                         </div>
                                         ${m.contributions.map(c => `
-                                            <div style="display:flex; justify-content:space-between; align-items:center; background:#F1F5F9; border:1px solid #E2E8F0; border-radius:6px; padding:6px 10px; font-size:12px;">
+                                            <div style="display:flex; justify-content:space-between; align-items:center; background:#181530; border:1px solid rgba(167, 139, 250, 0.22); border-radius:6px; padding:6px 10px; font-size:12px;">
                                                 <div>
                                                     <div style="display:flex; align-items:center; gap:6px;">
-                                                        <strong style="color:#0F172A;">${escapeHTML(c.exercise)}</strong>
-                                                        <span style="font-size:10.5px; padding:2px 6px; border-radius:4px; font-weight:700; ${(c.role === 'Birincil' || c.role === 'Ana Hedef') ? 'background:#FEF3C7; color:#B45309;' : 'background:#E0F2FE; color:#0369A1;'}">
+                                                        <strong style="color:#FFFFFF;">${escapeHTML(c.exercise)}</strong>
+                                                        <span style="font-size:10.5px; padding:2px 6px; border-radius:4px; font-weight:700; ${(c.role === 'Birincil' || c.role === 'Ana Hedef') ? 'background:#7C2D12; color:#FDE68A; border:1px solid #F59E0B;' : 'background:#0C4A6E; color:#BAE6FD; border:1px solid #38BDF8;'}">
                                                             ${c.role} (${c.factor}x)
                                                         </span>
                                                     </div>
-                                                    <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                                    <div style="font-size:11px; color:#CBD5E1; margin-top:2px;">
                                                         ${escapeHTML(c.date)} • ${escapeHTML(c.sessionTitle)}
                                                     </div>
                                                 </div>
                                                 <div style="text-align:right;">
-                                                    <div style="font-size:12.5px; font-weight:900; color:#15803D;">+${c.earnedSets.toFixed(1)} Set</div>
-                                                    <div style="font-size:10.5px; color:var(--text-secondary);">${c.rawSets} Set Yapıldı</div>
+                                                    <div style="font-size:12.5px; font-weight:900; color:#4ADE80;">+${c.earnedSets.toFixed(1)} Set</div>
+                                                    <div style="font-size:10.5px; color:#CBD5E1;">${c.rawSets} Set Yapıldı</div>
                                                 </div>
                                             </div>
                                         `).join('')}
                                     </div>
                                 ` : `
-                                    <div style="font-size:12px; color:var(--text-secondary); text-align:center; padding:8px 6px;">
+                                    <div style="font-size:12px; color:#CBD5E1; text-align:center; padding:8px 6px;">
                                         Bu hafta bu kas grubu için henüz tamamlanmış bir seans kaydı bulunmuyor.
                                     </div>
                                 `}
@@ -5135,19 +5158,19 @@
 
             return `
                 <!-- ANATOMICAL BODY & WEEKLY SUFFICIENCY HERO -->
-                <div class="anatomy-hero-wrapper">
+                <div class="anatomy-hero-wrapper" style="background:#181530 !important; border:1.5px solid rgba(167, 139, 250, 0.25) !important; color:#F8FAFC !important;">
                     <!-- HEADER -->
                     <div class="anatomy-top-bar" style="align-items:center;">
-                        <h3 style="font-size:15.5px; font-weight:900; color:#0F172A; margin:0; white-space:nowrap;">Haftalık Kas Haritası</h3>
+                        <h3 style="font-size:15.5px; font-weight:900; color:#FFFFFF; margin:0; white-space:nowrap;">Haftalık Kas Haritası</h3>
 
                         <!-- Mini Week Switcher -->
                         <div style="display:flex; align-items:center; gap:4px;">
-                            <button class="btn btn-outline" style="padding:4px 8px; font-size:12px; border-radius:6px;" onclick="setWeeklyMuscleOffset(${weekOffset - 1})" title="Önceki Hafta">&lsaquo;</button>
-                            <span style="font-size:11.5px; font-weight:800; color:#0F172A; padding:4px 8px; background:#F8FAFC; border-radius:6px; border:1px solid var(--border); white-space:nowrap;">
+                            <button class="btn btn-outline" style="padding:4px 8px; font-size:12px; border-radius:6px; background:#121024; color:#F8FAFC; border-color:rgba(167, 139, 250, 0.28);" onclick="setWeeklyMuscleOffset(${weekOffset - 1})" title="Önceki Hafta">&lsaquo;</button>
+                            <span style="font-size:11.5px; font-weight:800; color:#FFFFFF; padding:4px 8px; background:#121024; border-radius:6px; border:1px solid rgba(167, 139, 250, 0.25); white-space:nowrap;">
                                 ${escapeHTML(bounds.label)}
                             </span>
-                            <button class="btn btn-outline" style="padding:4px 8px; font-size:12px; border-radius:6px;" onclick="setWeeklyMuscleOffset(${weekOffset + 1})" title="Sonraki Hafta">&rsaquo;</button>
-                            ${weekOffset !== 0 ? `<button class="btn btn-outline" style="padding:4px 8px; font-size:11px; border-radius:6px; color:#0369A1; border-color:#0369A1;" onclick="setWeeklyMuscleOffset(0)">Bugün</button>` : ''}
+                            <button class="btn btn-outline" style="padding:4px 8px; font-size:12px; border-radius:6px; background:#121024; color:#F8FAFC; border-color:rgba(167, 139, 250, 0.28);" onclick="setWeeklyMuscleOffset(${weekOffset + 1})" title="Sonraki Hafta">&rsaquo;</button>
+                            ${weekOffset !== 0 ? `<button class="btn btn-outline" style="padding:4px 8px; font-size:11px; border-radius:6px; color:#BAE6FD; border-color:#38BDF8; background:#0C4A6E;" onclick="setWeeklyMuscleOffset(0)">Bugün</button>` : ''}
                         </div>
                     </div>
 
@@ -5156,25 +5179,25 @@
 
                     <!-- 3 VISUAL STATUS COUNTERS (COMPACT 3-COLUMN BAR) -->
                     <div class="anatomy-legend" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
-                        <div class="anatomy-legend-item optimal" style="cursor:pointer; justify-content:center; padding:6px 4px; ${currentWeeklyMuscleFilter === 'optimal' ? 'box-shadow: 0 0 0 2.5px #15803D; background:#DCFCE7;' : ''}" onclick="setWeeklyMuscleFilter('optimal')" title="İyi çalışan ana kas gruplarını ve alt kasları listele">
+                        <div class="anatomy-legend-item optimal" style="cursor:pointer; justify-content:center; padding:6px 4px; background:${currentWeeklyMuscleFilter === 'optimal' ? '#14532D' : '#121024'} !important; border:1.5px solid ${currentWeeklyMuscleFilter === 'optimal' ? '#22C55E' : 'rgba(167, 139, 250, 0.25)'} !important; ${currentWeeklyMuscleFilter === 'optimal' ? 'box-shadow: 0 0 0 2px #22C55E;' : ''}" onclick="setWeeklyMuscleFilter('optimal')" title="İyi çalışan ana kas gruplarını ve alt kasları listele">
                             <div class="badge-dot"></div>
-                            <span class="badge-val">${optimalTotal}</span>
-                            <span class="badge-label" style="white-space:nowrap; font-size:11px;">İyi (${subWorkedCount} Alt)</span>
+                            <span class="badge-val" style="color:#FFFFFF !important;">${optimalTotal}</span>
+                            <span class="badge-label" style="white-space:nowrap; font-size:11px; color:${currentWeeklyMuscleFilter === 'optimal' ? '#BBF7D0' : '#E2E8F0'} !important;">İyi (${subWorkedCount} Alt)</span>
                         </div>
-                        <div class="anatomy-legend-item insufficient" style="cursor:pointer; justify-content:center; padding:6px 4px; ${currentWeeklyMuscleFilter === 'insufficient' ? 'box-shadow: 0 0 0 2.5px #B45309; background:#FEF3C7;' : ''}" onclick="setWeeklyMuscleFilter('insufficient')" title="Az çalışan / eksik bölge / planda olan ana kas gruplarını ve alt kasları listele">
+                        <div class="anatomy-legend-item insufficient" style="cursor:pointer; justify-content:center; padding:6px 4px; background:${currentWeeklyMuscleFilter === 'insufficient' ? '#7C2D12' : '#121024'} !important; border:1.5px solid ${currentWeeklyMuscleFilter === 'insufficient' ? '#F59E0B' : 'rgba(167, 139, 250, 0.25)'} !important; ${currentWeeklyMuscleFilter === 'insufficient' ? 'box-shadow: 0 0 0 2px #F59E0B;' : ''}" onclick="setWeeklyMuscleFilter('insufficient')" title="Az çalışan / eksik bölge / planda olan ana kas gruplarını ve alt kasları listele">
                             <div class="badge-dot"></div>
-                            <span class="badge-val">${summary.insufficientCount}</span>
-                            <span class="badge-label" style="white-space:nowrap; font-size:11px;">Az / Plan (${subPlannedCount} Alt)</span>
+                            <span class="badge-val" style="color:#FFFFFF !important;">${summary.insufficientCount}</span>
+                            <span class="badge-label" style="white-space:nowrap; font-size:11px; color:${currentWeeklyMuscleFilter === 'insufficient' ? '#FDE68A' : '#E2E8F0'} !important;">Az / Plan (${subPlannedCount} Alt)</span>
                         </div>
-                        <div class="anatomy-legend-item unworked" style="cursor:pointer; justify-content:center; padding:6px 4px; ${currentWeeklyMuscleFilter === 'unworked' ? 'box-shadow: 0 0 0 2.5px #B91C1C; background:#FEE2E2;' : ''}" onclick="setWeeklyMuscleFilter('unworked')" title="Hiç çalışmayan ana kas gruplarını ve 0 set kalan alt kasları listele">
+                        <div class="anatomy-legend-item unworked" style="cursor:pointer; justify-content:center; padding:6px 4px; background:${currentWeeklyMuscleFilter === 'unworked' ? '#7F1D1D' : '#121024'} !important; border:1.5px solid ${currentWeeklyMuscleFilter === 'unworked' ? '#EF4444' : 'rgba(167, 139, 250, 0.25)'} !important; ${currentWeeklyMuscleFilter === 'unworked' ? 'box-shadow: 0 0 0 2px #EF4444;' : ''}" onclick="setWeeklyMuscleFilter('unworked')" title="Hiç çalışmayan ana kas gruplarını ve 0 set kalan alt kasları listele">
                             <div class="badge-dot"></div>
-                            <span class="badge-val">${summary.unworkedCount}</span>
-                            <span class="badge-label" style="white-space:nowrap; font-size:11px;">Boşta (${subUnworkedCount} Alt)</span>
+                            <span class="badge-val" style="color:#FFFFFF !important;">${summary.unworkedCount}</span>
+                            <span class="badge-label" style="white-space:nowrap; font-size:11px; color:${currentWeeklyMuscleFilter === 'unworked' ? '#FECACA' : '#E2E8F0'} !important;">Boşta (${subUnworkedCount} Alt)</span>
                         </div>
                     </div>
 
                     <!-- INTERACTIVE ANATOMICAL BODY SVG -->
-                    <div class="anatomy-svg-box">
+                    <div class="anatomy-svg-box" style="background:#121024; border:1px solid rgba(167, 139, 250, 0.22); border-radius:14px; padding:6px;">
                         ${bodySvgHTML}
                     </div>
 
@@ -5189,9 +5212,9 @@
                         const titleText = isOpt
                             ? `İyi Çalışan Bölgeler (${optimalTotal} Ana Grup • ${subWorkedCount} Alt Kas)`
                             : (isIns ? `Az Çalışan & Planda Olan Bölgeler (${summary.insufficientCount} Ana Grup • ${subPlannedCount} Alt Kas)` : `Çalışmayan (0 Set) Bölgeler (${summary.unworkedCount} Ana Grup • ${subUnworkedCount} Alt Kas)`);
-                        const borderCol = isOpt ? '#86EFAC' : (isIns ? '#FCD34D' : '#FCA5A5');
-                        const headerBg = isOpt ? '#DCFCE7' : (isIns ? '#FEF3C7' : '#FEE2E2');
-                        const headerColor = isOpt ? '#15803D' : (isIns ? '#B45309' : '#B91C1C');
+                        const borderCol = isOpt ? '#22C55E' : (isIns ? '#F59E0B' : '#EF4444');
+                        const headerBg = isOpt ? '#14532D' : (isIns ? '#7C2D12' : '#7F1D1D');
+                        const headerColor = isOpt ? '#BBF7D0' : (isIns ? '#FDE68A' : '#FECACA');
 
                         const mainMatches = analysis.muscles.filter(m => isOpt ? (m.status === 'optimal' || m.status === 'high') : m.status === currentWeeklyMuscleFilter);
                         const subMatches = isOpt ? subWorkedList : (isIns ? subPlannedList : subUnworkedList);
@@ -5199,9 +5222,9 @@
                         const mainHTML = mainMatches.length > 0
                             ? mainMatches.map(m => {
                                 const s = (m.effectiveTotal !== undefined ? m.effectiveTotal : m.effectiveDone);
-                                return `<button type="button" class="btn btn-outline" style="font-size:12px; padding:6px 12px; border-radius:8px; background:#FFFFFF; color:#0F172A; border-color:${borderCol}; font-weight:800;" onclick="selectAnatomyMuscle('${m.id}')">${escapeHTML(m.name)} (${s.toFixed(1)} Set)</button>`;
+                                return `<button type="button" class="btn btn-outline" style="font-size:12px; padding:6px 12px; border-radius:8px; background:#181530; color:#FFFFFF; border-color:${borderCol}; font-weight:800;" onclick="selectAnatomyMuscle('${m.id}')">${escapeHTML(m.name)} (${s.toFixed(1)} Set)</button>`;
                             }).join('')
-                            : `<span style="font-size:12px; color:#475569;">Bu kategoride ana kas grubu yok.</span>`;
+                            : `<span style="font-size:12px; color:#CBD5E1;">Bu kategoride ana kas grubu yok.</span>`;
 
                         const subHTML = subMatches.length > 0
                             ? subMatches.map(it => {
@@ -5210,34 +5233,34 @@
                                     : `Planda (${it.plannedCount} Hrk)`;
                                 const meta = isOpt ? `${it.earnedSets.toFixed(1)} Set` : (isIns ? partialTxt : `0 Set`);
                                 const quickAddBtn = ((!isOpt && !isIns) || (isIns && it.isPartial)) && it.recId
-                                    ? `<button type="button" class="btn btn-outline" style="font-size:11px; padding:4px 8px; border-radius:6px; background:${isIns ? '#FFFBEB' : '#FEF2F2'}; color:${isIns ? '#B45309' : '#B91C1C'}; border-color:${isIns ? '#FCD34D' : '#FECACA'}; font-weight:800;" onclick="openQuickAddToDayModal('${it.recId}')">+ ${escapeHTML(it.recName)} Ekle</button>`
+                                    ? `<button type="button" class="btn btn-outline" style="font-size:11px; padding:4px 8px; border-radius:6px; background:${isIns ? '#7C2D12' : '#7F1D1D'}; color:${isIns ? '#FDE68A' : '#FECACA'}; border-color:${isIns ? '#F59E0B' : '#EF4444'}; font-weight:800;" onclick="openQuickAddToDayModal('${it.recId}')">+ ${escapeHTML(it.recName)} Ekle</button>`
                                     : '';
                                 return `
-                                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:7px 10px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px;">
-                                        <button type="button" style="background:none; border:none; padding:0; text-align:left; cursor:pointer; color:#0F172A; font-size:12px; font-weight:800; display:flex; align-items:center; gap:6px;" onclick="selectAnatomyMuscle('${it.muscleId}', '${it.colKey}', event)">
-                                            <span style="display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:${headerColor}; color:#FFFFFF; font-size:11px; font-weight:900;">${it.num}</span>
-                                            <span><strong>${escapeHTML(it.muscleName)}</strong> &rarr; ${escapeHTML(it.colLabel)}</span>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:7px 10px; background:#181530; border:1px solid rgba(167, 139, 250, 0.22); border-radius:8px;">
+                                        <button type="button" style="background:none; border:none; padding:0; text-align:left; cursor:pointer; color:#FFFFFF; font-size:12px; font-weight:800; display:flex; align-items:center; gap:6px;" onclick="selectAnatomyMuscle('${it.muscleId}', '${it.colKey}', event)">
+                                            <span style="display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:${headerBg}; color:${headerColor}; border:1px solid ${borderCol}; font-size:11px; font-weight:900;">${it.num}</span>
+                                            <span><strong style="color:#FFFFFF;">${escapeHTML(it.muscleName)}</strong> &rarr; ${escapeHTML(it.colLabel)}</span>
                                             <span style="font-size:11px; color:${headerColor}; font-weight:800;">(${meta})</span>
                                         </button>
                                         ${quickAddBtn}
                                     </div>
                                 `;
                             }).join('')
-                            : `<span style="font-size:12px; color:#475569;">Bu kategoride alt kas bölgesi yok.</span>`;
+                            : `<span style="font-size:12px; color:#CBD5E1;">Bu kategoride alt kas bölgesi yok.</span>`;
 
                         return `
-                            <div id="anatomyFilterResultsBox" style="margin:12px 0; border:1.5px solid ${borderCol}; border-radius:12px; overflow:hidden; background:#FFFFFF;">
+                            <div id="anatomyFilterResultsBox" style="margin:12px 0; border:1.5px solid ${borderCol}; border-radius:12px; overflow:hidden; background:#121024;">
                                 <div style="background:${headerBg}; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid ${borderCol};">
                                     <span style="font-size:12.5px; font-weight:900; color:${headerColor};">${titleText}</span>
-                                    <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 9px; border-radius:6px; background:#FFFFFF; color:#0F172A; border-color:${borderCol}; font-weight:800;" onclick="setWeeklyMuscleFilter('all')">Kapat ✕</button>
+                                    <button type="button" class="btn btn-outline" style="font-size:11px; padding:3px 9px; border-radius:6px; background:#181530; color:#FFFFFF; border-color:${borderCol}; font-weight:800;" onclick="setWeeklyMuscleFilter('all')">Kapat ✕</button>
                                 </div>
                                 <div style="padding:12px; display:flex; flex-direction:column; gap:10px;">
                                     <div>
-                                        <div style="font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase;">Ana Kas Grupları (${mainMatches.length}):</div>
+                                        <div style="font-size:11px; font-weight:800; color:#CBD5E1; margin-bottom:6px; text-transform:uppercase;">Ana Kas Grupları (${mainMatches.length}):</div>
                                         <div style="display:flex; gap:6px; flex-wrap:wrap;">${mainHTML}</div>
                                     </div>
                                     <div>
-                                        <div style="font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase;">Şekildeki Alt Kas Bölgeleri (${subMatches.length}) — Tıklayıp İncele:</div>
+                                        <div style="font-size:11px; font-weight:800; color:#CBD5E1; margin-bottom:6px; text-transform:uppercase;">Şekildeki Alt Kas Bölgeleri (${subMatches.length}) — Tıklayıp İncele:</div>
                                         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:6px;">${subHTML}</div>
                                     </div>
                                 </div>
@@ -5260,8 +5283,8 @@
             if (elBtn) {
                 const count = elBox.dataset.count || 0;
                 elBtn.innerHTML = isHidden 
-                    ? `<span>Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:#B45309; font-size:11.5px; font-weight:800;">Kapat</span>`
-                    : `<span>Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:#B45309; font-size:11.5px; font-weight:800;">Detay</span>`;
+                    ? `<span>Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:#FCD34D; font-size:11.5px; font-weight:800;">Kapat</span>`
+                    : `<span>Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:#FCD34D; font-size:11.5px; font-weight:800;">Detay</span>`;
             }
         }
 
@@ -5289,7 +5312,7 @@
                 weeklySufficiencyHTML = renderWeeklyMuscleSufficiencySection();
             } catch (err) {
                 console.error("Weekly muscle sufficiency error:", err);
-                weeklySufficiencyHTML = `<div style="padding:14px; background:#FEE2E2; border:1px solid #FCA5A5; border-radius:10px; color:#B91C1C; font-size:12px; margin-bottom:14px;">Kas Haritası yüklenirken bir sorun oluştu: ${escapeHTML(err.message)}</div>`;
+                weeklySufficiencyHTML = `<div style="padding:14px; background:#7F1D1D; border:1px solid #EF4444; border-radius:10px; color:#FECACA; font-size:12px; margin-bottom:14px;">Kas Haritası yüklenirken bir sorun oluştu: ${escapeHTML(err.message)}</div>`;
             }
 
             let mobilityBridgeHTML = '';
@@ -5302,23 +5325,23 @@
             }
 
             const timeFilterHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px; background:#F8FAFC; padding:8px 12px; border-radius:10px; border:1px solid var(--border);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px; background:#121024; padding:8px 12px; border-radius:10px; border:1px solid rgba(167, 139, 250, 0.25);">
                     <div style="display:flex; align-items:center; gap:6px;">
-                        <span style="font-size:13px; font-weight:900; color:#0F172A; white-space:nowrap;">Tonaj & Bölge Özeti</span>
-                        <button type="button" class="wk-ex-i-btn" onclick="openAnalyticsInfoModal('tonnage')" title="Hesaplama Bilgisi">i</button>
+                        <span style="font-size:13px; font-weight:900; color:#FFFFFF; white-space:nowrap;">Tonaj & Bölge Özeti</span>
+                        <button type="button" class="wk-ex-i-btn" style="background:#2C2550; color:#F3E8FF; border:1px solid rgba(167, 139, 250, 0.4);" onclick="openAnalyticsInfoModal('tonnage')" title="Hesaplama Bilgisi">i</button>
                     </div>
                     <div style="display:flex; gap:4px;">
-                        <button class="btn btn-outline" style="font-size:11.5px; padding:4px 9px; border-radius:8px; ${days === 7 ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : ''}" onclick="setAnalyticsPeriod(7)">7G</button>
-                        <button class="btn btn-outline" style="font-size:11.5px; padding:4px 9px; border-radius:8px; ${days === 30 ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : ''}" onclick="setAnalyticsPeriod(30)">30G</button>
-                        <button class="btn btn-outline" style="font-size:11.5px; padding:4px 9px; border-radius:8px; ${days === 90 ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : ''}" onclick="setAnalyticsPeriod(90)">90G</button>
-                        <button class="btn btn-outline" style="font-size:11.5px; padding:4px 9px; border-radius:8px; ${days === 0 ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : ''}" onclick="setAnalyticsPeriod(0)">Tümü</button>
+                        <button class="btn btn-outline" style="font-size:11.5px; padding:4px 9px; border-radius:8px; ${days === 7 ? 'background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important; background-color:#6D28D9 !important; color:#FFFFFF !important; border-color:rgba(167, 139, 250, 0.4) !important; font-weight:800;' : 'background:transparent !important; color:#CBD5E1 !important; border-color:rgba(167, 139, 250, 0.22) !important;'}" onclick="setAnalyticsPeriod(7)">7G</button>
+                        <button class="btn btn-outline" style="font-size:11.5px; padding:4px 9px; border-radius:8px; ${days === 30 ? 'background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important; background-color:#6D28D9 !important; color:#FFFFFF !important; border-color:rgba(167, 139, 250, 0.4) !important; font-weight:800;' : 'background:transparent !important; color:#CBD5E1 !important; border-color:rgba(167, 139, 250, 0.22) !important;'}" onclick="setAnalyticsPeriod(30)">30G</button>
+                        <button class="btn btn-outline" style="font-size:11.5px; padding:4px 9px; border-radius:8px; ${days === 90 ? 'background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important; background-color:#6D28D9 !important; color:#FFFFFF !important; border-color:rgba(167, 139, 250, 0.4) !important; font-weight:800;' : 'background:transparent !important; color:#CBD5E1 !important; border-color:rgba(167, 139, 250, 0.22) !important;'}" onclick="setAnalyticsPeriod(90)">90G</button>
+                        <button class="btn btn-outline" style="font-size:11.5px; padding:4px 9px; border-radius:8px; ${days === 0 ? 'background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important; background-color:#6D28D9 !important; color:#FFFFFF !important; border-color:rgba(167, 139, 250, 0.4) !important; font-weight:800;' : 'background:transparent !important; color:#CBD5E1 !important; border-color:rgba(167, 139, 250, 0.22) !important;'}" onclick="setAnalyticsPeriod(0)">Tümü</button>
                     </div>
                 </div>
             `;
 
             if (filteredLogs.length === 0) {
                 container.innerHTML = weeklySufficiencyHTML + mobilityBridgeHTML + timeFilterHTML + `
-                    <div style="background:var(--bg-surface); padding:18px; text-align:center; border:1px solid var(--border); border-radius:10px; color:var(--text-secondary); font-size:12.5px;">
+                    <div style="background:#121024; padding:18px; text-align:center; border:1px solid rgba(167, 139, 250, 0.25); border-radius:10px; color:#CBD5E1; font-size:12.5px;">
                         Bu dönemde kayıtlı antrenman yok.
                     </div>
                 `;
@@ -5330,11 +5353,11 @@
             let totalReps = 0;
 
             const pillars = {
-                legs: { label: 'Bacak & Kalça', icon: '', color: '#10b981', textColor: '#15803D', volume: 0, sets: 0 },
-                back: { label: 'Sırt & Çekiş', icon: '', color: '#0284C7', textColor: '#0369A1', volume: 0, sets: 0 },
-                chest: { label: 'Göğüs & Omuz', icon: '', color: '#D97706', textColor: '#B45309', volume: 0, sets: 0 },
-                arms: { label: 'Kollar', icon: '', color: '#9333EA', textColor: '#6B21A8', volume: 0, sets: 0 },
-                core: { label: 'Karın & Bel', icon: '', color: '#E11D48', textColor: '#BE123C', volume: 0, sets: 0 }
+                legs: { label: 'Bacak & Kalça', icon: '', color: '#10b981', textColor: '#4ADE80', volume: 0, sets: 0 },
+                back: { label: 'Sırt & Çekiş', icon: '', color: '#0284C7', textColor: '#7DD3FC', volume: 0, sets: 0 },
+                chest: { label: 'Göğüs & Omuz', icon: '', color: '#D97706', textColor: '#FCD34D', volume: 0, sets: 0 },
+                arms: { label: 'Kollar', icon: '', color: '#9333EA', textColor: '#D8B4FE', volume: 0, sets: 0 },
+                core: { label: 'Karın & Bel', icon: '', color: '#E11D48', textColor: '#FDA4AF', volume: 0, sets: 0 }
             };
 
             const prMap = {};
@@ -5447,15 +5470,15 @@
             const pushPullRatio = pushTotal > 0 ? (pullTotal / pushTotal).toFixed(2) : '1.00';
 
             let balanceBadge = '✅ Mükemmel Denge';
-            let balanceColor = '#15803D';
+            let balanceColor = '#4ADE80';
             let balanceDesc = 'İtiş ve çekiş hacminiz dengeli; omuz ve omurga sağlığınız korunuyor.';
             if (pushPullRatio < 0.85) {
                 balanceBadge = '⚠️ İtiş Hacmi Baskın';
-                balanceColor = '#B45309';
+                balanceColor = '#FCD34D';
                 balanceDesc = 'Göğüs ve omuz itiş tonajınız sırttan yüksek. Omuz sakatlığı riskini önlemek için sırt ve kürek hareketlerine ağırlık verin.';
             } else if (pushPullRatio > 1.35) {
                 balanceBadge = '⚠️ Çekiş Hacmi Baskın';
-                balanceColor = '#0369A1';
+                balanceColor = '#7DD3FC';
                 balanceDesc = 'Sırt çekiş hacminiz itişten belirgin şekilde fazla. İtiş egzersizlerinizi artırabilirsiniz.';
             }
 
@@ -5464,25 +5487,25 @@
             container.innerHTML = weeklySufficiencyHTML + mobilityBridgeHTML + timeFilterHTML + `
                 <!-- KPI STATS (2x2 COMPACT GRID) -->
                 <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-bottom:12px;">
-                    <div class="analytics-kpi-card" style="padding:10px 12px;">
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">TOPLAM TONAJ</div>
-                        <div style="font-size:16px; font-weight:900; color:var(--gold); margin-top:2px;">🏋️ ${Math.round(totalVolume).toLocaleString('tr-TR')} kg</div>
-                        <div style="font-size:10px; color:var(--text-secondary); margin-top:1px;">${sessionsCount} Seans</div>
+                    <div class="analytics-kpi-card" style="padding:10px 12px; background:#121024; border:1px solid rgba(167, 139, 250, 0.25);">
+                        <div style="font-size:10px; color:#CBD5E1; font-weight:700;">TOPLAM TONAJ</div>
+                        <div style="font-size:16px; font-weight:900; color:#FCD34D; margin-top:2px;">🏋️ ${Math.round(totalVolume).toLocaleString('tr-TR')} kg</div>
+                        <div style="font-size:10px; color:#CBD5E1; margin-top:1px;">${sessionsCount} Seans</div>
                     </div>
-                    <div class="analytics-kpi-card" style="padding:10px 12px;">
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">SEANS ORT.</div>
-                        <div style="font-size:16px; font-weight:900; color:var(--cyan); margin-top:2px;">⚡ ${avgSessionVol.toLocaleString('tr-TR')} kg</div>
-                        <div style="font-size:10px; color:var(--text-secondary); margin-top:1px;">Yoğunluk</div>
+                    <div class="analytics-kpi-card" style="padding:10px 12px; background:#121024; border:1px solid rgba(167, 139, 250, 0.25);">
+                        <div style="font-size:10px; color:#CBD5E1; font-weight:700;">SEANS ORT.</div>
+                        <div style="font-size:16px; font-weight:900; color:#7DD3FC; margin-top:2px;">⚡ ${avgSessionVol.toLocaleString('tr-TR')} kg</div>
+                        <div style="font-size:10px; color:#CBD5E1; margin-top:1px;">Yoğunluk</div>
                     </div>
-                    <div class="analytics-kpi-card" style="padding:10px 12px;">
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">SET & TEKRAR</div>
-                        <div style="font-size:16px; font-weight:900; color:var(--green-success); margin-top:2px;">🎯 ${totalSets} / ${totalReps}</div>
-                        <div style="font-size:10px; color:var(--text-secondary); margin-top:1px;">Toplam İş</div>
+                    <div class="analytics-kpi-card" style="padding:10px 12px; background:#121024; border:1px solid rgba(167, 139, 250, 0.25);">
+                        <div style="font-size:10px; color:#CBD5E1; font-weight:700;">SET & TEKRAR</div>
+                        <div style="font-size:16px; font-weight:900; color:#4ADE80; margin-top:2px;">🎯 ${totalSets} / ${totalReps}</div>
+                        <div style="font-size:10px; color:#CBD5E1; margin-top:1px;">Toplam İş</div>
                     </div>
-                    <div class="analytics-kpi-card" style="padding:10px 12px;">
+                    <div class="analytics-kpi-card" style="padding:10px 12px; background:#121024; border:1px solid rgba(167, 139, 250, 0.25);">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:10px; color:var(--text-secondary); font-weight:700;">İTİŞ / ÇEKİŞ</span>
-                            <button type="button" class="wk-ex-i-btn" style="width:22px; height:22px; font-size:12px;" onclick="openAnalyticsInfoModal('posture', '${pushPullRatio}', '${Math.round(pullTotal)}', '${Math.round(pushTotal)}')" title="Duruş Dengesi Detayı">i</button>
+                            <span style="font-size:10px; color:#CBD5E1; font-weight:700;">İTİŞ / ÇEKİŞ</span>
+                            <button type="button" class="wk-ex-i-btn" style="width:22px; height:22px; font-size:12px; background:#2C2550; color:#F3E8FF; border:1px solid rgba(167, 139, 250, 0.4);" onclick="openAnalyticsInfoModal('posture', '${pushPullRatio}', '${Math.round(pullTotal)}', '${Math.round(pushTotal)}')" title="Duruş Dengesi Detayı">i</button>
                         </div>
                         <div style="font-size:16px; font-weight:900; color:${balanceColor}; margin-top:2px;">⚖️ ${pushPullRatio}</div>
                         <div style="font-size:10px; color:${balanceColor}; margin-top:1px; white-space:nowrap;">${balanceBadge}</div>
@@ -5490,10 +5513,10 @@
                 </div>
 
                 <!-- MUSCLE PILLARS VOLUME BARS -->
-                <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:12px;">
+                <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); border-radius:12px; padding:12px 14px; margin-bottom:12px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <h3 style="font-size:13.5px; font-weight:800; color:#0F172A; margin:0;">Bölge Dağılımı</h3>
-                        <span style="font-size:11px; color:var(--gold); font-weight:700;">Toplam Yük</span>
+                        <h3 style="font-size:13.5px; font-weight:800; color:#FFFFFF; margin:0;">Bölge Dağılımı</h3>
+                        <span style="font-size:11px; color:#FCD34D; font-weight:700;">Toplam Yük</span>
                     </div>
 
                     <div style="display:flex; flex-direction:column; gap:10px;">
@@ -5503,10 +5526,10 @@
                             return `
                                 <div>
                                     <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700;">
-                                        <span style="color:#0F172A;">${p.label}</span>
-                                        <span style="color:${p.textColor || p.color};">${Math.round(p.volume).toLocaleString('tr-TR')} kg <span style="color:var(--text-secondary); font-size:11px;">(%${pct} • ${(Math.round(p.sets * 10) / 10).toFixed(0)} Set)</span></span>
+                                        <span style="color:#F8FAFC;">${p.label}</span>
+                                        <span style="color:${p.textColor || p.color};">${Math.round(p.volume).toLocaleString('tr-TR')} kg <span style="color:#CBD5E1; font-size:11px;">(%${pct} • ${(Math.round(p.sets * 10) / 10).toFixed(0)} Set)</span></span>
                                     </div>
-                                    <div class="analytics-bar-bg" style="margin-top:4px;">
+                                    <div class="analytics-bar-bg" style="margin-top:4px; background:rgba(255,255,255,0.08);">
                                         <div class="analytics-bar-fill" style="width:${Math.min(100, Math.max(4, pct))}%; background:${p.color};"></div>
                                     </div>
                                 </div>
@@ -5517,19 +5540,19 @@
 
                 <!-- PR RECORDS TABLE -->
                 ${sortedPrs.length > 0 ? `
-                    <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:12px 14px;">
+                    <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); border-radius:12px; padding:12px 14px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                            <h3 style="font-size:13.5px; font-weight:800; color:#0F172A; margin:0;">🏆 Kişisel Rekorlar</h3>
-                            <span style="font-size:11px; color:var(--cyan); font-weight:700;">Zirve Kilolar</span>
+                            <h3 style="font-size:13.5px; font-weight:800; color:#FFFFFF; margin:0;">🏆 Kişisel Rekorlar</h3>
+                            <span style="font-size:11px; color:#7DD3FC; font-weight:700;">Zirve Kilolar</span>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:6px;">
                             ${sortedPrs.map((pr, idx) => `
-                                <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; padding:7px 10px; border-radius:8px; border-left:3px solid var(--gold);">
+                                <div style="display:flex; justify-content:space-between; align-items:center; background:#181530; padding:7px 10px; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.2); border-left:3px solid #FCD34D;">
                                     <div style="min-width:0;">
-                                        <div style="font-size:12px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">#${idx+1} ${escapeHTML(pr.name)}</div>
-                                        <div style="font-size:10.5px; color:var(--text-secondary);">${escapeHTML(pr.date)}</div>
+                                        <div style="font-size:12px; font-weight:800; color:#FFFFFF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">#${idx+1} ${escapeHTML(pr.name)}</div>
+                                        <div style="font-size:10.5px; color:#CBD5E1;">${escapeHTML(pr.date)}</div>
                                     </div>
-                                    <div style="font-size:14px; font-weight:900; color:var(--gold); white-space:nowrap; margin-left:8px;">
+                                    <div style="font-size:14px; font-weight:900; color:#FCD34D; white-space:nowrap; margin-left:8px;">
                                         ${pr.weight} kg
                                     </div>
                                 </div>
@@ -6160,7 +6183,7 @@
                 const dayDate = new Date(bounds.monday);
                 dayDate.setDate(bounds.monday.getDate() + offsetFromMon);
 
-                const plan = (sourceMode !== 'schedule_full' && typeof getPlanForDate === 'function')
+                const plan = ((weekOffset !== 0 || sourceMode !== 'schedule_full') && typeof getPlanForDate === 'function')
                     ? getPlanForDate(dayDate)
                     : schedule[dKey];
                 if (!plan || plan.rest) return;
@@ -6373,8 +6396,8 @@
             if (elBtn) {
                 const count = elBox.dataset.count || 0;
                 elBtn.innerHTML = isHidden
-                    ? `<span>Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:#B45309; font-size:11.5px; font-weight:800;">Kapat ▲</span>`
-                    : `<span>Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:#B45309; font-size:11.5px; font-weight:800;">Detay ▼</span>`;
+                    ? `<span>Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:#FCD34D; font-size:11.5px; font-weight:800;">Kapat ▲</span>`
+                    : `<span>Hangi Seans & Hareketten Geldi? (${count} Kayıt)</span><span style="color:#FCD34D; font-size:11.5px; font-weight:800;">Detay ▼</span>`;
             }
         }
 
@@ -6397,27 +6420,27 @@
 
                 let statusBadge = '';
                 let contentHTML = '';
-                let cellBg = '#FEF2F2';
-                let cellBorder = '1px solid #FECACA';
+                let cellBg = '#2A1421';
+                let cellBorder = '1px solid rgba(239, 68, 68, 0.45)';
 
                 if (isDone) {
-                    cellBg = '#F0FDF4';
-                    cellBorder = '1px solid #86EFAC';
-                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#15803D; background:#DCFCE7; border:1px solid #86EFAC; border-radius:6px; padding:2px 7px;">✅ ${slot.earnedSets.toFixed(1)} Set</span>`;
+                    cellBg = '#132E24';
+                    cellBorder = '1px solid rgba(34, 197, 94, 0.45)';
+                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#BBF7D0; background:#14532D; border:1px solid #22C55E; border-radius:6px; padding:2px 7px;">✅ ${slot.earnedSets.toFixed(1)} Set</span>`;
                     const exList = Array.from(slot.doneExs).map(escapeHTML).join(', ');
-                    const planList = slot.plannedExs.size > 0 ? `<div style="font-size:11px; color:#B45309; margin-top:3px; font-weight:700;">+ ${Array.from(slot.plannedExs).map(escapeHTML).join(', ')} (Planda)</div>` : '';
-                    contentHTML = `<div style="font-size:11.5px; color:#1E293B; margin-top:5px; line-height:1.35;"><strong>${exList}</strong>${planList}</div>`;
+                    const planList = slot.plannedExs.size > 0 ? `<div style="font-size:11px; color:#FDE68A; margin-top:3px; font-weight:700;">+ ${Array.from(slot.plannedExs).map(escapeHTML).join(', ')} (Planda)</div>` : '';
+                    contentHTML = `<div style="font-size:11.5px; color:#F8FAFC; margin-top:5px; line-height:1.35;"><strong style="color:#FFFFFF;">${exList}</strong>${planList}</div>`;
                 } else if (isPlanned) {
-                    cellBg = '#FFFBEB';
-                    cellBorder = '1px solid #FCD34D';
-                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#B45309; background:#FEF3C7; border:1px solid #FCD34D; border-radius:6px; padding:2px 7px;">🟡 Planda (${slot.plannedCount} Hrk)</span>`;
+                    cellBg = '#271C19';
+                    cellBorder = '1px solid rgba(245, 158, 11, 0.45)';
+                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#FDE68A; background:#7C2D12; border:1px solid #F59E0B; border-radius:6px; padding:2px 7px;">🟡 Planda (${slot.plannedCount} Hrk)</span>`;
                     const planList = Array.from(slot.plannedExs).map(escapeHTML).join(', ');
-                    contentHTML = `<div style="font-size:11.5px; color:#92400E; margin-top:5px; line-height:1.35; font-weight:600;">${planList}</div>`;
+                    contentHTML = `<div style="font-size:11.5px; color:#FDE68A; margin-top:5px; line-height:1.35; font-weight:600;">${planList}</div>`;
                 } else {
-                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#B91C1C; background:#FEE2E2; border:1px solid #FCA5A5; border-radius:6px; padding:2px 7px;">⚠️ 0 Set (Boşta!)</span>`;
+                    statusBadge = `<span style="display:inline-block; font-size:11px; font-weight:800; color:#FECACA; background:#7F1D1D; border:1px solid #EF4444; border-radius:6px; padding:2px 7px;">⚠️ 0 Set (Boşta!)</span>`;
                     contentHTML = `
                         <div style="margin-top:6px;">
-                            <button class="btn btn-outline" style="font-size:11px; padding:6px 8px; border-radius:6px; color:#DC2626; border-color:#FECACA; width:100%; text-align:center; font-weight:800; background:#FFFFFF;" onclick="openQuickAddToDayModal('${col.recId}')" title="Bu eklem yönünü açmak için ${escapeHTML(col.recName)} ekle">
+                            <button class="btn btn-outline" style="font-size:11px; padding:6px 8px; border-radius:6px; color:#FECACA; border-color:rgba(239, 68, 68, 0.5); width:100%; text-align:center; font-weight:800; background:#181530;" onclick="openQuickAddToDayModal('${col.recId}')" title="Bu eklem yönünü açmak için ${escapeHTML(col.recName)} ekle">
                                 ➕ ${escapeHTML(col.recName)} Ekle
                             </button>
                         </div>
@@ -6427,7 +6450,7 @@
                 return `
                     <div style="background:${cellBg}; border:${cellBorder}; border-radius:8px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
                         <div>
-                            <div style="font-size:11.5px; font-weight:800; color:#0F172A; margin-bottom:5px; letter-spacing:0.2px;">${escapeHTML(col.label)}</div>
+                            <div style="font-size:11.5px; font-weight:800; color:#FFFFFF; margin-bottom:5px; letter-spacing:0.2px;">${escapeHTML(col.label)}</div>
                             <div>${statusBadge}</div>
                         </div>
                         ${contentHTML}
@@ -6436,12 +6459,12 @@
             }).join('');
 
             return `
-                <div style="margin-top:12px; border:1.5px solid #E2E8F0; border-radius:14px; overflow:hidden; background:#FFFFFF;">
-                    <div style="background:#F1F5F9; border-bottom:1.5px solid #E2E8F0; padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:11.5px; font-weight:900; letter-spacing:0.5px; color:#0F172A; text-transform:uppercase;">
+                <div style="margin-top:12px; border:1.5px solid rgba(167, 139, 250, 0.25); border-radius:14px; overflow:hidden; background:#121024;">
+                    <div style="background:#181530; border-bottom:1.5px solid rgba(167, 139, 250, 0.22); padding:10px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
+                        <span style="font-size:11.5px; font-weight:900; letter-spacing:0.5px; color:#FFFFFF; text-transform:uppercase;">
                             📐 ${escapeHTML(j.title)} — HANGİ YÖNLER ÇALIŞTI?
                         </span>
-                        <span style="font-size:11px; color:#64748B; font-weight:700;">
+                        <span style="font-size:11px; color:#CBD5E1; font-weight:700;">
                             Hangi Yön Açıldı?
                         </span>
                     </div>
@@ -6456,11 +6479,11 @@
             const mob = calculateWeeklyMobilitySufficiency(currentWeeklyMuscleSource, currentWeeklyMuscleWeekOffset);
 
             return `
-                <div class="anatomy-hero-wrapper" style="padding:12px 14px; margin-bottom:12px; align-items:stretch;">
+                <div class="anatomy-hero-wrapper" style="background:#181530 !important; border:1.5px solid rgba(167, 139, 250, 0.25) !important; color:#F8FAFC !important; padding:12px 14px; margin-bottom:12px; align-items:stretch;">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
                         <div style="display:flex; align-items:center; gap:6px;">
-                            <h3 style="font-size:14.5px; font-weight:900; color:#0F172A; margin:0; white-space:nowrap;">🤸 Eklem Hareketliliği</h3>
-                            <span style="font-size:10.5px; font-weight:800; background:#ECFDF5; color:#15803D; border:1px solid #86EFAC; padding:2px 7px; border-radius:99px; white-space:nowrap;">
+                            <h3 style="font-size:14.5px; font-weight:900; color:#FFFFFF; margin:0; white-space:nowrap;">🤸 Eklem Hareketliliği</h3>
+                            <span style="font-size:10.5px; font-weight:800; background:#14532D; color:#BBF7D0; border:1px solid #22C55E; padding:2px 7px; border-radius:99px; white-space:nowrap;">
                                 ${mob.summary.totalEndRangeSets.toFixed(0)} Set
                             </span>
                         </div>
@@ -6473,12 +6496,12 @@
                         ${mob.joints.map(j => {
                             const isOpt = j.status === 'optimal';
                             const isIns = j.status === 'insufficient';
-                            const bg = isOpt ? '#F0FDF4' : (isIns ? '#FFFBEB' : '#FEF2F2');
-                            const brd = isOpt ? '#86EFAC' : (isIns ? '#FCD34D' : '#FECACA');
-                            const clr = isOpt ? '#15803D' : (isIns ? '#B45309' : '#B91C1C');
+                            const bg = isOpt ? '#132E24' : (isIns ? '#271C19' : '#2A1421');
+                            const brd = isOpt ? 'rgba(34, 197, 94, 0.45)' : (isIns ? 'rgba(245, 158, 11, 0.45)' : 'rgba(239, 68, 68, 0.45)');
+                            const clr = isOpt ? '#BBF7D0' : (isIns ? '#FDE68A' : '#FECACA');
                             return `
                                 <div style="background:${bg}; border:1px solid ${brd}; border-radius:8px; padding:7px 9px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:4px;" onclick="currentSelectedMobilityJoint='${j.id}'; switchAnalyticsSubView('mobility');">
-                                    <span style="font-size:11.5px; font-weight:900; color:#0F172A; white-space:nowrap;">${escapeHTML(j.shortName || j.name)}</span>
+                                    <span style="font-size:11.5px; font-weight:900; color:#FFFFFF; white-space:nowrap;">${escapeHTML(j.shortName || j.name)}</span>
                                     <span style="font-size:11px; font-weight:800; color:${clr}; white-space:nowrap;">
                                         ${j.effectiveDone.toFixed(0)}/${j.optimalMin}s
                                     </span>
@@ -6509,27 +6532,27 @@
                 const pct = Math.min(100, Math.round((j.effectiveDone / j.optimalMin) * 100));
                 const barColor = j.status === 'optimal' ? '#10b981' : (j.status === 'insufficient' ? '#f59e0b' : '#ef4444');
                 const badgeStyle = j.status === 'optimal'
-                    ? 'background:#DCFCE7; border:1px solid #86EFAC; color:#15803D;'
-                    : (j.status === 'insufficient' ? 'background:#FEF3C7; border:1px solid #FCD34D; color:#B45309;' : 'background:#FEE2E2; border:1px solid #FCA5A5; color:#B91C1C;');
+                    ? 'background:#14532D; border:1px solid #22C55E; color:#BBF7D0;'
+                    : (j.status === 'insufficient' ? 'background:#7C2D12; border:1px solid #F59E0B; color:#FDE68A;' : 'background:#7F1D1D; border:1px solid #EF4444; color:#FECACA;');
 
                 const subregionGridHTML = renderMobilityJointSubregionGrid(j);
                 const recCol = j.columns[0];
 
                 focusJointHTML = `
-                    <div class="anatomy-focus-card" style="width:100%; margin-top:12px; padding:14px;">
+                    <div class="anatomy-focus-card" style="width:100%; margin-top:12px; padding:14px; background:#181530 !important; border:1.5px solid rgba(167, 139, 250, 0.25) !important; color:#F8FAFC !important;">
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                            <h4 style="font-size:16px; font-weight:900; color:#0F172A; margin:0;">${escapeHTML(j.name)}</h4>
+                            <h4 style="font-size:16px; font-weight:900; color:#FFFFFF; margin:0;">${escapeHTML(j.name)}</h4>
                             <span style="${badgeStyle} font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:6px;">
                                 ${escapeHTML(j.statusLabel)}
                             </span>
                         </div>
 
                         <div style="margin-top:10px;">
-                            <div style="display:flex; justify-content:space-between; font-size:11.5px; color:#475569; margin-bottom:4px; font-weight:700;">
+                            <div style="display:flex; justify-content:space-between; font-size:11.5px; color:#CBD5E1; margin-bottom:4px; font-weight:700;">
                                 <span>Haftalık Açılma Hedefi: %${pct}</span>
                                 <span>${j.effectiveDone.toFixed(1)} / Hedef: ${j.optimalMin}-${j.optimalMax} Set</span>
                             </div>
-                            <div style="height:7px; background:#E2E8F0; border-radius:4px; overflow:hidden;">
+                            <div style="height:7px; background:#121024; border:1px solid rgba(167, 139, 250, 0.2); border-radius:4px; overflow:hidden;">
                                 <div style="height:100%; width:${pct}%; background:${barColor}; border-radius:4px; transition:width 0.3s ease;"></div>
                             </div>
                         </div>
@@ -6543,43 +6566,43 @@
                                 </button>
                             </div>
                         ` : `
-                            <div style="margin-top:10px; font-size:12px; color:#15803D; font-weight:700;">
+                            <div style="margin-top:10px; font-size:12px; color:#4ADE80; font-weight:700;">
                                 ✅ Bu bölge bu hafta yeterince esnetildi ve tam açıklıkta çalıştırıldı.
                             </div>
                         `}
 
                         <!-- Varsayılan Kapalı (Collapsible) Lineage Akordiyonu (GEMINI.md Kural 5) -->
-                        <div style="margin-top:10px; padding-top:8px; border-top:1px solid #E2E8F0;">
-                            <button id="mob_lineage_btn_${j.id}" class="btn btn-outline" style="width:100%; font-size:12px; padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border-color:#CBD5E1; cursor:pointer;" onclick="toggleMobilityJointLineage('${j.id}')">
+                        <div style="margin-top:10px; padding-top:8px; border-top:1px solid rgba(167, 139, 250, 0.2);">
+                            <button id="mob_lineage_btn_${j.id}" class="btn btn-outline" style="width:100%; font-size:12px; padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; background:#121024; border-color:rgba(167, 139, 250, 0.28); color:#F8FAFC; cursor:pointer;" onclick="toggleMobilityJointLineage('${j.id}')">
                                 <span>Hangi Seans & Hareketten Geldi? (${(j.contributions || []).length} Kayıt)</span>
-                                <span style="color:#B45309; font-size:11.5px; font-weight:800;">Detay ▼</span>
+                                <span style="color:#FCD34D; font-size:11.5px; font-weight:800;">Detay ▼</span>
                             </button>
 
-                            <div id="mob_lineage_box_${j.id}" data-count="${(j.contributions || []).length}" style="display:none; margin-top:8px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:10px;">
+                            <div id="mob_lineage_box_${j.id}" data-count="${(j.contributions || []).length}" style="display:none; margin-top:8px; background:#121024; border:1px solid rgba(167, 139, 250, 0.22); border-radius:8px; padding:10px;">
                                 ${(j.contributions && j.contributions.length > 0) ? `
                                     <div style="display:flex; flex-direction:column; gap:6px;">
                                         ${j.contributions.map(c => `
-                                            <div style="display:flex; justify-content:space-between; align-items:center; background:#FFFFFF; border:1px solid #E2E8F0; border-radius:6px; padding:6px 10px; font-size:12px;">
+                                            <div style="display:flex; justify-content:space-between; align-items:center; background:#181530; border:1px solid rgba(167, 139, 250, 0.22); border-radius:6px; padding:6px 10px; font-size:12px;">
                                                 <div>
                                                     <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                                                        <strong style="color:#0F172A;">${escapeHTML(c.exercise)}</strong>
-                                                        <span style="font-size:10.5px; padding:2px 6px; border-radius:4px; font-weight:700; background:#E0F2FE; color:#0369A1;">
+                                                        <strong style="color:#FFFFFF;">${escapeHTML(c.exercise)}</strong>
+                                                        <span style="font-size:10.5px; padding:2px 6px; border-radius:4px; font-weight:700; background:#0C4A6E; color:#BAE6FD; border:1px solid #38BDF8;">
                                                             ${escapeHTML(c.plane)} (${c.factor}x Etki)
                                                         </span>
                                                     </div>
-                                                    <div style="font-size:11px; color:#64748B; margin-top:2px;">
+                                                    <div style="font-size:11px; color:#CBD5E1; margin-top:2px;">
                                                         ${escapeHTML(c.date)} • ${escapeHTML(c.sessionTitle)}
                                                     </div>
                                                 </div>
                                                 <div style="text-align:right;">
-                                                    <div style="font-size:12.5px; font-weight:900; color:#15803D;">+${c.earnedSets.toFixed(1)} Set</div>
-                                                    <div style="font-size:10.5px; color:#64748B;">${c.rawSets} Set Yapıldı</div>
+                                                    <div style="font-size:12.5px; font-weight:900; color:#4ADE80;">+${c.earnedSets.toFixed(1)} Set</div>
+                                                    <div style="font-size:10.5px; color:#CBD5E1;">${c.rawSets} Set Yapıldı</div>
                                                 </div>
                                             </div>
                                         `).join('')}
                                     </div>
                                 ` : `
-                                    <div style="font-size:12px; color:#64748B; text-align:center; padding:8px;">
+                                    <div style="font-size:12px; color:#CBD5E1; text-align:center; padding:8px;">
                                         Bu hafta bu eklemi açan bir antrenman kaydı bulunmuyor.
                                     </div>
                                 `}
@@ -6628,60 +6651,60 @@
                 const dose30 = t.jointIds.reduce((sum, jId) => sum + (jointDose30[jId] || 0), 0);
                 const curLvlObj = curLvl ? t.levels.find(l => l.level === curLvl) : null;
 
-                let statusBadge = `<span style="font-size:11px; font-weight:800; background:#F1F5F9; color:#475569; border:1px solid #CBD5E1; padding:3px 8px; border-radius:6px;">Henüz Seçilmedi</span>`;
+                let statusBadge = `<span style="font-size:11px; font-weight:800; background:#2C2550; color:#F3E8FF; border:1px solid rgba(167, 139, 250, 0.4); padding:3px 8px; border-radius:6px;">Henüz Seçilmedi</span>`;
                 if (curLvlObj) {
-                    const clr = curLvl >= 3 ? '#15803D' : (curLvl === 2 ? '#B45309' : '#B91C1C');
-                    const bg = curLvl >= 3 ? '#DCFCE7' : (curLvl === 2 ? '#FEF3C7' : '#FEE2E2');
-                    const brd = curLvl >= 3 ? '#86EFAC' : (curLvl === 2 ? '#FCD34D' : '#FCA5A5');
+                    const clr = curLvl >= 3 ? '#BBF7D0' : (curLvl === 2 ? '#FDE68A' : '#FECACA');
+                    const bg = curLvl >= 3 ? '#14532D' : (curLvl === 2 ? '#7C2D12' : '#7F1D1D');
+                    const brd = curLvl >= 3 ? '#22C55E' : (curLvl === 2 ? '#F59E0B' : '#EF4444');
                     const deltaStr = deltaLvl > 0 ? ` 📈 (+${deltaLvl} Seviye Açıldı!)` : (initLvl && initLvl !== curLvl ? ` (${initLvl}➔${curLvl})` : '');
                     statusBadge = `<span style="font-size:11px; font-weight:800; background:${bg}; color:${clr}; border:1px solid ${brd}; padding:3px 8px; border-radius:6px;">${escapeHTML(curLvlObj.short)}${deltaStr}</span>`;
                 }
 
                 return `
-                    <div style="background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:14px; padding:12px 14px; display:flex; flex-direction:column; justify-content:space-between;">
+                    <div style="background:#121024; border:1.5px solid rgba(167, 139, 250, 0.25); border-radius:14px; padding:12px 14px; display:flex; flex-direction:column; justify-content:space-between;">
                         <div>
                             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap;">
                                 <div>
-                                    <h4 style="font-size:13.5px; font-weight:900; color:#0F172A; margin:0;">${escapeHTML(t.title)}</h4>
-                                    <div style="font-size:11px; color:#64748B; font-weight:700; margin-top:2px;">Bölge: ${escapeHTML(t.jointLabel)}</div>
+                                    <h4 style="font-size:13.5px; font-weight:900; color:#FFFFFF; margin:0;">${escapeHTML(t.title)}</h4>
+                                    <div style="font-size:11px; color:#CBD5E1; font-weight:700; margin-top:2px;">Bölge: ${escapeHTML(t.jointLabel)}</div>
                                 </div>
                                 ${statusBadge}
                             </div>
 
                             <!-- Neden-Sonuç Korelasyon Kutusu -->
-                            <div style="margin-top:8px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:7px 10px; font-size:11.5px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
-                                <span style="color:#475569;">💪 <strong>Son 30 Günde Bu Bölgeyi Açan Antrenman:</strong> <strong style="color:#0F172A;">${dose30.toFixed(1)} Set</strong></span>
-                                ${initLvl ? `<span style="color:#15803D; font-weight:800;">Başlangıç: Sv.${initLvl} ➔ Şimdi: Sv.${curLvl}</span>` : `<span style="color:#B45309; font-weight:700;">Aşağıdan durumunu seç</span>`}
+                            <div style="margin-top:8px; background:#181530; border:1px solid rgba(167, 139, 250, 0.22); border-radius:8px; padding:7px 10px; font-size:11.5px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                                <span style="color:#CBD5E1;">💪 <strong>Son 30 Günde Bu Bölgeyi Açan Antrenman:</strong> <strong style="color:#FFFFFF;">${dose30.toFixed(1)} Set</strong></span>
+                                ${initLvl ? `<span style="color:#4ADE80; font-weight:800;">Başlangıç: Sv.${initLvl} ➔ Şimdi: Sv.${curLvl}</span>` : `<span style="color:#FCD34D; font-weight:700;">Aşağıdan durumunu seç</span>`}
                             </div>
 
                             ${curLvlObj ? `
-                                <div style="font-size:11.5px; color:#334155; margin-top:6px; line-height:1.4;">
+                                <div style="font-size:11.5px; color:#E2E8F0; margin-top:6px; line-height:1.4;">
                                     <strong>Şu Anki Durumun:</strong> ${escapeHTML(curLvlObj.desc)}
                                 </div>
                             ` : ''}
                         </div>
 
                         <!-- Varsayılan Kapalı Seviye Güncelleme Akordiyonu (GEMINI.md Kural 5) -->
-                        <div style="margin-top:10px; padding-top:8px; border-top:1px solid #E2E8F0;">
-                            <button type="button" class="btn btn-outline" style="width:100%; font-size:11.5px; padding:6px 10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC;" onclick="togglePhysicalTestGuide('${t.id}')">
+                        <div style="margin-top:10px; padding-top:8px; border-top:1px solid rgba(167, 139, 250, 0.2);">
+                            <button type="button" class="btn btn-outline" style="width:100%; font-size:11.5px; padding:6px 10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; background:#181530; border-color:rgba(167, 139, 250, 0.28); color:#F8FAFC;" onclick="togglePhysicalTestGuide('${t.id}')">
                                 <span>🎯 Kendini Test Et & Durumunu İşaretle</span>
-                                <span id="fms_test_lbl_${t.id}" style="color:#0369A1; font-weight:800;">Seviye Seç / Güncelle ▼</span>
+                                <span id="fms_test_lbl_${t.id}" style="color:#7DD3FC; font-weight:800;">Seviye Seç / Güncelle ▼</span>
                             </button>
 
-                            <div id="fms_test_box_${t.id}" style="display:none; margin-top:8px; background:#F8FAFC; border:1px solid #CBD5E1; border-radius:10px; padding:10px;">
-                                <div style="font-size:11.5px; color:#0F172A; margin-bottom:8px; line-height:1.4; background:#FFFFFF; padding:8px; border-radius:6px; border-left:3px solid #84CC16;">
+                            <div id="fms_test_box_${t.id}" style="display:none; margin-top:8px; background:#181530; border:1px solid rgba(167, 139, 250, 0.25); border-radius:10px; padding:10px;">
+                                <div style="font-size:11.5px; color:#F8FAFC; margin-bottom:8px; line-height:1.4; background:#121024; padding:8px; border-radius:6px; border-left:3px solid #A78BFA;">
                                     <strong>Nasıl Denenir:</strong> ${escapeHTML(t.protocol)}
                                 </div>
                                 <div style="display:flex; flex-direction:column; gap:6px;">
                                     ${t.levels.map(lvl => {
                                         const isSelected = curLvl === lvl.level;
                                         return `
-                                            <button type="button" class="btn btn-outline" style="text-align:left; padding:8px 10px; border-radius:8px; font-size:11.5px; display:flex; justify-content:space-between; align-items:center; gap:8px; ${isSelected ? 'background:#ECFDF5 !important; border-color:#16A34A !important; color:#0F172A !important; font-weight:800;' : 'background:#FFFFFF;'}" onclick="saveMobilityPhysicalTestLevel('${t.id}', ${lvl.level})">
+                                            <button type="button" class="btn btn-outline" style="text-align:left; padding:8px 10px; border-radius:8px; font-size:11.5px; display:flex; justify-content:space-between; align-items:center; gap:8px; ${isSelected ? 'background:#14532D !important; border-color:#22C55E !important; color:#FFFFFF !important; font-weight:800;' : 'background:#121024; border-color:rgba(167, 139, 250, 0.22); color:#E2E8F0;'}" onclick="saveMobilityPhysicalTestLevel('${t.id}', ${lvl.level})">
                                                 <div>
-                                                    <strong style="color:${isSelected ? '#15803D' : '#0F172A'};">${escapeHTML(lvl.short)}:</strong>
-                                                    <span style="color:#475569; font-weight:500;"> ${escapeHTML(lvl.desc)}</span>
+                                                    <strong style="color:${isSelected ? '#BBF7D0' : '#FFFFFF'};">${escapeHTML(lvl.short)}:</strong>
+                                                    <span style="color:${isSelected ? '#E2E8F0' : '#CBD5E1'}; font-weight:500;"> ${escapeHTML(lvl.desc)}</span>
                                                 </div>
-                                                <span style="flex-shrink:0; font-weight:900; color:${isSelected ? '#15803D' : '#64748B'};">${isSelected ? '✓ Seçili' : 'Seç'}</span>
+                                                <span style="flex-shrink:0; font-weight:900; color:${isSelected ? '#BBF7D0' : '#CBD5E1'};">${isSelected ? '✓ Seçili' : 'Seç'}</span>
                                             </button>
                                         `;
                                     }).join('')}
@@ -6694,52 +6717,52 @@
 
             container.innerHTML = `
                 <!-- BÖLÜM 1: 4 ANA EKLEM HAREKETLİLİK HARİTASI -->
-                <div class="anatomy-hero-wrapper" style="align-items:stretch;">
+                <div class="anatomy-hero-wrapper" style="background:#181530 !important; border:1.5px solid rgba(167, 139, 250, 0.25) !important; color:#F8FAFC !important; align-items:stretch;">
                     <div class="anatomy-top-bar" style="align-items:center;">
                         <div style="display:flex; align-items:center; gap:6px;">
-                            <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:11.5px; border-radius:6px; font-weight:800;" onclick="switchAnalyticsSubView('muscle')">‹ Kaslar</button>
-                            <h3 style="font-size:15.5px; font-weight:900; color:#0F172A; margin:0; white-space:nowrap;">🤸 Eklem Hareketliliği</h3>
+                            <button type="button" class="btn btn-outline" style="padding:4px 8px; font-size:11.5px; border-radius:6px; font-weight:800; background:#121024; color:#F8FAFC; border-color:rgba(167, 139, 250, 0.28);" onclick="switchAnalyticsSubView('muscle')">‹ Kaslar</button>
+                            <h3 style="font-size:15.5px; font-weight:900; color:#FFFFFF; margin:0; white-space:nowrap;">🤸 Eklem Hareketliliği</h3>
                         </div>
 
                         <div style="display:flex; align-items:center; gap:4px;">
-                            <button class="btn btn-outline" style="padding:4px 8px; font-size:12px; border-radius:6px;" onclick="setMobilityWeekOffset(${weekOffset - 1})" title="Önceki Hafta">&lsaquo;</button>
-                            <span style="font-size:11.5px; font-weight:800; color:#0F172A; padding:4px 8px; background:#F8FAFC; border-radius:6px; border:1px solid #CBD5E1; white-space:nowrap;">
+                            <button class="btn btn-outline" style="padding:4px 8px; font-size:12px; border-radius:6px; background:#121024; color:#F8FAFC; border-color:rgba(167, 139, 250, 0.28);" onclick="setMobilityWeekOffset(${weekOffset - 1})" title="Önceki Hafta">&lsaquo;</button>
+                            <span style="font-size:11.5px; font-weight:800; color:#FFFFFF; padding:4px 8px; background:#121024; border-radius:6px; border:1px solid rgba(167, 139, 250, 0.25); white-space:nowrap;">
                                 ${escapeHTML(bounds.label)}
                             </span>
-                            <button class="btn btn-outline" style="padding:4px 8px; font-size:12px; border-radius:6px;" onclick="setMobilityWeekOffset(${weekOffset + 1})" title="Sonraki Hafta">&rsaquo;</button>
-                            ${weekOffset !== 0 ? `<button class="btn btn-outline" style="padding:4px 8px; font-size:11px; border-radius:6px; color:#0369A1; border-color:#0369A1;" onclick="setMobilityWeekOffset(0)">Bugün</button>` : ''}
+                            <button class="btn btn-outline" style="padding:4px 8px; font-size:12px; border-radius:6px; background:#121024; color:#F8FAFC; border-color:rgba(167, 139, 250, 0.28);" onclick="setMobilityWeekOffset(${weekOffset + 1})" title="Sonraki Hafta">&rsaquo;</button>
+                            ${weekOffset !== 0 ? `<button class="btn btn-outline" style="padding:4px 8px; font-size:11px; border-radius:6px; color:#BAE6FD; border-color:#38BDF8; background:#0C4A6E;" onclick="setMobilityWeekOffset(0)">Bugün</button>` : ''}
                         </div>
                     </div>
 
                     <!-- Kaynak Seçici (3'lü Kompakt Bar) -->
-                    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:5px; margin-top:8px; background:#F8FAFC; padding:4px; border-radius:10px; border:1px solid #E2E8F0;">
-                        <button class="btn btn-outline" style="font-size:11.5px; padding:6px 4px; border-radius:7px; white-space:nowrap; ${sourceMode === 'week_projected' ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : 'border-color:transparent;'}" onclick="setMobilitySource('week_projected')">
+                    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:5px; margin-top:8px; background:#121024; padding:4px; border-radius:10px; border:1px solid rgba(167, 139, 250, 0.25);">
+                        <button class="btn btn-outline" style="font-size:11.5px; padding:6px 4px; border-radius:7px; white-space:nowrap; ${sourceMode === 'week_projected' ? 'background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important; background-color:#6D28D9 !important; color:#FFFFFF !important; border-color:rgba(167, 139, 250, 0.4) !important; font-weight:800;' : 'background:transparent !important; color:#CBD5E1 !important; border-color:transparent !important;'}" onclick="setMobilitySource('week_projected')">
                             Yapılan + Plan
                         </button>
-                        <button class="btn btn-outline" style="font-size:11.5px; padding:6px 4px; border-radius:7px; white-space:nowrap; ${sourceMode === 'week_done' ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : 'border-color:transparent;'}" onclick="setMobilitySource('week_done')">
+                        <button class="btn btn-outline" style="font-size:11.5px; padding:6px 4px; border-radius:7px; white-space:nowrap; ${sourceMode === 'week_done' ? 'background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important; background-color:#6D28D9 !important; color:#FFFFFF !important; border-color:rgba(167, 139, 250, 0.4) !important; font-weight:800;' : 'background:transparent !important; color:#CBD5E1 !important; border-color:transparent !important;'}" onclick="setMobilitySource('week_done')">
                             Yapılan (${mob.totalDoneSessions})
                         </button>
-                        <button class="btn btn-outline" style="font-size:11.5px; padding:6px 4px; border-radius:7px; white-space:nowrap; ${sourceMode === 'schedule_full' ? 'background:#84CC16 !important; color:#0A0E17 !important; border-color:#65A30D !important; font-weight:800;' : 'border-color:transparent;'}" onclick="setMobilitySource('schedule_full')">
+                        <button class="btn btn-outline" style="font-size:11.5px; padding:6px 4px; border-radius:7px; white-space:nowrap; ${sourceMode === 'schedule_full' ? 'background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important; background-color:#6D28D9 !important; color:#FFFFFF !important; border-color:rgba(167, 139, 250, 0.4) !important; font-weight:800;' : 'background:transparent !important; color:#CBD5E1 !important; border-color:transparent !important;'}" onclick="setMobilitySource('schedule_full')">
                             Şablon
                         </button>
                     </div>
 
                     <!-- 3 Durum Rozeti -->
                     <div class="anatomy-legend" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin:10px 0;">
-                        <div class="anatomy-legend-item optimal" style="justify-content:center; padding:6px 4px;">
+                        <div class="anatomy-legend-item optimal" style="justify-content:center; padding:6px 4px; background:#121024 !important; border:1.5px solid rgba(167, 139, 250, 0.25) !important;">
                             <div class="badge-dot"></div>
-                            <span class="badge-val">${summary.optimalCount}</span>
-                            <span class="badge-label" style="white-space:nowrap; font-size:11px;">İyi Açılan</span>
+                            <span class="badge-val" style="color:#FFFFFF !important;">${summary.optimalCount}</span>
+                            <span class="badge-label" style="white-space:nowrap; font-size:11px; color:#E2E8F0 !important;">İyi Açılan</span>
                         </div>
-                        <div class="anatomy-legend-item insufficient" style="justify-content:center; padding:6px 4px;">
+                        <div class="anatomy-legend-item insufficient" style="justify-content:center; padding:6px 4px; background:#121024 !important; border:1.5px solid rgba(167, 139, 250, 0.25) !important;">
                             <div class="badge-dot"></div>
-                            <span class="badge-val">${summary.insufficientCount}</span>
-                            <span class="badge-label" style="white-space:nowrap; font-size:11px;">Az Çalışan</span>
+                            <span class="badge-val" style="color:#FFFFFF !important;">${summary.insufficientCount}</span>
+                            <span class="badge-label" style="white-space:nowrap; font-size:11px; color:#E2E8F0 !important;">Az Çalışan</span>
                         </div>
-                        <div class="anatomy-legend-item unworked" style="justify-content:center; padding:6px 4px;">
+                        <div class="anatomy-legend-item unworked" style="justify-content:center; padding:6px 4px; background:#121024 !important; border:1.5px solid rgba(167, 139, 250, 0.25) !important;">
                             <div class="badge-dot"></div>
-                            <span class="badge-val">${summary.unworkedCount}</span>
-                            <span class="badge-label" style="white-space:nowrap; font-size:11px;">Kilitli (0s)</span>
+                            <span class="badge-val" style="color:#FFFFFF !important;">${summary.unworkedCount}</span>
+                            <span class="badge-label" style="white-space:nowrap; font-size:11px; color:#E2E8F0 !important;">Kilitli (0s)</span>
                         </div>
                     </div>
 
@@ -6747,16 +6770,16 @@
                     <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; width:100%;">
                         ${joints.map(j => {
                             const isSel = j.id === currentSelectedMobilityJoint;
-                            const dotColor = j.status === 'optimal' ? '#16A34A' : (j.status === 'insufficient' ? '#F59E0B' : '#EF4444');
-                            const cardBg = isSel ? '#F0FDF4' : '#F8FAFC';
-                            const cardBrd = isSel ? '2px solid #65A30D' : '1.5px solid #E2E8F0';
+                            const dotColor = j.status === 'optimal' ? '#4ADE80' : (j.status === 'insufficient' ? '#FBBF24' : '#F87171');
+                            const cardBg = isSel ? '#2C2550' : '#121024';
+                            const cardBrd = isSel ? '2px solid #A78BFA' : '1.5px solid rgba(167, 139, 250, 0.22)';
                             return `
                                 <button type="button" style="background:${cardBg}; border:${cardBrd}; border-radius:10px; padding:8px 10px; text-align:left; cursor:pointer; transition:all 0.2s;" onclick="selectMobilityJoint('${j.id}')">
                                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                                        <span style="font-size:12.5px; font-weight:900; color:#0F172A; white-space:nowrap;">${escapeHTML(j.name)}</span>
+                                        <span style="font-size:12.5px; font-weight:900; color:#FFFFFF; white-space:nowrap;">${escapeHTML(j.name)}</span>
                                         <span style="width:8px; height:8px; border-radius:50%; background:${dotColor}; display:inline-block;"></span>
                                     </div>
-                                    <div style="font-size:11px; color:#475569; font-weight:700; margin-top:2px;">
+                                    <div style="font-size:11px; color:#CBD5E1; font-weight:700; margin-top:2px;">
                                         ${j.effectiveDone.toFixed(1)} / ${j.optimalMin}-${j.optimalMax} Set
                                     </div>
                                 </button>
@@ -6769,10 +6792,10 @@
                 </div>
 
                 <!-- BÖLÜM 2: HAREKET YÖNÜ ÇEŞİTLİLİĞİ -->
-                <div class="anatomy-hero-wrapper" style="align-items:stretch;">
+                <div class="anatomy-hero-wrapper" style="background:#181530 !important; border:1.5px solid rgba(167, 139, 250, 0.25) !important; color:#F8FAFC !important; align-items:stretch;">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
-                        <h3 style="font-size:14.5px; font-weight:900; color:#0F172A; margin:0; white-space:nowrap;">🧭 Hareket Yönü Çeşitliliği</h3>
-                        <span style="font-size:11px; font-weight:800; background:#F1F5F9; color:#0F172A; padding:3px 8px; border-radius:6px; border:1px solid #CBD5E1; white-space:nowrap;">
+                        <h3 style="font-size:14.5px; font-weight:900; color:#FFFFFF; margin:0; white-space:nowrap;">🧭 Hareket Yönü Çeşitliliği</h3>
+                        <span style="font-size:11px; font-weight:800; background:#2C2550; color:#F3E8FF; padding:3px 8px; border-radius:6px; border:1px solid rgba(167, 139, 250, 0.4); white-space:nowrap;">
                             %${functionalPct} Eklem Açan (${functionalSets}s)
                         </span>
                     </div>
@@ -6783,24 +6806,24 @@
                             const isZero = pObj.sets === 0;
                             const exNames = Array.from(pObj.exs).slice(0, 3).map(escapeHTML).join(', ');
                             return `
-                                <div style="background:${isZero ? '#FEF2F2' : '#F8FAFC'}; border:1px solid ${isZero ? '#FECACA' : '#E2E8F0'}; border-radius:10px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
+                                <div style="background:${isZero ? '#2A1421' : '#121024'}; border:1px solid ${isZero ? 'rgba(239, 68, 68, 0.45)' : 'rgba(167, 139, 250, 0.22)'}; border-radius:10px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
                                     <div>
-                                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:900; color:#0F172A;">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:900; color:#FFFFFF;">
                                             <span>${escapeHTML(pObj.label)}</span>
-                                            <span style="color:${isZero ? '#DC2626' : pObj.color};">${pObj.sets}s (%${pct})</span>
+                                            <span style="color:${isZero ? '#FECACA' : pObj.color};">${pObj.sets}s (%${pct})</span>
                                         </div>
-                                        <div style="height:5px; background:#E2E8F0; border-radius:3px; overflow:hidden; margin-top:5px;">
+                                        <div style="height:5px; background:#181530; border-radius:3px; overflow:hidden; margin-top:5px;">
                                             <div style="height:100%; width:${Math.min(100, pct)}%; background:${isZero ? '#EF4444' : pObj.color};"></div>
                                         </div>
-                                        <div style="font-size:11px; color:#475569; margin-top:5px;">
+                                        <div style="font-size:11px; color:#CBD5E1; margin-top:5px;">
                                             ${isZero
-                                                ? `<strong style="color:#B91C1C;">0 Set (Boşta)</strong>`
+                                                ? `<strong style="color:#FECACA;">0 Set (Boşta)</strong>`
                                                 : `${exNames || 'Tamamlandı'}`
                                             }
                                         </div>
                                     </div>
                                     ${isZero ? `
-                                        <button type="button" class="btn btn-outline" style="margin-top:6px; width:100%; font-size:11px; padding:5px 8px; border-color:#FECACA; color:#DC2626; font-weight:800; background:#FFFFFF;" onclick="openQuickAddToDayModal('${pObj.recId}')">
+                                        <button type="button" class="btn btn-outline" style="margin-top:6px; width:100%; font-size:11px; padding:5px 8px; border-color:rgba(239, 68, 68, 0.5); color:#FECACA; font-weight:800; background:#181530;" onclick="openQuickAddToDayModal('${pObj.recId}')">
                                             ➕ ${escapeHTML(pObj.recName)} Ekle
                                         </button>
                                     ` : ''}
@@ -6811,24 +6834,24 @@
                 </div>
 
                 <!-- BÖLÜM 3: HAFTALIK HAREKETLİLİK GELİŞİMİ (SON 6 HAFTA) -->
-                <div class="anatomy-hero-wrapper" style="align-items:stretch;">
+                <div class="anatomy-hero-wrapper" style="background:#181530 !important; border:1.5px solid rgba(167, 139, 250, 0.25) !important; color:#F8FAFC !important; align-items:stretch;">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px;">
-                        <h3 style="font-size:14.5px; font-weight:900; color:#0F172A; margin:0; white-space:nowrap;">📈 6 Haftalık Trend</h3>
-                        <span style="font-size:11px; font-weight:800; padding:3px 8px; border-radius:6px; ${parseFloat(deltaEvoSets) >= 0 ? 'background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;' : 'background:#FEF3C7; color:#B45309; border:1px solid #FCD34D;'}">
+                        <h3 style="font-size:14.5px; font-weight:900; color:#FFFFFF; margin:0; white-space:nowrap;">📈 6 Haftalık Trend</h3>
+                        <span style="font-size:11px; font-weight:800; padding:3px 8px; border-radius:6px; ${parseFloat(deltaEvoSets) >= 0 ? 'background:#14532D; color:#BBF7D0; border:1px solid #22C55E;' : 'background:#7C2D12; color:#FDE68A; border:1px solid #F59E0B;'}">
                             ${parseFloat(deltaEvoSets) >= 0 ? `+${deltaEvoSets}` : deltaEvoSets} Set
                         </span>
                     </div>
 
-                    <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; align-items:end; height:110px; padding:10px 8px 4px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px;">
+                    <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; align-items:end; height:110px; padding:10px 8px 4px; background:#121024; border:1px solid rgba(167, 139, 250, 0.22); border-radius:10px;">
                         ${evo.map(w => {
                             const hPct = Math.max(8, Math.round((w.endRangeSets / maxEvoSets) * 100));
                             const isCurrent = w.offset === 0;
-                            const barBg = w.endRangeSets >= 22 ? '#16A34A' : (w.endRangeSets > 0 ? '#84CC16' : '#CBD5E1');
+                            const barBg = w.endRangeSets >= 22 ? '#22C55E' : (w.endRangeSets > 0 ? '#8B5CF6' : '#334155');
                             return `
                                 <div style="display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%;" title="${escapeHTML(w.fullLabel)}: ${w.endRangeSets.toFixed(1)} Set">
-                                    <div style="font-size:10px; font-weight:800; color:#0F172A; margin-bottom:3px;">${w.endRangeSets.toFixed(0)}s</div>
-                                    <div style="width:100%; max-width:34px; height:${hPct}%; background:${barBg}; border-radius:5px 5px 2px 2px; border:${isCurrent ? '2px solid #0F172A' : 'none'};"></div>
-                                    <div style="font-size:9.5px; font-weight:${isCurrent ? '900' : '700'}; color:${isCurrent ? '#0F172A' : '#64748B'}; margin-top:4px; white-space:nowrap;">${escapeHTML(w.label)}</div>
+                                    <div style="font-size:10px; font-weight:800; color:#FFFFFF; margin-bottom:3px;">${w.endRangeSets.toFixed(0)}s</div>
+                                    <div style="width:100%; max-width:34px; height:${hPct}%; background:${barBg}; border-radius:5px 5px 2px 2px; border:${isCurrent ? '2px solid #A78BFA' : 'none'};"></div>
+                                    <div style="font-size:9.5px; font-weight:${isCurrent ? '900' : '700'}; color:${isCurrent ? '#FFFFFF' : '#CBD5E1'}; margin-top:4px; white-space:nowrap;">${escapeHTML(w.label)}</div>
                                 </div>
                             `;
                         }).join('')}
@@ -6836,11 +6859,11 @@
                 </div>
 
                 <!-- BÖLÜM 4: 4 FİZİKSEL HAREKETLİLİK TESTİ -->
-                <div class="anatomy-hero-wrapper" style="align-items:stretch;">
+                <div class="anatomy-hero-wrapper" style="background:#181530 !important; border:1.5px solid rgba(167, 139, 250, 0.25) !important; color:#F8FAFC !important; align-items:stretch;">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
-                        <h3 style="font-size:14.5px; font-weight:900; color:#0F172A; margin:0; white-space:nowrap;">🩺 4 Fiziksel Açıklık Testi</h3>
+                        <h3 style="font-size:14.5px; font-weight:900; color:#FFFFFF; margin:0; white-space:nowrap;">🩺 4 Fiziksel Açıklık Testi</h3>
                         ${testData.history.length > 0 ? `
-                            <span style="font-size:10.5px; font-weight:800; color:#0369A1; background:#E0F2FE; border:1px solid #BAE6FD; padding:3px 8px; border-radius:6px; white-space:nowrap;">
+                            <span style="font-size:10.5px; font-weight:800; color:#BAE6FD; background:#0C4A6E; border:1px solid #38BDF8; padding:3px 8px; border-radius:6px; white-space:nowrap;">
                                 Son: ${escapeHTML(testData.history[0].date)}
                             </span>
                         ` : ''}
@@ -6861,17 +6884,17 @@
 
             if (unified.length === 0) {
                 container.innerHTML = `
-                    <div style="background:var(--bg-surface); padding:20px 16px; text-align:center; border:1px dashed var(--border); border-radius:12px;">
+                    <div style="background:#181530; padding:20px 16px; text-align:center; border:1px dashed rgba(167, 139, 250, 0.35); border-radius:12px;">
                         <span style="font-size:32px; display:block; margin-bottom:8px;">⚖️📏</span>
-                        <h3 style="font-size:14.5px; font-weight:900; color:#0F172A; margin-bottom:6px;">Henüz Ölçüm Kaydı Yok</h3>
-                        <p style="font-size:11.5px; color:var(--text-secondary); max-width:340px; margin:0 auto 12px; line-height:1.4;">
+                        <h3 style="font-size:14.5px; font-weight:900; color:#FFFFFF; margin-bottom:6px;">Henüz Ölçüm Kaydı Yok</h3>
+                        <p style="font-size:11.5px; color:#CBD5E1; max-width:340px; margin:0 auto 12px; line-height:1.4;">
                             Kilo, yağ oranı veya mezura ölçülerini ekleyerek değişimini takip et.
                         </p>
                         <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
                             <button class="btn btn-gold" style="font-size:12px; padding:8px 14px; font-weight:900;" onclick="openScaleModal()">
                                 + Ölçüm Ekle
                             </button>
-                            <button class="btn btn-outline" style="font-size:11.5px; padding:8px 12px; font-weight:700;" onclick="seedUniqueHealthSample()">
+                            <button class="btn btn-outline" style="font-size:11.5px; padding:8px 12px; font-weight:700; background:#121024; color:#F8FAFC; border-color:rgba(167, 139, 250, 0.3);" onclick="seedUniqueHealthSample()">
                                 ⚡ Örnek Yükle
                             </button>
                         </div>
@@ -6897,9 +6920,9 @@
                 const latestDate = new Date(latestScale.date);
                 const now = new Date();
                 const daysDiff = Math.max(0, Math.floor((now - latestDate) / (1000 * 60 * 60 * 24)));
-                const statusColor = daysDiff <= 14 ? '#15803D' : (daysDiff <= 28 ? '#B45309' : '#DC2626');
-                const statusBg = daysDiff <= 14 ? '#F0FDF4' : (daysDiff <= 28 ? '#FFFBEB' : '#FEF2F2');
-                const statusBrd = daysDiff <= 14 ? '#86EFAC' : (daysDiff <= 28 ? '#FCD34D' : '#FECACA');
+                const statusColor = daysDiff <= 14 ? '#BBF7D0' : (daysDiff <= 28 ? '#FDE68A' : '#FECACA');
+                const statusBg = daysDiff <= 14 ? '#14532D' : (daysDiff <= 28 ? '#7C2D12' : '#7F1D1D');
+                const statusBrd = daysDiff <= 14 ? '#22C55E' : (daysDiff <= 28 ? '#F59E0B' : '#EF4444');
                 const statusDot = daysDiff <= 14 ? '🟢' : (daysDiff <= 28 ? '🟡' : '🔴');
                 const statusText = daysDiff <= 14
                     ? `Güncel Ölçüm (${daysDiff === 0 ? 'Bugün' : `${daysDiff}g önce`})`
@@ -6926,44 +6949,44 @@
 
                 <!-- UNIFIED KPI CARDS (2x2 + 1 COMPACT GRID) -->
                 <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-bottom:12px;">
-                    <div class="analytics-kpi-card" style="padding:10px 12px;">
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">KİLO</div>
-                        <div style="font-size:17px; font-weight:900; color:var(--gold); margin-top:2px;">
+                    <div class="analytics-kpi-card" style="padding:10px 12px; background:#181530; border:1px solid rgba(167, 139, 250, 0.25);">
+                        <div style="font-size:10px; color:#CBD5E1; font-weight:700;">KİLO</div>
+                        <div style="font-size:17px; font-weight:900; color:#FCD34D; margin-top:2px;">
                             ${latestScale ? `${latestScale.weight} kg` : '-'}
                         </div>
                         ${deltaWeight !== null ? `
-                            <div style="font-size:10.5px; font-weight:800; color:${parseFloat(deltaWeight) <= 0 ? 'var(--green-success)' : 'var(--red-alert)'}; margin-top:1px;">
+                            <div style="font-size:10.5px; font-weight:800; color:${parseFloat(deltaWeight) <= 0 ? '#4ADE80' : '#FCA5A5'}; margin-top:1px;">
                                 ${parseFloat(deltaWeight) > 0 ? '+' : ''}${deltaWeight} kg
                             </div>
-                        ` : '<div style="font-size:10px; color:var(--text-secondary); margin-top:1px;">Son Kayıt</div>'}
+                        ` : '<div style="font-size:10px; color:#CBD5E1; margin-top:1px;">Son Kayıt</div>'}
                     </div>
 
-                    <div class="analytics-kpi-card" style="padding:10px 12px;">
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">İSKELET KASI</div>
-                        <div style="font-size:17px; font-weight:900; color:var(--green-success); margin-top:2px;">
+                    <div class="analytics-kpi-card" style="padding:10px 12px; background:#181530; border:1px solid rgba(167, 139, 250, 0.25);">
+                        <div style="font-size:10px; color:#CBD5E1; font-weight:700;">İSKELET KASI</div>
+                        <div style="font-size:17px; font-weight:900; color:#4ADE80; margin-top:2px;">
                             ${latestScale?.muscleMass ? `${latestScale.muscleMass} kg` : '-'}
                         </div>
-                        <div style="font-size:10px; color:#15803D; font-weight:800; margin-top:1px;">
+                        <div style="font-size:10px; color:#BBF7D0; font-weight:800; margin-top:1px;">
                             ${deltaMuscle !== null ? `${parseFloat(deltaMuscle) > 0 ? '+' : ''}${deltaMuscle} kg` : 'Kas Kütlesi'}
                         </div>
                     </div>
 
-                    <div class="analytics-kpi-card" style="padding:10px 12px;">
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">YAĞ ORANI</div>
-                        <div style="font-size:17px; font-weight:900; color:var(--cyan); margin-top:2px;">
+                    <div class="analytics-kpi-card" style="padding:10px 12px; background:#181530; border:1px solid rgba(167, 139, 250, 0.25);">
+                        <div style="font-size:10px; color:#CBD5E1; font-weight:700;">YAĞ ORANI</div>
+                        <div style="font-size:17px; font-weight:900; color:#7DD3FC; margin-top:2px;">
                             ${latestScale?.bodyFat ? `%${latestScale.bodyFat}` : '-'}
                         </div>
-                        <div style="font-size:10px; color:#0369A1; font-weight:800; margin-top:1px;">
+                        <div style="font-size:10px; color:#BAE6FD; font-weight:800; margin-top:1px;">
                             ${uh?.bodyFatKg ? `${uh.bodyFatKg} kg Yağ` : (deltaFat !== null ? `${parseFloat(deltaFat) > 0 ? '+' : ''}${deltaFat}%` : 'Vücut Yağı')}
                         </div>
                     </div>
 
-                    <div class="analytics-kpi-card" style="padding:10px 12px;">
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">BEL & KOL</div>
-                        <div style="font-size:16px; font-weight:900; color:#0F172A; margin-top:2px; white-space:nowrap;">
+                    <div class="analytics-kpi-card" style="padding:10px 12px; background:#181530; border:1px solid rgba(167, 139, 250, 0.25);">
+                        <div style="font-size:10px; color:#CBD5E1; font-weight:700;">BEL & KOL</div>
+                        <div style="font-size:16px; font-weight:900; color:#FFFFFF; margin-top:2px; white-space:nowrap;">
                             ${latestMeas?.waist ? `${latestMeas.waist} cm` : '-'} ${latestMeas?.arms ? `• ${latestMeas.arms} cm` : ''}
                         </div>
-                        <div style="font-size:10px; color:var(--text-secondary); font-weight:700; margin-top:1px;">
+                        <div style="font-size:10px; color:#CBD5E1; font-weight:700; margin-top:1px;">
                             ${deltaWaist !== null ? `Bel: ${parseFloat(deltaWaist) > 0 ? '+' : ''}${deltaWaist} cm` : 'Mezura'}
                         </div>
                     </div>
@@ -6971,44 +6994,44 @@
 
                 ${(uh && (uh.totalWater || uh.protein || uh.minerals || uh.bone || uh.leanBodyMass || uh.subcutaneousFatKg)) ? `
                 <!-- CELLULAR & FLUID BALANCE CARD (COMPACT 2x2) -->
-                <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:12px;">
+                <div style="background:#181530; border:1px solid rgba(167, 139, 250, 0.25); border-radius:12px; padding:12px; margin-bottom:12px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <h3 style="font-size:13.5px; font-weight:900; color:#0F172A; margin:0;">🧬 Su, Protein & Bileşenler</h3>
-                        <span style="font-size:10.5px; color:#15803D; font-weight:800; background:rgba(16,185,129,0.15); padding:2px 8px; border-radius:99px;">${(uh.extraWater && uh.totalWater && (uh.extraWater / uh.totalWater) <= 0.40) ? 'Ödem Yok' : 'Vücut Bileşenleri'}</span>
+                        <h3 style="font-size:13.5px; font-weight:900; color:#FFFFFF; margin:0;">🧬 Su, Protein & Bileşenler</h3>
+                        <span style="font-size:10.5px; color:#BBF7D0; font-weight:800; background:#14532D; border:1px solid #22C55E; padding:2px 8px; border-radius:99px;">${(uh.extraWater && uh.totalWater && (uh.extraWater / uh.totalWater) <= 0.40) ? 'Ödem Yok' : 'Vücut Bileşenleri'}</span>
                     </div>
 
                     <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:6px;">
                         ${(uh.totalWater || latestScale?.waterPct) ? `
-                        <div style="background:#F8FAFC; padding:8px 10px; border-radius:8px;">
-                            <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">TOPLAM SU</div>
-                            <div style="font-size:14.5px; font-weight:900; color:var(--cyan); margin-top:1px;">${uh.totalWater ? `${uh.totalWater} kg` : `%${latestScale.waterPct}`}</div>
-                            <div style="font-size:9.5px; color:var(--text-secondary);">${(uh.intraWater && uh.extraWater) ? `İç: ${uh.intraWater} / Dış: ${uh.extraWater}` : (latestScale?.waterPct ? `Oran: %${latestScale.waterPct}` : 'Vücut Suyu')}</div>
+                        <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.2); padding:8px 10px; border-radius:8px;">
+                            <div style="font-size:10px; color:#CBD5E1; font-weight:700;">TOPLAM SU</div>
+                            <div style="font-size:14.5px; font-weight:900; color:#7DD3FC; margin-top:1px;">${uh.totalWater ? `${uh.totalWater} kg` : `%${latestScale.waterPct}`}</div>
+                            <div style="font-size:9.5px; color:#CBD5E1;">${(uh.intraWater && uh.extraWater) ? `İç: ${uh.intraWater} / Dış: ${uh.extraWater}` : (latestScale?.waterPct ? `Oran: %${latestScale.waterPct}` : 'Vücut Suyu')}</div>
                         </div>` : ''}
 
                         ${uh.protein ? `
-                        <div style="background:#F8FAFC; padding:8px 10px; border-radius:8px;">
-                            <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">PROTEİN</div>
-                            <div style="font-size:14.5px; font-weight:900; color:var(--gold); margin-top:1px;">${uh.protein} kg</div>
-                            <div style="font-size:9.5px; color:#15803D; font-weight:700;">Kas Yapısı</div>
+                        <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.2); padding:8px 10px; border-radius:8px;">
+                            <div style="font-size:10px; color:#CBD5E1; font-weight:700;">PROTEİN</div>
+                            <div style="font-size:14.5px; font-weight:900; color:#FCD34D; margin-top:1px;">${uh.protein} kg</div>
+                            <div style="font-size:9.5px; color:#BBF7D0; font-weight:700;">Kas Yapısı</div>
                         </div>` : ''}
 
                         ${uh.minerals ? `
-                        <div style="background:#F8FAFC; padding:8px 10px; border-radius:8px;">
-                            <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">MİNERAL</div>
-                            <div style="font-size:14.5px; font-weight:900; color:#0F172A; margin-top:1px;">${uh.minerals} kg</div>
-                            <div style="font-size:9.5px; color:#15803D; font-weight:700;">Kemik & İyon</div>
+                        <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.2); padding:8px 10px; border-radius:8px;">
+                            <div style="font-size:10px; color:#CBD5E1; font-weight:700;">MİNERAL</div>
+                            <div style="font-size:14.5px; font-weight:900; color:#FFFFFF; margin-top:1px;">${uh.minerals} kg</div>
+                            <div style="font-size:9.5px; color:#BBF7D0; font-weight:700;">Kemik & İyon</div>
                         </div>` : ''}
 
                         ${uh.bone ? `
-                        <div style="background:#F8FAFC; padding:8px 10px; border-radius:8px;">
-                            <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">KEMİK</div>
-                            <div style="font-size:14.5px; font-weight:900; color:#0F172A; margin-top:1px;">${uh.bone} kg</div>
-                            <div style="font-size:9.5px; color:var(--text-secondary);">İskelet</div>
+                        <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.2); padding:8px 10px; border-radius:8px;">
+                            <div style="font-size:10px; color:#CBD5E1; font-weight:700;">KEMİK</div>
+                            <div style="font-size:14.5px; font-weight:900; color:#FFFFFF; margin-top:1px;">${uh.bone} kg</div>
+                            <div style="font-size:9.5px; color:#CBD5E1;">İskelet</div>
                         </div>` : (uh.leanBodyMass ? `
-                        <div style="background:#F8FAFC; padding:8px 10px; border-radius:8px;">
-                            <div style="font-size:10px; color:var(--text-secondary); font-weight:700;">YAĞSIZ KÜTLE</div>
-                            <div style="font-size:14.5px; font-weight:900; color:#0F172A; margin-top:1px;">${uh.leanBodyMass} kg</div>
-                            <div style="font-size:9.5px; color:var(--text-secondary);">Aktif Doku</div>
+                        <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.2); padding:8px 10px; border-radius:8px;">
+                            <div style="font-size:10px; color:#CBD5E1; font-weight:700;">YAĞSIZ KÜTLE</div>
+                            <div style="font-size:14.5px; font-weight:900; color:#FFFFFF; margin-top:1px;">${uh.leanBodyMass} kg</div>
+                            <div style="font-size:9.5px; color:#CBD5E1;">Aktif Doku</div>
                         </div>` : '')}
                     </div>
                 </div>
@@ -7016,79 +7039,79 @@
 
                 ${(uh?.segmental && (uh.segmental.leftArm?.muscleKg || uh.segmental.rightArm?.muscleKg || uh.segmental.trunk?.muscleKg || uh.segmental.trunk?.fatKg || uh.segmental.leftLeg?.muscleKg || uh.segmental.rightLeg?.muscleKg)) ? `
                 <!-- SEGMENTAL (BÖLGESEL) KAS & YAĞ HARİTASI -->
-                <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:12px;">
+                <div style="background:#181530; border:1px solid rgba(167, 139, 250, 0.25); border-radius:12px; padding:12px; margin-bottom:12px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <h3 style="font-size:13.5px; font-weight:900; color:#0F172A; margin:0;">🧍 Bölgesel Kas & Yağ</h3>
-                        <span style="font-size:10.5px; color:var(--cyan); font-weight:700;">BIA Analizi</span>
+                        <h3 style="font-size:13.5px; font-weight:900; color:#FFFFFF; margin:0;">🧍 Bölgesel Kas & Yağ</h3>
+                        <span style="font-size:10.5px; color:#7DD3FC; font-weight:700;">BIA Analizi</span>
                     </div>
 
                     <div class="scale-segmental-grid" style="gap:8px;">
                         ${(uh.segmental.leftArm?.muscleKg || uh.segmental.rightArm?.muscleKg || uh.segmental.leftArm?.fatKg) ? `
-                        <div class="scale-segmental-card" style="border-left:3px solid var(--cyan); padding:8px 10px;">
-                            <div style="font-weight:900; color:#0F172A; font-size:12px;">🦾 Kollar</div>
-                            <div style="color:var(--text-secondary); font-size:11px; margin-top:2px;">Sol: <strong>${uh.segmental.leftArm?.muscleKg != null ? `${uh.segmental.leftArm.muscleKg}kg` : '-'}</strong> • Sağ: <strong>${uh.segmental.rightArm?.muscleKg != null ? `${uh.segmental.rightArm.muscleKg}kg` : '-'}</strong></div>
-                            <div style="color:#15803D; font-size:10.5px; font-weight:800; margin-top:2px;">Kas Dengesi</div>
+                        <div class="scale-segmental-card" style="background:#121024; border:1px solid rgba(167, 139, 250, 0.2); border-left:3px solid #38BDF8; padding:8px 10px;">
+                            <div style="font-weight:900; color:#FFFFFF; font-size:12px;">🦾 Kollar</div>
+                            <div style="color:#CBD5E1; font-size:11px; margin-top:2px;">Sol: <strong style="color:#FFFFFF;">${uh.segmental.leftArm?.muscleKg != null ? `${uh.segmental.leftArm.muscleKg}kg` : '-'}</strong> • Sağ: <strong style="color:#FFFFFF;">${uh.segmental.rightArm?.muscleKg != null ? `${uh.segmental.rightArm.muscleKg}kg` : '-'}</strong></div>
+                            <div style="color:#BBF7D0; font-size:10.5px; font-weight:800; margin-top:2px;">Kas Dengesi</div>
                         </div>` : ''}
 
                         ${(uh.segmental.trunk?.muscleKg || uh.segmental.trunk?.fatKg) ? `
-                        <div class="scale-segmental-card" style="border-left:3px solid var(--gold); background:rgba(245,158,11,0.06); padding:8px 10px;">
-                            <div style="font-weight:900; color:#0F172A; font-size:12px;">🎯 Gövde & Bel</div>
-                            <div style="color:#0F172A; font-size:11px; margin-top:2px;">Kas: <strong>${uh.segmental.trunk?.muscleKg != null ? `${uh.segmental.trunk.muscleKg}kg` : '-'}</strong> • Yağ: <strong style="color:#DC2626;">${uh.segmental.trunk?.fatKg != null ? `${uh.segmental.trunk.fatKg}kg` : '-'}</strong></div>
-                            <div style="color:#B45309; font-size:10.5px; font-weight:800; margin-top:2px;">Merkez Bölge</div>
+                        <div class="scale-segmental-card" style="background:#121024; border:1px solid rgba(167, 139, 250, 0.2); border-left:3px solid #F59E0B; padding:8px 10px;">
+                            <div style="font-weight:900; color:#FFFFFF; font-size:12px;">🎯 Gövde & Bel</div>
+                            <div style="color:#F8FAFC; font-size:11px; margin-top:2px;">Kas: <strong style="color:#FFFFFF;">${uh.segmental.trunk?.muscleKg != null ? `${uh.segmental.trunk.muscleKg}kg` : '-'}</strong> • Yağ: <strong style="color:#FCA5A5;">${uh.segmental.trunk?.fatKg != null ? `${uh.segmental.trunk.fatKg}kg` : '-'}</strong></div>
+                            <div style="color:#FDE68A; font-size:10.5px; font-weight:800; margin-top:2px;">Merkez Bölge</div>
                         </div>` : ''}
 
                         ${(uh.segmental.leftLeg?.muscleKg || uh.segmental.rightLeg?.muscleKg || uh.segmental.leftLeg?.fatKg) ? `
-                        <div class="scale-segmental-card" style="border-left:3px solid var(--green-success); padding:8px 10px;">
-                            <div style="font-weight:900; color:#15803D; font-size:12px;">🦵 Bacaklar</div>
-                            <div style="color:var(--text-secondary); font-size:11px; margin-top:2px;">Sol: <strong>${uh.segmental.leftLeg?.muscleKg != null ? `${uh.segmental.leftLeg.muscleKg}kg` : '-'}</strong> • Sağ: <strong>${uh.segmental.rightLeg?.muscleKg != null ? `${uh.segmental.rightLeg.muscleKg}kg` : '-'}</strong></div>
-                            <div style="color:#15803D; font-size:10.5px; font-weight:800; margin-top:2px;">Alt Vücut</div>
+                        <div class="scale-segmental-card" style="background:#121024; border:1px solid rgba(167, 139, 250, 0.2); border-left:3px solid #22C55E; padding:8px 10px;">
+                            <div style="font-weight:900; color:#BBF7D0; font-size:12px;">🦵 Bacaklar</div>
+                            <div style="color:#CBD5E1; font-size:11px; margin-top:2px;">Sol: <strong style="color:#FFFFFF;">${uh.segmental.leftLeg?.muscleKg != null ? `${uh.segmental.leftLeg.muscleKg}kg` : '-'}</strong> • Sağ: <strong style="color:#FFFFFF;">${uh.segmental.rightLeg?.muscleKg != null ? `${uh.segmental.rightLeg.muscleKg}kg` : '-'}</strong></div>
+                            <div style="color:#BBF7D0; font-size:10.5px; font-weight:800; margin-top:2px;">Alt Vücut</div>
                         </div>` : ''}
                     </div>
                 </div>
                 ` : ''}
 
                 <!-- UNIFIED BODY COMPOSITION & MEASUREMENTS HISTORY LIST -->
-                <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; padding:12px;">
+                <div style="background:#181530; border:1px solid rgba(167, 139, 250, 0.25); border-radius:12px; padding:12px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <h3 style="font-size:13.5px; font-weight:800; color:#0F172A; margin:0;">📋 Ölçüm Geçmişi (${unified.length})</h3>
+                        <h3 style="font-size:13.5px; font-weight:800; color:#FFFFFF; margin:0;">📋 Ölçüm Geçmişi (${unified.length})</h3>
                     </div>
 
                     <div style="display:flex; flex-direction:column; gap:10px;">
                         ${unified.map((u, idx) => `
-                            <div style="background:#F8FAFC; padding:12px 14px; border-radius:10px; border-left:4px solid ${u.weight ? 'var(--gold)' : 'var(--cyan)'};">
+                            <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.2); padding:12px 14px; border-radius:10px; border-left:4px solid ${u.weight ? '#F59E0B' : '#38BDF8'};">
                                 <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
                                     <div>
                                         <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                                            <span style="font-size:12px; color:var(--text-secondary); font-weight:700;">📅 ${escapeHTML(u.date)}</span>
-                                            ${u.weight ? `<strong style="font-size:15px; color:#0F172A;">${u.weight} kg</strong>` : ''}
-                                            ${u.waist ? `<span style="font-size:13px; color:var(--cyan); font-weight:800; background:rgba(56,189,248,0.12); padding:2px 8px; border-radius:6px;">📏 Bel: ${u.waist} cm</span>` : ''}
-                                            ${u.uniqueHealth ? '<span style="font-size:9.5px; background:rgba(56,189,248,0.2); color:var(--cyan); padding:2px 6px; border-radius:4px; font-weight:700;">Unique Health BIA</span>' : ''}
+                                            <span style="font-size:12px; color:#CBD5E1; font-weight:700;">📅 ${escapeHTML(u.date)}</span>
+                                            ${u.weight ? `<strong style="font-size:15px; color:#FFFFFF;">${u.weight} kg</strong>` : ''}
+                                            ${u.waist ? `<span style="font-size:13px; color:#BAE6FD; font-weight:800; background:#0C4A6E; border:1px solid #0284C7; padding:2px 8px; border-radius:6px;">📏 Bel: ${u.waist} cm</span>` : ''}
+                                            ${u.uniqueHealth ? '<span style="font-size:9.5px; background:#0C4A6E; color:#BAE6FD; border:1px solid #0284C7; padding:2px 6px; border-radius:4px; font-weight:700;">Unique Health BIA</span>' : ''}
                                         </div>
 
                                         <!-- SCALE METRICS PILLS -->
                                         ${(u.bodyFat || u.muscleMass || u.waterPct || u.visceralFat || u.bmr) ? `
-                                            <div style="font-size:11.5px; color:#475569; margin-top:5px; display:flex; gap:8px; flex-wrap:wrap;">
-                                                ${u.bodyFat ? `<span>Yağ: <strong>%${u.bodyFat}</strong></span>` : ''}
-                                                ${u.muscleMass ? `<span>İskelet Kası: <strong>${u.muscleMass} kg</strong></span>` : ''}
-                                                ${u.waterPct ? `<span>Sıvı: <strong>%${u.waterPct}</strong></span>` : ''}
-                                                ${u.visceralFat ? `<span>İç Yağ: <strong>${u.visceralFat}</strong></span>` : ''}
-                                                ${u.bmr ? `<span>BMR: <strong>${u.bmr} kcal</strong></span>` : ''}
+                                            <div style="font-size:11.5px; color:#E2E8F0; margin-top:5px; display:flex; gap:8px; flex-wrap:wrap;">
+                                                ${u.bodyFat ? `<span>Yağ: <strong style="color:#FFFFFF;">%${u.bodyFat}</strong></span>` : ''}
+                                                ${u.muscleMass ? `<span>İskelet Kası: <strong style="color:#FFFFFF;">${u.muscleMass} kg</strong></span>` : ''}
+                                                ${u.waterPct ? `<span>Sıvı: <strong style="color:#FFFFFF;">%${u.waterPct}</strong></span>` : ''}
+                                                ${u.visceralFat ? `<span>İç Yağ: <strong style="color:#FFFFFF;">${u.visceralFat}</strong></span>` : ''}
+                                                ${u.bmr ? `<span>BMR: <strong style="color:#FFFFFF;">${u.bmr} kcal</strong></span>` : ''}
                                             </div>
                                         ` : ''}
 
                                         <!-- MEZURA METRICS PILLS -->
                                         ${(u.chest || u.shoulder || u.arms || u.thigh || u.hips || u.neck) ? `
-                                            <div style="font-size:11.5px; color:var(--cyan); margin-top:4px; display:flex; gap:8px; flex-wrap:wrap;">
-                                                ${u.arms ? `<span>Kol: <strong>${u.arms} cm</strong></span>` : ''}
-                                                ${u.chest ? `<span>Göğüs: <strong>${u.chest} cm</strong></span>` : ''}
-                                                ${u.shoulder ? `<span>Omuz: <strong>${u.shoulder} cm</strong></span>` : ''}
-                                                ${u.thigh ? `<span>Bacak: <strong>${u.thigh} cm</strong></span>` : ''}
-                                                ${u.hips ? `<span>Kalça: <strong>${u.hips} cm</strong></span>` : ''}
-                                                ${u.neck ? `<span>Boyun: <strong>${u.neck} cm</strong></span>` : ''}
+                                            <div style="font-size:11.5px; color:#7DD3FC; margin-top:4px; display:flex; gap:8px; flex-wrap:wrap;">
+                                                ${u.arms ? `<span>Kol: <strong style="color:#BAE6FD;">${u.arms} cm</strong></span>` : ''}
+                                                ${u.chest ? `<span>Göğüs: <strong style="color:#BAE6FD;">${u.chest} cm</strong></span>` : ''}
+                                                ${u.shoulder ? `<span>Omuz: <strong style="color:#BAE6FD;">${u.shoulder} cm</strong></span>` : ''}
+                                                ${u.thigh ? `<span>Bacak: <strong style="color:#BAE6FD;">${u.thigh} cm</strong></span>` : ''}
+                                                ${u.hips ? `<span>Kalça: <strong style="color:#BAE6FD;">${u.hips} cm</strong></span>` : ''}
+                                                ${u.neck ? `<span>Boyun: <strong style="color:#BAE6FD;">${u.neck} cm</strong></span>` : ''}
                                             </div>
                                         ` : ''}
 
-                                        ${u.notes ? `<div style="font-size:11px; color:#0F172A; margin-top:4px;">📝 ${escapeHTML(u.notes)}</div>` : ''}
+                                        ${u.notes ? `<div style="font-size:11px; color:#F8FAFC; margin-top:4px;">📝 ${escapeHTML(u.notes)}</div>` : ''}
                                     </div>
                                     <div>
                                         <button class="btn-delete-log" onclick="deleteUnifiedBodyEntry(decodeURIComponent('${encodeURIComponent(u.date)}'), decodeURIComponent('${encodeURIComponent(u.scaleId || '')}'), decodeURIComponent('${encodeURIComponent(u.measId || '')}'))" title="Kaydı Sil">✕</button>
@@ -7233,7 +7256,7 @@
                             wStr = `${wVal}kg × `;
                         }
                         return `${idx + 1}. Set: <strong>${wStr}${st.reps} ${unitLabel}</strong>`;
-                    }).join(' <span style="color:#94A3B8;">➔</span> ');
+                    }).join(' <span style="color:#CBD5E1;">➔</span> ');
 
                     let category = 'normal_fatigue';
                     let badgeText = '';
@@ -7255,14 +7278,14 @@
                             sortPriority = 3;
                             retentionPct = 100;
                             badgeText = `📈 Piramit Güç Artışı (+${weightDelta} kg)`;
-                            badgeStyle = 'background:#EEF2FF; color:#4338CA; border:1px solid #C7D2FE;';
+                            badgeStyle = 'background:#2C2550; color:#F3E8FF; border:1px solid #A78BFA;';
                             reasonText = `Ek ağırlığı <strong>${firstWeight} kg'dan ${lastWeight} kg'a</strong> çıkararak yükü artırdın; bu bir yorgunluk kaybı değil kademeli yüklenmedir.`;
                             adviceText = `Sonraki seansta zirve ağırlığında (<strong>${lastWeight} kg</strong>) <strong>+5 sn</strong> daha uzun tutmaya odaklan.`;
                         } else if (secDrop >= 10 && secDropPct >= 25) {
                             category = 'early_drop';
                             sortPriority = 1;
                             badgeText = `⚡ Süre Düşüşü (-${secDrop} sn)`;
-                            badgeStyle = 'background:#FEF2F2; color:#DC2626; border:1px solid #FECACA;';
+                            badgeStyle = 'background:#7F1D1D; color:#FECACA; border:1px solid #EF4444;';
                             reasonText = `İlk çalışma setinde <strong>${refFirst} sn</strong> tuttuktan sonra son sette <strong>${refLast} sn</strong> seviyesine (-${secDrop} sn, %${secDropPct}) düştün.`;
                             adviceText = (!isBw || hasAddedLoad)
                                 ? `İlk sette kasını son saniyeye kadar tüketme ve set arası dinlenmeyi <strong>+30 sn</strong> uzat.`
@@ -7271,7 +7294,7 @@
                             category = 'normal_fatigue';
                             sortPriority = 2;
                             badgeText = `🔋 Doğal İzometrik Yorgunluk (${secDelta} sn)`;
-                            badgeStyle = 'background:#F0F9FF; color:#0369A1; border:1px solid #BAE6FD;';
+                            badgeStyle = 'background:#0C4A6E; color:#BAE6FD; border:1px solid #0284C7;';
                             reasonText = `İzometrik tutuşta <strong>${refFirst} sn</strong>'den <strong>${refLast} sn</strong>'ye ufak iniş (%${secDropPct}) sinir-kas yorgunluğu sınırları içinde ve sağlıklıdır.`;
                             adviceText = (isBw && !hasAddedLoad)
                                 ? `Ağırlık eklemene gerek yok; sonraki seansta tüm setlerde <strong>${refFirst} sn</strong> tutuşu korumayı hedefle.`
@@ -7281,7 +7304,7 @@
                             sortPriority = 3;
                             const gainLabel = secDelta > 0 ? `+${secDelta} sn Artış` : 'Sıfır Kayıp';
                             badgeText = `🛡️ Tam Dayanıklılık (${gainLabel})`;
-                            badgeStyle = 'background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;';
+                            badgeStyle = 'background:#14532D; color:#BBF7D0; border:1px solid #22C55E;';
                             reasonText = `Tüm setlerde tutuş süreni korudun (${refFirst} ➔ ${refLast} sn). Core ve izometrik dayanıklılığın bu süreye tamamen hazır.`;
                             adviceText = (isBw && !hasAddedLoad)
                                 ? `Harika! Sonraki antrenmanda her sete <strong>+5 sn</strong> ekleyebilir veya bir üst zorlukta vücut ağırlığı varyasyonuna geçebilirsin.`
@@ -7309,7 +7332,7 @@
                             category = 'early_drop';
                             sortPriority = 1;
                             badgeText = `⚡ Ağır Set Düşüşü (${topDelta} ${unitLabel})`;
-                            badgeStyle = 'background:#FEF2F2; color:#DC2626; border:1px solid #FECACA;';
+                            badgeStyle = 'background:#7F1D1D; color:#FECACA; border:1px solid #EF4444;';
                             reasonText = `En ağır çalışma kilon olan <strong>${maxWeight} kg</strong> setlerinde <strong>${topFirstR} ${unitLabel}</strong>'dan <strong>${topLastR} ${unitLabel}</strong>'a (${topDelta}) düşüş oldu.`;
                             adviceText = `İlk <strong>${maxWeight} kg</strong> setinde cepte 1-2 tekrar bırak ve ağır setler arasında <strong>2-3 dakika</strong> dinlen.`;
                         } else if (isNonDecreasing && lastWeight > firstWeight) {
@@ -7319,14 +7342,14 @@
                                 sortPriority = 3;
                                 retentionPct = 100;
                                 badgeText = `📈 Piramit Güç Artışı (+${weightDelta} kg)`;
-                                badgeStyle = 'background:#EEF2FF; color:#4338CA; border:1px solid #C7D2FE;';
+                                badgeStyle = 'background:#2C2550; color:#F3E8FF; border:1px solid #A78BFA;';
                                 reasonText = `Ağırlığı <strong>${firstWeight} kg'dan ${lastWeight} kg'a</strong> yükselttin. Ağır kiloda tekrarı (${lastReps} ${unitLabel}) tutabilmen kuvvet artışıdır (tahmini güç +%${e1rmGainPct}).`;
                                 adviceText = `Artan piramit planın gayet dengeli. Sonraki seansta zirve kilon olan <strong>${lastWeight} kg</strong> ile <strong>+1 ${unitLabel}</strong> fazla hedeflenebilir.`;
                             } else {
                                 category = 'normal_fatigue';
                                 sortPriority = 2;
                                 badgeText = `🔋 Ağır Set Geçişi (+${weightDelta} kg)`;
-                                badgeStyle = 'background:#F0F9FF; color:#0369A1; border:1px solid #BAE6FD;';
+                                badgeStyle = 'background:#0C4A6E; color:#BAE6FD; border:1px solid #0284C7;';
                                 reasonText = `Setlerde kilo artırınca (${firstWeight} ➔ ${lastWeight} kg) tekrar sayısı ${firstReps}'ten ${lastReps}'e indi.`;
                                 adviceText = `Yeni ağırlık atlayışında <strong>${lastWeight} kg</strong> ile en az 6-8 tekrar çıkarabileceğin basamak seç.`;
                             }
@@ -7334,7 +7357,7 @@
                             category = 'early_drop';
                             sortPriority = 1;
                             badgeText = `⚡ Güç & Kilo Düşüşü (${weightDelta} kg / ${repDelta} ${unitLabel})`;
-                            badgeStyle = 'background:#FEF2F2; color:#DC2626; border:1px solid #FECACA;';
+                            badgeStyle = 'background:#7F1D1D; color:#FECACA; border:1px solid #EF4444;';
                             reasonText = `1. sette <strong>${firstWeight} kg × ${firstReps} ${unitLabel}</strong> sonrası yorgunlukla hem kilo (${lastWeight} kg) hem tekrar (${lastReps} ${unitLabel}) düştü.`;
                             adviceText = `Gelecek seansta çalışmaya <strong>${Math.round(((firstWeight + lastWeight) / 2) * 2) / 2} kg</strong> bandında başla ve tüm setlerde tekrarı koru.`;
                         } else {
@@ -7344,7 +7367,7 @@
                             sortPriority = 2;
                             retentionPct = Math.min(100, Math.round((lastE1RM / Math.max(0.5, firstE1RM)) * 100));
                             badgeText = isBackOffPattern ? `🔻 Top-Set & Kontrollü İniş` : `🔻 Kontrollü Kilo Düşürme (${weightDelta} kg)`;
-                            badgeStyle = 'background:#FFFBEB; color:#B45309; border:1px solid #FDE68A;';
+                            badgeStyle = 'background:#7C2D12; color:#FDE68A; border:1px solid #F59E0B;';
                             reasonText = isBackOffPattern
                                 ? `Isınma sonrası <strong>${maxWeight} kg</strong> ana sete çıkıp ardından <strong>${lastWeight} kg × ${lastReps} ${unitLabel}</strong> kontrollü destek (back-off) seti uyguladın.`
                                 : `Yorgunluğa rağmen kilonu kontrollü indirip (${firstWeight} ➔ ${lastWeight} kg) son sette <strong>${lastReps} ${unitLabel}</strong> hacmini korudun (drop-set).`;
@@ -7359,14 +7382,14 @@
                             sortPriority = 1;
                             const repDropPct = firstReps > 0 ? Math.round(((firstReps - lastReps) / firstReps) * 100) : 0;
                             badgeText = `⚡ Hızlı Güç Düşüşü (${repDelta} ${unitLabel})`;
-                            badgeStyle = 'background:#FEF2F2; color:#DC2626; border:1px solid #FECACA;';
+                            badgeStyle = 'background:#7F1D1D; color:#FECACA; border:1px solid #EF4444;';
                             reasonText = `Aynı yükte 1. sette <strong>${firstReps} ${unitLabel}</strong> çıkarıp son sette <strong>${lastReps} ${unitLabel}</strong> seviyesine (%${repDropPct} düşüş) indin. İlk sette cepte tekrar bırakmamış veya kısa dinlenmiş olabilirsin.`;
                             adviceText = `Bir sonraki seansta 1. sette <strong>${Math.max(1, firstReps - 1)} ${unitLabel}</strong> yapıp cepte 1-2 tekrar bırak ve set arası dinlenmeni <strong>+30 saniye</strong> uzat.`;
                         } else if (repDelta === -1 || repDelta === -2) {
                             category = 'normal_fatigue';
                             sortPriority = 2;
                             badgeText = `🔋 Doğal Kas Yorgunluğu (${repDelta} ${unitLabel})`;
-                            badgeStyle = 'background:#F0F9FF; color:#0369A1; border:1px solid #BAE6FD;';
+                            badgeStyle = 'background:#0C4A6E; color:#BAE6FD; border:1px solid #0284C7;';
                             reasonText = `1. sette <strong>${firstReps} ${unitLabel}</strong> yapıp sonraki setlerde <strong>${lastReps} ${unitLabel}</strong> seviyesinde kalman bilimsel olarak sağlıklı gelişim aralığıdır.`;
                             adviceText = (isBw && !hasAddedLoad)
                                 ? `Aynı hareketle devam et; tüm setlerde düşmeden <strong>${firstReps} ${unitLabel}</strong> çıkardığında +1-2 tekrar artırabilirsin.`
@@ -7376,7 +7399,7 @@
                             sortPriority = 3;
                             const gainLabel = repDelta > 0 ? `+${repDelta} ${unitLabel} Artış` : 'Sıfır Kayıp';
                             badgeText = `🛡️ Tam Dayanıklılık (${gainLabel})`;
-                            badgeStyle = 'background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;';
+                            badgeStyle = 'background:#14532D; color:#BBF7D0; border:1px solid #22C55E;';
                             reasonText = `İlk setten son sete kadar gücün hiç düşmedi (${firstReps} ➔ ${lastReps} ${unitLabel}). Kasların bu yükte tamamen rahatlamış durumda.`;
                             adviceText = (isBw && !hasAddedLoad)
                                 ? `Bu seviyeye hakimsin. Sonraki antrenmanda her sete <strong>+1-2 ${unitLabel}</strong> ekleyebilir veya zorluğu artırabilirsin.`
@@ -7538,7 +7561,7 @@
 
                 let status = 'baseline';
                 let badgeText = '🌱 İlk Kayıt Alındı';
-                let badgeStyle = 'background:#F1F5F9; color:#334155; border:1px solid #CBD5E1;';
+                let badgeStyle = 'background:#2C2550; color:#F3E8FF; border:1px solid rgba(167, 139, 250, 0.45);';
                 let changeHeadline = 'Başlangıç seviyen kaydedildi';
                 let coachNote = isPureBwOrTimeLatest
                     ? `Bir sonraki antrenmanda <strong>${item.isTimeBased ? `${latest.maxReps + 5} sn` : `${latest.maxReps + 1} ${unit}`}</strong> hedefleyerek ilk gelişim adımını at!`
@@ -7556,28 +7579,28 @@
                         status = 'dip';
                         sortOrder = 2;
                         badgeText = `⚠️ 2 Seansta Belirgin Yorgunluk`;
-                        badgeStyle = 'background:#FEF2F2; color:#DC2626; border:1px solid #FECACA;';
+                        badgeStyle = 'background:#7F1D1D; color:#FECACA; border:1px solid #EF4444;';
                         changeHeadline = `Zirve rekorun (${formatPerf(peak)}) sonrası son 2 antrenmandır üst üste performans düşüşü var`;
                         coachNote = `Kasların ve sinir sistemin toparlanmaya ihtiyaç duyuyor olabilir. Bir sonraki seansta hafifleme (deload) yap veya uyku/beslenmeni gözden geçirip <strong>${formatPerf(peak)}</strong> zirvene dön.`;
                     } else if (hasHigherPeak && peak.e1rm > latest.e1rm * 1.03 && e1rmDiff <= 0) {
                         status = 'dip';
                         sortOrder = 2;
                         badgeText = `🔄 Geçici Dalgalanma`;
-                        badgeStyle = 'background:#FFF7ED; color:#C2410C; border:1px solid #FDBA74;';
+                        badgeStyle = 'background:#7C2D12; color:#FDE68A; border:1px solid #F59E0B;';
                         changeHeadline = `Zirve rekorun ${formatPerf(peak)}; son seansta (${formatPerf(latest)}) geçici bir düşüş oldu`;
                         coachNote = `Tek günlük dalgalanma normaldir (yorgunluk veya sıralama farkı). Gelecek seansta zirven olan <strong>${formatPerf(peak)}</strong> seviyesini hedefle.`;
                     } else if (hasHigherPeak && e1rmDiff > 0 && latest.e1rm < peak.e1rm * 0.92) {
                         status = 'dip';
                         sortOrder = 2;
                         badgeText = `🔄 Zirve Altında Tek Günlük Düşüş`;
-                        badgeStyle = 'background:#FFF7ED; color:#C2410C; border:1px solid #FDBA74;';
+                        badgeStyle = 'background:#7C2D12; color:#FDE68A; border:1px solid #F59E0B;';
                         changeHeadline = `Başlangıcın önündesin ama zirven olan ${formatPerf(peak)} altında kaldın`;
                         coachNote = `Bir sonraki antrenmanda tempoyu koruyup tekrar zirven olan <strong>${formatPerf(peak)}</strong> seviyesine odaklan.`;
                     } else if (weightDiff > 0 && e1rmDiff >= 0) {
                         status = 'progressed';
                         sortOrder = 1;
                         badgeText = `🚀 +${weightDiff} kg Güç Artışı`;
-                        badgeStyle = 'background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;';
+                        badgeStyle = 'background:#14532D; color:#BBF7D0; border:1px solid #22C55E;';
                         changeHeadline = `Ağırlık ${first.maxWeight} kg'dan ${latest.maxWeight} kg'a (${formatPerf(latest)}) yükseldi!`;
                         coachNote = `Harika ilerleme! Bu yeni yükte (${latest.maxWeight} kg) tüm çalışma setlerinde hedef tekrarını sağlamlaştır.`;
                     } else if ((weightDiff === 0 && (maxRepsDiff > 0 || totalRepsDiff >= 2)) || (e1rmDiff > 0 && weightDiff >= 0)) {
@@ -7585,7 +7608,7 @@
                         sortOrder = 1;
                         const gainStr = maxRepsDiff > 0 ? `+${maxRepsDiff} ${unit}` : (e1rmDiff > 0 ? `+${Math.round(((latest.e1rm - first.e1rm) / Math.max(1, first.e1rm)) * 100)}% Güç` : `Toplam +${totalRepsDiff} ${unit}`);
                         badgeText = `🚀 ${gainStr} Gelişim`;
-                        badgeStyle = 'background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;';
+                        badgeStyle = 'background:#14532D; color:#BBF7D0; border:1px solid #22C55E;';
                         changeHeadline = maxRepsDiff > 0
                             ? `En iyi setin ${first.maxReps} ${unit} ➔ ${latest.maxReps} ${unit} seviyesine çıktı!`
                             : `Performansın ${formatPerf(first)} ➔ ${formatPerf(latest)} seviyesine yükseldi!`;
@@ -7596,21 +7619,21 @@
                         status = 'progressed';
                         sortOrder = 1;
                         badgeText = `🚀 +%${volDiffPct} Kapasite Artışı`;
-                        badgeStyle = 'background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;';
+                        badgeStyle = 'background:#14532D; color:#BBF7D0; border:1px solid #22C55E;';
                         changeHeadline = `Toplam çalışma hacmin %${volDiffPct} büyüdü!`;
                         coachNote = `Hareket üzerindeki kontrolün ve iş kapasiten net biçimde yukarı gidiyor.`;
                     } else if (weightDiff === 0 && maxRepsDiff === 0 && totalRepsDiff === 0) {
                         status = 'plateau';
                         sortOrder = 2;
                         badgeText = `⏸️ ${count} Seanstır Sabit`;
-                        badgeStyle = 'background:#FEF3C7; color:#B45309; border:1px solid #FCD34D;';
+                        badgeStyle = 'background:#7C2D12; color:#FDE68A; border:1px solid #F59E0B;';
                         changeHeadline = `${count} antrenmandır aynı seviyedesin (${formatPerf(latest)})`;
                         coachNote = `Bu takılmayı kırmak için gelecek antrenmanda sadece <strong>1. sette ${item.isTimeBased ? '+5 sn' : '+1 ' + unit}</strong> artırmayı dene!`;
                     } else {
                         status = 'dip';
                         sortOrder = 2;
                         badgeText = `🔄 Geçici Dalgalanma`;
-                        badgeStyle = 'background:#FFF7ED; color:#C2410C; border:1px solid #FDBA74;';
+                        badgeStyle = 'background:#7C2D12; color:#FDE68A; border:1px solid #F59E0B;';
                         changeHeadline = `${hasHigherPeak ? `Zirve rekorun ${formatPerf(peak)}; son` : `İlk kayda göre son`} seansta hafif düşüş var (${formatPerf(latest)})`;
                         coachNote = `Tek günlük yorgunluk veya antrenman sırası kaynaklı olabilir. Gelecek seansta <strong>${formatPerf(peak)}</strong> seviyesini hedefle.`;
                     }
@@ -7727,11 +7750,11 @@
 
             // Prepare fatigue cards (compact row + circular 'i' modal button)
             const renderFatigueCard = (item, idx) => `
-                <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; gap:6px;">
+                <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; gap:6px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                         <div style="min-width:0; flex:1;">
-                            <div style="font-size:13px; font-weight:900; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(item.name)}</div>
-                            <div style="font-size:10.5px; color:#64748B;">${escapeHTML(item.dateFormatted)} • ${item.setsCount} Set</div>
+                            <div style="font-size:13px; font-weight:900; color:#FFFFFF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(item.name)}</div>
+                            <div style="font-size:10.5px; color:#CBD5E1;">${escapeHTML(item.dateFormatted)} • ${item.setsCount} Set</div>
                         </div>
                         <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
                             <span style="font-size:10.5px; font-weight:800; padding:3px 8px; border-radius:999px; white-space:nowrap; ${item.badgeStyle}">
@@ -7741,7 +7764,7 @@
                         </div>
                     </div>
 
-                    <div style="background:#FFFFFF; border:1px solid #CBD5E1; border-radius:8px; padding:6px 10px; font-size:11.5px; color:#0F172A;">
+                    <div style="background:#181530; border:1px solid rgba(167, 139, 250, 0.25); border-radius:8px; padding:6px 10px; font-size:11.5px; color:#F8FAFC;">
                         ${item.setChainText}
                     </div>
                 </div>
@@ -7752,11 +7775,11 @@
 
             // Prepare progression cards (compact row + circular 'i' modal button)
             const renderProgressionCard = (item, idx) => `
-                <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; gap:6px;">
+                <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; gap:6px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                         <div style="min-width:0; flex:1;">
-                            <div style="font-size:13px; font-weight:900; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(item.name)}</div>
-                            <div style="font-size:10.5px; color:#64748B;">${item.sessionsCount} Antrenman</div>
+                            <div style="font-size:13px; font-weight:900; color:#FFFFFF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(item.name)}</div>
+                            <div style="font-size:10.5px; color:#CBD5E1;">${item.sessionsCount} Antrenman</div>
                         </div>
                         <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
                             <span style="font-size:10.5px; font-weight:800; padding:3px 8px; border-radius:999px; white-space:nowrap; ${item.badgeStyle}">
@@ -7766,21 +7789,21 @@
                         </div>
                     </div>
 
-                    <div style="display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:6px; background:#FFFFFF; border:1px solid #CBD5E1; border-radius:8px; padding:6px 10px;">
+                    <div style="display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:6px; background:#181530; border:1px solid rgba(167, 139, 250, 0.25); border-radius:8px; padding:6px 10px;">
                         <div>
-                            <div style="font-size:9.5px; font-weight:800; color:#64748B;">BAŞLANGIÇ</div>
-                            <div style="font-size:11.5px; font-weight:800; color:#475569; margin-top:1px;">${escapeHTML(item.firstPerfText)}</div>
+                            <div style="font-size:9.5px; font-weight:800; color:#CBD5E1;">BAŞLANGIÇ</div>
+                            <div style="font-size:11.5px; font-weight:800; color:#E2E8F0; margin-top:1px;">${escapeHTML(item.firstPerfText)}</div>
                         </div>
-                        <div style="font-size:14px; font-weight:900; color:#84CC16;">➔</div>
+                        <div style="font-size:14px; font-weight:900; color:#4ADE80;">➔</div>
                         <div style="text-align:right;">
-                            <div style="font-size:9.5px; font-weight:800; color:#15803D;">SON DURUM</div>
-                            <div style="font-size:12px; font-weight:900; color:#0F172A; margin-top:1px;">${escapeHTML(item.latestPerfText)}</div>
+                            <div style="font-size:9.5px; font-weight:800; color:#BBF7D0;">SON DURUM</div>
+                            <div style="font-size:12px; font-weight:900; color:#FFFFFF; margin-top:1px;">${escapeHTML(item.latestPerfText)}</div>
                         </div>
                     </div>
                     ${item.hasHigherPeak ? `
-                        <div style="margin-top:5px; display:flex; justify-content:space-between; align-items:center; gap:6px; background:#FFFBEB; border:1px solid #FDE68A; border-radius:7px; padding:4px 8px; font-size:10.5px;">
-                            <span style="font-weight:800; color:#B45309;">🏆 Zirve Rekor</span>
-                            <span style="font-weight:900; color:#0F172A;">${escapeHTML(item.peakPerfText)}</span>
+                        <div style="margin-top:5px; display:flex; justify-content:space-between; align-items:center; gap:6px; background:#271C19; border:1px solid #F59E0B; border-radius:7px; padding:4px 8px; font-size:10.5px;">
+                            <span style="font-weight:800; color:#FDE68A;">🏆 Zirve Rekor</span>
+                            <span style="font-weight:900; color:#FFFFFF;">${escapeHTML(item.peakPerfText)}</span>
                         </div>
                     ` : ''}
                 </div>
@@ -7800,13 +7823,13 @@
                         ? (getRecommendationsForMuscle(missingMuscle.id, 1)[0] || null)
                         : null;
                     tasksHTML.push(`
-                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; justify-content:space-between; gap:8px;">
+                        <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; justify-content:space-between; gap:8px;">
                             <div>
-                                <div style="font-size:10px; font-weight:800; color:#DC2626; text-transform:uppercase;">1. Eksik Kas</div>
-                                <div style="font-size:13px; font-weight:900; color:#0F172A; margin-top:2px;">${escapeHTML(missingMuscle.icon || '💪')} ${escapeHTML(missingMuscle.name)} (${missingMuscle.effectiveTotal === 0 ? '0 Set' : `${missingMuscle.effectiveTotal} Set`})</div>
+                                <div style="font-size:10px; font-weight:800; color:#FECACA; text-transform:uppercase;">1. Eksik Kas</div>
+                                <div style="font-size:13px; font-weight:900; color:#FFFFFF; margin-top:2px;">${escapeHTML(missingMuscle.icon || '💪')} ${escapeHTML(missingMuscle.name)} (${missingMuscle.effectiveTotal === 0 ? '0 Set' : `${missingMuscle.effectiveTotal} Set`})</div>
                             </div>
                             ${recEx ? `
-                                <button type="button" class="btn btn-outline" style="width:100%; font-size:11.5px; padding:7px 10px; font-weight:800; background:#FFFFFF; border-color:#CBD5E1; color:#0F172A;" onclick="openQuickAddToDayModal('${recEx.id}')">
+                                <button type="button" class="btn btn-outline" style="width:100%; font-size:11.5px; padding:7px 10px; font-weight:800; background:#181530; border-color:rgba(167, 139, 250, 0.35); color:#FFFFFF;" onclick="openQuickAddToDayModal('${recEx.id}')">
                                     ➕ ${escapeHTML(recEx.name)} Ekle
                                 </button>
                             ` : ''}
@@ -7825,12 +7848,12 @@
                         || jointCols.find(s => (s.doneSets || 0) === 0)
                         || jointCols[0];
                     tasksHTML.push(`
-                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; justify-content:space-between; gap:8px;">
+                        <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; justify-content:space-between; gap:8px;">
                             <div>
-                                <div style="font-size:10px; font-weight:800; color:#0284C7; text-transform:uppercase;">2. Eklem Açıklığı</div>
-                                <div style="font-size:13px; font-weight:900; color:#0F172A; margin-top:2px;">${escapeHTML(stiffJoint.name || stiffJoint.title || '')} • ${escapeHTML(targetSub.label)}</div>
+                                <div style="font-size:10px; font-weight:800; color:#BAE6FD; text-transform:uppercase;">2. Eklem Açıklığı</div>
+                                <div style="font-size:13px; font-weight:900; color:#FFFFFF; margin-top:2px;">${escapeHTML(stiffJoint.name || stiffJoint.title || '')} • ${escapeHTML(targetSub.label)}</div>
                             </div>
-                            <button type="button" class="btn btn-outline" style="width:100%; font-size:11.5px; padding:7px 10px; font-weight:800; background:#FFFFFF; border-color:#CBD5E1; color:#0F172A;" onclick="openQuickAddToDayModal('${targetSub.recId}')">
+                            <button type="button" class="btn btn-outline" style="width:100%; font-size:11.5px; padding:7px 10px; font-weight:800; background:#181530; border-color:rgba(167, 139, 250, 0.35); color:#FFFFFF;" onclick="openQuickAddToDayModal('${targetSub.recId}')">
                                 ➕ ${escapeHTML(targetSub.recName)} Ekle
                             </button>
                         </div>
@@ -7843,24 +7866,24 @@
             const focusProg = progData.items.find(i => i.status === 'plateau') || progData.items[0] || null;
             if (focusFatigue && focusFatigue.category === 'early_drop') {
                 tasksHTML.push(`
-                    <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; justify-content:space-between; gap:8px;">
+                    <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; justify-content:space-between; gap:8px;">
                         <div>
-                            <div style="font-size:10px; font-weight:800; color:#B45309; text-transform:uppercase;">3. Set Dengesi</div>
-                            <div style="font-size:13px; font-weight:900; color:#0F172A; margin-top:2px;">${escapeHTML(focusFatigue.name)} (${focusFatigue.firstReps}➔${focusFatigue.lastReps})</div>
+                            <div style="font-size:10px; font-weight:800; color:#FDE68A; text-transform:uppercase;">3. Set Dengesi</div>
+                            <div style="font-size:13px; font-weight:900; color:#FFFFFF; margin-top:2px;">${escapeHTML(focusFatigue.name)} (${focusFatigue.firstReps}➔${focusFatigue.lastReps})</div>
                         </div>
-                        <div style="font-size:11px; font-weight:800; color:#15803D; background:#DCFCE7; padding:6px 8px; border-radius:7px; text-align:center;">
+                        <div style="font-size:11px; font-weight:800; color:#BBF7D0; background:#14532D; border:1px solid #22C55E; padding:6px 8px; border-radius:7px; text-align:center;">
                             🎯 İlk Set: ${Math.max(1, focusFatigue.firstReps - 1)} ${focusFatigue.unitLabel} • +30sn Dinlen
                         </div>
                     </div>
                 `);
             } else if (focusProg) {
                 tasksHTML.push(`
-                    <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; justify-content:space-between; gap:8px;">
+                    <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; justify-content:space-between; gap:8px;">
                         <div>
-                            <div style="font-size:10px; font-weight:800; color:#15803D; text-transform:uppercase;">3. Güç Hedefi</div>
-                            <div style="font-size:13px; font-weight:900; color:#0F172A; margin-top:2px;">${escapeHTML(focusProg.name)} (${escapeHTML(focusProg.latestPerfText)})</div>
+                            <div style="font-size:10px; font-weight:800; color:#BBF7D0; text-transform:uppercase;">3. Güç Hedefi</div>
+                            <div style="font-size:13px; font-weight:900; color:#FFFFFF; margin-top:2px;">${escapeHTML(focusProg.name)} (${escapeHTML(focusProg.latestPerfText)})</div>
                         </div>
-                        <div style="font-size:11px; font-weight:800; color:#15803D; background:#DCFCE7; padding:6px 8px; border-radius:7px; text-align:center;">
+                        <div style="font-size:11px; font-weight:800; color:#BBF7D0; background:#14532D; border:1px solid #22C55E; padding:6px 8px; border-radius:7px; text-align:center;">
                             🎯 İlk Sette +1 Tekrar Ekle
                         </div>
                     </div>
@@ -7869,43 +7892,43 @@
 
             container.innerHTML = `
                 <!-- BÖLÜM 1: TEK BAKIŞTA GENEL DURUMUN & KOÇUN ÖZETİ -->
-                <div class="anatomy-hero-wrapper" style="align-items:stretch; padding:12px 14px; margin-bottom:12px;">
+                <div class="anatomy-hero-wrapper" style="align-items:stretch; padding:12px 14px; margin-bottom:12px; background:#181530 !important; border:1.5px solid rgba(167, 139, 250, 0.25) !important; color:#F8FAFC !important;">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px;">
-                        <h3 style="font-size:15px; font-weight:900; color:#0F172A; margin:0; white-space:nowrap;">🧠 Koç Raporu & Karne</h3>
+                        <h3 style="font-size:15px; font-weight:900; color:#FFFFFF; margin:0; white-space:nowrap;">🧠 Koç Raporu & Karne</h3>
                         <button type="button" class="wk-ex-i-btn" onclick="openCoachItemDetailModal('summary')" title="Koç Özeti">i</button>
                     </div>
 
                     <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px;">
-                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:9px 10px; border-radius:9px;">
-                            <div style="font-size:10px; color:#64748B; font-weight:800;">GEÇMİŞ</div>
-                            <div style="font-size:16px; font-weight:900; color:#0F172A; margin-top:2px;">${workoutLogs.length} Seans</div>
-                            <div style="font-size:10.5px; color:#475569; margin-top:1px;">${totalSets} Set • ${Math.round(totalVolume).toLocaleString('tr-TR')} kg</div>
+                        <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); padding:9px 10px; border-radius:9px;">
+                            <div style="font-size:10px; color:#CBD5E1; font-weight:800;">GEÇMİŞ</div>
+                            <div style="font-size:16px; font-weight:900; color:#FFFFFF; margin-top:2px;">${workoutLogs.length} Seans</div>
+                            <div style="font-size:10.5px; color:#E2E8F0; margin-top:1px;">${totalSets} Set • ${Math.round(totalVolume).toLocaleString('tr-TR')} kg</div>
                         </div>
 
-                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:9px 10px; border-radius:9px;">
-                            <div style="font-size:10px; color:#64748B; font-weight:800;">GÜÇLENEN</div>
-                            <div style="font-size:16px; font-weight:900; color:#16A34A; margin-top:2px;">
+                        <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); padding:9px 10px; border-radius:9px;">
+                            <div style="font-size:10px; color:#CBD5E1; font-weight:800;">GÜÇLENEN</div>
+                            <div style="font-size:16px; font-weight:900; color:#4ADE80; margin-top:2px;">
                                 ${progData.progressedCount} / ${progData.items.length} Hareket
                             </div>
-                            <div style="font-size:10.5px; color:#475569; margin-top:1px;">
+                            <div style="font-size:10.5px; color:#E2E8F0; margin-top:1px;">
                                 ${progData.plateauCount > 0 ? `${progData.plateauCount} sabit` : 'Artışta'}
                             </div>
                         </div>
 
-                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:9px 10px; border-radius:9px;">
-                            <div style="font-size:10px; color:#64748B; font-weight:800;">SET DAYANIKLILIĞI</div>
-                            <div style="font-size:16px; font-weight:900; color:#0284C7; margin-top:2px;">%${fatigueData.avgRetention} Koruma</div>
-                            <div style="font-size:10.5px; color:#475569; margin-top:1px;">
+                        <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); padding:9px 10px; border-radius:9px;">
+                            <div style="font-size:10px; color:#CBD5E1; font-weight:800;">SET DAYANIKLILIĞI</div>
+                            <div style="font-size:16px; font-weight:900; color:#7DD3FC; margin-top:2px;">%${fatigueData.avgRetention} Koruma</div>
+                            <div style="font-size:10.5px; color:#E2E8F0; margin-top:1px;">
                                 ${fatigueData.earlyDropCount > 0 ? `${fatigueData.earlyDropCount} hızlı düşüş` : 'Dengeli'}
                             </div>
                         </div>
 
-                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:9px 10px; border-radius:9px;">
-                            <div style="font-size:10px; color:#64748B; font-weight:800;">KİLO & BEL</div>
-                            <div style="font-size:16px; font-weight:900; color:#0F172A; margin-top:2px;">
+                        <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); padding:9px 10px; border-radius:9px;">
+                            <div style="font-size:10px; color:#CBD5E1; font-weight:800;">KİLO & BEL</div>
+                            <div style="font-size:16px; font-weight:900; color:#FFFFFF; margin-top:2px;">
                                 ${deltaWeight !== null ? `${parseFloat(deltaWeight) > 0 ? '+' : ''}${deltaWeight} kg` : (latestScale ? `${latestScale.weight} kg` : '-')}
                             </div>
-                            <div style="font-size:10.5px; color:#475569; margin-top:1px;">
+                            <div style="font-size:10.5px; color:#E2E8F0; margin-top:1px;">
                                 ${deltaWaist !== null ? `Bel: ${parseFloat(deltaWaist) > 0 ? '+' : ''}${deltaWaist} cm` : (latestMeas?.waist ? `Bel: ${latestMeas.waist} cm` : 'Ölçü yok')}
                             </div>
                         </div>
@@ -7913,23 +7936,23 @@
                 </div>
 
                 <!-- BÖLÜM 2: SETLER ARASI GÜÇ DÜŞÜŞÜ -->
-                <div class="anatomy-hero-wrapper" style="align-items:stretch; padding:12px 14px; margin-bottom:12px;">
+                <div class="anatomy-hero-wrapper" style="align-items:stretch; padding:12px 14px; margin-bottom:12px; background:#181530 !important; border:1.5px solid rgba(167, 139, 250, 0.25) !important; color:#F8FAFC !important;">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
                         <div style="display:flex; align-items:center; gap:6px;">
-                            <h3 style="font-size:14.5px; font-weight:900; color:#0F172A; margin:0; white-space:nowrap;">🔋 Set Dayanıklılığı</h3>
+                            <h3 style="font-size:14.5px; font-weight:900; color:#FFFFFF; margin:0; white-space:nowrap;">🔋 Set Dayanıklılığı</h3>
                             <button type="button" class="wk-ex-i-btn" onclick="openCoachItemDetailModal('fatigue_rule')" title="Altın Kural">i</button>
                         </div>
                         <div style="display:flex; gap:4px; flex-wrap:wrap;">
-                            <span style="font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; background:#FEF2F2; color:#DC2626; border:1px solid #FECACA;">⚡ Düşüş: ${fatigueData.earlyDropCount}</span>
-                            <span style="font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; background:#F0F9FF; color:#0369A1; border:1px solid #BAE6FD;">🔋 Doğal: ${fatigueData.normalFatigueCount}</span>
-                            <span style="font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;">🛡️ Tam: ${fatigueData.rockSolidCount}</span>
-                            ${fatigueData.pyramidCount > 0 ? `<span style="font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; background:#EEF2FF; color:#4338CA; border:1px solid #C7D2FE;">📈 Piramit: ${fatigueData.pyramidCount}</span>` : ''}
-                            ${fatigueData.dropSetCount > 0 ? `<span style="font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; background:#FFFBEB; color:#B45309; border:1px solid #FDE68A;">🔻 İnişli: ${fatigueData.dropSetCount}</span>` : ''}
+                            <span style="font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; background:#7F1D1D; color:#FECACA; border:1px solid #EF4444;">⚡ Düşüş: ${fatigueData.earlyDropCount}</span>
+                            <span style="font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; background:#0C4A6E; color:#BAE6FD; border:1px solid #0284C7;">🔋 Doğal: ${fatigueData.normalFatigueCount}</span>
+                            <span style="font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; background:#14532D; color:#BBF7D0; border:1px solid #22C55E;">🛡️ Tam: ${fatigueData.rockSolidCount}</span>
+                            ${fatigueData.pyramidCount > 0 ? `<span style="font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; background:#2C2550; color:#F3E8FF; border:1px solid #A78BFA;">📈 Piramit: ${fatigueData.pyramidCount}</span>` : ''}
+                            ${fatigueData.dropSetCount > 0 ? `<span style="font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; background:#7C2D12; color:#FDE68A; border:1px solid #F59E0B;">🔻 İnişli: ${fatigueData.dropSetCount}</span>` : ''}
                         </div>
                     </div>
 
                     ${fatigueData.items.length === 0 ? `
-                        <div style="background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:8px; padding:12px; text-align:center; font-size:12px; color:#475569;">
+                        <div style="background:#121024; border:1px dashed rgba(167, 139, 250, 0.35); border-radius:8px; padding:12px; text-align:center; font-size:12px; color:#CBD5E1;">
                             En az 2 seti tamamlanmış hareket kaydı yok.
                         </div>
                     ` : `
@@ -7940,7 +7963,7 @@
                             <div id="coachFatigueMoreBox" style="display:none; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:8px; margin-top:8px;">
                                 ${hiddenFatigue.map((it, idx) => renderFatigueCard(it, idx + 4)).join('')}
                             </div>
-                            <button id="coachFatigueMoreBtn" type="button" class="btn btn-outline" style="margin-top:8px; width:100%; font-size:11.5px; font-weight:800; padding:7px; background:#F8FAFC; color:#0F172A; border-color:#CBD5E1;" onclick="toggleCoachReportAccordion('coachFatigueMoreBox', 'coachFatigueMoreBtn', '▼ Diğer ${hiddenFatigue.length} Hareketi Göster', '▲ Gizle')">
+                            <button id="coachFatigueMoreBtn" type="button" class="btn btn-outline" style="margin-top:8px; width:100%; font-size:11.5px; font-weight:800; padding:7px; background:#121024; color:#FFFFFF; border-color:rgba(167, 139, 250, 0.35);" onclick="toggleCoachReportAccordion('coachFatigueMoreBox', 'coachFatigueMoreBtn', '▼ Diğer ${hiddenFatigue.length} Hareketi Göster', '▲ Gizle')">
                                 ▼ Diğer ${hiddenFatigue.length} Hareketi Göster
                             </button>
                         ` : ''}
@@ -7948,18 +7971,18 @@
                 </div>
 
                 <!-- BÖLÜM 3: HAREKETLERDE GELİŞİM -->
-                <div class="anatomy-hero-wrapper" style="align-items:stretch; padding:12px 14px; margin-bottom:12px;">
+                <div class="anatomy-hero-wrapper" style="align-items:stretch; padding:12px 14px; margin-bottom:12px; background:#181530 !important; border:1.5px solid rgba(167, 139, 250, 0.25) !important; color:#F8FAFC !important;">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
-                        <h3 style="font-size:14.5px; font-weight:900; color:#0F172A; margin:0; white-space:nowrap;">📈 Güç Gelişimi</h3>
+                        <h3 style="font-size:14.5px; font-weight:900; color:#FFFFFF; margin:0; white-space:nowrap;">📈 Güç Gelişimi</h3>
                         <div style="display:flex; gap:4px; flex-wrap:wrap;">
-                            <span style="font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;">🚀 Artan: ${progData.progressedCount}</span>
-                            <span style="font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; background:#FEF3C7; color:#B45309; border:1px solid #FCD34D;">⏸️ Sabit: ${progData.plateauCount}</span>
-                            <span style="font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; background:#F1F5F9; color:#334155; border:1px solid #CBD5E1;">🌱 Yeni: ${progData.baselineCount}</span>
+                            <span style="font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; background:#14532D; color:#BBF7D0; border:1px solid #22C55E;">🚀 Artan: ${progData.progressedCount}</span>
+                            <span style="font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; background:#7C2D12; color:#FDE68A; border:1px solid #F59E0B;">⏸️ Sabit: ${progData.plateauCount}</span>
+                            <span style="font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; background:#2C2550; color:#F3E8FF; border:1px solid rgba(167, 139, 250, 0.45);">🌱 Yeni: ${progData.baselineCount}</span>
                         </div>
                     </div>
 
                     ${progData.items.length === 0 ? `
-                        <div style="background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:8px; padding:12px; text-align:center; font-size:12px; color:#475569;">
+                        <div style="background:#121024; border:1px dashed rgba(167, 139, 250, 0.35); border-radius:8px; padding:12px; text-align:center; font-size:12px; color:#CBD5E1;">
                             Henüz kayıtlı hareket geçmişi yok.
                         </div>
                     ` : `
@@ -7970,7 +7993,7 @@
                             <div id="coachProgMoreBox" style="display:none; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:8px; margin-top:8px;">
                                 ${hiddenProg.map((it, idx) => renderProgressionCard(it, idx + 4)).join('')}
                             </div>
-                            <button id="coachProgMoreBtn" type="button" class="btn btn-outline" style="margin-top:8px; width:100%; font-size:11.5px; font-weight:800; padding:7px; background:#F8FAFC; color:#0F172A; border-color:#CBD5E1;" onclick="toggleCoachReportAccordion('coachProgMoreBox', 'coachProgMoreBtn', '▼ Diğer ${hiddenProg.length} Hareketi Göster', '▲ Gizle')">
+                            <button id="coachProgMoreBtn" type="button" class="btn btn-outline" style="margin-top:8px; width:100%; font-size:11.5px; font-weight:800; padding:7px; background:#121024; color:#FFFFFF; border-color:rgba(167, 139, 250, 0.35);" onclick="toggleCoachReportAccordion('coachProgMoreBox', 'coachProgMoreBtn', '▼ Diğer ${hiddenProg.length} Hareketi Göster', '▲ Gizle')">
                                 ▼ Diğer ${hiddenProg.length} Hareketi Göster
                             </button>
                         ` : ''}
@@ -7979,8 +8002,8 @@
 
                 <!-- BÖLÜM 4: BU HAFTA İÇİN 3 NET KOÇ GÖREVİ -->
                 ${tasksHTML.length > 0 ? `
-                    <div class="anatomy-hero-wrapper" style="align-items:stretch; padding:12px 14px;">
-                        <h3 style="font-size:14.5px; font-weight:900; color:#0F172A; margin:0 0 8px 0; white-space:nowrap;">🎯 Haftanın 3 Görevi</h3>
+                    <div class="anatomy-hero-wrapper" style="align-items:stretch; padding:12px 14px; background:#181530 !important; border:1.5px solid rgba(167, 139, 250, 0.25) !important; color:#F8FAFC !important;">
+                        <h3 style="font-size:14.5px; font-weight:900; color:#FFFFFF; margin:0 0 8px 0; white-space:nowrap;">🎯 Haftanın 3 Görevi</h3>
                         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:8px;">
                             ${tasksHTML.join('')}
                         </div>
@@ -8003,18 +8026,18 @@
             if (type === 'summary') {
                 title = 'Koçun Sana Özel Özeti';
                 const bullets = window._lastCoachSummaryBullets || [];
-                bodyHtml = `<div style="display:flex; flex-direction:column; gap:8px; font-size:12.5px; color:#334155; line-height:1.5;">${bullets.map(b => `<div>${b}</div>`).join('')}</div>`;
+                bodyHtml = `<div style="display:flex; flex-direction:column; gap:8px; font-size:12.5px; color:#E2E8F0; line-height:1.5;">${bullets.map(b => `<div>${b}</div>`).join('')}</div>`;
             } else if (type === 'fatigue_rule') {
                 title = 'Set Dayanıklılığı Kuralı';
-                bodyHtml = `<div style="font-size:12.5px; color:#334155; line-height:1.5;">Sabit kiloda 1-2 tekrar düşüşü doğal kas yorgunluğudur; 3+ tekrar düşüşü hızlı düşüş sayılır. Kilo artıran piramit setler tahmin edilen 1RM güç artışıyla, kilo düşüren setler kontrollü drop-set olarak değerlendirilir. İzometrik süre hareketlerinde ise en az 10 sn ve %25 birlikte düşüş olmadan uyarı verilmez.</div>`;
+                bodyHtml = `<div style="font-size:12.5px; color:#E2E8F0; line-height:1.5;">Sabit kiloda 1-2 tekrar düşüşü doğal kas yorgunluğudur; 3+ tekrar düşüşü hızlı düşüş sayılır. Kilo artıran piramit setler tahmin edilen 1RM güç artışıyla, kilo düşüren setler kontrollü drop-set olarak değerlendirilir. İzometrik süre hareketlerinde ise en az 10 sn ve %25 birlikte düşüş olmadan uyarı verilmez.</div>`;
             } else if (type === 'fatigue') {
                 const it = (window._lastCoachFatigueItems || [])[idx];
                 if (!it) return;
                 title = escapeHTML(it.name);
                 bodyHtml = `
-                    <div style="display:flex; flex-direction:column; gap:8px; font-size:12.5px; color:#334155; line-height:1.5;">
-                        <div><strong>🧐 Neden Oldu?</strong> ${it.reasonText}</div>
-                        <div style="background:#FEFCE8; border:1px solid #FEF08A; border-radius:8px; padding:8px 10px; color:#0F172A;"><strong>💡 Koç Tavsiyesi:</strong> ${it.adviceText}</div>
+                    <div style="display:flex; flex-direction:column; gap:8px; font-size:12.5px; color:#E2E8F0; line-height:1.5;">
+                        <div><strong style="color:#FFFFFF;">🧐 Neden Oldu?</strong> ${it.reasonText}</div>
+                        <div style="background:#271C19; border:1px solid #F59E0B; border-radius:8px; padding:8px 10px; color:#F8FAFC;"><strong style="color:#FDE68A;">💡 Koç Tavsiyesi:</strong> ${it.adviceText}</div>
                     </div>
                 `;
             } else if (type === 'prog') {
@@ -8022,17 +8045,17 @@
                 if (!it) return;
                 title = escapeHTML(it.name);
                 bodyHtml = `
-                    <div style="display:flex; flex-direction:column; gap:8px; font-size:12.5px; color:#334155; line-height:1.5;">
-                        <div><strong>📊 Durum:</strong> ${escapeHTML(it.changeHeadline)}.</div>
-                        <div style="background:#F0FDF4; border:1px solid #BBF7D0; border-radius:8px; padding:8px 10px; color:#0F172A;"><strong>💡 Hedef:</strong> ${it.coachNote}</div>
+                    <div style="display:flex; flex-direction:column; gap:8px; font-size:12.5px; color:#E2E8F0; line-height:1.5;">
+                        <div><strong style="color:#FFFFFF;">📊 Durum:</strong> ${escapeHTML(it.changeHeadline)}.</div>
+                        <div style="background:#132E24; border:1px solid #22C55E; border-radius:8px; padding:8px 10px; color:#F8FAFC;"><strong style="color:#BBF7D0;">💡 Hedef:</strong> ${it.coachNote}</div>
                     </div>
                 `;
             }
             modal.innerHTML = `
-                <div class="modal-box" style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:16px; max-width:380px; width:92%; padding:16px;">
+                <div class="modal-box" style="background:#181530; border:1.5px solid rgba(167, 139, 250, 0.35); border-radius:16px; max-width:380px; width:92%; padding:16px; color:#F8FAFC;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <div style="font-size:15px; font-weight:900; color:#0F172A;">${title}</div>
-                        <button type="button" onclick="document.getElementById('analyticsQuickInfoModal').classList.remove('active')" style="width:28px; height:28px; border-radius:50%; border:1px solid #CBD5E1; background:#F8FAFC; color:#0F172A; font-weight:800; cursor:pointer;">✕</button>
+                        <div style="font-size:15px; font-weight:900; color:#FFFFFF;">${title}</div>
+                        <button type="button" onclick="document.getElementById('analyticsQuickInfoModal').classList.remove('active')" style="width:28px; height:28px; border-radius:50%; border:1px solid rgba(167, 139, 250, 0.35); background:#121024; color:#FFFFFF; font-weight:800; cursor:pointer;">✕</button>
                     </div>
                     ${bodyHtml}
                 </div>
@@ -8406,14 +8429,14 @@
 
             const muscleRowsHtml = f.muscleBreakdown.map(m => {
                 const pct = Math.min(100, Math.round((m.doneSets / m.targetSets) * 100));
-                const badgeBg = pct >= 100 ? '#DCFCE7' : (pct > 0 ? '#FEF3C7' : '#FEE2E2');
-                const badgeCol = pct >= 100 ? '#15803D' : (pct > 0 ? '#B45309' : '#B91C1C');
+                const badgeBg = pct >= 100 ? '#14532D' : (pct > 0 ? '#7C2D12' : '#7F1D1D');
+                const badgeCol = pct >= 100 ? '#BBF7D0' : (pct > 0 ? '#FDE68A' : '#FECACA');
                 const cleanName = String(m.name || '').replace(/\s*\(.*?\)\s*/g, '').trim();
                 return `
-                    <div style="display:flex; flex-direction:column; gap:4px; padding:8px 10px; background:#FFFFFF; border:1px solid #E2E8F0; border-radius:8px;">
-                        <div style="font-size:12px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(cleanName)}</div>
+                    <div style="display:flex; flex-direction:column; gap:4px; padding:8px 10px; background:#121024; border:1px solid rgba(167, 139, 250, 0.25); border-radius:8px;">
+                        <div style="font-size:12px; font-weight:800; color:#FFFFFF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(cleanName)}</div>
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
-                            <span class="tabular-nums" style="font-size:11.5px; color:#475569; font-weight:700; white-space:nowrap;">${m.doneSets} / ${m.targetSets} Set</span>
+                            <span class="tabular-nums" style="font-size:11.5px; color:#CBD5E1; font-weight:700; white-space:nowrap;">${m.doneSets} / ${m.targetSets} Set</span>
                             <span class="tabular-nums" style="background:${badgeBg}; color:${badgeCol}; font-weight:900; padding:2px 7px; border-radius:6px; font-size:11px; white-space:nowrap;">+${m.ptsDone}p</span>
                         </div>
                     </div>
@@ -8423,11 +8446,11 @@
             const stepsRowsHtml = c.dailyStepsList.map(d => {
                 const pct = Math.min(100, Math.round((d.steps / 8000) * 100));
                 return `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 10px; background:#FFFFFF; border:1px solid #E2E8F0; border-radius:8px; font-size:12px; gap:8px;">
-                        <span style="font-weight:800; color:#0F172A; white-space:nowrap;">${escapeHTML(d.dayLabel)}</span>
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 10px; background:#121024; border:1px solid rgba(167, 139, 250, 0.25); border-radius:8px; font-size:12px; gap:8px;">
+                        <span style="font-weight:800; color:#FFFFFF; white-space:nowrap;">${escapeHTML(d.dayLabel)}</span>
                         <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
-                            ${d.restingHR ? `<span style="font-size:11px; color:#475569; font-weight:700; white-space:nowrap;">❤️ ${d.restingHR}</span>` : ''}
-                            <span class="tabular-nums" style="font-weight:900; color:${d.steps >= 8000 ? '#15803D' : '#0F172A'}; white-space:nowrap;">${d.steps.toLocaleString('tr-TR')} / 8.000 (%${pct})</span>
+                            ${d.restingHR ? `<span style="font-size:11px; color:#CBD5E1; font-weight:700; white-space:nowrap;">❤️ ${d.restingHR}</span>` : ''}
+                            <span class="tabular-nums" style="font-weight:900; color:${d.steps >= 8000 ? '#BBF7D0' : '#FFFFFF'}; white-space:nowrap;">${d.steps.toLocaleString('tr-TR')} / 8.000 (%${pct})</span>
                         </div>
                     </div>
                 `;
@@ -8441,66 +8464,66 @@
                         cs.powerWatts ? `${cs.powerWatts} W` : ''
                     ].filter(Boolean).join(' • ');
                     return `
-                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:#FFFFFF; border:1px solid #BAE6FD; border-radius:8px; font-size:12px; gap:8px; flex-wrap:wrap;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:#121024; border:1px solid #0284C7; border-radius:8px; font-size:12px; gap:8px; flex-wrap:wrap;">
                             <div>
-                                <div style="font-weight:800; color:#0F172A;">🚣🏃 ${escapeHTML(cs.name)} <span style="font-size:11px; color:#475569; font-weight:600;">(${escapeHTML(cs.date)})</span></div>
-                                <div style="font-size:11px; color:#0369A1; font-weight:700; margin-top:2px;">
+                                <div style="font-weight:800; color:#FFFFFF;">🚣🏃 ${escapeHTML(cs.name)} <span style="font-size:11px; color:#CBD5E1; font-weight:600;">(${escapeHTML(cs.date)})</span></div>
+                                <div style="font-size:11px; color:#BAE6FD; font-weight:700; margin-top:2px;">
                                     ❤️ Ort. ${cs.avgHr} bpm (Zirve ${cs.maxHr}) • ${escapeHTML(cs.zoneLabel)}${extraMeta ? ` • ${escapeHTML(extraMeta)}` : ''}
                                 </div>
                             </div>
                             <div style="text-align:right;">
-                                <div class="tabular-nums" style="font-weight:900; color:#0369A1; font-size:12.5px;">${cs.rawMin} dk × ${cs.multiplier} = ${cs.eqMin} eşd. dk</div>
+                                <div class="tabular-nums" style="font-weight:900; color:#7DD3FC; font-size:12.5px;">${cs.rawMin} dk × ${cs.multiplier} = ${cs.eqMin} eşd. dk</div>
                             </div>
                         </div>
                     `;
                 }).join('')
-                : `<div style="padding:10px; background:#FFFFFF; border:1px dashed #CBD5E1; border-radius:8px; font-size:11.5px; color:#475569; text-align:center;">
+                : `<div style="padding:10px; background:#121024; border:1px dashed rgba(167, 139, 250, 0.35); border-radius:8px; font-size:11.5px; color:#CBD5E1; text-align:center;">
                     Bu hafta henüz kardiyo seansı yok.
                    </div>`;
 
             container.innerHTML = `
                 <!-- HAFTA SEÇİCİ & YENİLEME (TEK SATIR) -->
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:12px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:8px 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:12px; background:#181530; border:1px solid rgba(167, 139, 250, 0.25); border-radius:10px; padding:8px 12px;">
                     <div style="display:flex; align-items:center; gap:6px;">
-                        <span style="font-size:13.5px; font-weight:900; color:#0F172A; white-space:nowrap;">Puan Özeti • ${escapeHTML(data.bounds.label)}</span>
+                        <span style="font-size:13.5px; font-weight:900; color:#FFFFFF; white-space:nowrap;">Puan Özeti • ${escapeHTML(data.bounds.label)}</span>
                         <button type="button" class="wk-ex-i-btn" onclick="openAnalyticsInfoModal('score_method')" title="Puanlama Yöntemi">i</button>
                     </div>
                     <div style="display:flex; gap:5px; align-items:center;">
-                        <button type="button" class="btn btn-outline ${currentScoreWeekOffset === -1 ? 'active-filter-pill' : ''}" style="font-size:11px; padding:4px 8px; font-weight:800; border-radius:7px;" onclick="setScoreAnalyticsWeekOffset(-1)">◀ Geçen</button>
-                        <button type="button" class="btn btn-outline ${currentScoreWeekOffset === 0 ? 'active-filter-pill' : ''}" style="font-size:11px; padding:4px 8px; font-weight:800; border-radius:7px;" onclick="setScoreAnalyticsWeekOffset(0)">Bu Hafta</button>
-                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:4px 8px; font-weight:800; border-radius:7px; color:#0369A1; border-color:#0284C7;" onclick="if(window.syncGarminActivitiesFromTredict){window.syncGarminActivitiesFromTredict(); setTimeout(renderAnalytics, 700);}">🔄 Saat</button>
+                        <button type="button" class="btn btn-outline ${currentScoreWeekOffset === -1 ? 'active-filter-pill' : ''}" style="font-size:11px; padding:4px 8px; font-weight:800; border-radius:7px; background:${currentScoreWeekOffset === -1 ? '#6D28D9' : '#121024'}; color:${currentScoreWeekOffset === -1 ? '#FFFFFF' : '#CBD5E1'}; border-color:rgba(167, 139, 250, 0.35);" onclick="setScoreAnalyticsWeekOffset(-1)">◀ Geçen</button>
+                        <button type="button" class="btn btn-outline ${currentScoreWeekOffset === 0 ? 'active-filter-pill' : ''}" style="font-size:11px; padding:4px 8px; font-weight:800; border-radius:7px; background:${currentScoreWeekOffset === 0 ? '#6D28D9' : '#121024'}; color:${currentScoreWeekOffset === 0 ? '#FFFFFF' : '#CBD5E1'}; border-color:rgba(167, 139, 250, 0.35);" onclick="setScoreAnalyticsWeekOffset(0)">Bu Hafta</button>
+                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:4px 8px; font-weight:800; border-radius:7px; background:#0C4A6E; color:#BAE6FD; border-color:#0284C7;" onclick="if(window.syncGarminActivitiesFromTredict){window.syncGarminActivitiesFromTredict(); setTimeout(renderAnalytics, 700);}">🔄 Saat</button>
                     </div>
                 </div>
 
                 <!-- İKİLİ BÜYÜK PUAN ÖZET KARTLARI -->
                 <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px; margin-bottom:14px;">
                     <!-- KIRMIZI FİTNESS KARTI -->
-                    <div style="background:#FEF2F2; border:1.5px solid #EF4444; border-radius:12px; padding:12px 14px; color:#0F172A;">
+                    <div style="background:#181530; border:1.5px solid #EF4444; border-radius:12px; padding:12px 14px; color:#F8FAFC;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                            <span style="font-size:12.5px; font-weight:900; color:#B91C1C;">🔴 FİTNESS PUANI</span>
-                            <span class="tabular-nums" style="font-size:20px; font-weight:900; color:#991B1B;">${f.totalScore} <span style="font-size:12px; color:#B91C1C;">/ 100</span></span>
+                            <span style="font-size:12.5px; font-weight:900; color:#FECACA;">🔴 FİTNESS PUANI</span>
+                            <span class="tabular-nums" style="font-size:20px; font-weight:900; color:#FFFFFF;">${f.totalScore} <span style="font-size:12px; color:#FECACA;">/ 100</span></span>
                         </div>
-                        <div style="width:100%; height:8px; background:#FEE2E2; border:1px solid #FECACA; border-radius:999px; overflow:hidden; margin-bottom:10px;">
+                        <div style="width:100%; height:8px; background:#121024; border:1px solid rgba(239, 68, 68, 0.4); border-radius:999px; overflow:hidden; margin-bottom:10px;">
                             <div style="height:100%; width:${f.totalScore}%; background:linear-gradient(90deg, #DC2626 0%, #EF4444 100%); border-radius:999px;"></div>
                         </div>
 
                         <div style="display:flex; flex-direction:column; gap:6px; font-size:12px;">
-                            <div style="background:#FFFFFF; border:1px solid #FECACA; border-radius:8px; padding:7px 10px; display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">
+                            <div style="background:#121024; border:1px solid rgba(239, 68, 68, 0.35); border-radius:8px; padding:7px 10px; display:flex; justify-content:space-between; font-weight:800; color:#FFFFFF;">
                                 <span>1. 10 Kas Dengesi (Plan: ${f.muscleScoreProjected}p)</span>
-                                <span class="tabular-nums" style="color:#B91C1C;">${f.muscleScoreDone} / 45p</span>
+                                <span class="tabular-nums" style="color:#FECACA;">${f.muscleScoreDone} / 45p</span>
                             </div>
-                            <div style="background:#FFFFFF; border:1px solid #FECACA; border-radius:8px; padding:7px 10px; display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">
+                            <div style="background:#121024; border:1px solid rgba(239, 68, 68, 0.35); border-radius:8px; padding:7px 10px; display:flex; justify-content:space-between; font-weight:800; color:#FFFFFF;">
                                 <span>2. Kuvvet Seti (${f.totalStrengthSetsDone} / 40 Set)</span>
-                                <span class="tabular-nums" style="color:#B91C1C;">${f.setVolumeScoreDone} / 35p</span>
+                                <span class="tabular-nums" style="color:#FECACA;">${f.setVolumeScoreDone} / 35p</span>
                             </div>
-                            <div style="background:#FFFFFF; border:1px solid #FECACA; border-radius:8px; padding:7px 10px; display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">
+                            <div style="background:#121024; border:1px solid rgba(239, 68, 68, 0.35); border-radius:8px; padding:7px 10px; display:flex; justify-content:space-between; font-weight:800; color:#FFFFFF;">
                                 <span>3. Çok Eklemli Oran (%${f.compoundPct})</span>
-                                <span class="tabular-nums" style="color:#B91C1C;">${f.compoundScoreDone} / 20p</span>
+                                <span class="tabular-nums" style="color:#FECACA;">${f.compoundScoreDone} / 20p</span>
                             </div>
                         </div>
 
                         <div style="margin-top:10px;">
-                            <div style="font-size:11px; font-weight:900; color:#991B1B; margin-bottom:5px;">10 ANA KAS PUANI:</div>
+                            <div style="font-size:11px; font-weight:900; color:#FECACA; margin-bottom:5px;">10 ANA KAS PUANI:</div>
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
                                 ${muscleRowsHtml}
                             </div>
@@ -8508,37 +8531,37 @@
                     </div>
 
                     <!-- MAVİ KARDİYO KARTI -->
-                    <div style="background:#F0F9FF; border:1.5px solid #0284C7; border-radius:12px; padding:12px 14px; color:#0F172A;">
+                    <div style="background:#181530; border:1.5px solid #0284C7; border-radius:12px; padding:12px 14px; color:#F8FAFC;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                            <span style="font-size:12.5px; font-weight:900; color:#0369A1;">🔵 KARDİYO PUANI</span>
-                            <span class="tabular-nums" style="font-size:20px; font-weight:900; color:#075985;">${c.totalScore} <span style="font-size:12px; color:#0369A1;">/ 100</span></span>
+                            <span style="font-size:12.5px; font-weight:900; color:#BAE6FD;">🔵 KARDİYO PUANI</span>
+                            <span class="tabular-nums" style="font-size:20px; font-weight:900; color:#FFFFFF;">${c.totalScore} <span style="font-size:12px; color:#BAE6FD;">/ 100</span></span>
                         </div>
-                        <div style="width:100%; height:8px; background:#DBEAFE; border:1px solid #BFDBFE; border-radius:999px; overflow:hidden; margin-bottom:10px;">
+                        <div style="width:100%; height:8px; background:#121024; border:1px solid rgba(2, 132, 199, 0.4); border-radius:999px; overflow:hidden; margin-bottom:10px;">
                             <div style="height:100%; width:${c.totalScore}%; background:linear-gradient(90deg, #0284C7 0%, #2563EB 100%); border-radius:999px;"></div>
                         </div>
 
                         <div style="display:flex; flex-direction:column; gap:6px; font-size:12px;">
-                            <div style="background:#FFFFFF; border:1px solid #BAE6FD; border-radius:8px; padding:7px 10px; display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">
+                            <div style="background:#121024; border:1px solid rgba(2, 132, 199, 0.35); border-radius:8px; padding:7px 10px; display:flex; justify-content:space-between; font-weight:800; color:#FFFFFF;">
                                 <span>1. Haftalık Adım (${c.weeklyStepsTotal.toLocaleString('tr-TR')} / 56B)</span>
-                                <span class="tabular-nums" style="color:#0369A1;">${c.stepsScore} / 40p</span>
+                                <span class="tabular-nums" style="color:#BAE6FD;">${c.stepsScore} / 40p</span>
                             </div>
-                            <div style="background:#FFFFFF; border:1px solid #BAE6FD; border-radius:8px; padding:7px 10px; display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">
+                            <div style="background:#121024; border:1px solid rgba(2, 132, 199, 0.35); border-radius:8px; padding:7px 10px; display:flex; justify-content:space-between; font-weight:800; color:#FFFFFF;">
                                 <span>2. Kardiyo Efor (${c.totalEqCardioMin} / 150 dk)</span>
-                                <span class="tabular-nums" style="color:#0369A1;">${c.cardioEffortScore} / 45p</span>
+                                <span class="tabular-nums" style="color:#BAE6FD;">${c.cardioEffortScore} / 45p</span>
                             </div>
-                            <div style="background:#FFFFFF; border:1px solid #BAE6FD; border-radius:8px; padding:7px 10px; display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">
+                            <div style="background:#121024; border:1px solid rgba(2, 132, 199, 0.35); border-radius:8px; padding:7px 10px; display:flex; justify-content:space-between; font-weight:800; color:#FFFFFF;">
                                 <span>3. Aktif Gün (${c.activeCardioDaysCount} / 3 Gün)</span>
-                                <span class="tabular-nums" style="color:#0369A1;">${c.cardioFreqScore} / 15p</span>
+                                <span class="tabular-nums" style="color:#BAE6FD;">${c.cardioFreqScore} / 15p</span>
                             </div>
                         </div>
 
                         <div style="margin-top:10px;">
-                            <div style="font-size:11px; font-weight:900; color:#075985; margin-bottom:5px;">KARDİYO SEANSLARI (${c.totalRawCardioMin} ➔ ${c.totalEqCardioMin} Dk):</div>
+                            <div style="font-size:11px; font-weight:900; color:#BAE6FD; margin-bottom:5px;">KARDİYO SEANSLARI (${c.totalRawCardioMin} ➔ ${c.totalEqCardioMin} Dk):</div>
                             <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:10px;">
                                 ${cardioExRowsHtml}
                             </div>
 
-                            <div style="font-size:11px; font-weight:900; color:#075985; margin-bottom:5px;">GÜNLÜK ADIM (ORT. ${c.dailyAvgSteps.toLocaleString('tr-TR')}):</div>
+                            <div style="font-size:11px; font-weight:900; color:#BAE6FD; margin-bottom:5px;">GÜNLÜK ADIM (ORT. ${c.dailyAvgSteps.toLocaleString('tr-TR')}):</div>
                             <div style="display:flex; flex-direction:column; gap:5px;">
                                 ${stepsRowsHtml}
                             </div>
@@ -8562,18 +8585,18 @@
             if (type === 'tonnage') {
                 title = 'Tonaj & Çalışma Hesabı';
                 bodyHtml = `
-                    <div style="font-size:12.5px; color:#334155; line-height:1.5;">
+                    <div style="font-size:12.5px; color:#E2E8F0; line-height:1.5;">
                         Şınav ve barfiks gibi vücut ağırlığı hareketleri ile Plank gibi süreli duruşlar harcanan efora göre toplam tonaj ve set hesabına otomatik eklenir.
                     </div>
                 `;
             } else if (type === 'posture') {
                 title = 'İtiş / Çekiş & Duruş Dengesi';
                 bodyHtml = `
-                    <div style="display:flex; flex-direction:column; gap:8px; font-size:12.5px; color:#334155; line-height:1.5;">
-                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:8px 10px; display:flex; justify-content:space-between; font-weight:800; color:#0F172A;">
+                    <div style="display:flex; flex-direction:column; gap:8px; font-size:12.5px; color:#E2E8F0; line-height:1.5;">
+                        <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); border-radius:8px; padding:8px 10px; display:flex; justify-content:space-between; font-weight:800; color:#FFFFFF;">
                             <span>Çekiş: ${escapeHTML(String(pullKg || 0))} kg</span>
                             <span>İtiş: ${escapeHTML(String(pushKg || 0))} kg</span>
-                            <span style="color:#0369A1;">Oran: ${escapeHTML(String(ratioVal || '1.00'))}</span>
+                            <span style="color:#BAE6FD;">Oran: ${escapeHTML(String(ratioVal || '1.00'))}</span>
                         </div>
                         <div>Omuz ve omurga sağlığı için sırt çekiş hacminin göğüs/omuz itiş hacmine eşit veya biraz üzerinde (0.85 – 1.35 arası) olması idealdir.</div>
                     </div>
@@ -8581,17 +8604,17 @@
             } else if (type === 'score_method') {
                 title = 'Fitness & Kardiyo Puanlama';
                 bodyHtml = `
-                    <div style="display:flex; flex-direction:column; gap:8px; font-size:12.5px; color:#334155; line-height:1.5;">
-                        <div><strong style="color:#B91C1C;">Fitness Puanı (100p):</strong> 10 ana kas dengesi (45p), haftalık 40 efektif set hedefi (35p) ve çok eklemli temel hareket oranı (20p) üzerinden hesaplanır.</div>
-                        <div><strong style="color:#0369A1;">Kardiyo Puanı (100p):</strong> Günde 8.000 adım / haftalık 56.000 adım (40p), nabız bölgesine göre çarpanlı 150 eşdeğer dakika (45p) ve haftada en az 3 aktif gün dağılımı (15p) ile hesaplanır.</div>
+                    <div style="display:flex; flex-direction:column; gap:8px; font-size:12.5px; color:#E2E8F0; line-height:1.5;">
+                        <div><strong style="color:#FECACA;">Fitness Puanı (100p):</strong> 10 ana kas dengesi (45p), haftalık 40 efektif set hedefi (35p) ve çok eklemli temel hareket oranı (20p) üzerinden hesaplanır.</div>
+                        <div><strong style="color:#BAE6FD;">Kardiyo Puanı (100p):</strong> Günde 8.000 adım / haftalık 56.000 adım (40p), nabız bölgesine göre çarpanlı 150 eşdeğer dakika (45p) ve haftada en az 3 aktif gün dağılımı (15p) ile hesaplanır.</div>
                     </div>
                 `;
             }
             modal.innerHTML = `
-                <div class="modal-box" style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:16px; max-width:380px; width:92%; padding:16px;">
+                <div class="modal-box" style="background:#181530; border:1.5px solid rgba(167, 139, 250, 0.35); border-radius:16px; max-width:380px; width:92%; padding:16px; color:#F8FAFC;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <div style="font-size:15px; font-weight:900; color:#0F172A;">${title}</div>
-                        <button type="button" onclick="document.getElementById('analyticsQuickInfoModal').classList.remove('active')" style="width:28px; height:28px; border-radius:50%; border:1px solid #CBD5E1; background:#F8FAFC; color:#0F172A; font-weight:800; cursor:pointer;">✕</button>
+                        <div style="font-size:15px; font-weight:900; color:#FFFFFF;">${title}</div>
+                        <button type="button" onclick="document.getElementById('analyticsQuickInfoModal').classList.remove('active')" style="width:28px; height:28px; border-radius:50%; border:1px solid rgba(167, 139, 250, 0.35); background:#121024; color:#FFFFFF; font-weight:800; cursor:pointer;">✕</button>
                     </div>
                     ${bodyHtml}
                 </div>

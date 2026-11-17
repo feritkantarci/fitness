@@ -2128,6 +2128,64 @@ function runAcademicMathSuite(moduleSources, dbText) {
         const ok = Boolean(hasThemeCss && res.genUnified && res.calUnified && res.liveUnified);
         return { ok, actual: JSON.stringify({ hasThemeCss, ...res }) };
       }
+    },
+    {
+      id: 'T39',
+      owner: 'workout-guard',
+      title: 'Tarih Bazlı Hafta Bağımsızlığı: Eklenen Hareket Geçmiş ve Gelecek Haftalara Sızmaz',
+      expected: 'Bu hafta/gelecek hafta Çarşambasına eklenen hareketler sadece kendi tarihine yazılır; -7g, +7g, +14g izoledir',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const today = new Date();
+          const dow = today.getDay();
+          const diffToWed = 3 - (dow === 0 ? 7 : dow);
+          const curWed = new Date(today.getFullYear(), today.getMonth(), today.getDate() + diffToWed);
+          const prevWed = new Date(curWed.getFullYear(), curWed.getMonth(), curWed.getDate() - 7);
+          const nextWed = new Date(curWed.getFullYear(), curWed.getMonth(), curWed.getDate() + 7);
+          const twoWkWed = new Date(curWed.getFullYear(), curWed.getMonth(), curWed.getDate() + 14);
+          const curWedYMD = formatDateYMD(curWed);
+          const nextWedYMD = formatDateYMD(nextWed);
+
+          const uid = 'usr_exam';
+          localStorage.removeItem('celik_kodu_weekly_schedule_' + uid);
+          localStorage.removeItem('celik_kodu_next_weekly_schedule_' + uid);
+          localStorage.removeItem('celik_kodu_date_schedule_' + uid);
+
+          const addCurOk = addExerciseToDaySchedule(3, 'db_lateral_raise', 3, '12', null, curWedYMD);
+          const pCur = getPlanForDate(curWed);
+          const pPrev = getPlanForDate(prevWed);
+          const pNextBefore = getPlanForDate(nextWed);
+          const pTwoWkBefore = getPlanForDate(twoWkWed);
+
+          const hasEx = (plan, exId) => {
+            if (!plan || plan.rest) return false;
+            const list = (plan.customWorkout && Array.isArray(plan.customWorkout.exercises))
+              ? plan.customWorkout.exercises
+              : (Array.isArray(plan.exercises) ? plan.exercises : []);
+            return list.some(e => e && (e.id === exId || e.exId === exId));
+          };
+
+          const addNextOk = addExerciseToDaySchedule(3, 'mach_face_pull', 3, '15', null, nextWedYMD);
+          const pCurAfterNextAdd = getPlanForDate(curWed);
+          const pNextAfter = getPlanForDate(nextWed);
+          const pTwoWkAfter = getPlanForDate(twoWkWed);
+
+          return {
+            addCurOk,
+            addNextOk,
+            curHasLateral: hasEx(pCur, 'db_lateral_raise'),
+            prevIsRest: Boolean(pPrev && pPrev.rest && !hasEx(pPrev, 'db_lateral_raise')),
+            nextBeforeIsRest: Boolean(pNextBefore && pNextBefore.rest && !hasEx(pNextBefore, 'db_lateral_raise')),
+            twoWkBeforeIsRest: Boolean(pTwoWkBefore && pTwoWkBefore.rest && !hasEx(pTwoWkBefore, 'db_lateral_raise')),
+            nextHasFacePullOnly: hasEx(pNextAfter, 'mach_face_pull') && !hasEx(pNextAfter, 'db_lateral_raise'),
+            curUnaffectedByNext: hasEx(pCurAfterNextAdd, 'db_lateral_raise') && !hasEx(pCurAfterNextAdd, 'mach_face_pull'),
+            twoWkStillRest: Boolean(pTwoWkAfter && pTwoWkAfter.rest)
+          };
+        })()`, ctx);
+        const ok = Object.values(res).every(Boolean);
+        return { ok, actual: JSON.stringify(res) };
+      }
     }
   ];
 

@@ -13972,6 +13972,9 @@ div[style*="linear-gradient"][style*="F43F5E"] div {
     --cyan: #7DD3FC;
     --bg-surface: #181530;
     --bg-card: #181530;
+    --bg-elevated: #121024;
+    --green-success: #4ADE80;
+    --green: #4ADE80;
     --border: rgba(167, 139, 250, 0.25);
 }
 
@@ -14022,3 +14025,647 @@ div[style*="linear-gradient"][style*="F43F5E"] div {
     color: #7DD3FC !important;
     border-color: rgba(56, 189, 248, 0.45) !important;
 }
+
+#completeModal .form-label,
+#completeModal label {
+    color: #E2E8F0 !important;
+}
+
+#completeModal .btn-danger-soft {
+    background: #7F1D1D !important;
+    border: 1px solid #EF4444 !important;
+    color: #FECACA !important;
+}
+
+#logWorkoutSummaryHint div[style*="background:#F8FAFC"] {
+    background: #121024 !important;
+    background-color: #121024 !important;
+    border-color: rgba(167, 139, 250, 0.25) !important;
+    color: #FFFFFF !important;
+}
+
+#logWorkoutSummaryHint strong[style*="color:#0F172A"],
+#logWorkoutSummaryHint span[style*="color:#0F172A"] {
+    color: #FFFFFF !important;
+}
+
+#logWorkoutSummaryHint span[style*="color:#15803D"] {
+    background: #14532D !important;
+    border-color: #22C55E !important;
+    color: #BBF7D0 !important;
+}
+
+#logWorkoutSummaryHint span[style*="color:#0369A1"] {
+    background: #0C4A6E !important;
+    border-color: #38BDF8 !important;
+    color: #BAE6FD !important;
+}
+
+#logWorkoutSummaryHint span[style*="color:#DC2626"] {
+    background: #7F1D1D !important;
+    border-color: #EF4444 !important;
+    color: #FECACA !important;
+    opacity: 1 !important;
+}
+
+#activeWorkoutContainer {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.daylight-studio-wrap {
+    padding: 0 !important;
+    margin: 0 auto !important;
+}
+
+.daylight-hub-bottom-zone {
+    margin-bottom: 10px !important;
+}
+
+#studioSectionInWorkout {
+    margin-top: 0 !important;
+    margin-bottom: 12px !important;
+}
+
+#embeddedCalendarSection {
+    margin-top: 0 !important;
+    margin-bottom: 10px !important;
+}
+
+.stitch-calendar-shell,
+#studioSectionInWorkout > .generator-card {
+    margin-bottom: 0 !important;
+}
+
+.daylight-hub-bottom-zone div {
+    color: #E2E8F0 !important;
+}
+
+.daylight-hub-bottom-zone div:first-child > div:first-child {
+    color: #FFFFFF !important;
+}
+
+.stitch-cal-view-pills .cal-pill-btn.active,
+.wk-btn-primary-compact,
+.daylight-studio-card .daylight-set-chip.active,
+.daylight-rest-skip-btn {
+    background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important;
+    background-color: #6D28D9 !important;
+    color: #FFFFFF !important;
+}
+
+.cal-tag-pill.rest {
+    background: #1E293B !important;
+    color: #E2E8F0 !important;
+    border: 1px solid #475569 !important;
+}
+
+#studioSectionInWorkout button[onclick*="removeExerciseFromCustomRoutine"] {
+    background: #7F1D1D !important;
+    border-color: #EF4444 !important;
+    color: #FECACA !important;
+}
+
+.wk-carousel-close-btn {
+    background: #2C2550 !important;
+    border: 1px solid rgba(167, 139, 250, 0.35) !important;
+    color: #F3E8FF !important;
+}
+
+.daylight-chart-badge {
+    background: #181530 !important;
+    border: 1px solid rgba(167, 139, 250, 0.35) !important;
+    color: #F3E8FF !important;
+}
+
+.daylight-rest-card .daylight-primary-cta {
+    background: linear-gradient(135deg, #047857 0%, #065F46 100%) !important;
+    background-color: #047857 !important;
+    color: #FFFFFF !important;
+}
+
+.stitch-dark-hud .btn-view-toggle.active,
+.workout-sticky-hud .btn-view-toggle.active,
+.btn-view-toggle.active,
+.stitch-hud-btn-primary,
+.hevy-set-pill.target {
+    background: #6D28D9 !important;
+    border-color: #8B5CF6 !important;
+    color: #FFFFFF !important;
+}
+
+#activeWorkoutContainer span[style*="color:#D97706"],
+#activeWorkoutContainer span[style*="color: #D97706"],
+#activeWorkoutContainer span[style*="color:var(--gold)"] {
+    color: #B45309 !important;
+}
+
+/* ==============================================================================
+   KÜTÜPHANE, GEÇMİŞ, ANALİZ & PROFİL SEKMELERİ — KOYU MOR (ATHLETIQ #181530) TEMA
+   ============================================================================== */
+#libraryTab,
+#historyTab,
+#analyticsTab,
+#profileTab {
+    --bg-surface: #121024;
+    --bg-card: #181530;
+    --bg-elevated: #121024;
+    --border: rgba(167, 139, 250, 0.24);
+    --text-primary: #FFFFFF;
+    --text-secondary: #CBD5E1;
+    --text-tertiary: #CBD5E1;
+    --gold: #FCD34D;
+    --cyan: #7DD3FC;
+    --green-success: #4ADE80;
+    --green: #4ADE80;
+}
+
+#libraryTab > .generator-card,
+#historyTab > .generator-card,
+#analyticsTab > .generator-card,
+#profileTab > .generator-card {
+    background: linear-gradient(165deg, #181530 0%, #100E22 100%) !important;
+    background-color: #181530 !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.25) !important;
+    border-radius: 20px !important;
+    color: #F8FAFC !important;
+    box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(167, 139, 250, 0.1) !important;
+}
+
+/* Eski açık tema (Canva/Stitch) inline renk zorlamalarını Koyu Mor sekmeler ve modallarda iptal et */
+#libraryTab [style*="color:#F3F6FA"]:not(.btn-gold),
+#libraryTab [style*="color: #F3F6FA"]:not(.btn-gold),
+#libraryTab [style*="color:#F8FAFC"]:not(.btn-gold),
+#libraryTab [style*="color: #F8FAFC"]:not(.btn-gold),
+#libraryTab [style*="color:#F1F5F9"]:not(.btn-gold),
+#libraryTab [style*="color: #F1F5F9"]:not(.btn-gold),
+#historyTab [style*="color:#F3F6FA"]:not(.btn-gold),
+#historyTab [style*="color: #F3F6FA"]:not(.btn-gold),
+#historyTab [style*="color:#F8FAFC"]:not(.btn-gold),
+#historyTab [style*="color: #F8FAFC"]:not(.btn-gold),
+#historyTab [style*="color:#F1F5F9"]:not(.btn-gold),
+#historyTab [style*="color: #F1F5F9"]:not(.btn-gold),
+#analyticsTab [style*="color:#F3F6FA"]:not(.btn-gold),
+#analyticsTab [style*="color: #F3F6FA"]:not(.btn-gold),
+#analyticsTab [style*="color:#F8FAFC"]:not(.btn-gold),
+#analyticsTab [style*="color: #F8FAFC"]:not(.btn-gold),
+#analyticsTab [style*="color:#F1F5F9"]:not(.btn-gold),
+#analyticsTab [style*="color: #F1F5F9"]:not(.btn-gold),
+#profileTab [style*="color:#F3F6FA"]:not(.btn-gold),
+#profileTab [style*="color: #F3F6FA"]:not(.btn-gold),
+#profileTab [style*="color:#F8FAFC"]:not(.btn-gold),
+#profileTab [style*="color: #F8FAFC"]:not(.btn-gold),
+#profileTab [style*="color:#F1F5F9"]:not(.btn-gold),
+#profileTab [style*="color: #F1F5F9"]:not(.btn-gold),
+.modal-overlay [style*="color:#F3F6FA"]:not(.btn-gold),
+.modal-overlay [style*="color: #F3F6FA"]:not(.btn-gold),
+.modal-overlay [style*="color:#F8FAFC"]:not(.btn-gold),
+.modal-overlay [style*="color: #F8FAFC"]:not(.btn-gold),
+.modal-overlay [style*="color:#F1F5F9"]:not(.btn-gold),
+.modal-overlay [style*="color: #F1F5F9"]:not(.btn-gold) {
+    color: #F8FAFC !important;
+}
+
+#libraryTab [style*="color:#CBD5E1"],
+#libraryTab [style*="color: #CBD5E1"],
+#libraryTab [style*="color:#cbd5e1"],
+#libraryTab [style*="color: #cbd5e1"],
+#historyTab [style*="color:#CBD5E1"],
+#historyTab [style*="color: #CBD5E1"],
+#historyTab [style*="color:#cbd5e1"],
+#historyTab [style*="color: #cbd5e1"],
+#analyticsTab [style*="color:#CBD5E1"],
+#analyticsTab [style*="color: #CBD5E1"],
+#analyticsTab [style*="color:#cbd5e1"],
+#analyticsTab [style*="color: #cbd5e1"],
+#profileTab [style*="color:#CBD5E1"],
+#profileTab [style*="color: #CBD5E1"],
+#profileTab [style*="color:#cbd5e1"],
+#profileTab [style*="color: #cbd5e1"],
+.modal-overlay [style*="color:#CBD5E1"],
+.modal-overlay [style*="color: #CBD5E1"],
+.modal-overlay [style*="color:#cbd5e1"],
+.modal-overlay [style*="color: #cbd5e1"] {
+    color: #CBD5E1 !important;
+}
+
+#libraryTab [style*="background:#0E131B"],
+#libraryTab [style*="background: #0E131B"],
+#libraryTab [style*="background:#151C26"],
+#libraryTab [style*="background: #151C26"],
+#libraryTab [style*="background:#121821"],
+#libraryTab [style*="background: #121821"],
+#libraryTab [style*="background:#161E29"],
+#libraryTab [style*="background: #161E29"],
+#libraryTab [style*="background:#0f172a"],
+#libraryTab [style*="background: #0f172a"],
+#historyTab [style*="background:#0E131B"],
+#historyTab [style*="background: #0E131B"],
+#historyTab [style*="background:#151C26"],
+#historyTab [style*="background: #151C26"],
+#historyTab [style*="background:#121821"],
+#historyTab [style*="background: #121821"],
+#historyTab [style*="background:#161E29"],
+#historyTab [style*="background: #161E29"],
+#historyTab [style*="background:#0f172a"],
+#historyTab [style*="background: #0f172a"],
+#analyticsTab [style*="background:#0E131B"],
+#analyticsTab [style*="background: #0E131B"],
+#analyticsTab [style*="background:#151C26"],
+#analyticsTab [style*="background: #151C26"],
+#analyticsTab [style*="background:#121821"],
+#analyticsTab [style*="background: #121821"],
+#analyticsTab [style*="background:#161E29"],
+#analyticsTab [style*="background: #161E29"],
+#analyticsTab [style*="background:#0f172a"],
+#analyticsTab [style*="background: #0f172a"],
+#profileTab [style*="background:#0E131B"],
+#profileTab [style*="background: #0E131B"],
+#profileTab [style*="background:#151C26"],
+#profileTab [style*="background: #151C26"],
+#profileTab [style*="background:#121821"],
+#profileTab [style*="background: #121821"],
+#profileTab [style*="background:#161E29"],
+#profileTab [style*="background: #161E29"],
+#profileTab [style*="background:#0f172a"],
+#profileTab [style*="background: #0f172a"],
+.modal-overlay [style*="background:#0E131B"],
+.modal-overlay [style*="background: #0E131B"],
+.modal-overlay [style*="background:#151C26"],
+.modal-overlay [style*="background: #151C26"],
+.modal-overlay [style*="background:#121821"],
+.modal-overlay [style*="background: #121821"],
+.modal-overlay [style*="background:#161E29"],
+.modal-overlay [style*="background: #161E29"],
+.modal-overlay [style*="background:#0f172a"],
+.modal-overlay [style*="background: #0f172a"] {
+    background: #121024 !important;
+    background-color: #121024 !important;
+    border-color: rgba(167, 139, 250, 0.25) !important;
+    color: #F8FAFC !important;
+}
+
+/* Başlıklar ve yardımcı metinler */
+#libraryTab h1, #libraryTab h2, #libraryTab h3, #libraryTab h4, #libraryTab h5,
+#historyTab h1, #historyTab h2, #historyTab h3, #historyTab h4, #historyTab h5,
+#analyticsTab h1, #analyticsTab h2, #analyticsTab h3, #analyticsTab h4, #analyticsTab h5,
+#profileTab h1, #profileTab h2, #profileTab h3, #profileTab h4, #profileTab h5,
+#libraryTab .lib-ex-title, #libraryTab .lib-ex-name, #libraryTab .ex-name,
+#historyTab .log-date, #historyTab .ex-name,
+#analyticsTab .ex-name,
+.modal-overlay .modal-title,
+.modal-overlay h2, .modal-overlay h3, .modal-overlay h4 {
+    color: #FFFFFF !important;
+}
+
+#libraryTab p, #libraryTab .lib-ex-sub,
+#historyTab p, #historyTab .stat-metric-label,
+#analyticsTab p, #analyticsTab .stat-metric-label,
+#profileTab p, #profileTab .form-label,
+.modal-overlay .form-label {
+    color: #CBD5E1 !important;
+}
+
+/* Kartlar ve iç konteynerler */
+#libraryTab .lib-ex-card,
+#libraryTab .card,
+#historyTab .history-card,
+#historyTab .log-card,
+#historyTab .log-history-card,
+#historyTab .stat-metric-card,
+#historyTab .generator-card > div > div[style*="background:var(--bg-surface)"],
+#historyTab .generator-card > div > div[style*="background:#121024"],
+#analyticsTab .muscle-analysis-card,
+#analyticsTab .analytics-card,
+#analyticsTab .analytics-kpi-card,
+#analyticsTab .anatomy-hero-wrapper,
+#analyticsTab .anatomy-focus-card,
+#analyticsTab .radar-card-premium,
+#analyticsTab .scale-segmental-card,
+#analyticsTab .card,
+#profileTab .card,
+.modal-overlay .admin-user-card,
+.modal-overlay .edit-log-ex-card {
+    background: #121024 !important;
+    background-color: #121024 !important;
+    border: 1px solid rgba(167, 139, 250, 0.25) !important;
+    color: #F8FAFC !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+}
+
+#statTotalWorkouts {
+    color: #FCD34D !important;
+}
+
+#statWeekWorkouts {
+    color: #7DD3FC !important;
+}
+
+#statStreak {
+    color: #4ADE80 !important;
+}
+
+/* Geçmiş sekmesi iç egzersiz satırları ve set pilleri */
+#historyTab .log-exercise-item,
+.modal-overlay .log-exercise-item {
+    background: #181530 !important;
+    background-color: #181530 !important;
+    border: 1px solid rgba(167, 139, 250, 0.22) !important;
+    color: #F8FAFC !important;
+}
+
+#historyTab .log-exercise-item strong,
+#historyTab .log-exercise-item .log-ex-name,
+#historyTab .log-exercise-item [style*="color:#F3F6FA"],
+#historyTab .log-exercise-item [style*="color: #F3F6FA"],
+#historyTab .log-exercise-item [style*="color:#FFFFFF"],
+#historyTab .log-exercise-item [style*="color: #FFFFFF"],
+#historyTab .log-exercise-item [style*="color:#F8FAFC"],
+#historyTab .log-exercise-item [style*="color: #F8FAFC"],
+.modal-overlay .log-exercise-item strong,
+.modal-overlay .log-exercise-item .log-ex-name,
+.modal-overlay .log-exercise-item [style*="color:#FFFFFF"],
+.modal-overlay .log-exercise-item [style*="color:#F8FAFC"] {
+    color: #FFFFFF !important;
+}
+
+#historyTab .log-set-pill,
+.modal-overlay .log-set-pill {
+    background: #121024 !important;
+    background-color: #121024 !important;
+    border: 1px solid rgba(167, 139, 250, 0.25) !important;
+    color: #CBD5E1 !important;
+}
+
+#historyTab .log-set-pill.completed,
+.modal-overlay .log-set-pill.completed {
+    background: #14532D !important;
+    background-color: #14532D !important;
+    border: 1px solid #22C55E !important;
+    color: #BBF7D0 !important;
+}
+
+#historyTab .log-set-pill.completed strong,
+.modal-overlay .log-set-pill.completed strong {
+    color: #FFFFFF !important;
+}
+
+#historyTab .log-stats-bar,
+#historyTab .log-notes-box,
+#libraryTab .ex-cue-box,
+.modal-overlay .log-stats-bar,
+.modal-overlay .ex-cue-box,
+.modal-overlay .log-notes-box {
+    background: #121024 !important;
+    background-color: #121024 !important;
+    border-color: rgba(167, 139, 250, 0.25) !important;
+    color: #E2E8F0 !important;
+}
+
+/* Giriş alanları, select kutuları ve butonlar */
+#libraryTab input[type="text"],
+#libraryTab input[type="number"],
+#libraryTab input[type="search"],
+#libraryTab select,
+#libraryTab textarea,
+#libraryTab .form-input,
+#libraryTab .form-select,
+#historyTab input[type="text"],
+#historyTab input[type="number"],
+#historyTab select,
+#historyTab textarea,
+#historyTab .form-input,
+#historyTab .form-select,
+#analyticsTab input[type="text"],
+#analyticsTab input[type="number"],
+#analyticsTab select,
+#analyticsTab textarea,
+#analyticsTab .form-input,
+#analyticsTab .form-select,
+#profileTab input[type="text"],
+#profileTab input[type="number"],
+#profileTab input[type="password"],
+#profileTab input[type="email"],
+#profileTab select,
+#profileTab textarea,
+#profileTab .form-input,
+#profileTab .form-select,
+.modal-overlay input[type="text"],
+.modal-overlay input[type="number"],
+.modal-overlay input[type="password"],
+.modal-overlay input[type="email"],
+.modal-overlay input[type="date"],
+.modal-overlay select,
+.modal-overlay textarea,
+.modal-overlay .form-input,
+.modal-overlay .form-select,
+.modal-overlay .edit-log-input,
+.modal-overlay .edit-log-num-input {
+    background: #0B0A14 !important;
+    background-color: #0B0A14 !important;
+    border: 1px solid rgba(167, 139, 250, 0.3) !important;
+    color: #FFFFFF !important;
+    color-scheme: dark !important;
+}
+
+#libraryTab select option,
+#historyTab select option,
+#analyticsTab select option,
+#profileTab select option,
+.modal-overlay select option {
+    background-color: #121024 !important;
+    color: #FFFFFF !important;
+}
+
+#libraryTab .btn-gold,
+#libraryTab .btn-primary,
+#historyTab .btn-gold,
+#historyTab .btn-primary,
+#analyticsTab .btn-gold,
+#analyticsTab .btn-primary,
+#profileTab .btn-gold,
+#profileTab .btn-primary,
+.modal-overlay .edit-log-save-btn {
+    background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important;
+    background-color: #6D28D9 !important;
+    border: 1px solid rgba(167, 139, 250, 0.4) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 14px rgba(109, 40, 217, 0.35) !important;
+}
+
+#libraryTab .btn-outline,
+#libraryTab .stitch-ex-swap-pill,
+#historyTab .btn-outline,
+#historyTab .btn-edit-log,
+#analyticsTab .btn-outline:not(.analytics-subtab-btn),
+#profileTab .btn-outline,
+.modal-overlay .btn-edit-log,
+.modal-overlay .edit-log-mini-btn,
+.modal-overlay .edit-log-secondary-btn,
+.modal-overlay .edit-log-cancel-btn,
+.modal-overlay .stitch-ex-swap-pill {
+    background: #121024 !important;
+    background-color: #121024 !important;
+    border: 1px solid rgba(167, 139, 250, 0.3) !important;
+    color: #F8FAFC !important;
+}
+
+#profileTab button[onclick*="handleAuthLogout"] {
+    color: #FCA5A5 !important;
+    border-color: rgba(248, 113, 113, 0.45) !important;
+}
+
+#profileTab button[onclick*="handleUserChangePassword"],
+#profileTab #profileTabAdminBtn {
+    color: #FCD34D !important;
+    border-color: rgba(252, 211, 77, 0.45) !important;
+}
+
+/* Analiz alt sekme butonları, anatomi lejantı, çipler ve alt bölge hücreleri */
+#analyticsTab .analytics-subtab-btn {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: 1px solid transparent !important;
+    color: #CBD5E1 !important;
+    box-shadow: none !important;
+}
+
+#analyticsTab .analytics-subtab-btn.active {
+    background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important;
+    background-color: #6D28D9 !important;
+    border-color: rgba(167, 139, 250, 0.4) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 2px 10px rgba(109, 40, 217, 0.35) !important;
+}
+
+#analyticsTab .anatomy-legend-item,
+#analyticsTab .anatomy-chip {
+    background: #121024 !important;
+    background-color: #121024 !important;
+    border: 1px solid rgba(167, 139, 250, 0.25) !important;
+    color: #F8FAFC !important;
+}
+
+#analyticsTab .anatomy-legend-item .badge-val,
+#analyticsTab .anatomy-chip .chip-name {
+    color: #FFFFFF !important;
+}
+
+#analyticsTab .anatomy-legend-item .badge-label,
+#analyticsTab .anatomy-chip .chip-sets {
+    color: #CBD5E1 !important;
+}
+
+#analyticsTab .anatomy-chip.selected {
+    background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important;
+    background-color: #6D28D9 !important;
+    border-color: #A78BFA !important;
+    color: #FFFFFF !important;
+}
+
+#analyticsTab .anatomy-chip.selected .chip-name,
+#analyticsTab .anatomy-chip.selected .chip-sets {
+    color: #FFFFFF !important;
+}
+
+#analyticsTab .anatomy-table-cell,
+#analyticsTab .sub-region-cell {
+    background: #121024 !important;
+    background-color: #121024 !important;
+    border: 1px solid rgba(167, 139, 250, 0.22) !important;
+    color: #F8FAFC !important;
+}
+
+#analyticsTab .sub-region-cell.working {
+    background: #14532D !important;
+    background-color: #14532D !important;
+    border-color: #22C55E !important;
+    color: #BBF7D0 !important;
+}
+
+#analyticsTab .sub-region-cell.planned {
+    background: #78350F !important;
+    background-color: #78350F !important;
+    border-color: #F59E0B !important;
+    color: #FDE68A !important;
+}
+
+#analyticsTab .sub-region-cell.empty {
+    background: #7F1D1D !important;
+    background-color: #7F1D1D !important;
+    border-color: #EF4444 !important;
+    color: #FECACA !important;
+}
+
+/* Rozetler, avatar/tema seçiciler ve düzenleme çekmeceleri */
+#libraryTab .ex-chip-badge,
+#libraryTab .lib-ex-tag,
+#libraryTab .muscle-tag,
+#historyTab .muscle-tag,
+#analyticsTab .muscle-tag,
+.modal-overlay .ex-chip-badge,
+.modal-overlay .muscle-tag {
+    background: #2C2550 !important;
+    background-color: #2C2550 !important;
+    border: 1px solid rgba(167, 139, 250, 0.35) !important;
+    color: #F3E8FF !important;
+}
+
+#profileTab .avatar-choice,
+.modal-overlay .avatar-choice {
+    background: #181530 !important;
+    background-color: #181530 !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.25) !important;
+    color: #FFFFFF !important;
+}
+
+#profileTab .avatar-choice.selected,
+.modal-overlay .avatar-choice.selected {
+    background: rgba(109, 40, 217, 0.35) !important;
+    background-color: #3B1D70 !important;
+    border-color: #A78BFA !important;
+}
+
+#profileTab .theme-pill {
+    color: #FFFFFF !important;
+}
+
+.scale-pdf-dropzone,
+.modal-overlay .edit-log-meta-toggle,
+.modal-overlay .edit-log-meta-drawer,
+.modal-overlay .edit-log-live-bar,
+.modal-overlay .edit-log-picker-item,
+.modal-overlay .edit-log-footer-actions {
+    background: #121024 !important;
+    background-color: #121024 !important;
+    border-color: rgba(167, 139, 250, 0.25) !important;
+    color: #F8FAFC !important;
+}
+
+.modal-overlay .edit-log-field-label {
+    color: #CBD5E1 !important;
+}
+
+.modal-overlay .edit-log-ex-title {
+    color: #FFFFFF !important;
+}
+
+.modal-overlay .edit-log-status-btn.done {
+    background: #14532D !important;
+    border-color: #22C55E !important;
+    color: #BBF7D0 !important;
+}
+
+.modal-overlay .edit-log-status-btn.skipped {
+    background: #1E293B !important;
+    border-color: #475569 !important;
+    color: #CBD5E1 !important;
+}
+
+.modal-overlay .edit-log-del-set-btn,
+.modal-overlay .edit-log-mini-btn.danger {
+    background: #7F1D1D !important;
+    border-color: #EF4444 !important;
+    color: #FECACA !important;
+}
+

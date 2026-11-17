@@ -4015,30 +4015,35 @@
             }
 
             section.style.display = 'block';
-            if (countLabel) countLabel.innerText = `${pendingUsers.length} Bekleyen Başvuru`;
+            section.style.background = '#121024';
+            section.style.borderColor = 'rgba(245, 158, 11, 0.45)';
+            if (countLabel) {
+                countLabel.innerText = `${pendingUsers.length} Bekleyen Başvuru`;
+                countLabel.style.color = '#FDE68A';
+            }
 
             listEl.innerHTML = pendingUsers.map(u => {
                 const reqDate = u.createdAt ? new Date(u.createdAt).toLocaleString('tr-TR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
                 return `
-                    <div style="background:#F8FAFC; border:1px solid rgba(245,158,11,0.35); border-radius:9px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <div style="background:#181530; border:1px solid rgba(167, 139, 250, 0.25); border-radius:9px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
                         <div>
                             <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                                <strong style="color:#0F172A; font-size:13px;">${escapeHTML(u.name)}</strong>
-                                <span style="font-size:11px; color:var(--text-secondary);">(@${escapeHTML(u.username)})</span>
-                                <span style="font-size:10px; background:rgba(245,158,11,0.2); color:var(--gold); padding:1px 6px; border-radius:6px; font-weight:800;">⏳ ONAY BEKLİYOR</span>
+                                <strong style="color:#FFFFFF; font-size:13px;">${escapeHTML(u.name)}</strong>
+                                <span style="font-size:11px; color:#CBD5E1;">(@${escapeHTML(u.username)})</span>
+                                <span style="font-size:10px; background:#7C2D12; color:#FDE68A; border:1px solid rgba(251,191,36,0.35); padding:1px 6px; border-radius:6px; font-weight:800;">⏳ ONAY BEKLİYOR</span>
                             </div>
-                            <div style="font-size:11.5px; color:var(--cyan); margin-top:2px;">
+                            <div style="font-size:11.5px; color:#BAE6FD; margin-top:2px;">
                                 ✉️ ${escapeHTML(u.email || 'E-posta belirtilmedi')}
                             </div>
-                            <div style="font-size:10.5px; color:var(--text-secondary); margin-top:2px;">
+                            <div style="font-size:10.5px; color:#CBD5E1; margin-top:2px;">
                                 ${escapeHTML(u.level || 'Orta Seviye')} • ${escapeHTML(u.gender || 'Erkek')} ${reqDate ? '• ' + escapeHTML(reqDate) : ''}
                             </div>
                         </div>
                         <div style="display:flex; gap:6px; flex-shrink:0;">
-                            <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 10px; font-weight:800; background:#10b981; border-color:#10b981; color:#06281e;" onclick="adminApproveUser(decodeURIComponent('${encodeURIComponent(u.id)}'))">
+                            <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 10px; font-weight:800; background:#14532D; border-color:#22C55E; color:#BBF7D0;" onclick="adminApproveUser(decodeURIComponent('${encodeURIComponent(u.id)}'))">
                                 ✅ Onayla & Mail Gönder
                             </button>
-                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px; color:#ef4444; border-color:#ef4444; font-weight:800;" onclick="adminRejectUser(decodeURIComponent('${encodeURIComponent(u.id)}'))">
+                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px; background:#7F1D1D; color:#FECACA; border-color:#F87171; font-weight:800;" onclick="adminRejectUser(decodeURIComponent('${encodeURIComponent(u.id)}'))">
                                 ✕ Reddet
                             </button>
                         </div>
@@ -4056,12 +4061,26 @@
             if (typeof syncUsersFromCloud === 'function' && isFirebaseReady && !IS_LOCAL_DEV) {
                 try { await syncUsersFromCloud(); } catch (err) {}
             }
+            const adminModalEl = document.getElementById('adminModal');
+            if (adminModalEl) {
+                const modalBox = adminModalEl.querySelector('.modal-box');
+                if (modalBox) {
+                    modalBox.style.background = '#181530';
+                    modalBox.style.color = '#F8FAFC';
+                    modalBox.style.border = '1.5px solid rgba(167, 139, 250, 0.25)';
+                }
+                adminModalEl.querySelectorAll('h3, span').forEach(el => {
+                    if (el.style && (el.style.color === '#0F172A' || el.style.color === 'rgb(15, 23, 42)')) {
+                        el.style.color = '#FFFFFF';
+                    }
+                });
+            }
             loadAdminEmailJsConfigUI();
             renderPendingApprovalsBanner();
             renderAdminAthleteStatuses();
             renderAdminUserList();
             switchAdminModalTab('status');
-            document.getElementById('adminModal').classList.add('active');
+            if (adminModalEl) adminModalEl.classList.add('active');
         }
 
         function closeAdminModal() {
@@ -4081,11 +4100,16 @@
                 if (manageView) manageView.style.display = 'none';
                 if (btnStatus) {
                     btnStatus.className = 'btn btn-gold';
-                    btnStatus.style.color = '#000';
+                    btnStatus.style.background = 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)';
+                    btnStatus.style.backgroundColor = '#6D28D9';
+                    btnStatus.style.color = '#FFFFFF';
+                    btnStatus.style.borderColor = 'rgba(167, 139, 250, 0.45)';
                 }
                 if (btnManage) {
                     btnManage.className = 'btn btn-outline';
-                    btnManage.style.color = 'var(--text-secondary)';
+                    btnManage.style.background = '#121024';
+                    btnManage.style.color = '#CBD5E1';
+                    btnManage.style.borderColor = 'rgba(167, 139, 250, 0.25)';
                 }
                 renderAdminAthleteStatuses();
             } else {
@@ -4093,11 +4117,16 @@
                 if (manageView) manageView.style.display = 'block';
                 if (btnStatus) {
                     btnStatus.className = 'btn btn-outline';
-                    btnStatus.style.color = 'var(--text-secondary)';
+                    btnStatus.style.background = '#121024';
+                    btnStatus.style.color = '#CBD5E1';
+                    btnStatus.style.borderColor = 'rgba(167, 139, 250, 0.25)';
                 }
                 if (btnManage) {
                     btnManage.className = 'btn btn-gold';
-                    btnManage.style.color = '#000';
+                    btnManage.style.background = 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)';
+                    btnManage.style.backgroundColor = '#6D28D9';
+                    btnManage.style.color = '#FFFFFF';
+                    btnManage.style.borderColor = 'rgba(167, 139, 250, 0.45)';
                 }
                 renderAdminUserList();
             }
@@ -4278,6 +4307,13 @@
             const modal = document.getElementById('approvalEmailDispatchModal');
             if (!modal || !user) return;
 
+            const modalBox = modal.querySelector('.modal-box');
+            if (modalBox) {
+                modalBox.style.background = '#181530';
+                modalBox.style.color = '#F8FAFC';
+                modalBox.style.border = '1.5px solid rgba(167, 139, 250, 0.25)';
+            }
+
             const payload = buildApprovalEmailPayload(user);
             lastApprovalMessageCache = payload.body;
 
@@ -4289,10 +4325,30 @@
             const gmailBtn = document.getElementById('approvalModalGmailBtn');
             const autoStatusEl = document.getElementById('approvalModalAutoStatus');
 
-            if (nameEl) nameEl.innerText = `${user.name} (@${user.username})`;
-            if (emailEl) emailEl.innerText = payload.to || 'E-posta kayıtlı değil';
-            if (subjEl) subjEl.innerText = payload.subject;
-            if (bodyEl) bodyEl.innerText = payload.body;
+            if (nameEl) {
+                nameEl.innerText = `${user.name} (@${user.username})`;
+                nameEl.style.color = '#FDE68A';
+                if (nameEl.parentElement) nameEl.parentElement.style.color = '#E2E8F0';
+            }
+            if (emailEl) {
+                emailEl.innerText = payload.to || 'E-posta kayıtlı değil';
+                emailEl.style.color = '#BAE6FD';
+            }
+            if (subjEl) {
+                subjEl.innerText = payload.subject;
+                subjEl.style.color = '#FFFFFF';
+            }
+            if (bodyEl) {
+                bodyEl.innerText = payload.body;
+                bodyEl.style.background = '#181530';
+                bodyEl.style.color = '#E2E8F0';
+                bodyEl.style.border = '1px solid rgba(167, 139, 250, 0.25)';
+                if (bodyEl.parentElement) {
+                    bodyEl.parentElement.style.background = '#121024';
+                    bodyEl.parentElement.style.borderColor = 'rgba(167, 139, 250, 0.25)';
+                    bodyEl.parentElement.style.color = '#CBD5E1';
+                }
+            }
 
             const encTo = encodeURIComponent(payload.to);
             const encSubj = encodeURIComponent(payload.subject);
@@ -4301,10 +4357,16 @@
             if (mailtoBtn) {
                 mailtoBtn.href = `mailto:${encTo}?subject=${encSubj}&body=${encBody}`;
                 mailtoBtn.style.display = payload.to ? 'block' : 'none';
+                mailtoBtn.style.background = '#6D28D9';
+                mailtoBtn.style.color = '#FFFFFF';
+                mailtoBtn.style.borderColor = '#7C3AED';
             }
             if (gmailBtn) {
                 gmailBtn.href = `https://mail.google.com/mail/?view=cm&fs=1&to=${encTo}&su=${encSubj}&body=${encBody}`;
                 gmailBtn.style.display = payload.to ? 'block' : 'none';
+                gmailBtn.style.background = '#0C4A6E';
+                gmailBtn.style.color = '#BAE6FD';
+                gmailBtn.style.borderColor = '#38BDF8';
             }
 
             if (autoStatusEl) {
@@ -4320,8 +4382,8 @@
                 if (cfg && cfg.serviceId && cfg.templateId && cfg.publicKey) {
                     if (autoStatusEl) {
                         autoStatusEl.style.display = 'block';
-                        autoStatusEl.style.background = 'rgba(56,189,248,0.12)';
-                        autoStatusEl.style.color = '#0369A1';
+                        autoStatusEl.style.background = '#0C4A6E';
+                        autoStatusEl.style.color = '#BAE6FD';
                         autoStatusEl.innerText = '⏳ Otomatik onay e-postası gönderiliyor...';
                     }
                     try {
@@ -4343,18 +4405,18 @@
                             })
                         });
                         if (resp.ok && autoStatusEl) {
-                            autoStatusEl.style.background = 'rgba(16,185,129,0.18)';
-                            autoStatusEl.style.color = '#047857';
+                            autoStatusEl.style.background = '#14532D';
+                            autoStatusEl.style.color = '#BBF7D0';
                             autoStatusEl.innerText = `🚀 Otomatik onay e-postası (${payload.to}) adresine başarıyla gönderildi!`;
                         } else if (autoStatusEl) {
-                            autoStatusEl.style.background = 'rgba(245,158,11,0.18)';
-                            autoStatusEl.style.color = '#92400E';
+                            autoStatusEl.style.background = '#7C2D12';
+                            autoStatusEl.style.color = '#FDE68A';
                             autoStatusEl.innerText = '⚠️ Otomatik servis yanıt vermedi; aşağıdaki butonlarla tek tıkla gönderebilirsiniz.';
                         }
                     } catch (err) {
                         if (autoStatusEl) {
-                            autoStatusEl.style.background = 'rgba(245,158,11,0.18)';
-                            autoStatusEl.style.color = '#92400E';
+                            autoStatusEl.style.background = '#7C2D12';
+                            autoStatusEl.style.color = '#FDE68A';
                             autoStatusEl.innerText = '⚠️ Otomatik gönderim yapılamadı; aşağıdaki butonlarla tek tıkla gönderebilirsiniz.';
                         }
                     }
@@ -4456,56 +4518,56 @@
                 if (lastLog) {
                     const exList = lastLog.exercises || lastLog.detailedExercises || [];
                     lastLogDetailsHTML = `
-                        <div id="adminExDetails_${u.id}" style="display:none; margin-top:10px; padding:10px 12px; background:#F8FAFC; border-radius:8px; border:1px solid rgba(245,158,11,0.25);">
-                            <div style="font-size:11px; font-weight:800; color:var(--gold); margin-bottom:8px; text-transform:uppercase; display:flex; justify-content:space-between;">
+                        <div id="adminExDetails_${u.id}" style="display:none; margin-top:10px; padding:10px 12px; background:#121024; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.25);">
+                            <div style="font-size:11px; font-weight:800; color:#FDE68A; margin-bottom:8px; text-transform:uppercase; display:flex; justify-content:space-between;">
                                 <span>📋 ${escapeHTML(lastLog.title)}</span>
-                                <span style="color:#0F172A;">${lastLog.dateFormatted || lastLog.date}</span>
+                                <span style="color:#E2E8F0;">${lastLog.dateFormatted || lastLog.date}</span>
                             </div>
                             ${exList.length > 0 ? `
                                 <div style="display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto; padding-right:4px;">
                                     ${exList.map(ex => {
                                         const sets = (ex.sets || []).filter(s => s.completed || (parseFloat(s.weight) > 0));
                                         const setsStr = sets.length > 0
-                                            ? sets.map((s, idx) => `Set ${idx+1}: <strong style="color:var(--gold);">${s.weight}kg</strong> x ${s.reps}`).join(' • ')
-                                            : '<span style="color:var(--text-secondary);">Set kaydı yok</span>';
+                                            ? sets.map((s, idx) => `Set ${idx+1}: <strong style="color:#FDE68A;">${s.weight}kg</strong> x ${s.reps}`).join(' • ')
+                                            : '<span style="color:#CBD5E1;">Set kaydı yok</span>';
                                         return `
-                                            <div style="font-size:11px; padding:6px 8px; background:#F1F5F9; border-radius:6px; border-left:3px solid var(--gold);">
+                                            <div style="font-size:11px; padding:6px 8px; background:#181530; border-radius:6px; border-left:3px solid #A78BFA;">
                                                 <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                                                    <strong style="color:#0F172A;">${escapeHTML(ex.name)}</strong>
-                                                    ${ex.muscle ? `<span style="font-size:10px; color:var(--cyan);">[${escapeHTML(ex.muscle)}]</span>` : ''}
+                                                    <strong style="color:#FFFFFF;">${escapeHTML(ex.name)}</strong>
+                                                    ${ex.muscle ? `<span style="font-size:10px; color:#BAE6FD;">[${escapeHTML(ex.muscle)}]</span>` : ''}
                                                 </div>
-                                                <div style="font-size:10.5px; color:var(--text-secondary);">${setsStr}</div>
+                                                <div style="font-size:10.5px; color:#CBD5E1;">${setsStr}</div>
                                             </div>
                                         `;
                                     }).join('')}
                                 </div>
-                            ` : '<div style="font-size:11px; color:var(--text-secondary);">Detaylı set kaydı bulunamadı.</div>'}
+                            ` : '<div style="font-size:11px; color:#CBD5E1;">Detaylı set kaydı bulunamadı.</div>'}
                         </div>
                     `;
                 }
 
                 return `
-                    <div style="background:var(--bg-surface); border:1px solid #E2E8F0; border-radius:12px; padding:14px; margin-bottom:12px; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+                    <div style="background:#181530; border:1px solid rgba(167, 139, 250, 0.25); border-radius:12px; padding:14px; margin-bottom:12px; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
                         <!-- ATHLETE HEADER -->
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
                             <div style="display:flex; align-items:center; gap:10px;">
-                                <span style="font-size:26px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:var(--bg-elevated); border-radius:10px; border:1px solid var(--gold);">${u.avatar || '🥋'}</span>
+                                <span style="font-size:26px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:#121024; border-radius:10px; border:1px solid rgba(167, 139, 250, 0.35);">${u.avatar || '🥋'}</span>
                                 <div>
                                     <div style="display:flex; align-items:center; gap:6px;">
-                                        <strong style="color:#0F172A; font-size:14px;">${escapeHTML(u.name)}</strong>
-                                        <span style="font-size:11px; color:var(--text-secondary);">@${escapeHTML(u.username)}</span>
+                                        <strong style="color:#FFFFFF; font-size:14px;">${escapeHTML(u.name)}</strong>
+                                        <span style="font-size:11px; color:#CBD5E1;">@${escapeHTML(u.username)}</span>
                                         <span class="auth-role-tag ${u.role === 'admin' ? 'role-admin' : 'role-athlete'}" style="font-size:9px; padding:2px 6px;">
                                             ${u.role === 'admin' ? 'YÖNETİCİ' : 'SPORCU'}
                                         </span>
                                     </div>
-                                    <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                                    <div style="font-size:11px; color:#CBD5E1; margin-top:2px;">
                                         ${escapeHTML(u.level || 'Orta Seviye')} • ${escapeHTML(u.gender || 'Erkek')}
                                     </div>
                                 </div>
                             </div>
                             ${isLiveWorking ? `
-                                <span style="background:rgba(34,197,94,0.15); border:1px solid var(--green-success); color:var(--green-success); font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px; display:flex; align-items:center; gap:5px;">
-                                    <span style="width:6px; height:6px; border-radius:50%; background:var(--green-success); display:inline-block;"></span>
+                                <span style="background:#14532D; border:1px solid #4ADE80; color:#BBF7D0; font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px; display:flex; align-items:center; gap:5px;">
+                                    <span style="width:6px; height:6px; border-radius:50%; background:#4ADE80; display:inline-block;"></span>
                                     Antrenmanda
                                 </span>
                             ` : ''}
@@ -4513,41 +4575,41 @@
 
                         <!-- 3-COL KPI STATS -->
                         <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px; text-align:center;">
-                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid #E2E8F0;">
-                                <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">TOPLAM SEANS</div>
-                                <div style="font-size:13px; font-weight:800; color:#0F172A; margin-top:2px;">🏋️ ${sessionCount} Seans</div>
+                            <div style="background:#121024; padding:8px 4px; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.25);">
+                                <div style="font-size:9.5px; color:#CBD5E1; font-weight:700;">TOPLAM SEANS</div>
+                                <div style="font-size:13px; font-weight:800; color:#FFFFFF; margin-top:2px;">🏋️ ${sessionCount} Seans</div>
                             </div>
-                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid #E2E8F0;">
-                                <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">SERİ DURUMU</div>
-                                <div style="font-size:13px; font-weight:800; color:var(--gold); margin-top:2px;">🔥 ${streak} Gün</div>
+                            <div style="background:#121024; padding:8px 4px; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.25);">
+                                <div style="font-size:9.5px; color:#CBD5E1; font-weight:700;">SERİ DURUMU</div>
+                                <div style="font-size:13px; font-weight:800; color:#FDE68A; margin-top:2px;">🔥 ${streak} Gün</div>
                             </div>
-                            <div style="background:var(--bg-card); padding:8px 4px; border-radius:8px; border:1px solid #E2E8F0;">
-                                <div style="font-size:9.5px; color:var(--text-secondary); font-weight:700;">TOPLAM TONAJ</div>
-                                <div style="font-size:13px; font-weight:800; color:var(--cyan); margin-top:2px;">⚡ ${Math.round(userTonaj).toLocaleString('tr-TR')} kg</div>
+                            <div style="background:#121024; padding:8px 4px; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.25);">
+                                <div style="font-size:9.5px; color:#CBD5E1; font-weight:700;">TOPLAM TONAJ</div>
+                                <div style="font-size:13px; font-weight:800; color:#BAE6FD; margin-top:2px;">⚡ ${Math.round(userTonaj).toLocaleString('tr-TR')} kg</div>
                             </div>
                         </div>
 
                         <!-- LAST WORKOUT PREVIEW -->
-                        <div style="background:var(--bg-card); border-radius:8px; padding:10px 12px; border:1px solid #E2E8F0; font-size:11.5px; margin-bottom:10px;">
+                        <div style="background:#121024; border-radius:8px; padding:10px 12px; border:1px solid rgba(167, 139, 250, 0.25); font-size:11.5px; margin-bottom:10px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                <span style="font-weight:700; color:var(--gold);">Son Antrenman Seansı:</span>
-                                <span style="color:var(--text-secondary); font-size:10.5px;">
+                                <span style="font-weight:700; color:#FDE68A;">Son Antrenman Seansı:</span>
+                                <span style="color:#CBD5E1; font-size:10.5px;">
                                     ${lastLog ? (lastLog.dateFormatted || lastLog.date) : 'Kayıt Yok'}
                                 </span>
                             </div>
                             ${lastLog ? `
-                                <div style="color:#0F172A; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
+                                <div style="color:#FFFFFF; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
                                     <span>${escapeHTML(lastLog.title)}</span>
-                                    <span style="color:#0F172A; font-size:11px;">⏱️ ${lastLog.duration || 0} dk • ${lastLog.totalSetsCompleted || 0} Set</span>
+                                    <span style="color:#E2E8F0; font-size:11px;">⏱️ ${lastLog.duration || 0} dk • ${lastLog.totalSetsCompleted || 0} Set</span>
                                 </div>
                             ` : `
-                                <div style="color:var(--text-secondary); font-style:italic;">Henüz tamamlanmış antrenman seansı bulunmuyor.</div>
+                                <div style="color:#CBD5E1; font-style:italic;">Henüz tamamlanmış antrenman seansı bulunmuyor.</div>
                             `}
                         </div>
 
                         <!-- TOGGLE LAST WORKOUT DETAILS BUTTON -->
                         ${lastLog ? `
-                            <button class="btn btn-outline" style="width:100%; font-size:11px; padding:7px; border-color:rgba(245,158,11,0.4); color:var(--gold);" onclick="toggleAdminAthleteDetails('${u.id}')">
+                            <button class="btn btn-outline" style="width:100%; font-size:11px; padding:7px; background:#2C2550; border-color:rgba(167, 139, 250, 0.35); color:#F3E8FF; font-weight:800;" onclick="toggleAdminAthleteDetails('${u.id}')">
                                 🔍 Son Antrenman Hareket ve Set Detaylarını İncele
                             </button>
                             ${lastLogDetailsHTML}
@@ -4558,17 +4620,17 @@
 
             if (kpisEl) {
                 kpisEl.innerHTML = `
-                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid #E2E8F0; text-align:center;">
-                        <div style="font-size:9px; color:var(--text-secondary); font-weight:700;">KAYITLI SPORCU</div>
-                        <div style="font-size:14px; font-weight:900; color:var(--gold); margin-top:2px;">👥 ${users.length}</div>
+                    <div style="background:#121024; padding:8px 6px; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.25); text-align:center;">
+                        <div style="font-size:9px; color:#CBD5E1; font-weight:700;">KAYITLI SPORCU</div>
+                        <div style="font-size:14px; font-weight:900; color:#FDE68A; margin-top:2px;">👥 ${users.length}</div>
                     </div>
-                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid #E2E8F0; text-align:center;">
-                        <div style="font-size:9px; color:var(--text-secondary); font-weight:700;">TOPLAM SEANS</div>
-                        <div style="font-size:14px; font-weight:900; color:var(--green-success); margin-top:2px;">✅ ${totalWorkoutsAll}</div>
+                    <div style="background:#121024; padding:8px 6px; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.25); text-align:center;">
+                        <div style="font-size:9px; color:#CBD5E1; font-weight:700;">TOPLAM SEANS</div>
+                        <div style="font-size:14px; font-weight:900; color:#BBF7D0; margin-top:2px;">✅ ${totalWorkoutsAll}</div>
                     </div>
-                    <div style="background:var(--bg-surface); padding:8px 6px; border-radius:8px; border:1px solid #E2E8F0; text-align:center;">
-                        <div style="font-size:9px; color:var(--text-secondary); font-weight:700;">TOPLAM TONAJ</div>
-                        <div style="font-size:14px; font-weight:900; color:var(--cyan); margin-top:2px;">⚡ ${Math.round(totalTonajAll).toLocaleString('tr-TR')} kg</div>
+                    <div style="background:#121024; padding:8px 6px; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.25); text-align:center;">
+                        <div style="font-size:9px; color:#CBD5E1; font-weight:700;">TOPLAM TONAJ</div>
+                        <div style="font-size:14px; font-weight:900; color:#BAE6FD; margin-top:2px;">⚡ ${Math.round(totalTonajAll).toLocaleString('tr-TR')} kg</div>
                     </div>
                 `;
             }
@@ -4599,43 +4661,43 @@
                 const safeIdAttr = encodeURIComponent(u.id);
 
                 return `
-                    <div class="admin-user-card" style="background:var(--bg-surface); border:1px solid ${isSelf ? 'var(--gold)' : (isPending ? 'rgba(245,158,11,0.5)' : 'rgba(255,255,255,0.08)')}; border-radius:10px; padding:12px; margin-bottom:8px;">
+                    <div class="admin-user-card" style="background:#181530; border:1px solid ${isSelf ? '#FDE68A' : (isPending ? 'rgba(245,158,11,0.5)' : 'rgba(167, 139, 250, 0.25)')}; border-radius:10px; padding:12px; margin-bottom:8px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px; flex-wrap:wrap;">
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <span style="font-size:22px;">${u.avatar || '🥋'}</span>
                                 <div>
                                     <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                                        <strong style="color:#0F172A; font-size:13px;">${escapeHTML(u.name)}</strong>
-                                        <span style="font-size:11.5px; color:#15803D; font-weight:800;">(@${escapeHTML(u.username)})</span>
+                                        <strong style="color:#FFFFFF; font-size:13px;">${escapeHTML(u.name)}</strong>
+                                        <span style="font-size:11.5px; color:#BBF7D0; font-weight:800;">(@${escapeHTML(u.username)})</span>
                                         ${isSelf ? '<span class="auth-role-tag role-admin" style="font-size:9px; padding:1px 6px;">GİRİŞ YAPILAN HESAP</span>' : ''}
                                         ${!isSelf ? (isPending
-                                            ? '<span style="font-size:9.5px; background:rgba(245,158,11,0.2); color:var(--gold); padding:1px 6px; border-radius:6px; font-weight:800;">⏳ ONAY BEKLİYOR</span>'
-                                            : '<span style="font-size:9.5px; background:rgba(16,185,129,0.15); color:#10b981; padding:1px 6px; border-radius:6px; font-weight:800;">✅ ONAYLI</span>') : ''}
+                                            ? '<span style="font-size:9.5px; background:#7C2D12; color:#FDE68A; border:1px solid rgba(251,191,36,0.35); padding:1px 6px; border-radius:6px; font-weight:800;">⏳ ONAY BEKLİYOR</span>'
+                                            : '<span style="font-size:9.5px; background:#14532D; color:#BBF7D0; border:1px solid rgba(74,222,128,0.35); padding:1px 6px; border-radius:6px; font-weight:800;">✅ ONAYLI</span>') : ''}
                                     </div>
-                                    ${u.email ? `<div style="font-size:11px; color:var(--cyan); margin-top:2px;">✉️ ${escapeHTML(u.email)}</div>` : ''}
-                                    <div style="font-size:11px; color:var(--text-secondary);">
+                                    ${u.email ? `<div style="font-size:11px; color:#BAE6FD; margin-top:2px;">✉️ ${escapeHTML(u.email)}</div>` : ''}
+                                    <div style="font-size:11px; color:#CBD5E1;">
                                         ${escapeHTML(u.level || 'Orta Seviye')} • ${escapeHTML(u.gender || 'Erkek')}
                                     </div>
                                 </div>
                             </div>
                             <div style="display:flex; gap:6px; flex-wrap:wrap;">
                                 ${!isSelf && isPending ? `
-                                    <button class="btn btn-gold" style="font-size:10px; padding:4px 8px; background:#10b981; border-color:#10b981; color:#06281e; font-weight:800;" onclick="adminApproveUser(decodeURIComponent('${safeIdAttr}'))">
+                                    <button class="btn btn-gold" style="font-size:10px; padding:4px 8px; background:#14532D; border-color:#22C55E; color:#BBF7D0; font-weight:800;" onclick="adminApproveUser(decodeURIComponent('${safeIdAttr}'))">
                                         ✅ Onayla & Mail
                                     </button>
                                 ` : (!isSelf && u.email ? `
-                                    <button class="btn btn-outline" style="font-size:10px; padding:4px 8px; color:var(--cyan); border-color:var(--cyan);" onclick="openApprovalEmailDispatchById(decodeURIComponent('${safeIdAttr}'))" title="Onay E-Postasını Gönder">
+                                    <button class="btn btn-outline" style="font-size:10px; padding:4px 8px; background:#0C4A6E; color:#BAE6FD; border-color:#38BDF8;" onclick="openApprovalEmailDispatchById(decodeURIComponent('${safeIdAttr}'))" title="Onay E-Postasını Gönder">
                                         📧 Mail Gönder
                                     </button>
                                 ` : '')}
-                                <button class="btn btn-outline" style="font-size:10px; padding:4px 8px; color:#0F172A; border-color:#CBD5E1; font-weight:800;" onclick="toggleAdminEditUserBox(decodeURIComponent('${safeIdAttr}'))" title="Kullanıcı Adı, Ad Soyad ve E-Posta Düzenle">
+                                <button class="btn btn-outline" style="font-size:10px; padding:4px 8px; background:#2C2550; color:#F3E8FF; border-color:rgba(167, 139, 250, 0.35); font-weight:800;" onclick="toggleAdminEditUserBox(decodeURIComponent('${safeIdAttr}'))" title="Kullanıcı Adı, Ad Soyad ve E-Posta Düzenle">
                                     ✏️ Kullanıcı Adı
                                 </button>
-                                <button class="btn btn-outline" style="font-size:10px; padding:4px 8px; color:var(--gold); border-color:var(--gold);" onclick="adminResetUserPassword(decodeURIComponent('${safeIdAttr}'))" title="Şifre Belirle / Sıfırla">
+                                <button class="btn btn-outline" style="font-size:10px; padding:4px 8px; background:#7C2D12; color:#FDE68A; border-color:rgba(251, 191, 36, 0.45);" onclick="adminResetUserPassword(decodeURIComponent('${safeIdAttr}'))" title="Şifre Belirle / Sıfırla">
                                     🔑 Şifre
                                 </button>
                                 ${!isSelf ? `
-                                    <button class="btn btn-outline" style="font-size:10px; padding:4px 8px; color:#ef4444; border-color:#ef4444;" onclick="adminDeleteUser(decodeURIComponent('${safeIdAttr}'))" title="Kullanıcıyı Sil">
+                                    <button class="btn btn-outline" style="font-size:10px; padding:4px 8px; background:#7F1D1D; color:#FECACA; border-color:#F87171;" onclick="adminDeleteUser(decodeURIComponent('${safeIdAttr}'))" title="Kullanıcıyı Sil">
                                         🗑️ Sil
                                     </button>
                                 ` : ''}
@@ -4643,29 +4705,29 @@
                         </div>
 
                         <!-- INLINE KULLANICI ADI / AD SOYAD / E-POSTA DÜZENLEME PANELİ (VARSAYILAN KAPALI) -->
-                        <div id="adminEditBox_${escapeHTML(u.id)}" style="display:none; margin-top:8px; padding:10px; background:#F8FAFC; border:1.5px solid #CBD5E1; border-radius:8px;">
+                        <div id="adminEditBox_${escapeHTML(u.id)}" style="display:none; margin-top:8px; padding:10px; background:#121024; border:1.5px solid rgba(167, 139, 250, 0.25); border-radius:8px;">
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
                                 <div>
-                                    <label class="form-label" style="font-size:10.5px; color:#334155;">Yeni Kullanıcı Adı (@)</label>
-                                    <input type="text" id="adminEditUname_${escapeHTML(u.id)}" class="form-input" value="${escapeHTML(u.username || '')}" style="font-size:12px; padding:6px 8px;" autocapitalize="none" spellcheck="false">
+                                    <label class="form-label" style="font-size:10.5px; color:#E2E8F0;">Yeni Kullanıcı Adı (@)</label>
+                                    <input type="text" id="adminEditUname_${escapeHTML(u.id)}" class="form-input" value="${escapeHTML(u.username || '')}" style="font-size:12px; padding:6px 8px; background:#181530; color:#FFFFFF; border:1px solid rgba(167, 139, 250, 0.3);" autocapitalize="none" spellcheck="false">
                                 </div>
                                 <div>
-                                    <label class="form-label" style="font-size:10.5px; color:#334155;">Ad Soyad</label>
-                                    <input type="text" id="adminEditName_${escapeHTML(u.id)}" class="form-input" value="${escapeHTML(u.name || '')}" style="font-size:12px; padding:6px 8px;">
+                                    <label class="form-label" style="font-size:10.5px; color:#E2E8F0;">Ad Soyad</label>
+                                    <input type="text" id="adminEditName_${escapeHTML(u.id)}" class="form-input" value="${escapeHTML(u.name || '')}" style="font-size:12px; padding:6px 8px; background:#181530; color:#FFFFFF; border:1px solid rgba(167, 139, 250, 0.3);">
                                 </div>
                             </div>
                             <div style="margin-bottom:8px;">
-                                <label class="form-label" style="font-size:10.5px; color:#334155;">E-Posta Adresi</label>
-                                <input type="email" id="adminEditEmail_${escapeHTML(u.id)}" class="form-input" value="${escapeHTML(u.email || '')}" placeholder="ornek@gmail.com" style="font-size:12px; padding:6px 8px;" autocapitalize="none" spellcheck="false">
+                                <label class="form-label" style="font-size:10.5px; color:#E2E8F0;">E-Posta Adresi</label>
+                                <input type="email" id="adminEditEmail_${escapeHTML(u.id)}" class="form-input" value="${escapeHTML(u.email || '')}" placeholder="ornek@gmail.com" style="font-size:12px; padding:6px 8px; background:#181530; color:#FFFFFF; border:1px solid rgba(167, 139, 250, 0.3);" autocapitalize="none" spellcheck="false">
                             </div>
                             <div style="display:flex; justify-content:flex-end; gap:6px;">
-                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 10px;" onclick="toggleAdminEditUserBox(decodeURIComponent('${safeIdAttr}'))">Vazgeç</button>
-                                <button type="button" class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:800;" onclick="adminSaveUserIdentity(decodeURIComponent('${safeIdAttr}'))">💾 Değişiklikleri Kaydet</button>
+                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 10px; background:#2C2550; color:#F3E8FF; border-color:rgba(167, 139, 250, 0.35);" onclick="toggleAdminEditUserBox(decodeURIComponent('${safeIdAttr}'))">Vazgeç</button>
+                                <button type="button" class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:800; background:#6D28D9; color:#FFFFFF; border-color:#7C3AED;" onclick="adminSaveUserIdentity(decodeURIComponent('${safeIdAttr}'))">💾 Değişiklikleri Kaydet</button>
                             </div>
                         </div>
 
-                        <div style="font-size:11px; color:var(--text-secondary); display:flex; justify-content:space-between; border-top:1px solid #E2E8F0; padding-top:6px; margin-top:6px;">
-                            <span>Güvenlik: <span style="color:#10B981; font-weight:700;">🔒 Salted SHA-256</span></span>
+                        <div style="font-size:11px; color:#CBD5E1; display:flex; justify-content:space-between; border-top:1px solid rgba(167, 139, 250, 0.25); padding-top:6px; margin-top:6px;">
+                            <span>Güvenlik: <span style="color:#4ADE80; font-weight:700;">🔒 Salted SHA-256</span></span>
                             <span>${logs.length} Seans • Seri: ${streak} Gün</span>
                         </div>
                     </div>
@@ -4851,6 +4913,172 @@
         }
 
         // PROFILE & THEME SETTINGS
+        const PROFILE_DARK_THEME_PILL_COLORS = {
+            gold: '#B45309',
+            cyan: '#0369A1',
+            green: '#15803D',
+            red: '#BE123C',
+            purple: '#6D28D9'
+        };
+
+        function applyProfileTabDarkSurfaceStyles() {
+            const profileRoot = document.getElementById('profileTab');
+            if (profileRoot) {
+                const outerCard = profileRoot.querySelector('.generator-card');
+                if (outerCard) {
+                    outerCard.style.background = 'linear-gradient(165deg, #181530 0%, #100E22 100%)';
+                    outerCard.style.backgroundColor = '#181530';
+                    outerCard.style.borderColor = 'rgba(167, 139, 250, 0.25)';
+                    outerCard.style.color = '#F8FAFC';
+                }
+            }
+
+            const cardName = document.getElementById('profileCardName');
+            if (cardName) cardName.style.color = '#FFFFFF';
+            const cardMeta = document.getElementById('profileCardMeta');
+            if (cardMeta) cardMeta.style.color = '#CBD5E1';
+
+            const btn = document.getElementById('profileEditToggleBtn');
+            if (btn) {
+                btn.style.background = '#121024';
+                btn.style.borderColor = 'rgba(167, 139, 250, 0.25)';
+                btn.style.color = '#FFFFFF';
+                btn.querySelectorAll('div').forEach(divEl => {
+                    if (divEl.style && (divEl.style.color === '#0F172A' || divEl.style.color === 'rgb(15, 23, 42)')) {
+                        divEl.style.color = '#FFFFFF';
+                    } else if (divEl.style && (divEl.style.color === '#475569' || divEl.style.color === 'rgb(71, 85, 105)')) {
+                        divEl.style.color = '#CBD5E1';
+                    }
+                });
+            }
+
+            const arrow = document.getElementById('profileEditToggleArrow');
+            if (arrow) {
+                arrow.style.background = '#2C2550';
+                arrow.style.color = '#F3E8FF';
+                arrow.style.border = '1px solid rgba(167, 139, 250, 0.35)';
+            }
+
+            const drawer = document.getElementById('profileCustomizationDrawer');
+            if (drawer) {
+                drawer.style.background = '#121024';
+                drawer.style.borderColor = 'rgba(167, 139, 250, 0.25)';
+                drawer.style.color = '#F8FAFC';
+                drawer.querySelectorAll('.form-label').forEach(lbl => {
+                    lbl.style.color = '#E2E8F0';
+                });
+                drawer.querySelectorAll('.form-input, .form-select').forEach(inp => {
+                    inp.style.background = '#181530';
+                    inp.style.color = '#FFFFFF';
+                    inp.style.borderColor = 'rgba(167, 139, 250, 0.3)';
+                });
+            }
+
+            document.querySelectorAll('#themePicker .theme-pill').forEach(el => {
+                const onclickAttr = el.getAttribute('onclick') || '';
+                Object.keys(PROFILE_DARK_THEME_PILL_COLORS).forEach(k => {
+                    if (onclickAttr.includes(`'${k}'`) || onclickAttr.includes(`"${k}"`)) {
+                        el.style.background = PROFILE_DARK_THEME_PILL_COLORS[k];
+                        el.style.color = '#FFFFFF';
+                    }
+                });
+            });
+
+            const currPassInput = document.getElementById('profileCurrentPassword');
+            if (currPassInput) {
+                const pwCard = currPassInput.closest('div[style*="border-radius"]');
+                if (pwCard) {
+                    pwCard.style.background = '#121024';
+                    pwCard.style.borderColor = 'rgba(167, 139, 250, 0.25)';
+                    const h4 = pwCard.querySelector('h4');
+                    if (h4) h4.style.color = '#FFFFFF';
+                    pwCard.querySelectorAll('.form-label').forEach(lbl => {
+                        lbl.style.color = '#E2E8F0';
+                    });
+                    pwCard.querySelectorAll('.form-input').forEach(inp => {
+                        inp.style.background = '#181530';
+                        inp.style.color = '#FFFFFF';
+                        inp.style.borderColor = 'rgba(167, 139, 250, 0.3)';
+                    });
+                    const pwBtn = pwCard.querySelector('button');
+                    if (pwBtn) {
+                        pwBtn.style.background = '#2C2550';
+                        pwBtn.style.color = '#FDE68A';
+                        pwBtn.style.borderColor = 'rgba(251, 191, 36, 0.45)';
+                    }
+                }
+            }
+
+            const geminiCard = document.getElementById('profileGeminiConfigCard');
+            if (geminiCard) {
+                geminiCard.style.background = '#121024';
+                geminiCard.style.borderColor = 'rgba(167, 139, 250, 0.35)';
+                const h4 = geminiCard.querySelector('h4');
+                if (h4) h4.style.color = '#F3E8FF';
+                geminiCard.querySelectorAll('.form-label').forEach(lbl => {
+                    lbl.style.color = '#E2E8F0';
+                });
+                const gemInput = document.getElementById('profileGeminiApiKeyInput');
+                if (gemInput) {
+                    gemInput.style.background = '#181530';
+                    gemInput.style.color = '#FFFFFF';
+                    gemInput.style.borderColor = 'rgba(167, 139, 250, 0.3)';
+                }
+                const gemBtn = geminiCard.querySelector('button');
+                if (gemBtn) {
+                    gemBtn.style.background = '#2C2550';
+                    gemBtn.style.color = '#F3E8FF';
+                    gemBtn.style.borderColor = 'rgba(192, 132, 252, 0.45)';
+                }
+                const gemLink = geminiCard.querySelector('a');
+                if (gemLink) {
+                    gemLink.style.color = '#BAE6FD';
+                }
+            }
+
+            const badge = document.getElementById('profileGeminiStatusBadge');
+            if (badge) {
+                const hasKey = (typeof getGeminiApiKey === 'function') && Boolean(getGeminiApiKey());
+                if (hasKey || String(badge.innerText || '').includes('Aktif')) {
+                    badge.style.background = '#14532D';
+                    badge.style.color = '#BBF7D0';
+                    badge.style.border = '1px solid rgba(74, 222, 128, 0.45)';
+                } else {
+                    badge.style.background = '#2C2550';
+                    badge.style.color = '#F3E8FF';
+                    badge.style.border = '1px solid rgba(167, 139, 250, 0.35)';
+                }
+            }
+
+            const adminBtn = document.getElementById('profileTabAdminBtn');
+            if (adminBtn) {
+                adminBtn.style.background = '#2C2550';
+                adminBtn.style.color = '#FDE68A';
+                adminBtn.style.borderColor = 'rgba(251, 191, 36, 0.45)';
+            }
+        }
+
+        function ensureProfileGeminiStatusDarkHook() {
+            if (typeof window !== 'undefined' && typeof window.updateProfileGeminiStatusUI === 'function' && !window.updateProfileGeminiStatusUI._profileDarkHooked) {
+                const origFn = window.updateProfileGeminiStatusUI;
+                const wrapped = function(...args) {
+                    const res = origFn.apply(this, args);
+                    applyProfileTabDarkSurfaceStyles();
+                    return res;
+                };
+                wrapped._profileDarkHooked = true;
+                window.updateProfileGeminiStatusUI = wrapped;
+                try { updateProfileGeminiStatusUI = wrapped; } catch (e) {}
+            }
+        }
+
+        if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+            document.addEventListener('DOMContentLoaded', () => {
+                ensureProfileGeminiStatusDarkHook();
+                applyProfileTabDarkSurfaceStyles();
+            });
+        }
+
         function applyTheme(themeKey) {
             const theme = THEMES[themeKey] || THEMES.gold;
             document.documentElement.style.setProperty('--gold', theme.gold);
@@ -4872,6 +5100,7 @@
                 el.classList.toggle('selected', isSelected);
             });
             applyTheme(themeKey);
+            applyProfileTabDarkSurfaceStyles();
         }
 
         function toggleProfileCustomizationDrawer() {
@@ -4883,6 +5112,7 @@
             drawer.style.display = isOpen ? 'none' : 'block';
             if (arrow) arrow.textContent = isOpen ? '▼ Göster' : '▲ Gizle';
             if (btn) btn.setAttribute('aria-expanded', String(!isOpen));
+            applyProfileTabDarkSurfaceStyles();
         }
 
         function applyActiveUserProfile() {
@@ -4917,9 +5147,11 @@
             selectAvatar(user.avatar || '🥋');
             selectTheme(user.theme || 'gold');
 
+            ensureProfileGeminiStatusDarkHook();
             if (typeof updateProfileGeminiStatusUI === 'function') {
                 updateProfileGeminiStatusUI();
             }
+            applyProfileTabDarkSurfaceStyles();
 
             renderHistory();
         }

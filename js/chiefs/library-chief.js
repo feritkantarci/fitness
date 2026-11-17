@@ -347,13 +347,31 @@
             const btnEx = document.getElementById('libSubTabExercisesBtn');
             const btnProg = document.getElementById('libSubTabProgramsBtn');
             const isProg = currentLibrarySubTab === 'programs';
+            if (btnEx && btnEx.parentElement) {
+                btnEx.parentElement.style.background = '#121024';
+                btnEx.parentElement.style.borderColor = 'rgba(167, 139, 250, 0.25)';
+            }
             if (btnEx) {
-                btnEx.style.background = isProg ? '#F1F5F9' : '#0F172A';
-                btnEx.style.color = isProg ? '#334155' : '#FFFFFF';
+                if (!isProg) {
+                    btnEx.style.background = 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)';
+                    btnEx.style.backgroundColor = '#6D28D9';
+                    btnEx.style.color = '#FFFFFF';
+                } else {
+                    btnEx.style.background = 'transparent';
+                    btnEx.style.backgroundColor = 'transparent';
+                    btnEx.style.color = '#CBD5E1';
+                }
             }
             if (btnProg) {
-                btnProg.style.background = isProg ? '#0F172A' : '#F1F5F9';
-                btnProg.style.color = isProg ? '#FFFFFF' : '#334155';
+                if (isProg) {
+                    btnProg.style.background = 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)';
+                    btnProg.style.backgroundColor = '#6D28D9';
+                    btnProg.style.color = '#FFFFFF';
+                } else {
+                    btnProg.style.background = 'transparent';
+                    btnProg.style.backgroundColor = 'transparent';
+                    btnProg.style.color = '#CBD5E1';
+                }
                 const savedCount = typeof getUserCustomPrograms === 'function' ? getUserCustomPrograms().length : 0;
                 btnProg.textContent = savedCount > 0 ? `Programlarım (${savedCount})` : 'Programlarım';
             }
@@ -480,22 +498,45 @@
 
         let currentLibraryExerciseMode = 'fitness'; // 'fitness' | 'cardio'
 
-        function switchLibraryExerciseMode(mode) {
-            currentLibraryExerciseMode = mode === 'cardio' ? 'cardio' : 'fitness';
+        function updateLibraryModeButtons() {
             const fitBtn = document.getElementById('libModeFitnessBtn');
-            const carBtn = document.getElementId('libModeCardioBtn');
+            const carBtn = document.getElementById('libModeCardioBtn');
+            const isCar = currentLibraryExerciseMode === 'cardio';
+            if (fitBtn && fitBtn.parentElement) {
+                fitBtn.parentElement.style.background = '#121024';
+                fitBtn.parentElement.style.borderColor = 'rgba(167, 139, 250, 0.25)';
+            }
             if (fitBtn) {
-                const isFit = currentLibraryExerciseMode === 'fitness';
-                fitBtn.style.background = isFit ? '#0F172A' : 'transparent';
-                fitBtn.style.color = isFit ? '#FFFFFF' : '#0F172A';
-                fitBtn.style.borderColor = isFit ? '#0F172A' : 'transparent';
+                if (!isCar) {
+                    fitBtn.style.background = 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)';
+                    fitBtn.style.backgroundColor = '#6D28D9';
+                    fitBtn.style.color = '#FFFFFF';
+                    fitBtn.style.borderColor = 'rgba(167, 139, 250, 0.35)';
+                } else {
+                    fitBtn.style.background = 'transparent';
+                    fitBtn.style.backgroundColor = 'transparent';
+                    fitBtn.style.color = '#CBD5E1';
+                    fitBtn.style.borderColor = 'transparent';
+                }
             }
             if (carBtn) {
-                const isCar = currentLibraryExerciseMode === 'cardio';
-                carBtn.style.background = isCar ? '#0369A1' : 'transparent';
-                carBtn.style.color = isCar ? '#FFFFFF' : '#0F172A';
-                carBtn.style.borderColor = isCar ? '#0369A1' : 'transparent';
+                if (isCar) {
+                    carBtn.style.background = 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)';
+                    carBtn.style.backgroundColor = '#6D28D9';
+                    carBtn.style.color = '#FFFFFF';
+                    carBtn.style.borderColor = 'rgba(167, 139, 250, 0.35)';
+                } else {
+                    carBtn.style.background = 'transparent';
+                    carBtn.style.backgroundColor = 'transparent';
+                    carBtn.style.color = '#CBD5E1';
+                    carBtn.style.borderColor = 'transparent';
+                }
             }
+        }
+
+        function switchLibraryExerciseMode(mode) {
+            currentLibraryExerciseMode = mode === 'cardio' ? 'cardio' : 'fitness';
+            updateLibraryModeButtons();
             renderLibraryExerciseCatalog();
         }
 
@@ -518,41 +559,41 @@
                         : (ex.equipment || 'Serbest'));
 
                 html += `
-                    <div data-lib-ex-id="${ex.id}" style="padding:8px 10px; background:${isExcluded ? '#FEF2F2' : '#F8FAFC'}; border:1px solid ${isExcluded ? '#FECACA' : '#E2E8F0'}; border-radius:10px; content-visibility:auto; contain-intrinsic-size:0 58px;">
+                    <div class="lib-ex-card" data-lib-ex-id="${ex.id}" style="padding:8px 10px; background:${isExcluded ? '#2A1222' : '#121024'}; border:1px solid ${isExcluded ? 'rgba(248, 113, 113, 0.45)' : 'rgba(167, 139, 250, 0.25)'}; border-radius:10px; content-visibility:auto; contain-intrinsic-size:0 58px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                             <div style="display:flex; align-items:center; gap:9px; min-width:0; flex:1; cursor:pointer;" onclick="toggleLibExerciseForm('${ex.id}')">
-                                <div style="width:40px; height:40px; border-radius:8px; background:#FFFFFF; overflow:hidden; flex-shrink:0; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center;">
+                                <div style="width:40px; height:40px; border-radius:8px; background:#FFFFFF; color:#0F172A; overflow:hidden; flex-shrink:0; border:1px solid rgba(167, 139, 250, 0.25); display:flex; align-items:center; justify-content:center;">
                                     ${thumbImg ? `<img src="${thumbImg}" width="40" height="40" decoding="async" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}" loading="lazy">` : '🏋️'}
                                 </div>
                                 <div style="min-width:0; flex:1;">
-                                    <div style="font-size:13px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    <div style="font-size:13px; font-weight:800; color:#FFFFFF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                                         ${escapeHTML(ex.name)}
                                     </div>
-                                    <div style="font-size:10.5px; font-weight:700; color:${isExcluded ? '#B91C1C' : '#64748B'}; margin-top:1px;">
+                                    <div style="font-size:10.5px; font-weight:700; color:${isExcluded ? '#FCA5A5' : '#CBD5E1'}; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                                         ${escapeHTML(eqLabel)}${isExcluded ? ' • Gizli' : ''}
                                     </div>
                                 </div>
                             </div>
 
                             <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
-                                <button type="button" class="wk-ex-i-btn" onclick="event.stopPropagation(); openExerciseQuickInfoModal('${ex.id}')" title="Hareket Bilgisi">i</button>
+                                <button type="button" class="wk-ex-i-btn" style="background:#2C2550; color:#F3E8FF; border:1px solid rgba(167, 139, 250, 0.35);" onclick="event.stopPropagation(); openExerciseQuickInfoModal('${ex.id}')" title="Hareket Bilgisi">i</button>
                                 ${isExcluded ? `
                                     <button type="button" class="stitch-ex-swap-pill" style="background:#15803D; color:#FFFFFF; border-color:#15803D; padding:6px 11px; font-size:11px; font-weight:800;" onclick="event.stopPropagation(); toggleExerciseExclusionAndRefresh('${ex.id}')">
                                         Geri Al
                                     </button>
                                 ` : `
-                                    <button type="button" class="stitch-ex-swap-pill" style="background:#FF5A36; color:#FFFFFF; border-color:#FF5A36; padding:6px 12px; font-size:11.5px; font-weight:800;" onclick="event.stopPropagation(); openAddToProgramOptions('${ex.id}')">
+                                    <button type="button" class="stitch-ex-swap-pill" style="background:#6D28D9; color:#FFFFFF; border-color:rgba(167, 139, 250, 0.4); padding:6px 12px; font-size:11.5px; font-weight:800;" onclick="event.stopPropagation(); openAddToProgramOptions('${ex.id}')">
                                         + Ekle
                                     </button>
                                 `}
                             </div>
                         </div>
 
-                        <div id="lib_form_expand_${ex.id}" data-clip="${escapeHTML(clipUrl)}" data-thumb="${escapeHTML(thumbImg)}" data-name="${escapeHTML(ex.name || '')}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px solid #E2E8F0;"></div>
+                        <div id="lib_form_expand_${ex.id}" data-clip="${escapeHTML(clipUrl)}" data-thumb="${escapeHTML(thumbImg)}" data-name="${escapeHTML(ex.name || '')}" style="display:none; margin-top:8px; padding-top:8px; border-top:1px solid rgba(167, 139, 250, 0.25);"></div>
                     </div>
                 `;
             });
-            html += `<div id="libCatalogEmptyState" style="display:none; grid-column: 1 / -1; text-align:center; padding:32px 16px; background:#F8FAFC; border-radius:12px; border:1px dashed var(--border);"></div>`;
+            html += `<div id="libCatalogEmptyState" style="display:none; grid-column: 1 / -1; text-align:center; padding:32px 16px; background:#121024; border-radius:12px; border:1px dashed rgba(167, 139, 250, 0.25); color:#F8FAFC;"></div>`;
             container.innerHTML = html;
         }
 
@@ -574,17 +615,21 @@
             }
 
             container.style.display = 'flex';
+            container.style.background = '#121024';
+            container.style.borderColor = 'rgba(167, 139, 250, 0.25)';
             container.innerHTML = subOpts.map(sub => {
                 const isActive = activeLibSubRegion === sub.id;
                 return `
                     <button type="button"
                             onclick="setLibSubRegion('${sub.id}')"
-                            style="border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; cursor:pointer; transition:all 0.12s; ${isActive ? 'background:#0F172A; color:#FFFFFF; border:1px solid #0F172A;' : 'background:#FFFFFF; color:#475569; border:1px solid #CBD5E1;'}">
+                            style="border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; cursor:pointer; transition:all 0.12s; ${isActive ? 'background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); background-color:#6D28D9; color:#FFFFFF; border:1px solid #A78BFA;' : 'background:#181530; color:#E2E8F0; border:1px solid rgba(167, 139, 250, 0.28);'}">
                         ${escapeHTML(sub.label)}
                     </button>
                 `;
             }).join('');
         }
+        const renderLibrarySubRegionChips = renderLibSubRegionChips;
+        window.renderLibrarySubRegionChips = renderLibSubRegionChips;
 
         function setLibSubRegion(subId) {
             activeLibSubRegion = subId || 'all';
@@ -600,6 +645,8 @@
 
         function renderLibraryExerciseCatalog() {
             ensureBilingualExerciseNames();
+            if (typeof updateLibrarySubTabButtons === 'function') updateLibrarySubTabButtons();
+            if (typeof updateLibraryModeButtons === 'function') updateLibraryModeButtons();
             renderLibSubRegionChips();
             const container = document.getElementById('libExercisesCatalogGrid');
             const countBadge = document.getElementById('libExCountBadge');
@@ -622,6 +669,7 @@
 
             if (clearBtn) {
                 clearBtn.style.display = q ? 'block' : 'none';
+                clearBtn.style.color = '#CBD5E1';
             }
 
             const cacheKey = `${currentLibraryExerciseMode}|${EXERCISES_DB.length}|${excludedIds.join(',')}`;
@@ -676,8 +724,16 @@
             });
 
             const badgeText = `${filtered.length} ${currentLibraryExerciseMode === 'cardio' ? 'Kardiyo & Kondisyon' : 'Egzersiz'} ${showExcluded ? '(Gizlenenler)' : ''}`;
-            if (countBadge) countBadge.innerText = badgeText;
-            if (subCountBadge) subCountBadge.innerText = badgeText;
+            if (countBadge) {
+                countBadge.innerText = badgeText;
+                countBadge.style.background = '#121024';
+                countBadge.style.borderColor = 'rgba(167, 139, 250, 0.25)';
+                countBadge.style.color = '#E2E8F0';
+            }
+            if (subCountBadge) {
+                subCountBadge.innerText = badgeText;
+                subCountBadge.style.color = '#CBD5E1';
+            }
 
             const visibleIdSet = new Set(filtered.map(ex => ex.id));
             const cards = container.children;
@@ -697,9 +753,9 @@
                     emptyEl.style.display = 'block';
                     emptyEl.innerHTML = `
                         <div style="font-size:28px; margin-bottom:8px;">${showExcluded ? '✨' : '🔍'}</div>
-                        <div style="font-size:13.5px; font-weight:800; color:#0F172A; margin-bottom:4px;">${showExcluded ? 'Kişisel Havuzunuzdan Gizlenmiş Egzersiz Yok' : 'Aramanıza Uygun Egzersiz Bulunamadı'}</div>
-                        <div style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">${showExcluded ? 'Bir hareketi istemediğinizde "👁️‍🗨️ Gizle" butonuna basarak bu listeye alabilirsiniz.' : 'Filtreleri veya arama kelimesini değiştirerek tekrar deneyebilirsiniz.'}</div>
-                        ${!showExcluded ? `<button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px;" onclick="document.getElementById('libExSearchInput').value=''; document.getElementById('libExMuscleFilter').value='all'; document.getElementById('libExEquipFilter').value='all'; renderLibraryExerciseCatalog();">Filtreleri Sıfırla</button>` : ''}
+                        <div style="font-size:13.5px; font-weight:800; color:#FFFFFF; margin-bottom:4px;">${showExcluded ? 'Kişisel Havuzunuzdan Gizlenmiş Egzersiz Yok' : 'Aramanıza Uygun Egzersiz Bulunamadı'}</div>
+                        <div style="font-size:12px; color:#CBD5E1; margin-bottom:12px;">${showExcluded ? 'Bir hareketi istemediğinizde "👁️‍🗨️ Gizle" butonuna basarak bu listeye alabilirsiniz.' : 'Filtreleri veya arama kelimesini değiştirerek tekrar deneyebilirsiniz.'}</div>
+                        ${!showExcluded ? `<button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px; background:#181530; color:#F3E8FF; border:1px solid rgba(167, 139, 250, 0.35);" onclick="document.getElementById('libExSearchInput').value=''; document.getElementById('libExMuscleFilter').value='all'; document.getElementById('libExEquipFilter').value='all'; renderLibraryExerciseCatalog();">Filtreleri Sıfırla</button>` : ''}
                     `;
                 } else {
                     emptyEl.style.display = 'none';
@@ -775,7 +831,7 @@
                     <div class="add-to-prog-card" style="padding:10px 12px;" onclick="closeAddToProgramOptionsModal(); openQuickAddToDayModal(decodeURIComponent('${encodeURIComponent(ex.id)}'));">
                         <div style="font-size:20px; flex-shrink:0;">📅</div>
                         <div style="flex:1; font-size:13px; font-weight:800; color:#0F172A;">Haftalık Güne Planla</div>
-                        <div style="font-size:12px; color:#FF5A36; font-weight:800;">Güne Ata ➔</div>
+                        <div style="font-size:12px; color:#C2410C; font-weight:800;">Güne Ata ➔</div>
                     </div>
 
                     <div class="add-to-prog-card" style="padding:10px 12px; cursor:default;">
@@ -797,7 +853,7 @@
                                     <option value="12-15">12-15 T.</option>
                                     <option value="Maks">Maks</option>
                                 </select>
-                                <button type="button" class="stitch-ex-swap-pill" style="background:#FF5A36; color:#FFFFFF; border-color:#FF5A36; padding:6px 12px; font-size:11.5px; font-weight:800;" onclick="applyAddToStudioRoutine(decodeURIComponent('${encodeURIComponent(ex.id)}'))">
+                                <button type="button" class="stitch-ex-swap-pill" style="background:#6D28D9; color:#FFFFFF; border-color:rgba(167, 139, 250, 0.4); padding:6px 12px; font-size:11.5px; font-weight:800;" onclick="applyAddToStudioRoutine(decodeURIComponent('${encodeURIComponent(ex.id)}'))">
                                     + Ekle
                                 </button>
                             </div>
@@ -1012,7 +1068,7 @@
             if (savedListEl) {
                 const saved = typeof getUserCustomPrograms === 'function' ? getUserCustomPrograms() : [];
                 if (!saved.length) {
-                    savedListEl.innerHTML = `<div style="background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:10px; padding:14px; text-align:center; color:#475569; font-size:13px; font-weight:600;">Henüz kayıtlı program yok.</div>`;
+                    savedListEl.innerHTML = `<div style="background:#121024; border:1px dashed rgba(167, 139, 250, 0.25); border-radius:10px; padding:14px; text-align:center; color:#CBD5E1; font-size:13px; font-weight:600;">Henüz kayıtlı program yok.</div>`;
                 } else {
                     savedListEl.innerHTML = saved.map(prog => {
                         const titleText = esc(prog.title || 'Kayıtlı Program');
@@ -1021,17 +1077,17 @@
                         const metaText = dur > 0 ? `${exCount} Hareket • ${dur} Dk` : `${exCount} Hareket`;
                         const encodedId = encodeURIComponent(String(prog.id || ''));
                         return `
-                            <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:12px; padding:12px 14px; margin-bottom:8px; box-shadow:0 1px 2px rgba(15,23,42,0.04);">
+                            <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); border-radius:12px; padding:12px 14px; margin-bottom:8px; box-shadow:0 4px 12px rgba(0,0,0,0.25);">
                                 <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
                                     <div style="min-width:0;">
-                                        <div style="font-size:14px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${titleText}</div>
-                                        <div style="font-size:12px; font-weight:600; color:#475569; margin-top:2px;">${esc(metaText)}</div>
+                                        <div style="font-size:14px; font-weight:800; color:#FFFFFF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${titleText}</div>
+                                        <div style="font-size:12px; font-weight:600; color:#CBD5E1; margin-top:2px;">${esc(metaText)}</div>
                                     </div>
                                 </div>
                                 <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                                    <button type="button" onclick="loadSavedProgram(decodeURIComponent('${encodedId}'))" style="flex:1; min-width:80px; padding:8px 10px; font-size:12px; font-weight:800; border-radius:8px; border:none; background:#0F172A; color:#FFFFFF; cursor:pointer; white-space:nowrap;">Başlat</button>
-                                    <button type="button" onclick="assignSavedProgramToCalendar(decodeURIComponent('${encodedId}'))" style="flex:1; min-width:96px; padding:8px 10px; font-size:12px; font-weight:800; border-radius:8px; border:1px solid #BFDBFE; background:#EFF6FF; color:#1D4ED8; cursor:pointer; white-space:nowrap;">Takvime Ekle</button>
-                                    <button type="button" onclick="deleteSavedProgram(decodeURIComponent('${encodedId}'))" style="padding:8px 12px; font-size:12px; font-weight:800; border-radius:8px; border:1px solid #FECACA; background:#FEF2F2; color:#B91C1C; cursor:pointer; white-space:nowrap;">Sil</button>
+                                    <button type="button" onclick="loadSavedProgram(decodeURIComponent('${encodedId}'))" style="flex:1; min-width:80px; padding:8px 10px; font-size:12px; font-weight:800; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.35); background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); background-color:#6D28D9; color:#FFFFFF; cursor:pointer; white-space:nowrap;">Başlat</button>
+                                    <button type="button" onclick="assignSavedProgramToCalendar(decodeURIComponent('${encodedId}'))" style="flex:1; min-width:96px; padding:8px 10px; font-size:12px; font-weight:800; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.35); background:#2C2550; color:#F3E8FF; cursor:pointer; white-space:nowrap;">Takvime Ekle</button>
+                                    <button type="button" onclick="deleteSavedProgram(decodeURIComponent('${encodedId}'))" style="padding:8px 12px; font-size:12px; font-weight:800; border-radius:8px; border:1px solid rgba(248, 113, 113, 0.4); background:#3B1219; color:#FCA5A5; cursor:pointer; white-space:nowrap;">Sil</button>
                                 </div>
                             </div>
                         `;
@@ -1048,17 +1104,19 @@
                 officialListEl.innerHTML = templates.map(tpl => {
                     const encodedId = encodeURIComponent(tpl.id);
                     return `
-                        <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:12px; padding:12px 14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                        <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); border-radius:12px; padding:12px 14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
                             <div style="min-width:0;">
-                                <div style="font-size:14px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(tpl.title)}</div>
-                                <div style="font-size:12px; font-weight:600; color:#475569; margin-top:2px;">${esc(tpl.meta)}</div>
+                                <div style="font-size:14px; font-weight:800; color:#FFFFFF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(tpl.title)}</div>
+                                <div style="font-size:12px; font-weight:600; color:#CBD5E1; margin-top:2px;">${esc(tpl.meta)}</div>
                             </div>
-                            <button type="button" onclick="loadOfficialRoutine(decodeURIComponent('${encodedId}'))" style="padding:8px 14px; font-size:12px; font-weight:800; border-radius:8px; border:none; background:#0F172A; color:#FFFFFF; cursor:pointer; white-space:nowrap; flex-shrink:0;">Aç</button>
+                            <button type="button" onclick="loadOfficialRoutine(decodeURIComponent('${encodedId}'))" style="padding:8px 14px; font-size:12px; font-weight:800; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.35); background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); background-color:#6D28D9; color:#FFFFFF; cursor:pointer; white-space:nowrap; flex-shrink:0;">Aç</button>
                         </div>
                     `;
                 }).join('');
             }
         }
+        const renderLibraryPrograms = renderSavedProgramsPane;
+        window.renderLibraryPrograms = renderSavedProgramsPane;
 
         function renderLibrary(options = {}) {
             if (options && (options.subTab === 'programs' || options.subTab === 'exercises')) {
