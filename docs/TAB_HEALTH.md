@@ -1,6 +1,6 @@
 # 🛡️ ÇELİK KODU — 7 BAĞIMSIZ ŞEF ODASI, KÖPRÜ GÜMRÜĞÜ & HATA HAFIZASI PANELİ (TAB_HEALTH)
 
-> **Son Otomatik Kontrol:** `2026-11-16 23:41:30` | **Bağımsız Oda Dosyası:** `11/11` | **Toplam Hareket:** `301` | **Kırık Bağlantı:** `0` | **Matematik & Gümrük Sınavı:** `30/30`
+> **Son Otomatik Kontrol:** `2026-11-17 20:48:33` | **Bağımsız Oda Dosyası:** `11/11` | **Toplam Hareket:** `311` | **Kırık Bağlantı:** `0` | **Matematik & Gümrük Sınavı:** `36/36`
 
 ---
 
@@ -8,11 +8,11 @@
 
 | Alan & Sorumlu Şef | Fiziksel Odası | Kabiliyeti (Ne Yapar?) | En Çok Nerede Hata Yapar? (Bekçinin Koruduğu Yer) | Ekran Kontrolü | Matematik & Gümrük Sınavı |
 | :--- | :--- | :--- | :--- | :---: | :---: |
-| **1. Üretici Şefi** (`generator-guard`) | `js/chiefs/generator-chief.js` (169 fn) | Sana uygun antrenmanı kurar, ardışık günde doğrudan çalışmayan alt kasları seçer, gizli hareketi asla çıkarmaz | Ardışık günde dünkü alt kası tekrar seçmesi, gizlenen hareketin çıkması, hareket değiştirirken ekranın zıplaması | 🟢 Sorunsuz | 🟢 3/3 Geçti |
-| **2. Antrenman & Stüdyo Şefi** (`workout-guard`) | `js/chiefs/workout-chief.js` (277 fn) | Antrenman sırasında set/kilo/süre/dakika tutar, son ağır seti hatırlar, kendi özel programını kurdurur | Back-off set kilosunu hatırlaması, süreli harekete 8-12 tekrar yazması, kardiyo dakikasını tekrara eklemesi | 🟢 Sorunsuz | 🟢 4/4 Geçti |
-| **3. Kütüphane Şefi** (`library-guard`) | `js/chiefs/library-chief.js` (38 fn) | Tüm hareketlerin form/kas/birim kimliğini korur, istemediğin hareketi tüm sistemden gizler | Süreli/dakikalı hareketi tekrarlı sanması, gizlenen hareketin sayacı bozması | 🟢 Sorunsuz | 🟢 3/3 Geçti |
+| **1. Üretici Şefi** (`generator-guard`) | `js/chiefs/generator-chief.js` (175 fn) | Sana uygun antrenmanı kurar, ardışık günde doğrudan çalışmayan alt kasları seçer, gizli hareketi asla çıkarmaz | Ardışık günde dünkü alt kası tekrar seçmesi, gizlenen hareketin çıkması, hareket değiştirirken ekranın zıplaması | 🟢 Sorunsuz | 🟢 7/7 Geçti |
+| **2. Antrenman & Stüdyo Şefi** (`workout-guard`) | `js/chiefs/workout-chief.js` (284 fn) | Antrenman sırasında set/kilo/süre/dakika tutar, son ağır seti hatırlar, kendi özel programını kurdurur | Back-off set kilosunu hatırlaması, süreli harekete 8-12 tekrar yazması, kardiyo dakikasını tekrara eklemesi | 🟢 Sorunsuz | 🟢 4/4 Geçti |
+| **3. Kütüphane Şefi** (`library-guard`) | `js/chiefs/library-chief.js` (45 fn) | Tüm hareketlerin form/kas/birim kimliğini korur, istemediğin hareketi tüm sistemden gizler | Süreli/dakikalı hareketi tekrarlı sanması, gizlenen hareketin sayacı bozması | 🟢 Sorunsuz | 🟢 4/4 Geçti |
 | **4. Geçmiş Şefi** (`history-guard`) | `js/chiefs/history-chief.js` (66 fn) | Tamamlanan seansları gümrükten geçirip saklar, bozuk veriyi engeller, düzenleme/silmeyi Analiz ile eşitler | Bozuk/boş kaydın geçmişe sızması, kardiyo dakikasının tonaj şişirmesi, silinen kaydın Analizden düşmemesi | 🟢 Sorunsuz | 🟢 2/2 Geçti |
-| **5. Analiz Şefi** (`analytics-guard`) | `js/chiefs/analytics-chief.js` (92 fn) | Kas yükünü, set dayanıklılığını, Epley zirve rekorunu, haftalık fitness/kardiyo puanını ve güncel kiloyu hesaplar | Piramit/drop-seti güç düşüşü sanmak, çift Zirve Rekor basmak, 30 günlük eski tartı kiloyu sıfırlamak | 🟢 Sorunsuz | 🟢 11/11 Geçti |
+| **5. Analiz Şefi** (`analytics-guard`) | `js/chiefs/analytics-chief.js` (92 fn) | Kas yükünü, set dayanıklılığını, Epley zirve rekorunu, haftalık fitness/kardiyo puanını ve güncel kiloyu hesaplar | Piramit/drop-seti güç düşüşü sanmak, çift Zirve Rekor basmak, 30 günlük eski tartı kiloyu sıfırlamak | 🟢 Sorunsuz | 🟢 12/12 Geçti |
 | **6. Profil Şefi** (`profile-guard`) | `js/chiefs/profile-chief.js` (128 fn) | Verilerini güvenle yedekler, şifre/API anahtarlarını buluttan izole eder ve tema okunabilirliğini korur | Açık zeminde açık renk yazı kalması, dışa aktarımda gizli anahtar/şifre sızması | 🟢 Sorunsuz | 🟢 2/2 Geçti |
 | **7. Garmin & Tredict Şefi** (`garmin-tredict-guard`) | `js/garmin-tredict-bridge.js` (97 fn) | Yeni hareketlerin Garmin karşılığını library-guard kaslarıyla kıyaslar, olmayanları isimsiz+notlu gönderir, dönüşte saatin adını değil bizdeki orijinal adı koruyup sağlık verilerini ilgili şefe iletir | Saatten gelen ham hareket adının olduğu gibi alınması, Garmin’de olmayan harekete zorlama isim verilmesi | 🟢 Sorunsuz | 🟢 5/5 Geçti |
 
@@ -46,7 +46,7 @@
 
 ---
 
-## 4. Otomatik Bekçi Raporu — B) 7 Şef Matematik, Gümrük & Hata Hafızası Sınavı (30/30)
+## 4. Otomatik Bekçi Raporu — B) 7 Şef Matematik, Gümrük & Hata Hafızası Sınavı (36/36)
 
 | Test | Sorumlu Şef | Senaryo | Beklenen (Olması Gereken) | Gerçekleşen (Sistem Çıktısı) | Sonuç |
 | :--- | :--- | :--- | :--- | :--- | :---: |
@@ -79,4 +79,10 @@
 | `T27` | `workout-guard` | Süreli Set Arası Sayaç & Odak Ekranı Ekleme | süreli ara hareket otomatik yapıldı sayılmaz, sayaç açılır, süre bitince yapıldı olur; Odak dinlenme ekranında ekle düğmesi var | {"notAutoDone":true,"overlayOpen":true,"doneAfter":true,"overlayClosed":true,"repsDone":true,"noTimerForReps":true,"focusHasAdd":true} | ✅ Geçti |
 | `T28` | `analytics-guard` | Tek Hareketle Sahte İdeal Kas & Yan Etki Alt Kas Koruması (Schoenfeld/Pelland) | varsayılan=week_done; sadece Russian Twist (8 set bile) Karını ideal yapmaz, Ön/Derin Karın yeşil yanmaz; Barda Dize Çekme eklenince ideal olur; Göğüste tek Bench=eksik bölge | {"defaultSource":"week_done","core1Status":"insufficient","core1Covered":1,"chest1Status":"insufficient","obliqWorked":true,"rectusWorked":false,"rectusPartial":true,"transWorked":false,"core2Status":"optimal","core2Covered":2} | ✅ Geçti |
 | `T29` | `library-guard` | Paralel Bar Dips (bw_dips) ve Sehpada Dips (bw_bench_dips) Ayrımı & Medya Bütünlüğü | bw_dips=0251.mp4+chest_lower+dips_bar; bw_bench_dips=1399.mp4+triceps+bench (chest yok) | {"hasDips":true,"hasBenchDips":true,"dipsClipOk":true,"benchClipOk":true,"dipsHasLowerChest":true,"benchNoChest":true,"dipsReqBar":true,"benchReqBench":true,"staleCloudDidNotOverwrite":true} | ✅ Geçti |
-| `T30` | `generator-guard` | 5.000 Senaryo Hata Hafızası: Yorgun Bölge Onaylı Esnetme, Hazır Program İkamesi, Finisher & Stüdyo 3-Mod Koruması | yorgunOnay=evet+tamListe, hazırProgram=0Gizli/0YabancıEkip+30sn, finisher=uyumlu, stüdyoPlank=30sn | {"chestConfirmedOk":true,"finisherEquipOk":true,"offNoExcluded":true,"offEquipOk":true,"offUniqueFams":true,"hollowTimeOk":true,"studio3ModeOk":true} | ✅ Geçti |
+| `T31` | `generator-guard` | 5-Kademe Sıra, B2 Sinerjist Matrisi, Gerçek Sırt Zorunluluğu & Çelik Akışı Uyarlaması | 4 stilde 0 B2/sıra hatası, realBack>=2, Push/Pull<=1.35, functional jumping_jack sonda, bw Çelik Akışı başlıklı | {"upperOkAll":true,"minRealBack":2,"maxRatio":1,"b2Errs":0,"orderErrs":0,"burnoutEarlyErrs":0,"funcJumpOk":true,"flowTitleOk":true,"flowWarnOk":true} | ✅ Geçti |
+| `T32` | `generator-guard` | 34s/46s Kalibreli Yorgunluk Penceresi, +24s Sıfır Çakışma & 3-Gün Cooldown Kilidi | +24s 0 çakışma; +40s normal RPE7 toparlanır / 5set RPE9 yorgun kalır; +48s 3-gün tekrar yok | {"d2Collisions":0,"normal40hRecovered":true,"over40hStillFatigued":true,"d3RepeatCount":0} | ✅ Geçti |
+| `T33` | `generator-guard` | 10-Kas 0-Set Telafisi, "sırt ağrım var" Anahtar Dışlaması & Slot 0 Bileşik Zorunluluğu | sırt dışlanır, 3-gün Göğüs sonrası 4. gün Full Body Sırt+Bacak telafi eder ve Slot 0 Tier<=2 | {"backFreeOk":true,"deficitHitsBack":true,"deficitHitsLegs":true,"slot0TierOk":true} | ✅ Geçti |
+| `T34` | `generator-guard` | Sıkı Havuz Tükenmesi: Kural Delinmez, Boş+Uyarılı Dönüş & Köprü Gümrüğü Kabülü | iso_shoulders+(bw/barfiks/dips)=0 hrk + equipmentWarning; confirm=false iso_chest=0 çakışma + fatigueWarning | {"shNonNull":true,"shEmpty":true,"shHasWarn":true,"shNoClimber":true,"customsOk":true,"chestZeroCollision":true,"chestHasFatigueWarn":true} | ✅ Geçti |
+| `T35` | `generator-guard` | Haftalık Çevrimdışı Plan 31-Alt-Kas Ayrımı & Önizleme İzolasyonu | Önizleme son üretilen kaydı ezmez; onayda ardışık gün alt-kas çakışması = 0 | {"sentinelPreserved":true,"daysLen":3,"nextSchedSaved":true,"consecOverlap":0} | ✅ Geçti |
+| `T36` | `library-guard` | Kapsamlı Dışlama Önbelleği (I/O Azaltımı) & Gerçek Geçmiş Akışı | 1 üretimde celik_excluded_exercises okuma <= 5, toggle anında günceller, getWorkoutLogs geçmişi okunur | {"exclReads":1,"hasLastDone":true,"toggleAdded":true,"toggleRemoved":true} | ✅ Geçti |
+| `T37` | `analytics-guard` | Kimlik Öncelikli Biyomekanik Çözümleme & Artan Ağırlık Piramidi Muafiyeti | bb_overhead_press=Omuz; 20kgx12->25kgx10 piramidi +40s sonrasında sahte yorgunluk bloğu tetiklemez | {"primary":"Omuz","noPyramidOverload":true} | ✅ Geçti |

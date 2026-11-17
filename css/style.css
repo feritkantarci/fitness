@@ -12621,6 +12621,7 @@
 .quick-listbox-sheet,
 .wk-info-modal-sheet {
     background: linear-gradient(165deg, #181530 0%, #100E22 100%) !important;
+    background-color: #181530 !important;
     border: 1.5px solid rgba(167, 139, 250, 0.28) !important;
     border-radius: 24px !important;
     box-shadow: 0 25px 70px -10px rgba(0, 0, 0, 0.85), 0 0 30px rgba(139, 92, 246, 0.2) !important;
@@ -12692,9 +12693,9 @@
 
 /* Kapatma ve İkincil Butonlar */
 .modal-box .btn-outline {
-    background: rgba(24, 21, 48, 0.8) !important;
+    background: #181530 !important;
     border: 1px solid rgba(167, 139, 250, 0.25) !important;
-    color: #94A3B8 !important;
+    color: #E2E8F0 !important;
     border-radius: 14px !important;
 }
 
@@ -13675,3 +13676,349 @@ div[style*="linear-gradient"][style*="F43F5E"] div {
         .interset-timer-btn.ghost { background: #1E293B; color: #FFFFFF; }
         .interset-timer-btn.close { background: #1E293B; color: #FFFFFF; }
         .interset-timer-btn.done { background: #16A34A; border-color: #16A34A; color: #FFFFFF; }
+
+/* ==============================================================================
+   ANTRENMAN SEKMESİ & ÜRETİCİ KOYU MOR TEMA EŞİTLEMESİ + MODAL KONTRAST ZIRHI
+   ============================================================================== */
+.stitch-calendar-shell,
+.stitch-selected-day-card,
+.daylight-hub-bottom-zone,
+#studioSectionInWorkout > .generator-card,
+#activeWorkoutTab .wk-info-modal-box {
+    background: linear-gradient(165deg, #181530 0%, #100E22 100%) !important;
+    background-color: #181530 !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.25) !important;
+    border-radius: 20px !important;
+    color: #F8FAFC !important;
+}
+
+.daylight-hub-bottom-zone .daylight-btn-secondary {
+    background: #121024 !important;
+    border: 1px solid rgba(167, 139, 250, 0.28) !important;
+    color: #FFFFFF !important;
+}
+
+.stitch-cal-topbar .cal-period-title {
+    color: #FFFFFF !important;
+}
+
+.stitch-cal-arrow-btn,
+.stitch-cal-today-btn {
+    background: #121024 !important;
+    border: 1px solid rgba(167, 139, 250, 0.28) !important;
+    color: #F8FAFC !important;
+}
+
+.stitch-cal-view-pills {
+    background: #121024 !important;
+    border: 1px solid rgba(167, 139, 250, 0.22) !important;
+}
+
+.stitch-cal-view-pills .cal-pill-btn {
+    background: transparent !important;
+    color: #CBD5E1 !important;
+}
+
+.stitch-cal-view-pills .cal-pill-btn.active {
+    background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
+    background-color: #6D28D9 !important;
+    color: #FFFFFF !important;
+}
+
+.stitch-day-strip {
+    background: #121024 !important;
+    border: 1px solid rgba(167, 139, 250, 0.22) !important;
+}
+
+.stitch-day-pill {
+    background: transparent !important;
+}
+
+.stitch-day-pill.is-today:not(.active) {
+    background: rgba(139, 92, 246, 0.16) !important;
+    border-color: rgba(167, 139, 250, 0.5) !important;
+}
+
+.stitch-day-pill-lbl {
+    color: #CBD5E1 !important;
+}
+
+.stitch-day-pill-num {
+    color: #FFFFFF !important;
+}
+
+.stitch-day-pill.active {
+    background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
+    background-color: #6D28D9 !important;
+    border-color: #A78BFA !important;
+}
+
+.stitch-selected-day-date {
+    color: #CBD5E1 !important;
+}
+
+.stitch-sel-workout-title {
+    color: #FFFFFF !important;
+}
+
+.stitch-day-status-pill.today {
+    background: #7C2D12 !important;
+    color: #FED7AA !important;
+    border-color: #EA580C !important;
+}
+
+.stitch-day-status-pill.done {
+    background: #14532D !important;
+    color: #BBF7D0 !important;
+    border-color: #22C55E !important;
+}
+
+.stitch-day-status-pill.planned {
+    background: #0C4A6E !important;
+    color: #BAE6FD !important;
+    border-color: #38BDF8 !important;
+}
+
+.stitch-day-status-pill.missed {
+    background: #7F1D1D !important;
+    color: #FECACA !important;
+    border-color: #EF4444 !important;
+}
+
+.stitch-day-status-pill.rest {
+    background: #1E293B !important;
+    color: #E2E8F0 !important;
+    border-color: #475569 !important;
+}
+
+.cal-month-header-row {
+    color: #CBD5E1 !important;
+}
+
+.cal-month-cell {
+    background: #121024 !important;
+    border: 1px solid rgba(167, 139, 250, 0.18) !important;
+    color: #F8FAFC !important;
+}
+
+.cal-month-cell.is-today {
+    background: rgba(139, 92, 246, 0.18) !important;
+    border-color: #A78BFA !important;
+}
+
+.cal-month-cell-header {
+    color: #E2E8F0 !important;
+}
+
+.cal-month-cell.is-today .cal-month-cell-header {
+    color: #FDE68A !important;
+}
+
+.stitch-calendar-shell .wk-ex-i-btn,
+.wk-carousel-wrap .wk-i-badge {
+    background: rgba(167, 139, 250, 0.22) !important;
+    background-color: #2C2550 !important;
+    color: #F3E8FF !important;
+    border: 1px solid rgba(167, 139, 250, 0.4) !important;
+}
+
+#activeWorkoutTab .wk-info-modal-header {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(167, 139, 250, 0.18) !important;
+    color: #FFFFFF !important;
+}
+
+#activeWorkoutTab .wk-info-modal-header span {
+    color: #FFFFFF !important;
+}
+
+#calendarToolsModalOverlay div[style*="color:#64748B"] {
+    color: #CBD5E1 !important;
+}
+
+#calendarToolsModalOverlay .wk-chip-action {
+    background: #121024 !important;
+    border: 1px solid rgba(167, 139, 250, 0.28) !important;
+    color: #E2E8F0 !important;
+}
+
+#calendarToolsModalOverlay .wk-chip-action[style*="color:#B91C1C"] {
+    background: #7F1D1D !important;
+    border-color: #EF4444 !important;
+    color: #FECACA !important;
+}
+
+/* Canlı Odak Stüdyo Kartı (Üretici ile birebir hizalama ve yüksek kontrast) */
+.wk-carousel-wrap.daylight-studio-card {
+    padding: 0 !important;
+}
+
+.daylight-studio-card .daylight-primary-cta,
+.wk-dock-start-btn.daylight-primary-cta {
+    background: linear-gradient(135deg, #047857 0%, #065F46 100%) !important;
+    background-color: #047857 !important;
+    color: #FFFFFF !important;
+}
+
+.daylight-studio-card .daylight-set-chip {
+    color: #E2E8F0 !important;
+}
+
+/* Manuel Program Oluşturucu (#studioSectionInWorkout) Koyu Mor Uyarlaması */
+#studioSectionInWorkout h3,
+#studioSectionInWorkout strong,
+#studioSectionInWorkout span[style*="color:#0F172A"],
+#studioSectionInWorkout div[style*="color:#0F172A"] {
+    color: #FFFFFF !important;
+}
+
+#studioSectionInWorkout p,
+#studioSectionInWorkout label,
+#studioSectionInWorkout span[style*="color:#64748B"],
+#studioSectionInWorkout div[style*="color:#64748B"],
+#studioSectionInWorkout span[style*="color:#475569"],
+#studioSectionInWorkout div[style*="color:#475569"] {
+    color: #CBD5E1 !important;
+}
+
+#studioSectionInWorkout #studioAccordionBody {
+    border-top-color: rgba(167, 139, 250, 0.2) !important;
+}
+
+#studioSectionInWorkout #studioAccordionBody > div,
+#studioSectionInWorkout div[style*="background:#F8FAFC"],
+#studioSectionInWorkout div[style*="background:#FFFFFF"] {
+    background: #121024 !important;
+    background-color: #121024 !important;
+    border-color: rgba(167, 139, 250, 0.24) !important;
+    color: #F8FAFC !important;
+}
+
+#studioSectionInWorkout #customWorkoutExercisesList > div,
+#studioSectionInWorkout #studioExercisesCatalog > div {
+    background: #181530 !important;
+    background-color: #181530 !important;
+    border-color: rgba(167, 139, 250, 0.28) !important;
+    color: #F8FAFC !important;
+}
+
+#studioSectionInWorkout #customWorkoutExercisesList span[style*="background:#F1F5F9"] {
+    background: #2C2550 !important;
+    color: #F3E8FF !important;
+}
+
+#studioSectionInWorkout #customRoutineCountBadge,
+#studioSectionInWorkout #studioExTotalCount {
+    background: #221D42 !important;
+    color: #F3E8FF !important;
+    border-color: rgba(167, 139, 250, 0.35) !important;
+}
+
+#studioSectionInWorkout #btnToggleStudioAccordion {
+    background: #121024 !important;
+    border-color: rgba(167, 139, 250, 0.35) !important;
+    color: #FFFFFF !important;
+}
+
+#studioSectionInWorkout button[onclick*="setQuickEquip"] {
+    color: #7DD3FC !important;
+}
+
+#studioSectionInWorkout button[onclick*="resetCustomRoutine"] {
+    color: #CBD5E1 !important;
+}
+
+#studioSectionInWorkout #studioOwnedEquipChips button[style*="background:#F8FAFC"],
+#studioSectionInWorkout #studioRegionChips button[style*="background:#FFFFFF"],
+#studioSectionInWorkout #studioSubRegionChips button {
+    background: #121024 !important;
+    border-color: rgba(167, 139, 250, 0.25) !important;
+    color: #E2E8F0 !important;
+}
+
+#studioSectionInWorkout #studioOwnedEquipChips button[style*="background:#2563EB"],
+#studioSectionInWorkout #studioRegionChips button[style*="background:#0F172A"],
+#studioSectionInWorkout #studioExercisesCatalog button[style*="background:#2563EB"] {
+    background: #6D28D9 !important;
+    border-color: #A78BFA !important;
+    color: #FFFFFF !important;
+}
+
+#studioSectionInWorkout #studioExercisesCatalog button[style*="background:#DCFCE7"] {
+    background: #14532D !important;
+    border-color: #22C55E !important;
+    color: #BBF7D0 !important;
+}
+
+#studioSectionInWorkout .wk-ex-i-btn {
+    background: #2C2550 !important;
+    color: #F3E8FF !important;
+    border: 1px solid rgba(167, 139, 250, 0.38) !important;
+}
+
+#studioSectionInWorkout input,
+#studioSectionInWorkout select {
+    background: #0B0A14 !important;
+    color: #FFFFFF !important;
+    border-color: rgba(167, 139, 250, 0.3) !important;
+}
+
+/* Modal Kontrast Zırhı & #addFinisherModal Düzeltmesi */
+.modal-box {
+    --text-primary: #F8FAFC;
+    --text-secondary: #CBD5E1;
+    --text-tertiary: #CBD5E1;
+    --gold: #FCD34D;
+    --cyan: #7DD3FC;
+    --bg-surface: #181530;
+    --bg-card: #181530;
+    --border: rgba(167, 139, 250, 0.25);
+}
+
+.modal-close,
+.modal-close-btn,
+.btn-close-modal,
+.wk-info-modal-close {
+    background: rgba(167, 139, 250, 0.16) !important;
+    background-color: #262044 !important;
+    color: #F3E8FF !important;
+    border: 1px solid rgba(167, 139, 250, 0.32) !important;
+    border-radius: 50% !important;
+}
+
+.modal-box .btn-gold,
+.modal-box .btn-primary {
+    background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important;
+    background-color: #6D28D9 !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 14px !important;
+    box-shadow: 0 6px 20px rgba(109, 40, 217, 0.4) !important;
+}
+
+#addFinisherModal p {
+    color: #CBD5E1 !important;
+}
+
+#addFinisherModal .finisher-preset-card {
+    background: #181530 !important;
+    background-color: #181530 !important;
+    border: 1px solid rgba(167, 139, 250, 0.25) !important;
+    color: #FFFFFF !important;
+}
+
+#addFinisherModal .finisher-preset-card div[style*="color:#0F172A"] {
+    color: #FFFFFF !important;
+}
+
+#addFinisherModal .finisher-badge {
+    background: rgba(56, 189, 248, 0.16) !important;
+    background-color: #132844 !important;
+    color: #7DD3FC !important;
+    border: 1px solid rgba(56, 189, 248, 0.35) !important;
+}
+
+#addFinisherModal .btn-outline {
+    color: #7DD3FC !important;
+    border-color: rgba(56, 189, 248, 0.45) !important;
+}

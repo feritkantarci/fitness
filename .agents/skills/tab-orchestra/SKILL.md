@@ -5,7 +5,7 @@ description: Çelik Kodu PWA içindeki 6 ana sekmeyi (Üretici, Antrenman/Stüdy
 
 # 🎼 Çelik Kodu — Sekme Orkestrası, 7 Ayrı Oda ve Köprü Gümrüğü (`tab-orchestra`)
 
-Bu beceri, sitedeki 6 sekmenin ve Garmin/Tredict köprüsünün birbirini bozmasını engeller. Her şef kendi **ayrı fiziksel dosyasında (odasında)** yaşar, şefler arası paylaşılan 8 `localStorage` köprüsü **Köprü Gümrüğü (`js/chiefs/bridge-customs.js`)** tarafından denetlenir ve tüm sistem **7 Şef Bekçisi (`scripts/tab-watchdog.js`)** ile 18 maddelik sınavdan geçirilir.
+Bu beceri, sitedeki 6 sekmenin ve Garmin/Tredict köprüsünün birbirini bozmasını engeller. Her şef kendi **ayrı fiziksel dosyasında (odasında)** yaşar, şefler arası paylaşılan 8 `localStorage` köprüsü **Köprü Gümrüğü (`js/chiefs/bridge-customs.js`)** tarafından denetlenir ve tüm sistem **7 Şef Bekçisi (`scripts/tab-watchdog.js`)** ile 36 maddelik sınavdan geçirilir.
 
 ---
 
@@ -19,11 +19,11 @@ Ortak altyapı dosyaları:
 
 | Oda / Sekme | Şef Adı | Fiziksel Dosyası | Görevi ve Kırmızı Çizgisi |
 | :--- | :--- | :--- | :--- |
-| **1. Oda — Üretici** (`#generatorTab`) | [`generator-guard`](../generator-guard/SKILL.md) | `js/chiefs/generator-chief.js` | Günlük/haftalık program üretir; ardışık günlerde bir önceki/sonraki gün çalışan birincil 31 alt kası eler ve doğrudan **çalışmayan alt kasları** seçer; gizli hareket kurada çıkmaz, sayfa sıçramaz (`T13`, `T14`). |
+| **1. Oda — Üretici** (`#generatorTab`) | [`generator-guard`](../generator-guard/SKILL.md) | `js/chiefs/generator-chief.js` | Günlük/haftalık program üretir; 5-kademe biyomekanik sıra, B2 sinerjist matrisi, gerçek sırt dengesi, 34s/46s toparlanma, 10-kas telafisi, kural-öncelikli dar havuz güvenliği ve ardışık gün 31-alt-kas korumasını sağlar (`T13`, `T14`, `T30`–`T35`). |
 | **2. Oda — Antrenman & Stüdyo** (`#activeWorkoutTab`) | [`workout-guard`](../workout-guard/SKILL.md) | `js/chiefs/workout-chief.js` | Canlı antrenman, sayaç, Stüdyo ve Helms Top-Set ağırlık hafızasını yönetir; yarıda kalan setler silinmez, saf vücut ağırlığına hayalet kilo yazılmaz, izometrik hedef en az `30 sn` olur (`T9`, `T10`). |
-| **3. Oda — Kütüphane** (`#libraryTab`) | [`library-guard`](../library-guard/SKILL.md) | `js/chiefs/library-chief.js` | `EXERCISES_DB` (SSOT) ve hazır programları yönetir; ana havuzdan hareket silinmez, yalnızca kişisel olarak gizlenir/açılır; 3 modlu birim sınıflandırması tek merkezden yapılır (`T6`). |
+| **3. Oda — Kütüphane** (`#libraryTab`) | [`library-guard`](../library-guard/SKILL.md) | `js/chiefs/library-chief.js` | `EXERCISES_DB` (SSOT) ve hazır programları yönetir; ana havuzdan hareket silinmez, yalnızca kişisel olarak gizlenir/açılır; kapsamlı dışlama önbelleği ve 3 modlu birim sınıflandırması tek merkezden yapılır (`T6`, `T29`, `T36`). |
 | **4. Oda — Geçmiş** (`#historyTab`) | [`history-guard`](../history-guard/SKILL.md) | `js/chiefs/history-chief.js` | Tamamlanan antrenmanları listeler/düzenler/siler; Köprü Gümrüğü ile bozuk/eksik birimleri otomatik onarır, içi boş kayıtları reddeder, dakikalık kardiyoya `0 kg` tonaj yazar (`T7`, `T17`). |
-| **5. Oda — Analiz** (`#analyticsTab`) | [`analytics-guard`](../analytics-guard/SKILL.md) | `js/chiefs/analytics-chief.js` | 10 ana / 31 alt kas haritası, Set Dayanıklılığı, Güç Gelişimi, Haftalık Puanlar ve Tartı/Ölçüyü yönetir; Willardson/Helms/Israetel/Epley kurallarını ve tekil `🏆 Zirve Rekor` etiketini korur (`T1..T5`, `T8`, `T11`, `T12`, `T18`). |
+| **5. Oda — Analiz** (`#analyticsTab`) | [`analytics-guard`](../analytics-guard/SKILL.md) | `js/chiefs/analytics-chief.js` | 10 ana / 31 alt kas haritası, Set Dayanıklılığı, Güç Gelişimi, Haftalık Puanlar ve Tartı/Ölçüyü yönetir; ID-öncelikli biyomekanik çözümleme, artan piramit muafiyeti, Willardson/Helms/Israetel/Epley kuralları ve `🏆 Zirve Rekor` etiketini korur (`T1..T5`, `T8`, `T11`, `T12`, `T18`, `T37`). |
 | **6. Oda — Profil** (`#profileTab`) | [`profile-guard`](../profile-guard/SKILL.md) | `js/chiefs/profile-chief.js` | Çok kullanıcılı oturum, bulut yedekleme, kişisel Gemini API izolasyonu ve WCAG tema kontrastını korur; parola/salt/API anahtarı dışa veya buluta sızmaz (`T15`). |
 | **7. Oda — Garmin & Tredict** | [`garmin-tredict-guard`](../garmin-tredict-guard/SKILL.md) | `js/garmin-tredict-bridge.js` | Garmin kas doğrulaması yapar; Garmin'de olmayan hareketi isimsiz+notlu gönderir; saatten dönüşte bizdeki orijinal hareket kimliğini koruyup yalnızca sağlık verilerini ilgili şeflere gümrükten geçirerek iletir (`T16`). |
 
@@ -46,4 +46,4 @@ Ortak altyapı dosyaları:
    ```
 2. **Sadece İlgili Şefin Odasında Çalış:** Değişiklik yalnızca ilgili şefin fiziksel dosyasında (`js/chiefs/<şef>-chief.js` veya `js/garmin-tredict-bridge.js`) yapılır; diğer 6 şefin odasına dokunulmaz.
 3. **Kalıcı Hata Hafızası Kuralı:** Kullanıcının yakaladığı her gerçek hata, ilgili şefin `SKILL.md` dosyasına kural olarak yazılır ve `scripts/tab-watchdog.js` içine yeni bir kalıcı sınav maddesi (`T18`, `T19`...) olarak eklenir.
-4. **Zorunlu Canlıya Çıkış Kapısı (`.git/hooks/pre-push`):** `npm run verify` komutu **7/7 şefin tamamında** hem `Ekran Kontrolü` hem **`18/18` Matematik & Gümrük Sınavı** geçmeden `git push` yapılmasına izin vermez.
+4. **Zorunlu Canlıya Çıkış Kapısı (`.git/hooks/pre-push`):** `npm run verify` komutu **7/7 şefin tamamında** hem `Ekran Kontrolü` hem **`36/36` Matematik & Gümrük Sınavı** geçmeden `git push` yapılmasına izin vermez.

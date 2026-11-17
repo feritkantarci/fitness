@@ -99,27 +99,65 @@
             }
         }
 
+        let _excludedCacheDepth = 0;
+        let _excludedScopeMap = new Map();
+
+        function invalidateExcludedExercisesCache() {
+            _excludedScopeMap.clear();
+        }
+        window.invalidateExcludedExercisesCache = invalidateExcludedExercisesCache;
+
+        function beginExcludedExercisesCacheScope() {
+            if (_excludedCacheDepth === 0) {
+                _excludedScopeMap.clear();
+            }
+            _excludedCacheDepth++;
+        }
+        window.beginExcludedExercisesCacheScope = beginExcludedExercisesCacheScope;
+
+        function endExcludedExercisesCacheScope() {
+            if (_excludedCacheDepth > 0) {
+                _excludedCacheDepth--;
+            }
+            if (_excludedCacheDepth === 0) {
+                _excludedScopeMap.clear();
+            }
+        }
+        window.endExcludedExercisesCacheScope = endExcludedExercisesCacheScope;
+
+        function _loadExcludedEntry(targetUid) {
+            const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            const cacheKey = uid || '__anon__';
+            if (_excludedCacheDepth > 0 && _excludedScopeMap.has(cacheKey)) {
+                return _excludedScopeMap.get(cacheKey);
+            }
+            const scopedKey = getExcludedExercisesStorageKey(uid);
+            let raw = localStorage.getItem(scopedKey);
+            if (!raw && uid === 'usr_admin') {
+                raw = localStorage.getItem('celik_excluded_exercises');
+            }
+            let arr = typeof sanitizeExcludedExerciseIds === 'function'
+                ? sanitizeExcludedExerciseIds(JSON.parse(raw || '[]'))
+                : JSON.parse(raw || '[]');
+            if (!Array.isArray(arr)) arr = [];
+            if (uid === 'usr_admin' && !localStorage.getItem('celik_excl_seed_sissy_v1')) {
+                if (!arr.includes('bw_sissy_squat')) {
+                    arr.push('bw_sissy_squat');
+                    localStorage.setItem(scopedKey, JSON.stringify(arr));
+                }
+                localStorage.setItem('celik_excl_seed_sissy_v1', '1');
+                purgeExcludedExerciseFromSavedPlans('bw_sissy_squat');
+            }
+            const entry = { arr, set: new Set(arr) };
+            if (_excludedCacheDepth > 0) {
+                _excludedScopeMap.set(cacheKey, entry);
+            }
+            return entry;
+        }
+
         function getUserExcludedExerciseIds(targetUid) {
             try {
-                const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
-                const scopedKey = getExcludedExercisesStorageKey(uid);
-                let raw = localStorage.getItem(scopedKey);
-                if (!raw && uid === 'usr_admin') {
-                    raw = localStorage.getItem('celik_excluded_exercises');
-                }
-                let arr = typeof sanitizeExcludedExerciseIds === 'function'
-                    ? sanitizeExcludedExerciseIds(JSON.parse(raw || '[]'))
-                    : JSON.parse(raw || '[]');
-                if (!Array.isArray(arr)) arr = [];
-                if (uid === 'usr_admin' && !localStorage.getItem('celik_excl_seed_sissy_v1')) {
-                    if (!arr.includes('bw_sissy_squat')) {
-                        arr.push('bw_sissy_squat');
-                        localStorage.setItem(scopedKey, JSON.stringify(arr));
-                    }
-                    localStorage.setItem('celik_excl_seed_sissy_v1', '1');
-                    purgeExcludedExerciseFromSavedPlans('bw_sissy_squat');
-                }
-                return arr;
+                return _loadExcludedEntry(targetUid).arr.slice();
             } catch(e) {
                 return [];
             }
@@ -143,6 +181,7 @@
                         : Date.now();
                     localStorage.setItem(`celik_excluded_updated_at_${uid}`, String(ts));
                 }
+                invalidateExcludedExercisesCache();
                 if (!options.fromCloud && !options.skipCloudSync && typeof window.scheduleUserStateCloudSync === 'function') {
                     window.scheduleUserStateCloudSync(uid);
                 }
@@ -151,8 +190,11 @@
 
         function isExerciseExcludedByUser(exId) {
             if (!exId) return false;
-            const excluded = getUserExcludedExerciseIds();
-            return excluded.includes(exId);
+            try {
+                return _loadExcludedEntry().set.has(exId);
+            } catch(e) {
+                return false;
+            }
         }
 
         function toggleExcludeExercise(exId, opts = {}) {

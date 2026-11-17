@@ -1757,6 +1757,9 @@
         };
 
         function normSearchText(s) {
+            if (typeof window !== 'undefined' && typeof window.normSearchText === 'function' && window.normSearchText !== normSearchText) {
+                return window.normSearchText(s);
+            }
             return String(s || '')
                 .replace(/İ/g, 'i')
                 .replace(/I/g, 'i')
@@ -3132,12 +3135,19 @@
           }
 };
 
-        function resolveExerciseBiomechanics(name = '', rawMuscle = '', category = '') {
+        function resolveExerciseBiomechanics(name = '', rawMuscle = '', category = '', exId = '') {
+            const cleanExId = String(exId || '').trim();
+            if (cleanExId && ACADEMIC_SPECS_BY_ID[cleanExId]) {
+                return ACADEMIC_SPECS_BY_ID[cleanExId];
+            }
             const cleanName = normSearchText(name);
             const cleanBase = cleanName.split('(')[0].trim();
 
             // 1. Önce EXERCISES_DB üzerinden tam ID / tam isim eşleşmesini kontrol et (alt-dize çarpışmalarını %100 önler)
-            const dbEx = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB))
+            const dbExById = (cleanExId && typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB))
+                ? EXERCISES_DB.find(e => e.id === cleanExId || normSearchText(e.id) === normSearchText(cleanExId))
+                : null;
+            const dbEx = dbExById || ((typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB))
                 ? (EXERCISES_DB.find(e => normSearchText(e.id) === cleanName || normSearchText(e.name) === cleanName)
                     || EXERCISES_DB.find(e => normSearchText((e.name || '').split('(')[0].trim()) === cleanBase && cleanBase.length >= 4)
                     || EXERCISES_DB.find(e => {
@@ -3145,7 +3155,7 @@
                         const eb = en.split('(')[0].trim();
                         return cleanBase.length >= 4 && (en.includes(cleanBase) || (eb.length >= 4 && cleanName.includes(eb)));
                     }))
-                : null;
+                : null);
 
             if (dbEx && ACADEMIC_SPECS_BY_ID[dbEx.id]) {
                 return ACADEMIC_SPECS_BY_ID[dbEx.id];

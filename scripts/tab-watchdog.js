@@ -1619,6 +1619,515 @@ function runAcademicMathSuite(moduleSources, dbText) {
         const ok = Object.values(res).every(Boolean);
         return { ok, actual: JSON.stringify(res) };
       }
+    },
+    {
+      id: 'T31',
+      owner: 'generator-guard',
+      title: '5-Kademe Sıra, B2 Sinerjist Matrisi, Gerçek Sırt Zorunluluğu & Çelik Akışı Uyarlaması',
+      expected: '4 stilde 0 B2/sıra hatası, realBack>=2, Push/Pull<=1.35, functional jumping_jack sonda, bw Çelik Akışı başlıklı',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const styles = ['straight', 'superset', 'superset_light', 'superset_intense'];
+          const durEl = document.getElementById('paramDuration');
+          const styleEl = document.getElementById('paramStyle');
+          const prevDur = durEl ? durEl.value : '45';
+          const prevStyle = styleEl ? styleEl.value : 'superset';
+          let upperOkAll = true;
+          let maxRatio = 0;
+          let minRealBack = 99;
+          let b2Errs = 0;
+          let orderErrs = 0;
+          let burnoutEarlyErrs = 0;
+          let funcJumpOk = true;
+          let flowTitleOk = false;
+          let flowWarnOk = false;
+          try {
+            if (durEl) durEl.value = '60';
+            selectedEquipments = [...ALL_EQUIPMENT_KEYS];
+            for (const st of styles) {
+              if (styleEl) styleEl.value = st;
+              selectedSplits = ['upper'];
+              localStorage.removeItem('celik_recent_generated_ids_usr_exam');
+              handleGenerateWorkout('bb_hybrid', '');
+              const exs = (currentGeneratedWorkout && currentGeneratedWorkout.exercises) || [];
+              let seenNonComp = false;
+              let realBack = 0;
+              let pushC = 0;
+              let pullC = 0;
+              exs.forEach((ex, idx) => {
+                const t = getExerciseOrderTier(ex, st);
+                if (seenNonComp && t <= 2) orderErrs++;
+                if (idx < 3 && isBurnoutOrFinisherExercise(ex)) burnoutEarlyErrs++;
+                if (t >= 3) seenNonComp = true;
+                for (let pi = 0; pi < idx; pi++) {
+                  if (hasSynergistPreExhaustionViolation(exs[pi], ex, st)) b2Errs++;
+                }
+                if (isRealBackPullExercise(ex)) realBack++;
+                const pk = getExercisePrimaryMuscleKeys(ex) || [];
+                const ec = getEffectiveExerciseCategory(ex);
+                const trapsOnly = pk.length > 0 && pk.every(k => k === 'traps');
+                if (ec === 'push' || pk.some(k => k.startsWith('chest_') || k === 'shoulders_front' || k === 'shoulders_side' || k.startsWith('triceps_'))) pushC++;
+                if (!trapsOnly && (ec === 'pull' || pk.some(k => k.startsWith('back_') || k === 'shoulders_rear' || k === 'biceps'))) pullC++;
+              });
+              const ratio = pullC > 0 ? (pushC / pullC) : 99;
+              if (ratio > maxRatio) maxRatio = Number(ratio.toFixed(2));
+              if (realBack < minRealBack) minRealBack = realBack;
+              if (exs.length < 4 || realBack < 2 || ratio > 1.35) upperOkAll = false;
+            }
+            if (durEl) durEl.value = '45';
+            if (styleEl) styleEl.value = 'superset';
+            selectedSplits = ['functional'];
+            handleGenerateWorkout('bb_hybrid', '');
+            const fExs = (currentGeneratedWorkout && currentGeneratedWorkout.exercises) || [];
+            const jumpIdx = fExs.findIndex(e => e.id === 'bw_jumping_jack');
+            const lastCompIdx = fExs.reduce((mx, e, i) => (getExerciseOrderTier(e, 'superset') <= 2 ? i : mx), -1);
+            if (jumpIdx !== -1 && lastCompIdx !== -1 && jumpIdx < lastCompIdx) funcJumpOk = false;
+
+            selectedEquipments = ['bodyweight'];
+            loadCelikAkisiWorkout(false);
+            const flowW = currentGeneratedWorkout || {};
+            flowTitleOk = String(flowW.title || '').includes('Vücut Ağırlığı Kompleksi') || String(flowW.title || '').includes('Ekipman Uyarlı Kompleks');
+            flowWarnOk = Boolean(flowW.equipmentWarning && String(flowW.equipmentWarning).trim().length > 0);
+          } finally {
+            if (durEl) durEl.value = prevDur;
+            if (styleEl) styleEl.value = prevStyle;
+            selectedEquipments = [...ALL_EQUIPMENT_KEYS];
+            selectedSplits = ['full_body'];
+          }
+          return { upperOkAll, minRealBack, maxRatio, b2Errs, orderErrs, burnoutEarlyErrs, funcJumpOk, flowTitleOk, flowWarnOk };
+        })()`, ctx);
+        const ok = res.upperOkAll && res.b2Errs === 0 && res.orderErrs === 0 && res.burnoutEarlyErrs === 0 && res.funcJumpOk && res.flowTitleOk && res.flowWarnOk;
+        return { ok, actual: JSON.stringify(res) };
+      }
+    },
+    {
+      id: 'T32',
+      owner: 'generator-guard',
+      title: '34s/46s Kalibreli Yorgunluk Penceresi, +24s Sıfır Çakışma & 3-Gün Cooldown Kilidi',
+      expected: '+24s 0 çakışma; +40s normal RPE7 toparlanır / 5set RPE9 yorgun kalır; +48s 3-gün tekrar yok',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const t0 = new Date('2026-11-10T10:00:00Z').getTime();
+          const day1Dt = new Date(t0);
+          const day1Iso = toIsoDateKeyLocal(day1Dt);
+          const makeSets = (n, rpe) => Array.from({ length: n }, (_, i) => ({ setNo: i + 1, weight: 20, reps: 10, rpe, completed: true }));
+          const day1LogNormal = {
+            id: 'log_d1_norm',
+            date: day1Iso,
+            timestamp: t0,
+            rpe: 7,
+            program: 'Üst Vücut',
+            exercises: [
+              { id: 'db_bench_press', name: 'Dambıl Bench Press', muscle: 'Göğüs', sets: makeSets(3, 7) },
+              { id: 'bw_pullup', name: 'Barfiks', muscle: 'Sırt', sets: makeSets(3, 7) }
+            ]
+          };
+          const day1LogOver = {
+            id: 'log_d1_over',
+            date: day1Iso,
+            timestamp: t0,
+            rpe: 9,
+            program: 'Üst Vücut Ağır',
+            exercises: [
+              { id: 'db_bench_press', name: 'Dambıl Bench Press', muscle: 'Göğüs', sets: makeSets(5, 9) },
+              { id: 'bw_pullup', name: 'Barfiks', muscle: 'Sırt', sets: makeSets(5, 9) }
+            ]
+          };
+          let d2Collisions = 0;
+          let normal40hRecovered = false;
+          let over40hStillFatigued = false;
+          let d3RepeatCount = 0;
+          try {
+            selectedEquipments = [...ALL_EQUIPMENT_KEYS];
+            selectedSplits = ['upper'];
+            setWorkoutLogs([day1LogNormal]);
+            localStorage.removeItem('celik_recent_generated_ids_usr_exam');
+            __mockNowMs = t0 + 24 * 3600 * 1000;
+            handleGenerateWorkout('bb_hybrid', '');
+            const d2Exs = (currentGeneratedWorkout && currentGeneratedWorkout.exercises) || [];
+            const d1P31 = new Set();
+            [EXERCISES_DB.find(e => e.id === 'db_bench_press'), EXERCISES_DB.find(e => e.id === 'bw_pullup')].forEach(ex => {
+              const an = getExerciseAnatomy(ex);
+              ((an && an.primarySubKeys) || []).forEach(k => d1P31.add(k));
+            });
+            d2Exs.forEach(ex => {
+              const an = getExerciseAnatomy(ex);
+              if (((an && an.primarySubKeys) || []).some(k => d1P31.has(k))) d2Collisions++;
+            });
+
+            __mockNowMs = t0 + 40 * 3600 * 1000;
+            const ctxNorm40 = getRecentAndScheduledMuscleContext();
+            normal40hRecovered = !ctxNorm40.adjacentPrevDaySubKeys31.has('chest_mid') && !ctxNorm40.adjacentPrevDaySubKeys31.has('back_lats') && !ctxNorm40.fatiguedMuscles48h.includes('Göğüs');
+
+            setWorkoutLogs([day1LogOver]);
+            const ctxOver40 = getRecentAndScheduledMuscleContext();
+            over40hStillFatigued = ctxOver40.adjacentPrevDaySubKeys31.has('chest_mid') && ctxOver40.adjacentPrevDaySubKeys31.has('back_lats');
+
+            const d2Dt = new Date(t0 + 24 * 3600 * 1000);
+            const day2Log = {
+              id: 'log_d2',
+              date: toIsoDateKeyLocal(d2Dt),
+              timestamp: t0 + 24 * 3600 * 1000,
+              program: 'Alt Vücut',
+              exercises: [
+                { id: 'bb_back_squat', name: 'Barbell Back Squat', muscle: 'Bacak', sets: makeSets(3, 7) },
+                { id: 'db_rdl', name: 'Dambıl RDL', muscle: 'Arka Bacak', sets: makeSets(3, 7) }
+              ]
+            };
+            setWorkoutLogs([day1LogNormal, day2Log]);
+            localStorage.removeItem('celik_recent_generated_ids_usr_exam');
+            __mockNowMs = t0 + 48 * 3600 * 1000;
+            selectedSplits = ['full_body'];
+            handleGenerateWorkout('bb_hybrid', '');
+            const d3Exs = (currentGeneratedWorkout && currentGeneratedWorkout.exercises) || [];
+            const pastIds = new Set(['db_bench_press', 'bw_pullup', 'bb_back_squat', 'db_rdl']);
+            d3RepeatCount = d3Exs.filter(e => pastIds.has(e.id)).length;
+          } finally {
+            __mockNowMs = 0;
+            selectedSplits = ['full_body'];
+          }
+          return { d2Collisions, normal40hRecovered, over40hStillFatigued, d3RepeatCount };
+        })()`, ctx);
+        const ok = res.d2Collisions === 0 && res.normal40hRecovered && res.over40hStillFatigued && res.d3RepeatCount === 0;
+        return { ok, actual: JSON.stringify(res) };
+      }
+    },
+    {
+      id: 'T33',
+      owner: 'generator-guard',
+      title: '10-Kas 0-Set Telafisi, "sırt ağrım var" Anahtar Dışlaması & Slot 0 Bileşik Zorunluluğu',
+      expected: 'sırt dışlanır, 3-gün Göğüs sonrası 4. gün Full Body Sırt+Bacak telafi eder ve Slot 0 Tier<=2',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const t0 = new Date('2026-11-10T10:00:00Z').getTime();
+          let backFreeOk = false;
+          let deficitHitsBack = false;
+          let deficitHitsLegs = false;
+          let slot0TierOk = false;
+          try {
+            selectedEquipments = [...ALL_EQUIPMENT_KEYS];
+            selectedSplits = ['full_body'];
+            setWorkoutLogs([]);
+            localStorage.removeItem('celik_recent_generated_ids_usr_exam');
+            __mockNowMs = t0;
+            handleGenerateWorkout('bb_hybrid', 'sırt ağrım var');
+            const wishExs = (currentGeneratedWorkout && currentGeneratedWorkout.exercises) || [];
+            backFreeOk = wishExs.length >= 4 && wishExs.every(ex => {
+              if (isRealBackPullExercise(ex)) return false;
+              const an = getExerciseAnatomy(ex);
+              const pk = (an && an.primarySubKeys) || getExercisePrimaryMuscleKeys(ex) || [];
+              return !pk.some(k => k === 'back_lats' || k === 'back_mid' || k === 'back_lower');
+            });
+
+            const pushSets = [{ weight: 20, reps: 10, completed: true }, { weight: 20, reps: 10, completed: true }, { weight: 20, reps: 10, completed: true }];
+            const logs3d = [0, 1, 2].map(dOff => ({
+              id: 'push_' + dOff,
+              date: toIsoDateKeyLocal(new Date(t0 + dOff * 24 * 3600 * 1000)),
+              timestamp: t0 + dOff * 24 * 3600 * 1000,
+              program: 'İtiş',
+              exercises: [
+                { id: 'db_bench_press', name: 'Dambıl Bench Press', muscle: 'Göğüs', sets: pushSets },
+                { id: 'db_incline_press', name: 'Incline Dambıl Press', muscle: 'Üst Göğüs', sets: pushSets },
+                { id: 'bw_dips', name: 'Paralel Bar Dips', muscle: 'Alt Göğüs', sets: pushSets }
+              ]
+            }));
+            setWorkoutLogs(logs3d);
+            localStorage.removeItem('celik_recent_generated_ids_usr_exam');
+            __mockNowMs = t0 + 72 * 3600 * 1000;
+            selectedSplits = ['full_body'];
+            handleGenerateWorkout('bb_hybrid', '');
+            const d4Exs = (currentGeneratedWorkout && currentGeneratedWorkout.exercises) || [];
+            deficitHitsBack = d4Exs.some(e => isRealBackPullExercise(e));
+            deficitHitsLegs = d4Exs.some(e => {
+              const pk = getExercisePrimaryMuscleKeys(e) || [];
+              return pk.some(k => k.startsWith('legs_quad') || k.startsWith('legs_ham') || k.startsWith('legs_glute'));
+            });
+            slot0TierOk = d4Exs.length > 0 && getExerciseOrderTier(d4Exs[0], 'superset') <= 2;
+          } finally {
+            __mockNowMs = 0;
+            selectedSplits = ['full_body'];
+          }
+          return { backFreeOk, deficitHitsBack, deficitHitsLegs, slot0TierOk };
+        })()`, ctx);
+        const ok = res.backFreeOk && res.deficitHitsBack && res.deficitHitsLegs && res.slot0TierOk;
+        return { ok, actual: JSON.stringify(res) };
+      }
+    },
+    {
+      id: 'T34',
+      owner: 'generator-guard',
+      title: 'Sıkı Havuz Tükenmesi: Kural Delinmez, Boş+Uyarılı Dönüş & Köprü Gümrüğü Kabülü',
+      expected: 'iso_shoulders+(bw/barfiks/dips)=0 hrk + equipmentWarning; confirm=false iso_chest=0 çakışma + fatigueWarning',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const origConfirm = confirm;
+          const nowMs = new Date('2026-11-12T10:00:00Z').getTime();
+          let shNonNull = false;
+          let shEmpty = false;
+          let shHasWarn = false;
+          let shNoClimber = false;
+          let customsOk = false;
+          let chestZeroCollision = false;
+          let chestHasFatigueWarn = false;
+          try {
+            __mockNowMs = nowMs;
+            selectedSplits = ['iso_shoulders'];
+            selectedEquipments = ['bodyweight', 'pullup_bar', 'dips_bar'];
+            handleGenerateWorkout('bb_hybrid', '');
+            const wSh = currentGeneratedWorkout;
+            shNonNull = Boolean(wSh);
+            shEmpty = Array.isArray(wSh && wSh.exercises) && wSh.exercises.length === 0;
+            shHasWarn = Boolean(wSh && wSh.equipmentWarning && String(wSh.equipmentWarning).trim().length > 0);
+            shNoClimber = !(wSh && Array.isArray(wSh.exercises) && wSh.exercises.some(e => e.id === 'bw_mountain_climber'));
+            const sc = window.CelikBridgeCustoms.sanitizeGeneratedWorkoutPayload(wSh);
+            customsOk = Boolean(sc && sc.isBlockedEmpty && Array.isArray(sc.exercises) && sc.exercises.length === 0);
+
+            const heavySets = [1, 2, 3, 4, 5].map(n => ({ setNo: n, weight: 30, reps: 10, rpe: 9, completed: true }));
+            const chestExIds = EXERCISES_DB.filter(e => {
+              const pk = getExercisePrimaryMuscleKeys(e) || [];
+              return pk.some(k => k.startsWith('chest_'));
+            }).map(e => ({ id: e.id, name: e.name, muscle: e.muscle, sets: heavySets }));
+            setWorkoutLogs([{
+              id: 'heavy_chest_20h',
+              date: toIsoDateKeyLocal(new Date(nowMs - 20 * 3600 * 1000)),
+              timestamp: nowMs - 20 * 3600 * 1000,
+              program: 'Göğüs İzole',
+              exercises: chestExIds
+            }]);
+            confirm = () => false;
+            selectedSplits = ['iso_chest'];
+            selectedEquipments = ['dumbbell', 'bench', 'bodyweight'];
+            handleGenerateWorkout('bb_hybrid', '');
+            const wChest = currentGeneratedWorkout || {};
+            const chExs = wChest.exercises || [];
+            chestZeroCollision = chExs.length === 0 || chExs.every(ex => {
+              const an = getExerciseAnatomy(ex);
+              return !((an && an.primarySubKeys) || []).some(k => k.startsWith('chest_'));
+            });
+            chestHasFatigueWarn = Boolean(wChest.fatigueWarning && String(wChest.fatigueWarning).trim().length > 0);
+          } finally {
+            confirm = origConfirm;
+            __mockNowMs = 0;
+            selectedEquipments = [...ALL_EQUIPMENT_KEYS];
+            selectedSplits = ['full_body'];
+          }
+          return { shNonNull, shEmpty, shHasWarn, shNoClimber, customsOk, chestZeroCollision, chestHasFatigueWarn };
+        })()`, ctx);
+        const ok = res.shNonNull && res.shEmpty && res.shHasWarn && res.shNoClimber && res.customsOk && res.chestZeroCollision && res.chestHasFatigueWarn;
+        return { ok, actual: JSON.stringify(res) };
+      }
+    },
+    {
+      id: 'T35',
+      owner: 'generator-guard',
+      title: 'Haftalık Çevrimdışı Plan 31-Alt-Kas Ayrımı & Önizleme İzolasyonu',
+      expected: 'Önizleme son üretilen kaydı ezmez; onayda ardışık gün alt-kas çakışması = 0',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const OrigDate = Date;
+          const FRI_NOW = new OrigDate('2026-11-20T10:00:00+03:00').getTime();
+          class FriMockDate extends OrigDate {
+            constructor(...args) { super(args.length ? args[0] : FRI_NOW, ...(args.slice(1))); }
+            static now() { return FRI_NOW; }
+          }
+          const sentinel = { id: 'sentinel_1', title: 'Korunan Son Kayıt', exercises: [{ id: 'db_bench_press', name: 'Dambıl Bench Press' }] };
+          localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify(sentinel));
+          let sentinelPreserved = false;
+          let daysLen = 0;
+          let nextSchedSaved = false;
+          let consecOverlap = 0;
+          try {
+            selectedEquipments = [...ALL_EQUIPMENT_KEYS];
+            setWorkoutLogs([]);
+            Date = FriMockDate;
+            window.selectedAiWeeklyTemplate = 'full_body_abc';
+            applyAiWeeklySchedule(null);
+            const afterPreview = JSON.parse(localStorage.getItem('celik_kodu_last_generated_workout') || '{}');
+            sentinelPreserved = afterPreview.title === 'Korunan Son Kayıt';
+            const planDays = (window.pendingAiWeeklyPlan && window.pendingAiWeeklyPlan.days) || [];
+            daysLen = planDays.length;
+            confirmPendingAiWeeklyPlan('next');
+            const nextRaw = localStorage.getItem('celik_kodu_next_weekly_schedule_usr_exam');
+            const nextSched = nextRaw ? JSON.parse(nextRaw) : {};
+            const dayOrder = [5, 6, 0, 1, 2, 3, 4];
+            const activeEntries = dayOrder.map(d => nextSched[d]).filter(x => x && !x.rest && ((x.exercises && x.exercises.length) || (x.customWorkout && x.customWorkout.exercises && x.customWorkout.exercises.length)));
+            nextSchedSaved = activeEntries.length >= 2;
+            for (let i = 1; i < dayOrder.length; i++) {
+              const prevE = nextSched[dayOrder[i - 1]];
+              const curE = nextSched[dayOrder[i]];
+              if (!prevE || !curE || prevE.rest || curE.rest) continue;
+              const prevList = (prevE.customWorkout && prevE.customWorkout.exercises) || prevE.exercises || [];
+              const curList = (curE.customWorkout && curE.customWorkout.exercises) || curE.exercises || [];
+              const prevP = new Set();
+              prevList.forEach(ex => {
+                const dbRef = (EXERCISES_DB.find(d => d.id === ex.id) || ex);
+                const an = getExerciseAnatomy(dbRef);
+                ((an && an.primarySubKeys) || []).forEach(pk => prevP.add(pk));
+              });
+              curList.forEach(ex => {
+                const dbRef = (EXERCISES_DB.find(d => d.id === ex.id) || ex);
+                const an = getExerciseAnatomy(dbRef);
+                if (((an && an.primarySubKeys) || []).some(pk => prevP.has(pk))) consecOverlap++;
+              });
+            }
+          } finally {
+            Date = OrigDate;
+          }
+          return { sentinelPreserved, daysLen, nextSchedSaved, consecOverlap };
+        })()`, ctx);
+        const ok = res.sentinelPreserved && res.daysLen >= 3 && res.nextSchedSaved && res.consecOverlap === 0;
+        return { ok, actual: JSON.stringify(res) };
+      }
+    },
+    {
+      id: 'T36',
+      owner: 'library-guard',
+      title: 'Kapsamlı Dışlama Önbelleği (I/O Azaltımı) & Gerçek Geçmiş Akışı',
+      expected: '1 üretimde celik_excluded_exercises okuma <= 5, toggle anında günceller, getWorkoutLogs geçmişi okunur',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const t0 = new Date('2026-11-10T10:00:00Z').getTime();
+          const twoDaysAgo = t0 - 48 * 3600 * 1000;
+          setWorkoutLogs([{
+            id: 'h_lib_1',
+            date: toIsoDateKeyLocal(new Date(twoDaysAgo)),
+            timestamp: twoDaysAgo,
+            program: 'Test',
+            exercises: [
+              { id: 'db_bench_press', name: 'Dambıl Bench Press', sets: [{ weight: 20, reps: 10, completed: true }] },
+              { id: 'db_bent_over_row', name: 'Dambıl Row', sets: [{ weight: 20, reps: 10, completed: true }] }
+            ]
+          }]);
+          const origGetItem = localStorage.getItem.bind(localStorage);
+          let exclReads = 0;
+          let hasLastDone = false;
+          let toggleAdded = false;
+          let toggleRemoved = false;
+          try {
+            __mockNowMs = t0;
+            selectedEquipments = [...ALL_EQUIPMENT_KEYS];
+            selectedSplits = ['upper'];
+            localStorage.getItem = function(k) {
+              if (String(k || '').startsWith('celik_excluded_exercises')) exclReads++;
+              return origGetItem(k);
+            };
+            handleGenerateWorkout('bb_hybrid', '');
+            localStorage.getItem = origGetItem;
+            const lastMap = getLastDoneMapFromHistory();
+            const wkCtx = getRecentAndScheduledMuscleContext();
+            hasLastDone = Boolean(lastMap && lastMap['db_bench_press'] && lastMap['db_bent_over_row'] && wkCtx && wkCtx.directPrimaryMuscleSets7d && wkCtx.directPrimaryMuscleSets7d['Göğüs'] > 0);
+            toggleExcludeExercise('db_bench_press');
+            toggleAdded = getUserExcludedExerciseIds().includes('db_bench_press');
+            toggleExcludeExercise('db_bench_press');
+            toggleRemoved = !getUserExcludedExerciseIds().includes('db_bench_press');
+          } finally {
+            localStorage.getItem = origGetItem;
+            __mockNowMs = 0;
+          }
+          return { exclReads, hasLastDone, toggleAdded, toggleRemoved };
+        })()`, ctx);
+        const ok = res.exclReads <= 5 && res.hasLastDone && res.toggleAdded && res.toggleRemoved;
+        return { ok, actual: JSON.stringify(res) };
+      }
+    },
+    {
+      id: 'T37',
+      owner: 'analytics-guard',
+      title: 'Kimlik Öncelikli Biyomekanik Çözümleme & Artan Ağırlık Piramidi Muafiyeti',
+      expected: 'bb_overhead_press=Omuz; 20kgx12->25kgx10 piramidi +40s sonrasında sahte yorgunluk bloğu tetiklemez',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const bio = resolveExerciseBiomechanics('Overhead Press', '', '', 'bb_overhead_press');
+          const t0 = new Date('2026-11-10T10:00:00Z').getTime();
+          let noPyramidOverload = false;
+          try {
+            setWorkoutLogs([{
+              id: 'pyr_1',
+              date: toIsoDateKeyLocal(new Date(t0)),
+              timestamp: t0,
+              rpe: 7,
+              program: 'Göğüs Piramit',
+              exercises: [{
+                id: 'db_bench_press',
+                name: 'Dambıl Bench Press',
+                muscle: 'Göğüs',
+                sets: [
+                  { setNo: 1, weight: 20, reps: 12, completed: true },
+                  { setNo: 2, weight: 22.5, reps: 11, completed: true },
+                  { setNo: 3, weight: 25, reps: 10, completed: true }
+                ]
+              }]
+            }]);
+            __mockNowMs = t0 + 40 * 3600 * 1000;
+            const ctx40 = getRecentAndScheduledMuscleContext();
+            noPyramidOverload = !ctx40.adjacentPrevDaySubKeys31.has('chest_mid') && !ctx40.fatiguedMuscles48h.includes('Göğüs');
+          } finally {
+            __mockNowMs = 0;
+          }
+          return { primary: bio && bio.primary, noPyramidOverload };
+        })()`, ctx);
+        const ok = res.primary === 'Omuz' && res.noPyramidOverload === true;
+        return { ok, actual: JSON.stringify(res) };
+      }
+    },
+    {
+      id: 'T38',
+      owner: 'workout-guard',
+      title: 'Üretici & Antrenman Sekmeleri Arası Arayüz ve Kart Düzeni Bütünlüğü',
+      expected: 'Üretici, Takvim gün önizlemesi ve Canlı Odak ekranı .wk-carousel-wrap/.wk-card-media-box/.wk-carousel-dock kullanır; CSS Koyu Mor (#181530) tema aktif',
+      run: () => {
+        ctx.__seedState();
+        const cssText = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
+        const hasThemeCss = cssText.includes('.stitch-calendar-shell')
+          && cssText.includes('#studioSectionInWorkout > .generator-card')
+          && cssText.includes('#181530');
+
+        const res = vm.runInContext(`(() => {
+          const sampleExs = [
+            { id: 'db_bench_press', name: 'Dambıl Bench Press', category: 'push', muscle: 'Göğüs', targetSets: 3, targetReps: '8-12' },
+            { id: 'db_row', name: 'Dambıl Row', category: 'pull', muscle: 'Sırt', targetSets: 3, targetReps: '8-12' }
+          ];
+          const genHtml = buildWorkoutCardsCarouselHtml({ title: 'T38 Test', style: 'superset', scheme: { sets: 3, reps: '8-12', rest: 60 }, exercises: sampleExs }, 'generated');
+
+          const uid = 'usr_exam';
+          const todayDt = new Date();
+          const todayYMD = formatDateYMD(todayDt);
+          const sched = getWeeklySchedule(uid);
+          sched[todayDt.getDay()] = { id: 't38_day', title: 'T38 Gün Programı', rest: false, exercises: sampleExs };
+          saveWeeklySchedule(sched, uid);
+          calendarScreenState.viewMode = 'weekly';
+          calendarScreenState.anchorDate = todayDt;
+          calendarScreenState.selectedDayYMD = todayYMD;
+          renderCalendarScreen();
+          const calHtml = String((document.getElementById('calendarMainContainer') && document.getElementById('calendarMainContainer').innerHTML) || '');
+
+          activeWorkoutSession = { title: 'T38 Canlı Test', style: 'superset', scheme: { sets: 3, reps: '8-12', rest: 60 }, exercises: sampleExs };
+          activeWorkoutSetsData = {};
+          activeWorkoutViewMode = 'focus';
+          activeFocusExIndex = 0;
+          activeFocusSetIndex = null;
+          isDaylightRestActive = false;
+          renderActiveWorkout();
+          const liveHtml = String((document.getElementById('activeWorkoutContainer') && document.getElementById('activeWorkoutContainer').innerHTML) || '');
+
+          const hasAll = (h) => ['wk-carousel-wrap', 'wk-carousel-topbar', 'wk-card-media-box', 'wk-carousel-dock'].every(cls => h.includes(cls));
+          return {
+            genUnified: hasAll(genHtml),
+            calUnified: hasAll(calHtml),
+            liveUnified: hasAll(liveHtml)
+          };
+        })()`, ctx);
+
+        const ok = Boolean(hasThemeCss && res.genUnified && res.calUnified && res.liveUnified);
+        return { ok, actual: JSON.stringify({ hasThemeCss, ...res }) };
+      }
     }
   ];
 

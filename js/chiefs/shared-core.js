@@ -13,6 +13,24 @@
         };
         window.CANVA_ICONS = CANVA_ICONS;
 
+        function normSearchText(s) {
+            return String(s || '')
+                .replace(/İ/g, 'i')
+                .replace(/I/g, 'i')
+                .replace(/ı/g, 'i')
+                .toLowerCase()
+                .replace(/\u0307/g, '')
+                .replace(/ı/g, 'i')
+                .trim();
+        }
+        window.normSearchText = normSearchText;
+
+        window.__celikNowMs = function() {
+            return (typeof window.__mockNowMs === 'number' && Number.isFinite(window.__mockNowMs) && window.__mockNowMs > 0)
+                ? window.__mockNowMs
+                : Date.now();
+        };
+
 
         // ==================== MUSCLE RADAR & REGION DEFINITIONS ====================
         
@@ -3177,6 +3195,21 @@
         }
         window.isExerciseEquipmentAvailable = isExerciseEquipmentAvailable;
         let activeWorkoutSession = null;
+        if (typeof window !== 'undefined') {
+            try {
+                const _defineStateBridge = (prop, getter, setter) => {
+                    const desc = Object.getOwnPropertyDescriptor(window, prop);
+                    if (!desc || desc.configurable) {
+                        Object.defineProperty(window, prop, { get: getter, set: setter, configurable: true, enumerable: true });
+                    }
+                };
+                _defineStateBridge('selectedSplits', () => selectedSplits, v => { if (Array.isArray(v)) selectedSplits = v; });
+                _defineStateBridge('selectedSplit', () => selectedSplit, v => { selectedSplit = v; });
+                _defineStateBridge('selectedEquipments', () => selectedEquipments, v => { if (Array.isArray(v)) selectedEquipments = v; });
+                _defineStateBridge('currentGeneratedWorkout', () => currentGeneratedWorkout, v => { currentGeneratedWorkout = v; });
+                _defineStateBridge('activeWorkoutSession', () => activeWorkoutSession, v => { activeWorkoutSession = v; });
+            } catch (e) {}
+        }
         let activeWorkoutStartTime = null;
         let activeWorkoutIsPaused = false;
         let activeWorkoutPausedAt = null;

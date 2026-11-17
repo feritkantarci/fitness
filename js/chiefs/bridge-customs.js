@@ -257,6 +257,11 @@
             return null;
         }
         if (!Array.isArray(workout.exercises) || workout.exercises.length === 0) {
+            if (workout.equipmentWarning || workout.fatigueWarning) {
+                const blockedCopy = Object.assign({}, workout, { exercises: [], isBlockedEmpty: true });
+                if (!blockedCopy.id) blockedCopy.id = 'gen_' + Date.now();
+                return blockedCopy;
+            }
             recordCustomsEvent('rejected', 'generator', 'Hareket listesi boş program engellendi');
             return null;
         }
@@ -303,10 +308,27 @@
         }
 
         if (filteredExercises.length === 0) {
+            if (cleanWorkout.equipmentWarning || cleanWorkout.fatigueWarning) {
+                cleanWorkout.exercises = [];
+                cleanWorkout.isBlockedEmpty = true;
+                if (!cleanWorkout.id) cleanWorkout.id = 'gen_' + Date.now();
+                return cleanWorkout;
+            }
             recordCustomsEvent('rejected', 'generator', 'Tüm hareketleri geçersiz/gizli program engellendi');
             return null;
         }
-        cleanWorkout.exercises = filteredExercises;
+        if (typeof enforceUniversalBiomechanicalOrder === 'function' && filteredExercises.length >= 2) {
+            const ordered = enforceUniversalBiomechanicalOrder(filteredExercises, cleanWorkout.style || 'superset');
+            const changedOrder = ordered.some((e, i) => e !== filteredExercises[i]);
+            if (changedOrder && typeof assignAcademicBlockStructure === 'function') {
+                cleanWorkout.exercises = assignAcademicBlockStructure(ordered, cleanWorkout.style || 'superset', cleanWorkout.scheme || null);
+                repaired = true;
+            } else {
+                cleanWorkout.exercises = ordered;
+            }
+        } else {
+            cleanWorkout.exercises = filteredExercises;
+        }
         if (!cleanWorkout.id) {
             cleanWorkout.id = 'gen_' + Date.now();
             repaired = true;
