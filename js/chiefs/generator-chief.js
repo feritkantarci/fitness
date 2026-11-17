@@ -419,7 +419,7 @@
             'kb_goblet_squat': { id: '2993', name: "Kettlebell Goblet Squat", clip: 'assets/opengym/clips/2993.mp4', still: 'assets/opengym/stills/2993.webp' },
             'kb_gorilla_row': { id: '0522', name: "Kettlebell Gorilla Row", clip: 'assets/opengym/clips/0522.mp4', still: 'assets/opengym/stills/0522.webp' },
             'kb_windmill': { id: '0554', name: "Kettlebell Windmill", clip: 'assets/opengym/clips/0554.mp4', still: 'assets/opengym/stills/0554.webp' },
-            'kb_turkish_getup': { id: 'kb_turkish_getup', name: "Kettlebell Turkish Get-Up", clip: 'assets/opengym/clips/kb_turkish_getup.mp4', still: 'assets/opengym/stills/kb_turkish_getup.webp' },
+            'kb_turkish_getup': { id: 'kb_turkish_getup', name: "Kettlebell Turkish Get-Up", clip: 'assets/exercises/kb_turkish_getup.gif', still: 'assets/exercises/kb_turkish_getup.gif' },
             'kb_halo': { id: '6077', name: "Kettlebell Halo", clip: 'assets/opengym/clips/6077.mp4', still: 'assets/opengym/stills/6077.webp' },
             'kb_thruster': { id: '0538', name: "Kettlebell Thruster", clip: 'assets/opengym/clips/0538.mp4', still: 'assets/opengym/stills/0538.webp' },
             'bb_bench_press': { id: '0025', name: "Barbell Bench Press", clip: 'assets/opengym/clips/0025.mp4', still: 'assets/opengym/stills/0025.webp' },
@@ -2006,6 +2006,17 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         curSlot.customRestNote = 'Ardışık Gün Dengeli';
                     }
                 }
+            }
+
+            const hasAnyPullEquip = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB))
+                ? EXERCISES_DB.some(e => e.category === 'pull' && !isExerciseExcludedByUser(e.id) && isExerciseEquipmentAvailable(e))
+                : true;
+            if (!hasAnyPullEquip) {
+                weeklyDays.forEach(slot => {
+                    if (slot.split === 'upper_pull') {
+                        slot.split = 'full_body';
+                    }
+                });
             }
 
             weeklyDays.forEach((slot) => {
@@ -3856,6 +3867,139 @@ Aşağıdaki JSON şemasında çıktı ver:
             return exercises;
         }
 
+        function normalizeExerciseTargetByMetricMode(ex, fallbackSets = 3, fallbackReps = '8-12') {
+            if (!ex) return { sets: fallbackSets || 3, reps: fallbackReps || '8-12', metricMode: 'reps' };
+            const exMode = (typeof getExerciseMetricMode === 'function') ? getExerciseMetricMode(ex) : 'reps';
+            let sets = Number(ex.targetSets || ex.sets || fallbackSets) || 3;
+            let reps = String(ex.targetReps !== undefined && ex.targetReps !== null && ex.targetReps !== '' ? ex.targetReps : (ex.reps || fallbackReps || '8-12')).trim();
+            if (exMode === 'cardio_min') {
+                const defMin = (typeof resolveDefaultExerciseSetTarget === 'function') ? resolveDefaultExerciseSetTarget(ex, '') : 20;
+                sets = 1;
+                const numM = parseFloat(reps);
+                if (!/\b(dk|dak|min)\b/i.test(reps) || isNaN(numM) || numM < 5) {
+                    reps = `${defMin || 20} dk`;
+                }
+            } else if (exMode === 'time_sec') {
+                const defSec = (typeof resolveDefaultExerciseSetTarget === 'function') ? resolveDefaultExerciseSetTarget(ex, '') : 30;
+                const numS = parseFloat(reps);
+                if (/^\d+\s*-\s*\d+$/.test(reps) || /\b(dk|dak|min|maks|max)\b/i.test(reps) || (!/\b(sn|saniye|sec)\b/i.test(reps) && (isNaN(numS) || numS < 15))) {
+                    reps = `${defSec || 30} sn`;
+                }
+            } else {
+                if (/\b(sn|saniye|sec|dk|dak|min)\b/i.test(reps)) {
+                    reps = (fallbackReps && !/\b(sn|saniye|sec|dk|dak|min)\b/i.test(String(fallbackReps))) ? String(fallbackReps) : '8-12';
+                }
+            }
+            return { sets, reps, metricMode: exMode };
+        }
+        window.normalizeExerciseTargetByMetricMode = normalizeExerciseTargetByMetricMode;
+
+        function resolveSafeWorkoutFinisher(usedIds = [], usedFamilies = new Set(), wishParsed = null, weeklyUsedFinishers = new Set()) {
+            const uSet = new Set(Array.isArray(usedIds) ? usedIds : []);
+            const fSet = (usedFamilies instanceof Set) ? usedFamilies : new Set(Array.isArray(usedFamilies) ? usedFamilies : []);
+            const wkFinSet = (weeklyUsedFinishers instanceof Set) ? weeklyUsedFinishers : new Set();
+            const wp = wishParsed || { excludedIds: new Set(), excludedKeywords: [] };
+            const exIdsSet = (wp.excludedIds instanceof Set) ? wp.excludedIds : new Set();
+            const exKwList = Array.isArray(wp.excludedKeywords) ? wp.excludedKeywords : [];
+
+            const finisherCandidates = [
+                { exId: "db_swing", family: "ballistic_hip_hinge", name: "3 Dk Tabata Balistik Bitiş", desc: "20 sn Maksimum Tempolu Swing / Snatch + 10 sn Dinlenme (4 Tur)" },
+                { exId: "db_farmers_walk", family: "loaded_carry", name: "Çiftçi Yürüyüşü (Farmer's Walk / Carry Burnout)", desc: "Mümkün olan en ağır dambıllarla 3 tur 40 metre kesintisiz yürüyüş." },
+                { exId: "bw_burpee", family: "fullbody_metcon_burpee", name: "3 Dk EMOM Kondisyon Zırhı (Burpee / Mountain Climber)", desc: "Her dakika başında 10 Burpee veya 30 sn Mountain Climber, kalan sürede aktif dinlenme." },
+                { exId: "bw_plank", family: "core_anterior_plank", name: "2 Dk İzometrik Core & Hollow Hold Burnout", desc: "40 sn RKC Plank + 20 sn Dinlenme × 2 Tur maksimum karın duvarı sıkışı." },
+                { exId: "bw_mountain_climber", family: "core_dynamic_climber", name: "2 Dk Dağ Tırmanışı (Mountain Climber Burnout)", desc: "30 sn maksimum tempo + 15 sn dinlenme × 3 tur." },
+                { exId: "bw_hollow_body", family: "core_isometric_hollow", name: "2 Dk Hollow Body Zırh Tutuşu", desc: "30 sn Hollow Body Hold + 15 sn dinlenme × 3 tur." },
+                { exId: "bw_glute_bridge", family: "glute_bridge_thrust", name: "2 Dk İzometrik Kalça & Arka Zincir Bitişi", desc: "40 sn Glute Bridge Hold + 20 sn dinlenme × 2 tur." },
+                { exId: "kb_swing", family: "ballistic_hip_hinge", name: "3 Dk Kettlebell Balistik Bitiş", desc: "20 sn Kettlebell Swing + 10 sn dinlenme (6 Tur)." },
+                { exId: "mach_face_pull", family: "rear_delt_face_pull", name: "2 Dk Postür & Arka Omuz Yanma Bitişi", desc: "2×20 yüksek tekrar kontrollü sıkış." }
+            ];
+            const pureBreathingFallback = {
+                exId: null,
+                family: "recovery",
+                name: "2 Dk Diyafram Nefesi & Eklem Soğuma",
+                desc: "Sırtüstü uzanıp 4 sn nefes al, 4 sn tut, 6 sn ver; parasempatik toparlanmayı tetikle."
+            };
+
+            const validCandidates = finisherCandidates.filter(f => {
+                if (!f.exId) return false;
+                if (typeof isExerciseExcludedByUser === 'function' && isExerciseExcludedByUser(f.exId)) return false;
+                const dbEx = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB))
+                    ? EXERCISES_DB.find(e => e.id === f.exId)
+                    : null;
+                if (!dbEx) return false;
+                if (typeof isExerciseEquipmentAvailable === 'function' && !isExerciseEquipmentAvailable(dbEx)) return false;
+                if (uSet.has(f.exId) || fSet.has(f.family)) return false;
+                const dbFam = (typeof getExerciseMovementFamily === 'function') ? getExerciseMovementFamily(dbEx) : '';
+                if (dbFam && fSet.has(dbFam)) return false;
+                if (exIdsSet.has(f.exId)) return false;
+                const fNameLow = (f.name || '').toLocaleLowerCase('tr-TR');
+                const fIdLow = (f.exId || '').toLocaleLowerCase('tr-TR');
+                if (exKwList.some(kw => kw.length >= 2 && (fNameLow.includes(kw) || fIdLow.includes(kw)))) return false;
+                return true;
+            });
+
+            const weeklyFresh = validCandidates.filter(f => !wkFinSet.has(f.exId));
+            const picked = pickRandom(weeklyFresh.length > 0 ? weeklyFresh : validCandidates) || pureBreathingFallback;
+            if (picked && picked.exId) {
+                wkFinSet.add(picked.exId);
+            }
+            return Object.assign({}, picked);
+        }
+        window.resolveSafeWorkoutFinisher = resolveSafeWorkoutFinisher;
+
+        function sanitizeAndAdaptPresetWorkout(rawExercises, style = 'superset', scheme = null, preferComplex = false) {
+            const db = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) ? EXERCISES_DB : [];
+            const accepted = [];
+            const usedIds = new Set();
+            const usedFamilies = new Set();
+
+            const isCandValid = (cand) => {
+                if (!cand || !cand.id) return false;
+                if (usedIds.has(cand.id)) return false;
+                if (typeof isExerciseExcludedByUser === 'function' && isExerciseExcludedByUser(cand.id)) return false;
+                if (typeof isExerciseEquipmentAvailable === 'function' && !isExerciseEquipmentAvailable(cand)) return false;
+                const fam = (typeof getExerciseMovementFamily === 'function') ? getExerciseMovementFamily(cand) : '';
+                if (fam && usedFamilies.has(fam)) return false;
+                if (typeof hasBiomechAngleAndMuscleConflict === 'function' && hasBiomechAngleAndMuscleConflict(cand, accepted)) return false;
+                return true;
+            };
+
+            (Array.isArray(rawExercises) ? rawExercises : []).forEach(item => {
+                const baseEx = (item && item.id && db.find(e => e.id === item.id)) || item;
+                if (!baseEx) return;
+                let chosen = isCandValid(baseEx) ? Object.assign({}, baseEx, item, { id: baseEx.id, name: baseEx.name, equipment: baseEx.equipment, category: baseEx.category, muscle: baseEx.muscle, primaryMuscles: baseEx.primaryMuscles, secondaryMuscles: baseEx.secondaryMuscles }) : null;
+
+                if (!chosen) {
+                    const targetCat = (typeof getEffectiveExerciseCategory === 'function') ? getEffectiveExerciseCategory(baseEx) : baseEx.category;
+                    const targetSubKey = (typeof getExerciseAnatomy === 'function' && getExerciseAnatomy(baseEx)) ? getExerciseAnatomy(baseEx).subKey : '';
+                    let pool = db.filter(c => isCandValid(c) && (typeof getExerciseMetricMode === 'function' ? getExerciseMetricMode(c) !== 'cardio_min' : true));
+                    if (preferComplex) {
+                        const compMatches = pool.filter(c => c.isComplex || (c.tags && (c.tags.includes('complex') || c.tags.includes('flow'))));
+                        if (compMatches.length > 0) pool = compMatches;
+                    }
+                    const sameSub = targetSubKey ? pool.filter(c => (typeof getExerciseAnatomy === 'function' && getExerciseAnatomy(c)?.subKey === targetSubKey)) : [];
+                    const sameCat = pool.filter(c => ((typeof getEffectiveExerciseCategory === 'function') ? getEffectiveExerciseCategory(c) : c.category) === targetCat);
+                    const pickedAlt = (sameSub.length > 0 ? sameSub[0] : (sameCat.length > 0 ? sameCat[0] : pool[0])) || null;
+                    if (pickedAlt) {
+                        chosen = Object.assign({}, pickedAlt, {
+                            targetSets: item.targetSets || (scheme && scheme.sets) || 4,
+                            targetReps: item.targetReps || (scheme && scheme.reps) || '8 - 10'
+                        });
+                    }
+                }
+
+                if (chosen) {
+                    usedIds.add(chosen.id);
+                    const fam = (typeof getExerciseMovementFamily === 'function') ? getExerciseMovementFamily(chosen) : '';
+                    if (fam) usedFamilies.add(fam);
+                    accepted.push(chosen);
+                }
+            });
+
+            return assignAcademicBlockStructure(accepted, style, scheme || { sets: 4, reps: '8 - 10', rest: 45 });
+        }
+        window.sanitizeAndAdaptPresetWorkout = sanitizeAndAdaptPresetWorkout;
+
         function assignAcademicBlockStructure(exercises, style, baseScheme) {
             if (!Array.isArray(exercises)) return [];
             const straightRest = (baseScheme && baseScheme.straightRest) || 90;
@@ -3869,23 +4013,17 @@ Aşağıdaki JSON şemasında çıktı ver:
 
             const structured = optimized.map((rawEx, idx) => {
                 const ex = Object.assign({}, rawEx);
-                const exMode = (typeof getExerciseMetricMode === 'function') ? getExerciseMetricMode(ex) : 'reps';
-                ex.metricMode = exMode;
-                if (exMode === 'cardio_min') {
-                    const defMin = (typeof resolveDefaultExerciseSetTarget === 'function') ? resolveDefaultExerciseSetTarget(ex, '') : 20;
-                    ex.targetSets = 1;
+                const normTarget = normalizeExerciseTargetByMetricMode(
+                    ex,
+                    (baseScheme && baseScheme.sets) || 3,
+                    (baseScheme && baseScheme.reps) || '8-12'
+                );
+                ex.metricMode = normTarget.metricMode;
+                ex.targetSets = normTarget.sets;
+                if (normTarget.metricMode === 'cardio_min') {
                     ex.sets = 1;
-                    if (!ex.targetReps || !/\b(dk|dak|min)\b/i.test(String(ex.targetReps))) {
-                        ex.targetReps = `${defMin} dk`;
-                    }
-                } else if (exMode === 'time_sec') {
-                    const defSec = (typeof resolveDefaultExerciseSetTarget === 'function') ? resolveDefaultExerciseSetTarget(ex, '') : 30;
-                    if (!ex.targetReps || /^\d+\s*-\s*\d+$/.test(String(ex.targetReps).trim()) || (!/\b(sn|saniye|sec)\b/i.test(String(ex.targetReps)) && Number(ex.targetReps) < 15)) {
-                        ex.targetReps = `${defSec} sn`;
-                    }
-                } else if (!ex.targetReps && baseScheme && baseScheme.reps) {
-                    ex.targetReps = baseScheme.reps;
                 }
+                ex.targetReps = normTarget.reps;
                 if (style === 'superset') {
                     // ORTA / AKADEMİK HİBRİT (Schumann et al. 2022 & Weakley et al. 2017):
                     // 1 Düz Bileşik Set + 1 Süperset (A1+A2) + 1 Düz Bileşik Set + 1 Süperset (B1+B2)
@@ -5050,7 +5188,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
 
                 const pk = (typeof getExercisePrimaryMuscleKeys === 'function') ? getExercisePrimaryMuscleKeys(ex) : [];
                 const effCat = (typeof getEffectiveExerciseCategory === 'function') ? getEffectiveExerciseCategory(ex) : ex.category;
-                const isCondAllowed = style === 'emom_conditioning' && (effCat === 'cardio' || ex.isComplex || /burpee|swing|thruster|mountain|jack|rope|skater|thrust/i.test(ex.id || ''));
+                const isCondAllowed = style === 'emom_conditioning' && (effCat === 'cardio' || ex.isComplex || /burpee|swing|thruster|mountain|jack|rope|skater|thrust|high_knees|butt_kicks|shuffle/i.test(ex.id || ''));
                 if (isCondAllowed) return true;
 
                 const isCardioJunk = effCat === 'cardio' || /jumping_jack|high_knees|butt_kicks|running|walking|jump_rope|skater|shuffle|squat_thrust/i.test(ex.id || '');
@@ -5062,12 +5200,24 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 }).length;
 
                 return selectedSplits.some(sp => {
-                    if (sp === 'iso_chest') return pk.some(k => k.startsWith('chest_') || k.startsWith('triceps_'));
-                    if (sp === 'iso_back') return pk.some(k => k.startsWith('back_') || k === 'traps' || k === 'shoulders_rear' || k === 'biceps');
-                    if (sp === 'iso_shoulders') return pk.some(k => k.startsWith('shoulders_') || k === 'traps');
-                    if (sp === 'iso_arms') return pk.some(k => k === 'biceps' || k.startsWith('triceps_'));
-                    if (sp === 'iso_legs' || sp === 'lower') return pk.some(k => k.startsWith('legs_')) || effCat === 'legs_quad' || effCat === 'legs_hinge';
-                    if (sp === 'iso_core' || sp === 'core_functional') return pk.some(k => k.startsWith('core_')) || effCat === 'core';
+                    if (sp === 'iso_chest') {
+                        if (effCat === 'core' && !pk.some(k => k.startsWith('chest_') || k.startsWith('triceps_'))) return chosenCoreCount < 1 && style !== 'emom_conditioning';
+                        return pk.some(k => k.startsWith('chest_') || k.startsWith('triceps_'));
+                    }
+                    if (sp === 'iso_back') {
+                        if (effCat === 'core' && !pk.some(k => k.startsWith('back_') || k === 'traps' || k === 'shoulders_rear' || k === 'biceps')) return chosenCoreCount < 1 && style !== 'emom_conditioning';
+                        return pk.some(k => k.startsWith('back_') || k === 'traps' || k === 'shoulders_rear' || k === 'biceps');
+                    }
+                    if (sp === 'iso_shoulders') {
+                        if (effCat === 'core' && !pk.some(k => k.startsWith('shoulders_') || k === 'traps')) return chosenCoreCount < 1 && style !== 'emom_conditioning';
+                        return pk.some(k => k.startsWith('shoulders_') || k === 'traps');
+                    }
+                    if (sp === 'iso_arms') return pk.some(k => k === 'biceps' || k.startsWith('triceps_') || k === 'brachialis');
+                    if (sp === 'iso_legs' || sp === 'lower') {
+                        if (effCat === 'core' && !pk.some(k => k.startsWith('legs_'))) return chosenCoreCount < 1 && style !== 'emom_conditioning';
+                        return pk.some(k => k.startsWith('legs_')) || effCat === 'legs_quad' || effCat === 'legs_hinge';
+                    }
+                    if (sp === 'iso_core' || sp === 'core' || sp === 'core_functional') return pk.some(k => k.startsWith('core_')) || effCat === 'core';
                     if (sp === 'upper_push') {
                         if (effCat === 'core' && !pk.some(k => k.startsWith('chest_') || k.startsWith('shoulders_') || k.startsWith('triceps_'))) return chosenCoreCount < 1 && style !== 'emom_conditioning';
                         return effCat === 'push' || pk.some(k => k.startsWith('chest_') || k === 'shoulders_front' || k === 'shoulders_side' || k.startsWith('triceps_'));
@@ -5170,7 +5320,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 const isOnlyUpperSplit = !hasLowerOrFullOrFuncSplit;
                 const isOnlyLowerSplit = !isComplexFlow && selectedSplits.every(s => s === 'lower' || s === 'iso_legs');
                 const effCat = getEffectiveExerciseCategory(ex);
-                if (isOnlyUpperSplit && (effCat === 'legs_quad' || effCat === 'legs_hinge' || effCat === 'legs_calves')) {
+                if (isOnlyUpperSplit && (effCat === 'legs_quad' || effCat === 'legs_hinge' || effCat === 'legs_calves') && ex.id !== 'bw_hyperextension') {
                     return false;
                 }
                 if (isOnlyLowerSplit && (effCat === 'push' || effCat === 'pull')) {
@@ -5410,8 +5560,8 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     }
                     if (chosen) {
                         recordChosenExercise(chosen);
+                        return;
                     }
-                    return;
                 }
 
                 // KURAL 1: Aday havuzu KESİN OLARAK hem ID hem Biyomekanik Aile hem Medya açısından seansta benzersiz olmak zorundadır!
@@ -5921,6 +6071,92 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 }
             }
 
+            // KATMAN 2.5: EKSİK SLOT TAMAMLAMA & YORGUN BÖLGE KULLANICI ONAYLI KADEMELİ ESNETME (SEÇENEK-A)
+            let userConfirmedFatiguedSplit = false;
+            let fatigueWarning = '';
+            const isStrictCandidateValid = (cand, allowAdjacentFatigued = false, allowComplexFallback = false) => {
+                if (!cand || isExerciseExcludedByUser(cand.id)) return false;
+                if (!isExerciseEquipmentAvailable(cand)) return false;
+                if (cand.id === 'db_floor_press' && typeof selectedEquipments !== 'undefined' && selectedEquipments.includes('bench')) return false;
+                if (usedIds.includes(cand.id)) return false;
+                if (!isAllowedBySelectedSplits(cand)) return false;
+                if (wishParsed.excludedIds.has(cand.id)) return false;
+                const cNameLow = (cand.name || '').toLocaleLowerCase('tr-TR');
+                const cIdLow = (cand.id || '').toLocaleLowerCase('tr-TR');
+                const cFamLow = String(getExerciseMovementFamily(cand) || '').toLocaleLowerCase('tr-TR');
+                if (wishParsed.excludedKeywords.some(kw => kw.length >= 2 && (cNameLow.includes(kw) || cIdLow.includes(kw) || cFamLow.includes(kw)))) return false;
+                const fam = getExerciseMovementFamily(cand);
+                if (fam && usedFamilies.has(fam)) return false;
+                if (fam === 'squat_or_clean_press_complex' && (usedFamilies.has('vertical_shoulder_press') || usedFamilies.has('bilateral_squat'))) return false;
+                if ((fam === 'vertical_shoulder_press' || fam === 'bilateral_squat') && usedFamilies.has('squat_or_clean_press_complex')) return false;
+                if (fam === 'swing_goblet_complex' && (usedFamilies.has('bilateral_squat') || usedFamilies.has('ballistic_hip_hinge') || usedFamilies.has('hip_hinge_rdl_deadlift'))) return false;
+                if ((fam === 'bilateral_squat' || fam === 'ballistic_hip_hinge' || fam === 'hip_hinge_rdl_deadlift') && usedFamilies.has('swing_goblet_complex')) return false;
+                if (fam === 'rdl_high_pull_complex' && (usedFamilies.has('hip_hinge_rdl_deadlift') || usedFamilies.has('row_high_pull_cuban'))) return false;
+                if ((fam === 'hip_hinge_rdl_deadlift' || fam === 'row_high_pull_cuban') && usedFamilies.has('rdl_high_pull_complex')) return false;
+                if ((fam === 'lunge_curl_press_complex' || fam === 'lunge_knee_drive_complex' || fam === 'lunge_chop_rotational') && usedFamilies.has('unilateral_lunge_split')) return false;
+                if (fam === 'unilateral_lunge_split' && (usedFamilies.has('lunge_curl_press_complex') || usedFamilies.has('lunge_knee_drive_complex') || usedFamilies.has('lunge_chop_rotational'))) return false;
+                const mediaId = getExerciseMediaId(cand);
+                if (mediaId && usedMediaIds.has(mediaId)) return false;
+                if (hasBiomechAngleAndMuscleConflict(cand, chosenExercises)) return false;
+                const anat = getExerciseAnatomy(cand);
+                if (!isComplexFlow && !allowComplexFallback && (cand.isComplex || (anat && (anat.isComplex || anat.isLowerUpperComplex || anat.isFullBodyMetcon)))) return false;
+                const isOnlyUpperSplit = !hasLowerOrFullOrFuncSplit && !allowComplexFallback;
+                const isOnlyLowerSplit = !isComplexFlow && !allowComplexFallback && selectedSplits.every(s => s === 'lower' || s === 'iso_legs');
+                const effCat = getEffectiveExerciseCategory(cand);
+                if (isOnlyUpperSplit && (effCat === 'legs_quad' || effCat === 'legs_hinge' || effCat === 'legs_calves') && cand.id !== 'bw_hyperextension') return false;
+                if (isOnlyLowerSplit && (effCat === 'push' || effCat === 'pull')) return false;
+                if (!allowAdjacentFatigued && hasAdjacentDaySubMuscleRule && hasAdjacentDayPrimarySubMuscleOverlap(cand)) return false;
+                return true;
+            };
+
+            const runTopUpAndFatigueRelaxation = () => {
+                if (chosenExercises.length >= targetCount || typeof EXERCISES_DB === 'undefined' || !Array.isArray(EXERCISES_DB)) return true;
+
+                // Aşama 1: Dün çalışmamış (0 çakışmalı) uygun hareketlerle eksik slotları doldur (önce saf hareketler, sonra kompleks yedek)
+                const canUseComplexFallback = hasLowerOrFullOrFuncSplit || style === 'emom_conditioning';
+                while (chosenExercises.length < targetCount) {
+                    let strictPool = preferWeeklyFreshExercises(EXERCISES_DB.filter(c => isStrictCandidateValid(c, false, false)));
+                    if (strictPool.length === 0 && canUseComplexFallback) {
+                        strictPool = preferWeeklyFreshExercises(EXERCISES_DB.filter(c => isStrictCandidateValid(c, false, true)));
+                    }
+                    if (strictPool.length === 0) break;
+                    strictPool.sort((a, b) => scoreCandidateBy31SubMuscles(a) - scoreCandidateBy31SubMuscles(b));
+                    recordChosenExercise(strictPool[0]);
+                }
+
+                // Aşama 2 (Seçenek-A): Kullanıcının seçtiği bölge dün çalıştığı için havuz tükendiyse, önce kullanıcıdan onay iste; onaylarsa en az yorgun alt başlardan tamamla
+                if (chosenExercises.length < targetCount && hasAdjacentDaySubMuscleRule && (!weeklyContext || !isConsecutiveDay)) {
+                    const relaxedCheckPool = EXERCISES_DB.filter(c => isStrictCandidateValid(c, true, false) || (canUseComplexFallback && isStrictCandidateValid(c, true, true)));
+                    if (relaxedCheckPool.length > 0) {
+                        if (!userConfirmedFatiguedSplit) {
+                            let confirmedFatigue = true;
+                            if (!weeklyContext && typeof confirm === 'function') {
+                                confirmedFatigue = confirm("⚠️ Seçtiğiniz bölge dün yapılan antrenmanda çalıştı. Yorgun kasları bugün tekrar çalıştırmak istiyor musunuz?");
+                            }
+                            if (!confirmedFatigue) {
+                                return false;
+                            }
+                            userConfirmedFatiguedSplit = true;
+                            fatigueWarning = 'Seçilen bölge dün çalıştığı için onayınızla en az yorulan alt başlardan tamamlandı.';
+                        }
+                        while (chosenExercises.length < targetCount) {
+                            let relPool = preferWeeklyFreshExercises(EXERCISES_DB.filter(c => isStrictCandidateValid(c, true, false)));
+                            if (relPool.length === 0 && canUseComplexFallback) {
+                                relPool = preferWeeklyFreshExercises(EXERCISES_DB.filter(c => isStrictCandidateValid(c, true, true)));
+                            }
+                            if (relPool.length === 0) break;
+                            relPool.sort((a, b) => scoreCandidateBy31SubMuscles(a) - scoreCandidateBy31SubMuscles(b));
+                            recordChosenExercise(relPool[0]);
+                        }
+                    }
+                }
+                return true;
+            };
+
+            if (!runTopUpAndFatigueRelaxation()) {
+                return null;
+            }
+
             // Özel İstek + Geçmiş Haftalık/Aylık Eksik Bölge Telafisi & Eklem Hassasiyeti Uyarlaması
             const wishLower = (customWish || '').toLocaleLowerCase('tr-TR');
             const hasWorkoutHistory = (typeof getWorkoutLogs === 'function') && getWorkoutLogs().length > 0;
@@ -6145,6 +6381,10 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 }
             }
 
+            if (chosenExercises.length < targetCount) {
+                runTopUpAndFatigueRelaxation();
+            }
+
             // SON BİYOMEKANİK AÇI & %70 KAS ÖRTÜŞME DENETİMİ:
             // Seans içinde herhangi bir aşamada (fallback veya özel odak enjeksiyonu) aynı açılı ve %70+ kas örtüşmeli
             // iki hareket (örn. Barbell Row + Rotasyonel Gorilla Row) yan yana düşmüşse, ikincisini farklı açılı (dikey veya destekli) hareketle değiştir.
@@ -6272,37 +6512,8 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 { name: "Kedi - Deve & Kuş Köpeği (Omurga Aktivasyonu)", dur: "60 sn", cue: "Nefes alarak beli çukurlaştır, nefes vererek sırtı kabart." }
             ];
 
-            // KATMAN 3: FINISHER ÇAKIŞMA VE KISITLAMA KORUMASI (Ana antrenmanda seçilen hareket veya kullanıcının istemediği hareketler Finisher olamaz!)
-            const finisherCandidates = [
-                { exId: "db_swing", family: "ballistic_hip_hinge", name: "3 Dk Tabata Balistik Bitiş", desc: "20 sn Maksimum Tempolu Swing / Snatch + 10 sn Dinlenme (4 Tur)" },
-                { exId: "db_farmers_walk", family: "loaded_carry", name: "Çiftçi Yürüyüşü (Farmer's Walk / Carry Burnout)", desc: "Mümkün olan en ağır dambıllarla 3 tur 40 metre kesintisiz yürüyüş." },
-                { exId: "bw_burpee", family: "fullbody_metcon_burpee", name: "3 Dk EMOM Kondisyon Zırhı (Burpee / Mountain Climber)", desc: "Her dakika başında 10 Burpee veya 30 sn Mountain Climber, kalan sürede aktif dinlenme." },
-                { exId: "bw_plank", family: "core_anterior_plank", name: "2 Dk İzometrik Core & Hollow Hold Burnout", desc: "40 sn RKC Plank + 20 sn Dinlenme × 2 Tur maksimum karın duvarı sıkışı." }
-            ];
-            const fallbackRecoveryFinisher = {
-                exId: "bw_hollow_body",
-                family: "recovery",
-                name: "2 Dk Diyafram Nefesi & Core Toparlanma",
-                desc: "Sırtüstü uzanıp 4 sn nefes al, 4 sn tut, 6 sn ver; parasempatik toparlanmayı tetikle."
-            };
-
-            const deconflictedFinishers = finisherCandidates.filter(f => {
-                if (usedIds.includes(f.exId) || usedFamilies.has(f.family)) return false;
-                if (wishParsed.excludedIds.has(f.exId)) return false;
-                const fNameLow = (f.name || '').toLocaleLowerCase('tr-TR');
-                const fIdLow = (f.exId || '').toLocaleLowerCase('tr-TR');
-                if (wishParsed.excludedKeywords.some(kw => fNameLow.includes(kw) || fIdLow.includes(kw))) return false;
-                return true;
-            });
-            const weeklyFreshFinishers = deconflictedFinishers.filter(f => !weeklyUsedFinishers.has(f.exId));
-            const selectedFinisher = pickRandom(
-                weeklyFreshFinishers.length > 0
-                    ? weeklyFreshFinishers
-                    : (deconflictedFinishers.length > 0 ? deconflictedFinishers : [fallbackRecoveryFinisher])
-            ) || fallbackRecoveryFinisher;
-            if (selectedFinisher && selectedFinisher.exId) {
-                weeklyUsedFinishers.add(selectedFinisher.exId);
-            }
+            // KATMAN 3: FINISHER ÇAKIŞMA, EKİPMAN VE GİZLİ HAREKET KORUMASI
+            const selectedFinisher = resolveSafeWorkoutFinisher(usedIds, usedFamilies, wishParsed, weeklyUsedFinishers);
 
             const splitNames = {
                 full_body: "Tüm Vücut Antrenmanı",
@@ -6348,12 +6559,16 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 equipmentWarning = `Seçili ekipmanlar "${generatedSplitTitle}" bölgesi için yetersiz (${structuredExercises.length} hareket bulundu). Daha verimli program için ek ekipman seçin.`;
             } else if (style === 'emom_strength' && structuredExercises.every(e => e.equipment === 'bodyweight')) {
                 equipmentWarning = 'Kuvvet EMOM ağır yük gerektirir; yalnızca vücut ağırlığıyla gerçek kuvvet yüklemesi sınırlıdır.';
+            } else if (fatigueWarning) {
+                equipmentWarning = fatigueWarning;
             }
 
             currentGeneratedWorkout = {
                 id: 'gen_' + Date.now(),
                 title: generatedSplitTitle,
                 equipmentWarning,
+                fatigueWarning,
+                userConfirmedFatiguedSplit,
                 split: selectedSplits.length === 1 ? selectedSplits[0] : 'custom',
                 splits: [...selectedSplits],
                 splitName: generatedSplitTitle,
@@ -6893,7 +7108,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 'bw_mountain_climber': guideLibrary.mountain_climber,
                 'bw_hanging_knee_raise': guideLibrary.hanging_knee_raise,
                 'kb_windmill': guideLibrary.windmill,
-                'kb_turkish_getup': { form: 'assets/exercises/kb_turkish_getup.webp', anatomi: null },
+                'kb_turkish_getup': { form: 'assets/exercises/kb_turkish_getup.gif', anatomi: null },
 
                 // Kompleks & Fonksiyonel Akışlar (Gerçek Animasyonlu Kılavuzlar)
                 'db_clean_squat_press': { form: 'assets/exercises/db_clean_squat_press.webp', anatomi: null },
@@ -8884,6 +9099,22 @@ KESİN KURALLAR:
                     return true;
                 });
 
+                // Seanstaki diğer hareketlerle aynı hareket ailesi veya açı vektörü çakışması olanları ayıkla
+                const activeW = pickerContext.scope === 'active' ? activeWorkoutSession : currentGeneratedWorkout;
+                const otherExsInWorkout = (activeW && Array.isArray(activeW.exercises))
+                    ? activeW.exercises.filter(e => e && e.id !== pickerContext.targetExId)
+                    : [];
+                if (otherExsInWorkout.length > 0) {
+                    const otherFams = new Set(otherExsInWorkout.map(e => getExerciseMovementFamily(e)).filter(Boolean));
+                    const nonConflicting = filtered.filter(ex =>
+                        !otherFams.has(getExerciseMovementFamily(ex)) &&
+                        !hasBiomechAngleAndMuscleConflict(ex, otherExsInWorkout)
+                    );
+                    if (nonConflicting.length > 0) {
+                        filtered = nonConflicting;
+                    }
+                }
+
                 // Biyomekanik + Ortam Ekipman + Tazelik Sıralaması
                 const lastDoneMap = getLastDoneMapFromHistory();
                 const recentGenSet = new Set(getRecentGeneratedIds());
@@ -8953,6 +9184,8 @@ KESİN KURALLAR:
                     return true;
                 });
             }
+
+            window._lastRenderedPickerIds = Array.isArray(filtered) ? filtered.map(e => e.id) : [];
 
             if (filtered.length === 0) {
                 container.innerHTML = `
@@ -9066,6 +9299,23 @@ KESİN KURALLAR:
             const nowTs = Date.now();
             workout.updatedAt = nowTs;
             workout.exercises = assignAcademicBlockStructure(workout.exercises, workout.style || 'superset', workout.scheme);
+
+            // Finisher çakışma / ekipman / gizleme denetimi: Ana listedeki hareketle çakışırsa otomatik güncelle
+            if (workout.finisher && workout.finisher.exId && typeof resolveSafeWorkoutFinisher === 'function') {
+                const finId = workout.finisher.exId;
+                const mainIds = workout.exercises.map(e => e && e.id).filter(Boolean);
+                const mainFams = new Set(workout.exercises.map(e => (typeof getExerciseMovementFamily === 'function' ? getExerciseMovementFamily(e) : '')).filter(Boolean));
+                const finDb = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) ? EXERCISES_DB.find(e => e.id === finId) : null;
+                const isBadFin = mainIds.includes(finId) ||
+                    (typeof isExerciseExcludedByUser === 'function' && isExerciseExcludedByUser(finId)) ||
+                    (finDb && typeof isExerciseEquipmentAvailable === 'function' && !isExerciseEquipmentAvailable(finDb));
+                if (isBadFin) {
+                    const wp = (typeof parseUserWishConstraints === 'function' && workout.customWish)
+                        ? parseUserWishConstraints(workout.customWish, EXERCISES_DB, window.lastGeminiWishAnalysis)
+                        : null;
+                    workout.finisher = resolveSafeWorkoutFinisher(mainIds, mainFams, wp);
+                }
+            }
 
             // 1. Tek günlük oluşturulan antrenmanı localStorage'da da güncelle
             if (workout === currentGeneratedWorkout) {
@@ -9184,15 +9434,20 @@ KESİN KURALLAR:
 
             // 1. STUDIO SCOPE (Custom Routine Builder)
             if (pickerContext.scope === 'studio') {
+                const normStudio = normalizeExerciseTargetByMetricMode(newEx, 3, '8-12');
                 if (pickerContext.mode === 'replace' && pickerContext.studioIndex !== null) {
                     if (customRoutineState && customRoutineState.exercises && customRoutineState.exercises[pickerContext.studioIndex]) {
+                        const prevItem = customRoutineState.exercises[pickerContext.studioIndex];
+                        const repNorm = normalizeExerciseTargetByMetricMode(newEx, prevItem.sets || 3, prevItem.reps || '8-12');
                         customRoutineState.exercises[pickerContext.studioIndex].exId = newEx.id;
+                        customRoutineState.exercises[pickerContext.studioIndex].sets = repNorm.sets;
+                        customRoutineState.exercises[pickerContext.studioIndex].reps = repNorm.reps;
                     }
                 } else {
                     customRoutineState.exercises.push({
                         exId: newEx.id,
-                        sets: 3,
-                        reps: '8-12',
+                        sets: normStudio.sets,
+                        reps: normStudio.reps,
                         weight: ''
                     });
                 }
@@ -9227,22 +9482,38 @@ KESİN KURALLAR:
                     const currentExs = (details && Array.isArray(details.exercises)) ? details.exercises : [];
 
                     // Build updated full exercises array
-                    const newExercises = currentExs.map((e, idx) => {
+                    const rawNewExercises = currentExs.map((e, idx) => {
                         if (idx === targetItemIdx) {
+                            const normT = normalizeExerciseTargetByMetricMode(
+                                newEx,
+                                e.targetSets || e.sets || (details.scheme ? details.scheme.sets : 3),
+                                e.targetReps || e.reps || (details.scheme ? details.scheme.reps : '8-12')
+                            );
                             return Object.assign({}, newEx, {
-                                targetSets: e.targetSets || e.sets || (details.scheme ? details.scheme.sets : 3),
-                                targetReps: e.targetReps || e.reps || (details.scheme ? details.scheme.reps : '8-12'),
+                                targetSets: normT.sets,
+                                targetReps: normT.reps,
                                 logs: []
                             });
                         }
                         const exId = e.id || e.exId;
                         const dbMatch = EXERCISES_DB.find(x => x.id === exId);
-                        return Object.assign({}, dbMatch || e, {
+                        const baseItem = dbMatch || e;
+                        const normE = normalizeExerciseTargetByMetricMode(
+                            baseItem,
+                            e.targetSets || e.sets || (details.scheme ? details.scheme.sets : 3),
+                            e.targetReps || e.reps || (details.scheme ? details.scheme.reps : '8-12')
+                        );
+                        return Object.assign({}, baseItem, {
                             id: exId,
-                            targetSets: e.targetSets || e.sets || (details.scheme ? details.scheme.sets : 3),
-                            targetReps: e.targetReps || e.reps || (details.scheme ? details.scheme.reps : '8-12')
+                            targetSets: normE.sets,
+                            targetReps: normE.reps
                         });
                     });
+                    const newExercises = assignAcademicBlockStructure(
+                        rawNewExercises,
+                        details.style || 'classic',
+                        details.scheme || { sets: 3, reps: '8-12', rest: details.rest || 60 }
+                    );
 
                     const cleanTitle = (details.title || plan.title || 'Özel Program').replace(/⚔️|Çelik Kodu/g, '').trim();
                     const progId = (plan.id && plan.id.startsWith('custom_')) ? plan.id : ('custom_day_' + dayIdx + '_' + Date.now());
@@ -9323,10 +9594,11 @@ KESİN KURALLAR:
                 if (idx !== -1) {
                     const oldEx = workout.exercises[idx];
                     oldReplacedId = oldEx.id;
+                    const normRep = normalizeExerciseTargetByMetricMode(newEx, oldEx.targetSets || 3, oldEx.targetReps || '8-12');
                     workout.exercises[idx] = {
                         ...newEx,
-                        targetSets: oldEx.targetSets || 3,
-                        targetReps: oldEx.targetReps || '8-12',
+                        targetSets: normRep.sets,
+                        targetReps: normRep.reps,
                         logs: oldEx.logs || []
                     };
                 } else if (workout.finisher && (workout.finisher.exId === pickerContext.targetExId || (pickerContext.targetExId === 'db_farmers_walk' && workout.finisher.name && workout.finisher.name.toLowerCase().includes('farmer')))) {
@@ -9338,10 +9610,11 @@ KESİN KURALLAR:
                     };
                 }
             } else if (pickerContext.mode === 'add') {
+                const normAdd = normalizeExerciseTargetByMetricMode(newEx, 3, '8-12');
                 workout.exercises.push({
                     ...newEx,
-                    targetSets: 3,
-                    targetReps: '8-12',
+                    targetSets: normAdd.sets,
+                    targetReps: normAdd.reps,
                     logs: []
                 });
                 if (pickerContext.scope === 'active') {
@@ -9870,6 +10143,31 @@ KESİN KURALLAR:
             const currentSubKey = getExerciseAnatomy(currentEx)?.subKey;
             const recentGenSet = new Set(getRecentGeneratedIds());
             const style = workout.style || '';
+            const wishParsed = (typeof parseUserWishConstraints === 'function' && workout.customWish)
+                ? parseUserWishConstraints(workout.customWish, EXERCISES_DB, window.lastGeminiWishAnalysis)
+                : { excludedIds: new Set(), excludedKeywords: [] };
+            const blocked31 = new Set((workout.historyContext && workout.historyContext.adjacentBlockedSubKeys31) || []);
+
+            const isSwapCandidateAllowed = (e, enforceAdjacent31 = true) => {
+                if (!e || isExerciseExcludedByUser(e.id)) return false;
+                if (!isExerciseEquipmentAvailable(e)) return false;
+                if (usedIds.includes(e.id)) return false;
+                if (otherFamilies.has(getExerciseMovementFamily(e))) return false;
+                if (hasBiomechAngleAndMuscleConflict(e, otherExercises)) return false;
+                if (wishParsed.excludedIds && wishParsed.excludedIds.has(e.id)) return false;
+                const eNameLow = (e.name || '').toLocaleLowerCase('tr-TR');
+                const eIdLow = (e.id || '').toLocaleLowerCase('tr-TR');
+                const eFamLow = String(getExerciseMovementFamily(e) || '').toLocaleLowerCase('tr-TR');
+                if (Array.isArray(wishParsed.excludedKeywords) && wishParsed.excludedKeywords.some(kw => kw.length >= 2 && (eNameLow.includes(kw) || eIdLow.includes(kw) || eFamLow.includes(kw)))) {
+                    return false;
+                }
+                if (enforceAdjacent31 && blocked31.size > 0 && !workout.userConfirmedFatiguedSplit) {
+                    const anat = getExerciseAnatomy(e);
+                    const p31 = (anat && Array.isArray(anat.primarySubKeys)) ? anat.primarySubKeys : [];
+                    if (p31.some(pk => blocked31.has(pk))) return false;
+                }
+                return true;
+            };
 
             const filterSwapPool = (basePool) => {
                 let candidates = basePool;
@@ -9889,10 +10187,7 @@ KESİN KURALLAR:
                 return candidates;
             };
 
-            let pool = filterExercises(currentEx.category, usedIds).filter(e =>
-                !otherFamilies.has(getExerciseMovementFamily(e)) &&
-                !hasBiomechAngleAndMuscleConflict(e, otherExercises)
-            );
+            let pool = filterExercises(currentEx.category, usedIds).filter(e => isSwapCandidateAllowed(e, true));
             if (currentSubKey) {
                 const sameSubPool = pool.filter(e => getExerciseAnatomy(e)?.subKey === currentSubKey);
                 if (sameSubPool.length > 0) pool = sameSubPool;
@@ -9905,20 +10200,23 @@ KESİN KURALLAR:
                 else if (currentEx.category === 'legs_quad' || currentEx.category === 'legs_hinge') relatedCat = ['legs_quad', 'legs_hinge', 'core'];
 
                 const fallback = EXERCISES_DB.filter(e =>
-                    !isExerciseExcludedByUser(e.id) &&
-                    isExerciseEquipmentAvailable(e) &&
-                    !usedIds.includes(e.id) &&
-                    !otherFamilies.has(getExerciseMovementFamily(e)) &&
-                    !hasBiomechAngleAndMuscleConflict(e, otherExercises) &&
-                    (style === 'emom_conditioning' || (Array.isArray(relatedCat) ? relatedCat.includes(e.category) : e.category === relatedCat))
+                    isSwapCandidateAllowed(e, true) &&
+                    (Array.isArray(relatedCat) ? relatedCat.includes(e.category) : e.category === relatedCat)
                 );
                 replacement = pickRandom(filterSwapPool(fallback));
             }
+            if (!replacement && workout.userConfirmedFatiguedSplit) {
+                const relaxedFallback = EXERCISES_DB.filter(e =>
+                    isSwapCandidateAllowed(e, false) && e.category === currentEx.category
+                );
+                replacement = pickRandom(filterSwapPool(relaxedFallback));
+            }
 
             if (replacement) {
+                const normRep = normalizeExerciseTargetByMetricMode(replacement, currentEx.targetSets || 3, currentEx.targetReps || '8-12');
                 const newExObj = Object.assign({}, replacement, {
-                    targetSets: currentEx.targetSets || 3,
-                    targetReps: currentEx.targetReps || '8-12',
+                    targetSets: normRep.sets,
+                    targetReps: normRep.reps,
                     logs: currentEx.logs || [],
                     blockType: currentEx.blockType,
                     blockLabel: currentEx.blockLabel,

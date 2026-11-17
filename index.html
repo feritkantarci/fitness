@@ -54,7 +54,7 @@
                     <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                 </svg>
             </div>
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v318</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v319</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -253,7 +253,7 @@
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
                             <span class="modern-brand-subdot" aria-hidden="true">•</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v318</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v319</span>
                         </div>
                     </div>
                 </div>
@@ -802,11 +802,15 @@
                                 </div>
 
                                 <!-- BÖLGE SEKMELERİ + ARAMA -->
-                                <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px;">
+                                <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
                                     <div id="studioRegionChips" style="display:flex; flex-wrap:wrap; gap:5px;">
                                         <!-- Populated dynamically -->
                                     </div>
                                     <input type="text" id="studioSearchInput" class="form-input" style="width:190px; flex:1; min-width:150px; padding:7px 10px; font-size:12.5px; background:#F8FAFC;" placeholder="Hareket ara..." oninput="renderStudioExerciseCatalog()">
+                                </div>
+                                <!-- DİNAMİK ALT KAS GRUBU ÇİPLERİ -->
+                                <div id="studioSubRegionChips" style="display:none; flex-wrap:wrap; gap:4px; margin-bottom:10px; padding:6px 8px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px;">
+                                    <!-- Populated dynamically -->
                                 </div>
 
                                 <div id="studioExercisesCatalog" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(235px, 1fr)); gap:8px; max-height:380px; overflow-y:auto; padding-right:2px;">
@@ -931,7 +935,7 @@
                             </div>
 
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
-                                <select id="libExMuscleFilter" class="form-input" style="padding:7px 9px; font-size:12px; font-weight:700; border-radius:9px; background:#F8FAFC;" onchange="renderLibraryExerciseCatalog()">
+                                <select id="libExMuscleFilter" class="form-input" style="padding:7px 9px; font-size:12px; font-weight:700; border-radius:9px; background:#F8FAFC;" onchange="if(typeof onLibraryMuscleFilterChange==='function') onLibraryMuscleFilterChange(); else renderLibraryExerciseCatalog()">
                                     <option value="all">Tüm Kaslar</option>
                                     <option value="chest">Göğüs</option>
                                     <option value="back">Sırt & Kanat</option>
@@ -954,6 +958,11 @@
                                     <option value="resistance_band">Uzun Direnç Bandı</option>
                                     <option value="bodyweight">Vücut Ağırlığı</option>
                                 </select>
+                            </div>
+
+                            <!-- DİNAMİK KÜTÜPHANE ALT KAS GRUBU ÇİPLERİ -->
+                            <div id="libSubRegionChips" style="display:none; flex-wrap:wrap; gap:4px; margin-top:6px; padding:6px 8px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px;">
+                                <!-- Populated dynamically -->
                             </div>
 
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; padding:0 2px;">

@@ -1,6 +1,6 @@
 # 🛡️ ÇELİK KODU — 7 BAĞIMSIZ ŞEF ODASI, KÖPRÜ GÜMRÜĞÜ & HATA HAFIZASI PANELİ (TAB_HEALTH)
 
-> **Son Otomatik Kontrol:** `2026-11-16 22:03:28` | **Bağımsız Oda Dosyası:** `11/11` | **Toplam Hareket:** `301` | **Kırık Bağlantı:** `0` | **Matematik & Gümrük Sınavı:** `28/29`
+> **Son Otomatik Kontrol:** `2026-11-16 23:41:30` | **Bağımsız Oda Dosyası:** `11/11` | **Toplam Hareket:** `301` | **Kırık Bağlantı:** `0` | **Matematik & Gümrük Sınavı:** `30/30`
 
 ---
 
@@ -8,7 +8,7 @@
 
 | Alan & Sorumlu Şef | Fiziksel Odası | Kabiliyeti (Ne Yapar?) | En Çok Nerede Hata Yapar? (Bekçinin Koruduğu Yer) | Ekran Kontrolü | Matematik & Gümrük Sınavı |
 | :--- | :--- | :--- | :--- | :---: | :---: |
-| **1. Üretici Şefi** (`generator-guard`) | `js/chiefs/generator-chief.js` (166 fn) | Sana uygun antrenmanı kurar, ardışık günde doğrudan çalışmayan alt kasları seçer, gizli hareketi asla çıkarmaz | Ardışık günde dünkü alt kası tekrar seçmesi, gizlenen hareketin çıkması, hareket değiştirirken ekranın zıplaması | 🟢 Sorunsuz | 🔴 1/2 HATA |
+| **1. Üretici Şefi** (`generator-guard`) | `js/chiefs/generator-chief.js` (169 fn) | Sana uygun antrenmanı kurar, ardışık günde doğrudan çalışmayan alt kasları seçer, gizli hareketi asla çıkarmaz | Ardışık günde dünkü alt kası tekrar seçmesi, gizlenen hareketin çıkması, hareket değiştirirken ekranın zıplaması | 🟢 Sorunsuz | 🟢 3/3 Geçti |
 | **2. Antrenman & Stüdyo Şefi** (`workout-guard`) | `js/chiefs/workout-chief.js` (277 fn) | Antrenman sırasında set/kilo/süre/dakika tutar, son ağır seti hatırlar, kendi özel programını kurdurur | Back-off set kilosunu hatırlaması, süreli harekete 8-12 tekrar yazması, kardiyo dakikasını tekrara eklemesi | 🟢 Sorunsuz | 🟢 4/4 Geçti |
 | **3. Kütüphane Şefi** (`library-guard`) | `js/chiefs/library-chief.js` (38 fn) | Tüm hareketlerin form/kas/birim kimliğini korur, istemediğin hareketi tüm sistemden gizler | Süreli/dakikalı hareketi tekrarlı sanması, gizlenen hareketin sayacı bozması | 🟢 Sorunsuz | 🟢 3/3 Geçti |
 | **4. Geçmiş Şefi** (`history-guard`) | `js/chiefs/history-chief.js` (66 fn) | Tamamlanan seansları gümrükten geçirip saklar, bozuk veriyi engeller, düzenleme/silmeyi Analiz ile eşitler | Bozuk/boş kaydın geçmişe sızması, kardiyo dakikasının tonaj şişirmesi, silinen kaydın Analizden düşmemesi | 🟢 Sorunsuz | 🟢 2/2 Geçti |
@@ -46,7 +46,7 @@
 
 ---
 
-## 4. Otomatik Bekçi Raporu — B) 7 Şef Matematik, Gümrük & Hata Hafızası Sınavı (28/29)
+## 4. Otomatik Bekçi Raporu — B) 7 Şef Matematik, Gümrük & Hata Hafızası Sınavı (30/30)
 
 | Test | Sorumlu Şef | Senaryo | Beklenen (Olması Gereken) | Gerçekleşen (Sistem Çıktısı) | Sonuç |
 | :--- | :--- | :--- | :--- | :--- | :---: |
@@ -63,7 +63,7 @@
 | `T11` | `analytics-guard` | Kardiyo Puanı, 0 Tonaj & TUT Nabız Eşdeğer Dakika | vol=0, strengthSets=0, rawMin=23 (20+3), eqMin=26 (20+6) | cardVol=0, strSets=0, rawMin=23, eqMin=26 | ✅ Geçti |
 | `T12` | `analytics-guard` | 45 Günlük Eski Tartı Kiloyu Aktif Tutma & BW Hacmi | bw=79.2 kg, pullup10=752.4, telemetry=79.2 | bw=79.2, pullupVol=752.4 (beklenen 752.4), tel=79.2 | ✅ Geçti |
 | `T13` | `generator-guard` | Gizli Hareket & Ev Ekipmanı İzolasyonu + 3-Mod Hedef Etiketi | gizli=0, bar/makine=0, Plank="30 sn", Kürek="20 dk" (1 set) | adet=6, gizli=false, yabancıEkip=0, Plank=30 sn, Kürek=1×20 dk | ✅ Geçti |
-| `T14` | `generator-guard` | Ardışık Gün Doğrudan Çalışmayan Alt Kas Seçimi (A3) | Dünkü birincil 31 alt kasla çakışma = 0 (hem günlük hem haftalık ardışık günde) | korunanAltKas=7, günlükÇakışma=0, haftalıkArdışıkÇakışma=5, ov=db_front_squat:legs_quad_outer, db_front_squat:legs_quad_inner, mb_glute_bridge_abduction:legs_glutes_max, mb_glute_bridge_abduction:legs_glutes_med, mb_glute_bridge_abduction:legs_ham_hinge | ❌ KALDI |
+| `T14` | `generator-guard` | Ardışık Gün Doğrudan Çalışmayan Alt Kas Seçimi (A3) | Dünkü birincil 31 alt kasla çakışma = 0 (hem günlük hem haftalık ardışık günde) | korunanAltKas=7, günlükÇakışma=0, haftalıkArdışıkÇakışma=0, ov= | ✅ Geçti |
 | `T15` | `profile-guard` | Şifre/API Anahtarı İzolasyonu & Açık Zemin Kontrast Denetimi | 5 gizli alan sızıntısı = 0, açık zemin soluk yazı ihlali = 0 | sızıntı=0, güvenliAlan=true, kontrastİhlali=0 | ✅ Geçti |
 | `T16` | `garmin-tredict-guard` | İsimsiz+Notlu Saat Gönderimi & Orijinal Hareket Adı + Nabız İadesi | matchType=unmapped_noted, dönen ad="Dambıl Floor Press to Glute Bridge", nabız=148/166 | audit=unmapped_noted, ad="Dambıl Floor Press to Glute Bridge (Göğüs & Kalça Köprüsü)", nabız=148/166 | ✅ Geçti |
 | `T17` | `history-guard` | Köprü Gümrüğü (A2): Eksik Birim/Tarih Onarımı & Bozuk Kayıt Engeli | bozuk/boş kayıt engellendi (>=2), kardiyo sahte tonajı 0 kg onarıldı (>=1) | kayıt=1, tonaj=0kg, tartı=1, onarılan=3, engellenen=2 | ✅ Geçti |
@@ -79,3 +79,4 @@
 | `T27` | `workout-guard` | Süreli Set Arası Sayaç & Odak Ekranı Ekleme | süreli ara hareket otomatik yapıldı sayılmaz, sayaç açılır, süre bitince yapıldı olur; Odak dinlenme ekranında ekle düğmesi var | {"notAutoDone":true,"overlayOpen":true,"doneAfter":true,"overlayClosed":true,"repsDone":true,"noTimerForReps":true,"focusHasAdd":true} | ✅ Geçti |
 | `T28` | `analytics-guard` | Tek Hareketle Sahte İdeal Kas & Yan Etki Alt Kas Koruması (Schoenfeld/Pelland) | varsayılan=week_done; sadece Russian Twist (8 set bile) Karını ideal yapmaz, Ön/Derin Karın yeşil yanmaz; Barda Dize Çekme eklenince ideal olur; Göğüste tek Bench=eksik bölge | {"defaultSource":"week_done","core1Status":"insufficient","core1Covered":1,"chest1Status":"insufficient","obliqWorked":true,"rectusWorked":false,"rectusPartial":true,"transWorked":false,"core2Status":"optimal","core2Covered":2} | ✅ Geçti |
 | `T29` | `library-guard` | Paralel Bar Dips (bw_dips) ve Sehpada Dips (bw_bench_dips) Ayrımı & Medya Bütünlüğü | bw_dips=0251.mp4+chest_lower+dips_bar; bw_bench_dips=1399.mp4+triceps+bench (chest yok) | {"hasDips":true,"hasBenchDips":true,"dipsClipOk":true,"benchClipOk":true,"dipsHasLowerChest":true,"benchNoChest":true,"dipsReqBar":true,"benchReqBench":true,"staleCloudDidNotOverwrite":true} | ✅ Geçti |
+| `T30` | `generator-guard` | 5.000 Senaryo Hata Hafızası: Yorgun Bölge Onaylı Esnetme, Hazır Program İkamesi, Finisher & Stüdyo 3-Mod Koruması | yorgunOnay=evet+tamListe, hazırProgram=0Gizli/0YabancıEkip+30sn, finisher=uyumlu, stüdyoPlank=30sn | {"chestConfirmedOk":true,"finisherEquipOk":true,"offNoExcluded":true,"offEquipOk":true,"offUniqueFams":true,"hollowTimeOk":true,"studio3ModeOk":true} | ✅ Geçti |

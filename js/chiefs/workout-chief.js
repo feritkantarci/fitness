@@ -774,6 +774,17 @@
         }
 
         function loadCelikAkisiWorkout(autoStart = true) {
+            const flowScheme = { sets: 4, reps: '6-8', rest: 90 };
+            const rawFlowExercises = [
+                { id: 'db_swing_to_goblet_squat', name: 'Dambıl Swing to Goblet Squat (Hinge-Squat Akışı)', equipment: 'dumbbell', targetSets: 4, targetReps: '6 - 8', cue: 'Kalça itişiyle yükselen dambılı göğüste dikey yakalayıp derin çömelmeye bağlanın.', customRest: 0, blockType: 'complex', blockLabel: 'İstasyon 1', blockHeader: '⚔️ ÇELİK AKIŞI • KESİNTİSİZ KOMPLEKS (4 Tur • Tur Sonu 90 sn Dinlenme)' },
+                { id: 'db_clean_squat_press', name: 'Dambıl Clean to Front Squat to Push Press', equipment: 'dumbbell', targetSets: 4, targetReps: '6', cue: 'Hang clean ile omuzlara al, derin ön squat yap ve baş üstüne kilitle.', customRest: 0, blockType: 'complex', blockLabel: 'İstasyon 2' },
+                { id: 'db_seesaw_lunge', name: 'Dambıl Seesaw Lunge (Dinamik İleri-Geri Lunge)', equipment: 'dumbbell', targetSets: 4, targetReps: '6', cue: 'Öne lunge çöküşünden dönerken ayağı yere basmadan duraksız geriye lunge yapın.', customRest: 0, blockType: 'complex', blockLabel: 'İstasyon 3' },
+                { id: 'db_rdl_to_high_pull', name: 'Dambıl RDL to High Pull (Arka Zincir & Üst Çekiş)', equipment: 'dumbbell', targetSets: 4, targetReps: '6 - 8', cue: 'RDL ile gerilen hamstringleri patlatırken dambılları göğse çekip dirsekleri yükseltin.', customRest: 0, blockType: 'complex', blockLabel: 'İstasyon 4' },
+                { id: 'db_pullover_to_halo', name: 'Dambıl Pullover to Halo (Torasik & Omuz Akışı)', equipment: 'dumbbell', targetSets: 4, targetReps: '6', cue: 'Pullover esnemesinden doğrulurken baş çevresinde akıcı 360° halo çizin.', customRest: 90, blockType: 'complex', blockLabel: 'İstasyon 5' }
+            ];
+            const adaptedExercises = (typeof sanitizeAndAdaptPresetWorkout === 'function')
+                ? sanitizeAndAdaptPresetWorkout(rawFlowExercises, 'complex', flowScheme, true)
+                : rawFlowExercises;
             const flowWorkout = {
                 id: 'celik_akisi_20dk',
                 title: '⚔️ 20 Dk Çelik Akışı (Dambıl Kompleksi)',
@@ -782,18 +793,12 @@
                 style: 'complex',
                 goal: 'endurance',
                 duration: 20,
-                scheme: { sets: 4, reps: '6-8', rest: 90 },
+                scheme: flowScheme,
                 warmups: [
                     { name: "World's Greatest Stretch", dur: "60 sn", cue: "Kalça ve göğüs kafesi mobilitesi." },
                     { name: "Dambıl Halo Isınması", dur: "60 sn", cue: "Hafif dambılla omuz kapsülünü aç." }
                 ],
-                exercises: [
-                    { id: 'db_swing_to_goblet_squat', name: 'Dambıl Swing to Goblet Squat (Hinge-Squat Akışı)', equipment: 'dumbbell', targetSets: 4, targetReps: '6 - 8', cue: 'Kalça itişiyle yükselen dambılı göğüste dikey yakalayıp derin çömelmeye bağlanın.', customRest: 0, blockType: 'complex', blockLabel: 'İstasyon 1', blockHeader: '⚔️ ÇELİK AKIŞI • KESİNTİSİZ KOMPLEKS (4 Tur • Tur Sonu 90 sn Dinlenme)' },
-                    { id: 'db_clean_squat_press', name: 'Dambıl Clean to Front Squat to Push Press', equipment: 'dumbbell', targetSets: 4, targetReps: '6', cue: 'Hang clean ile omuzlara al, derin ön squat yap ve baş üstüne kilitle.', customRest: 0, blockType: 'complex', blockLabel: 'İstasyon 2' },
-                    { id: 'db_seesaw_lunge', name: 'Dambıl Seesaw Lunge (Dinamik İleri-Geri Lunge)', equipment: 'dumbbell', targetSets: 4, targetReps: '6', cue: 'Öne lunge çöküşünden dönerken ayağı yere basmadan duraksız geriye lunge yapın.', customRest: 0, blockType: 'complex', blockLabel: 'İstasyon 3' },
-                    { id: 'db_rdl_to_high_pull', name: 'Dambıl RDL to High Pull (Arka Zincir & Üst Çekiş)', equipment: 'dumbbell', targetSets: 4, targetReps: '6 - 8', cue: 'RDL ile gerilen hamstringleri patlatırken dambılları göğse çekip dirsekleri yükseltin.', customRest: 0, blockType: 'complex', blockLabel: 'İstasyon 4' },
-                    { id: 'db_pullover_to_halo', name: 'Dambıl Pullover to Halo (Torasik & Omuz Akışı)', equipment: 'dumbbell', targetSets: 4, targetReps: '6', cue: 'Pullover esnemesinden doğrulurken baş çevresinde akıcı 360° halo çizin.', customRest: 90, blockType: 'complex', blockLabel: 'İstasyon 5' }
-                ],
+                exercises: adaptedExercises,
                 finisher: { name: "Nefes Toparlanması", desc: "Burundan derin nefes, nabzı düşür." },
                 createdAt: Date.now()
             };
@@ -9110,10 +9115,88 @@ KURALLAR:
 
         var selectedTargetMuscles = [];
         var activeStudioRegion = 'all';
+        var activeStudioSubRegion = 'all';
+
+        var SUBREGION_FILTER_OPTIONS = {
+            chest: [
+                { id: 'all', label: 'Tümü' },
+                { id: 'upper', label: 'Üst Göğüs' },
+                { id: 'mid', label: 'Orta Göğüs' },
+                { id: 'lower', label: 'Alt Göğüs' }
+            ],
+            back: [
+                { id: 'all', label: 'Tümü' },
+                { id: 'lats', label: 'Kanat (Lats)' },
+                { id: 'mid', label: 'Orta Sırt & Kürek' },
+                { id: 'traps', label: 'Trapez & Üst Sırt' },
+                { id: 'lower', label: 'Alt Sırt & Bel' }
+            ],
+            shoulders: [
+                { id: 'all', label: 'Tümü' },
+                { id: 'front', label: 'Ön Omuz' },
+                { id: 'side', label: 'Yan Omuz' },
+                { id: 'rear', label: 'Arka Omuz' }
+            ],
+            legs: [
+                { id: 'all', label: 'Tümü' },
+                { id: 'quads', label: 'Ön Bacak (Quad)' },
+                { id: 'hamstrings', label: 'Arka Bacak (Hamstring)' },
+                { id: 'glutes', label: 'Kalça (Glute)' },
+                { id: 'calves', label: 'Kalf & Baldır' }
+            ],
+            arms: [
+                { id: 'all', label: 'Tümü' },
+                { id: 'biceps', label: 'Pazu (Biceps)' },
+                { id: 'triceps', label: 'Arka Kol (Triceps)' },
+                { id: 'forearms', label: 'Ön Kol (Kavrama)' }
+            ],
+            core: [
+                { id: 'all', label: 'Tümü' },
+                { id: 'front', label: 'Ön Karın' },
+                { id: 'obliques', label: 'Yan Karın (Oblik)' },
+                { id: 'deep', label: 'Derin Karın (Zırh)' }
+            ]
+        };
+
+        function matchesExerciseSubRegion(ex, regionId, subId) {
+            if (!subId || subId === 'all') return true;
+            const p = ex.primaryMuscles || [];
+            const subText = ((ex.name || '') + ' ' + (ex.primarySubMuscles || '') + ' ' + (ex.muscle || '') + ' ' + (ex.secondarySubMuscles || '')).toLowerCase();
+            
+            if (regionId === 'chest') {
+                if (subId === 'upper') return /incline|eğimli|üst göğüs/.test(subText);
+                if (subId === 'mid') return /bench|floor|şınav|pushup|pec deck|orta göğüs/.test(subText) && !/incline|decline/.test(subText);
+                if (subId === 'lower') return /dips|alt göğüs|decline/.test(subText);
+            } else if (regionId === 'back') {
+                if (subId === 'lats') return /pulldown|pullup|pull-up|barfiks|chinup|chin-up|saw row|pullover|kanat|lats/.test(subText);
+                if (subId === 'mid') return /row|kürek|pendlay|renegade/.test(subText) && !/saw row/.test(subText);
+                if (subId === 'traps') return /trapez|shrug|silkme|traps/.test(subText);
+                if (subId === 'lower') return /hiperekstansiyon|hyperextension|back extension|bel|lower back/.test(subText);
+            } else if (regionId === 'shoulders') {
+                if (subId === 'front') return /pres|press|arnold|ön omuz|front/.test(subText) && !/lateral|arka/.test(subText);
+                if (subId === 'side') return /lateral|yana açış|yan omuz|upright/.test(subText);
+                if (subId === 'rear') return /face pull|arka omuz|rear|cuban|sweep|ters/.test(subText);
+            } else if (regionId === 'legs') {
+                if (subId === 'quads') return p.includes('quads') || /squat|lunge|extension|ön bacak/.test(subText);
+                if (subId === 'hamstrings') return p.includes('hamstrings') || /rdl|curl|deadlift|arka bacak/.test(subText);
+                if (subId === 'glutes') return p.includes('glutes') || /thrust|bridge|kalça|glute/.test(subText);
+                if (subId === 'calves') return p.includes('calves') || /calf|kalf|baldır/.test(subText);
+            } else if (regionId === 'arms') {
+                if (subId === 'biceps') return p.includes('biceps') || /curl|pazu|biceps/.test(subText);
+                if (subId === 'triceps') return p.includes('triceps') || /triceps|pushdown|skullcrusher|arka kol|dips/.test(subText);
+                if (subId === 'forearms') return p.includes('forearms') || /carry|farmers|ön kol|kavrama|wrist/.test(subText);
+            } else if (regionId === 'core') {
+                if (subId === 'front') return /knee raise|leg raise|crunch|hollow|plank|ön karın/.test(subText) && !/twist|side|oblik/.test(subText);
+                if (subId === 'obliques') return /twist|oblik|yan karın|rotasyon|chop|woodchopper/.test(subText);
+                if (subId === 'deep') return /carry|farmers|suitcase|get-up|crawl|derin/.test(subText);
+            }
+            return true;
+        }
 
         function initStudioTab() {
             renderStudioOwnedEquipChips();
             renderStudioRegionChips();
+            renderStudioSubRegionChips();
             renderRegionStatus();
             renderCustomRoutine();
             renderStudioExerciseCatalog();
@@ -9198,11 +9281,43 @@ KURALLAR:
             }).join('');
         }
 
+        function renderStudioSubRegionChips() {
+            const container = document.getElementById('studioSubRegionChips');
+            if (!container) return;
+
+            if (activeStudioRegion === 'all' || !SUBREGION_FILTER_OPTIONS[activeStudioRegion]) {
+                container.style.display = 'none';
+                container.innerHTML = '';
+                return;
+            }
+
+            container.style.display = 'flex';
+            const subOptions = SUBREGION_FILTER_OPTIONS[activeStudioRegion] || [];
+            container.innerHTML = subOptions.map(sub => {
+                const isActive = activeStudioSubRegion === sub.id;
+                return `
+                    <button type="button"
+                            onclick="setStudioSubRegionTab('${sub.id}')"
+                            style="border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; cursor:pointer; transition:all 0.12s; ${isActive ? 'background:#2563EB; color:#FFFFFF; border:1px solid #2563EB;' : 'background:#FFFFFF; color:#475569; border:1px solid #CBD5E1;'}">
+                        ${escapeHTML(sub.label)}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function setStudioSubRegionTab(subId) {
+            activeStudioSubRegion = subId || 'all';
+            renderStudioSubRegionChips();
+            renderStudioExerciseCatalog();
+        }
+
         function setStudioRegionTab(tabId) {
             activeStudioRegion = tabId || 'all';
+            activeStudioSubRegion = 'all';
             const found = STUDIO_FILTER_TABS.find(t => t.id === activeStudioRegion);
             selectedTargetMuscles = found ? [...found.muscles] : [];
             renderStudioRegionChips();
+            renderStudioSubRegionChips();
             renderStudioExerciseCatalog();
         }
 
@@ -9342,9 +9457,11 @@ KURALLAR:
                 if (q && !matchesExerciseSearch(ex, q)) return false;
                 if (targetMuscles.length > 0) {
                     const pList = ex.primaryMuscles || [];
-                    const sList = ex.secondaryMuscles || [];
-                    const hits = pList.some(m => targetMuscles.includes(m)) || sList.some(m => targetMuscles.includes(m));
+                    const hits = pList.some(m => targetMuscles.includes(m));
                     if (!hits) return false;
+                }
+                if (activeStudioRegion !== 'all' && activeStudioSubRegion !== 'all') {
+                    if (!matchesExerciseSubRegion(ex, activeStudioRegion, activeStudioSubRegion)) return false;
                 }
                 return true;
             });
@@ -9400,10 +9517,13 @@ KURALLAR:
             if (existingIdx !== -1) {
                 customRoutineState.exercises.splice(existingIdx, 1);
             } else {
+                const normT = (typeof normalizeExerciseTargetByMetricMode === 'function')
+                    ? normalizeExerciseTargetByMetricMode(ex, 3, '8-12')
+                    : { sets: 3, reps: '8-12' };
                 customRoutineState.exercises.push({
                     exId: exId,
-                    sets: 3,
-                    reps: '8-12',
+                    sets: normT.sets,
+                    reps: normT.reps,
                     weight: ''
                 });
             }
@@ -9431,7 +9551,10 @@ KURALLAR:
 
         function updateCustomExerciseSets(index, val) {
             if (customRoutineState.exercises[index]) {
-                customRoutineState.exercises[index].sets = parseInt(val) || 3;
+                const item = customRoutineState.exercises[index];
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                const isCardio = ex && typeof getExerciseMetricMode === 'function' && getExerciseMetricMode(ex) === 'cardio_min';
+                item.sets = isCardio ? 1 : (parseInt(val) || 3);
                 renderCustomRoutineEquipmentSummary();
                 renderRegionStatus();
             }
@@ -9439,7 +9562,15 @@ KURALLAR:
 
         function updateCustomExerciseReps(index, val) {
             if (customRoutineState.exercises[index]) {
-                customRoutineState.exercises[index].reps = val;
+                const item = customRoutineState.exercises[index];
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                if (ex && typeof normalizeExerciseTargetByMetricMode === 'function') {
+                    const normT = normalizeExerciseTargetByMetricMode(ex, item.sets || 3, val);
+                    item.sets = normT.sets;
+                    item.reps = normT.reps;
+                } else {
+                    item.reps = val;
+                }
             }
         }
 
@@ -9475,7 +9606,11 @@ KURALLAR:
 
             const exercisesList = customRoutineState.exercises.map(item => {
                 const ex = EXERCISES_DB.find(e => e.id === item.exId);
-                return ex ? Object.assign({}, ex, { targetSets: item.sets, targetReps: item.reps }) : null;
+                if (!ex) return null;
+                const normT = (typeof normalizeExerciseTargetByMetricMode === 'function')
+                    ? normalizeExerciseTargetByMetricMode(ex, item.sets || 3, item.reps || '8-12')
+                    : { sets: item.sets || 3, reps: item.reps || '8-12' };
+                return Object.assign({}, ex, { targetSets: normT.sets, targetReps: normT.reps });
             }).filter(Boolean);
 
             const user = getActiveUser();
@@ -9566,7 +9701,11 @@ KURALLAR:
 
             const exercisesList = customRoutineState.exercises.map(item => {
                 const ex = EXERCISES_DB.find(e => e.id === item.exId);
-                return ex ? Object.assign({}, ex, { targetSets: item.sets, targetReps: item.reps }) : null;
+                if (!ex) return null;
+                const normT = (typeof normalizeExerciseTargetByMetricMode === 'function')
+                    ? normalizeExerciseTargetByMetricMode(ex, item.sets || 3, item.reps || '8-12')
+                    : { sets: item.sets || 3, reps: item.reps || '8-12' };
+                return Object.assign({}, ex, { targetSets: normT.sets, targetReps: normT.reps });
             }).filter(Boolean);
 
             const sessionObj = {

@@ -514,8 +514,51 @@
             container.innerHTML = html;
         }
 
+        var activeLibSubRegion = 'all';
+
+        function renderLibSubRegionChips() {
+            const container = document.getElementById('libSubRegionChips');
+            if (!container) return;
+
+            const muscle = document.getElementById('libExMuscleFilter')?.value || 'all';
+            const subOpts = (typeof SUBREGION_FILTER_OPTIONS !== 'undefined' && SUBREGION_FILTER_OPTIONS[muscle]) 
+                || (typeof window !== 'undefined' && window.SUBREGION_FILTER_OPTIONS && window.SUBREGION_FILTER_OPTIONS[muscle])
+                || null;
+
+            if (muscle === 'all' || muscle === 'conditioning' || !subOpts) {
+                container.style.display = 'none';
+                container.innerHTML = '';
+                return;
+            }
+
+            container.style.display = 'flex';
+            container.innerHTML = subOpts.map(sub => {
+                const isActive = activeLibSubRegion === sub.id;
+                return `
+                    <button type="button"
+                            onclick="setLibSubRegion('${sub.id}')"
+                            style="border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; cursor:pointer; transition:all 0.12s; ${isActive ? 'background:#0F172A; color:#FFFFFF; border:1px solid #0F172A;' : 'background:#FFFFFF; color:#475569; border:1px solid #CBD5E1;'}">
+                        ${escapeHTML(sub.label)}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function setLibSubRegion(subId) {
+            activeLibSubRegion = subId || 'all';
+            renderLibSubRegionChips();
+            renderLibraryExerciseCatalog();
+        }
+
+        function onLibraryMuscleFilterChange() {
+            activeLibSubRegion = 'all';
+            renderLibSubRegionChips();
+            renderLibraryExerciseCatalog();
+        }
+
         function renderLibraryExerciseCatalog() {
             ensureBilingualExerciseNames();
+            renderLibSubRegionChips();
             const container = document.getElementById('libExercisesCatalogGrid');
             const countBadge = document.getElementById('libExCountBadge');
             const subCountBadge = document.getElementById('libExSubCountBadge');
@@ -564,20 +607,24 @@
                     const allM = [...p, ...s];
 
                     if (muscle === 'chest') {
-                        if (!allM.includes('chest') && ex.category !== 'push') return false;
+                        if (!p.includes('chest')) return false;
                     } else if (muscle === 'back') {
-                        if (!allM.includes('back') && ex.category !== 'pull') return false;
+                        if (!p.includes('back') && !p.includes('lats')) return false;
                     } else if (muscle === 'shoulders') {
-                        if (!allM.includes('shoulders')) return false;
+                        if (!p.includes('shoulders')) return false;
                     } else if (muscle === 'legs') {
                         const legMuscles = ['quads', 'hamstrings', 'glutes', 'calves'];
-                        if (!allM.some(m => legMuscles.includes(m)) && !['legs_quad', 'legs_hinge'].includes(ex.category)) return false;
+                        if (!p.some(m => legMuscles.includes(m))) return false;
                     } else if (muscle === 'core') {
-                        if (!allM.includes('core') && ex.category !== 'core') return false;
+                        if (!p.includes('core')) return false;
                     } else if (muscle === 'arms') {
-                        if (!allM.some(m => ['biceps', 'triceps'].includes(m))) return false;
+                        if (!p.some(m => ['biceps', 'triceps', 'forearms'].includes(m))) return false;
                     } else if (muscle === 'conditioning') {
                         if (ex.category !== 'conditioning' && !(ex.tags || []).includes('conditioning') && !ex.isComplex) return false;
+                    }
+
+                    if (activeLibSubRegion !== 'all') {
+                        if (typeof matchesExerciseSubRegion === 'function' && !matchesExerciseSubRegion(ex, muscle, activeLibSubRegion)) return false;
                     }
                 }
 
@@ -745,17 +792,21 @@
         }
 
         function applyAddToStudioRoutine(exId) {
-            const sets = parseInt(document.getElementById('addToStudioSetsSelect')?.value) || 3;
-            const reps = document.getElementById('addToStudioRepsSelect')?.value || '8-12';
+            const rawSets = parseInt(document.getElementById('addToStudioSetsSelect')?.value) || 3;
+            const rawReps = document.getElementById('addToStudioRepsSelect')?.value || '8-12';
             
             const ex = EXERCISES_DB.find(e => e.id === exId);
             if (!ex) return;
 
+            const normT = (typeof normalizeExerciseTargetByMetricMode === 'function')
+                ? normalizeExerciseTargetByMetricMode(ex, rawSets, rawReps)
+                : { sets: rawSets, reps: rawReps };
+
             if (!customRoutineState.exercises) customRoutineState.exercises = [];
             customRoutineState.exercises.push({
                 exId: exId,
-                sets: sets,
-                reps: reps,
+                sets: normT.sets,
+                reps: normT.reps,
                 weight: ''
             });
 
@@ -771,10 +822,14 @@
             const ex = EXERCISES_DB.find(e => e.id === exId);
             if (!ex || !activeWorkoutSession) return;
 
+            const normT = (typeof normalizeExerciseTargetByMetricMode === 'function')
+                ? normalizeExerciseTargetByMetricMode(ex, 3, '8-12')
+                : { sets: 3, reps: '8-12' };
+
             activeWorkoutSession.exercises.push({
                 ...ex,
-                targetSets: 3,
-                targetReps: '8-12',
+                targetSets: normT.sets,
+                targetReps: normT.reps,
                 logs: []
             });
 
@@ -1028,7 +1083,7 @@
                     style: 'superset',
                     duration: 45,
                     scheme: { sets: 4, reps: '8 - 10', rest: 45 },
-                    exerciseIds: ['db_overhead_press', 'db_goblet_squat', 'db_front_squat', 'bw_pushup', 'kb_halo', 'bw_hollow_body']
+                    exerciseIds: ['db_overhead_press', 'db_goblet_squat', 'db_reverse_lunge', 'bw_pushup', 'kb_halo', 'bw_hollow_body']
                 },
                 la_forja_day2: {
                     title: '⚔️ Çelik Kodu Gün 2: Sırt Çekiş & Balistik Güç',
@@ -1051,7 +1106,15 @@
             const target = routines[routineId];
             if (!target) return;
 
-            const exercises = target.exerciseIds.map(id => EXERCISES_DB.find(e => e.id === id)).filter(Boolean);
+            const rawExercises = target.exerciseIds.map(id => EXERCISES_DB.find(e => e.id === id)).filter(Boolean);
+            const exercises = (typeof sanitizeAndAdaptPresetWorkout === 'function')
+                ? sanitizeAndAdaptPresetWorkout(rawExercises, target.style, target.scheme, false)
+                : rawExercises;
+            const usedIds = exercises.map(e => e.id);
+            const usedFamilies = new Set(exercises.map(e => (typeof getExerciseMovementFamily === 'function' ? getExerciseMovementFamily(e) : '')).filter(Boolean));
+            const safeFinisher = (typeof resolveSafeWorkoutFinisher === 'function')
+                ? resolveSafeWorkoutFinisher(usedIds, usedFamilies)
+                : { name: "3 Dk Tabata Finisher", desc: "Patlayıcı kondisyon" };
 
             currentGeneratedWorkout = {
                 id: 'gen_' + Date.now(),
@@ -1067,9 +1130,10 @@
                     { name: "World's Greatest Stretch", dur: "60 sn", cue: "Derin lunge ile omurga rotasyonu." }
                 ],
                 exercises: exercises,
-                finisher: { name: "3 Dk Tabata Finisher", desc: "Patlayıcı kondisyon" },
+                finisher: safeFinisher,
                 createdAt: Date.now()
             };
+            window.currentGeneratedWorkout = currentGeneratedWorkout;
 
             startActiveWorkoutFromGenerated();
         }
