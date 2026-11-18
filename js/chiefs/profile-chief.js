@@ -492,8 +492,10 @@
                 const isPermErr = err && (err.code === 'permission-denied' || /permission|insufficient/i.test(String(err.message || '')));
                 if (isPermErr) {
                     try {
-                        const snap = await docRef.get();
-                        const remoteSeal = snap.exists ? adoptCloudSyncSealIfPresent(colName, uid, snap.data()) : '';
+                        const snap = (typeof fetchCloudDocPreferServer === 'function')
+                            ? await fetchCloudDocPreferServer(docRef)
+                            : await docRef.get();
+                        const remoteSeal = snap && snap.exists ? adoptCloudSyncSealIfPresent(colName, uid, snap.data()) : '';
                         if (remoteSeal && remoteSeal !== firstSeal) {
                             await docRef.set(buildPayloadFn(remoteSeal), { merge: true });
                             if (!IS_LOCAL_DEV && !isTelCol) {
@@ -2243,25 +2245,33 @@
                     }
                 }
 
+                const ensureMapOr = (val, maxKeys, fallback) => {
+                    if (!val || typeof val !== 'object' || Array.isArray(val)) return fallback;
+                    return Object.keys(val).length <= maxKeys ? val : fallback;
+                };
+                const ensureListMax = (val, maxItems) => (Array.isArray(val) ? val.slice(0, maxItems) : []);
+
                 const clientUpdatedAt = Number(localStorage.getItem(`celik_kodu_state_updated_at_${uid}`) || Date.now());
-                await writeAthleteDocWithSealHeal('user_state', uid, (seal) => stripWatchBridgeSecretsFromObj({
-                    weeklySchedule: safeParse(`celik_kodu_weekly_schedule_${uid}`, {}),
-                    nextWeeklySchedule: safeParse(`celik_kodu_next_weekly_schedule_${uid}`, {}),
-                    dateSchedule: safeParse(`celik_kodu_date_schedule_${uid}`, {}),
-                    rememberedWeights: safeParse(`celik_kodu_last_weights_${uid}`, {}),
-                    excludedExercises: safeExclIds,
-                    excludedExercisesUpdatedAt: exclUpdatedAt,
-                    customPrograms: safeCustomPrograms,
-                    deletedCustomProgramIds: safeDeletedIds,
-                    deletedWorkoutLogIds,
-                    mobilityTests: safeMobilityTests,
-                    selectedEquipments: Array.isArray(selectedEquipments) ? selectedEquipments : [],
-                    customGyms: safeParse(`celik_kodu_custom_gyms_${uid}`, []),
-                    aiDoctrine: String(currentSelectedDoctrine || 'bb_hybrid'),
-                    aiCoachSummary: safeParse(`celik_kodu_ai_program_${uid}`, null),
-                    lastGeneratedWorkout: safeLastGen,
-                    activeWorkoutDraft: safeParse(`celik_kodu_active_state_${uid}`, null),
-                    garminManifests: leanManifests,
+                const statePayloadCore = stripWatchBridgeSecretsFromObj({
+                    weeklySchedule: ensureMapOr(safeParse(`celik_kodu_weekly_schedule_${uid}`, {}), 50, {}),
+                    nextWeeklySchedule: ensureMapOr(safeParse(`celik_kodu_next_weekly_schedule_${uid}`, {}), 50, {}),
+                    dateSchedule: ensureMapOr(safeParse(`celik_kodu_date_schedule_${uid}`, {}), 1500, {}),
+                    rememberedWeights: ensureMapOr(safeParse(`celik_kodu_last_weights_${uid}`, {}), 1500, {}),
+                    excludedExercises: ensureListMax(safeExclIds, 1000),
+                    excludedExercisesUpdatedAt: Number.isFinite(Number(exclUpdatedAt)) ? Number(exclUpdatedAt) : 0,
+                    customPrograms: ensureListMax(safeCustomPrograms, 200),
+                    deletedCustomProgramIds: ensureListMax(safeDeletedIds, 500),
+                    deletedWorkoutLogIds: ensureListMax(deletedWorkoutLogIds, 500),
+                    mobilityTests: ensureMapOr(safeMobilityTests, 20, { history: [], updatedAt: 0 }),
+                    selectedEquipments: ensureListMax(Array.isArray(selectedEquipments) ? selectedEquipments : [], 200),
+                    customGyms: ensureListMax(safeParse(`celik_kodu_custom_gyms_${uid}`, []), 200),
+                    aiDoctrine: String(currentSelectedDoctrine || 'bb_hybrid').slice(0, 120),
+                    aiCoachSummary: ensureMapOr(safeParse(`celik_kodu_ai_program_${uid}`, null), 100, null),
+                    lastGeneratedWorkout: ensureMapOr(safeLastGen, 100, null),
+                    activeWorkoutDraft: ensureMapOr(safeParse(`celik_kodu_active_state_${uid}`, null), 100, null),
+                    garminManifests: ensureMapOr(leanManifests, 1500, {})
+                });
+                await writeAthleteDocWithSealHeal('user_state', uid, (seal) => Object.assign({}, statePayloadCore, {
                     clientUpdatedAt,
                     syncSeal: seal,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()

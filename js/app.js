@@ -52,7 +52,7 @@ window.CELIK_CHIEF_ROOMS = Object.freeze({
             } else if ('serviceWorker' in navigator && navigator.serviceWorker) {
                 window.addEventListener('load', () => {
                     try {
-                        navigator.serviceWorker.register('./sw.js?v=323')
+                        navigator.serviceWorker.register('./sw.js?v=324')
                             .then(reg => {
                                 console.log('SW scope:', reg.scope);
                                 if (reg.update) reg.update();

@@ -30,6 +30,7 @@ rules_version = '2';
 //   - excludedExercisesUpdatedAt: timestamp | string | number | null (optional)
 //   - customPrograms: list | null (optional, <= 200 program maps, zero credentials/API keys/watch tokens)
 //   - deletedCustomProgramIds: list | null (optional, <= 500 items)
+//   - deletedWorkoutLogIds: list | null (optional, <= 500 items)
 //   - mobilityTests: map | null (optional, <= 20 keys, zero credentials/API keys/watch tokens)
 //   - selectedEquipments, customGyms: list | null (optional, <= 200 items)
 //   - aiDoctrine: string (optional, <= 120 chars)
@@ -242,6 +243,7 @@ service cloud.firestore {
           'excludedExercisesUpdatedAt',
           'customPrograms',
           'deletedCustomProgramIds',
+          'deletedWorkoutLogIds',
           'mobilityTests',
           'selectedEquipments',
           'customGyms',
@@ -285,6 +287,16 @@ service cloud.firestore {
           || (
             hasNoSensitiveSecrets(data.deletedCustomProgramIds[0])
             && hasNoSensitiveSecrets(data.deletedCustomProgramIds[data.deletedCustomProgramIds.size() - 1])
+          )
+        )
+        && isValidOptionalListOrNull(data, 'deletedWorkoutLogIds', 500)
+        && (
+          !('deletedWorkoutLogIds' in data)
+          || !(data.deletedWorkoutLogIds is list)
+          || data.deletedWorkoutLogIds.size() == 0
+          || (
+            hasNoSensitiveSecrets(data.deletedWorkoutLogIds[0])
+            && hasNoSensitiveSecrets(data.deletedWorkoutLogIds[data.deletedWorkoutLogIds.size() - 1])
           )
         )
         && isValidOptionalMapOrNull(data, 'mobilityTests', 20)
