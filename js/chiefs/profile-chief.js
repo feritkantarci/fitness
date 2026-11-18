@@ -481,12 +481,43 @@
             } catch {}
         }
 
+        function diagnoseCloudPayloadPreFlight(colName, payload, sealUsed) {
+            try {
+                const ver = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAppVersion === 'function')
+                    ? window.CelikKaraKutu.getAppVersion()
+                    : 'v325';
+                const keys = payload && typeof payload === 'object' ? Object.keys(payload) : [];
+                const undefKeys = [];
+                const overLimit = [];
+                for (const k of keys) {
+                    const v = payload[k];
+                    if (v === undefined) undefKeys.push(k);
+                    else if (Array.isArray(v) && v.length > 500) overLimit.push(`${k}:${v.length}`);
+                    else if (v && typeof v === 'object' && !Array.isArray(v) && typeof v._methodName !== 'string' && Object.keys(v).length > 100 && !['dateSchedule', 'rememberedWeights', 'garminManifests'].includes(k)) {
+                        overLimit.push(`${k}:${Object.keys(v).length}k`);
+                    }
+                }
+                const sealStr = String(sealUsed || '');
+                const sealStatus = sealStr.length >= 10 && sealStr.length <= 120 ? `${sealStr.length}krk` : `GEÇERSİZ(${sealStr.length})`;
+                const authOpen = (typeof fbAuth !== 'undefined' && fbAuth && fbAuth.currentUser) ? 'Açık' : 'Kapalı';
+                const schemaNote = undefKeys.length > 0
+                    ? `Tanımsız:${undefKeys.slice(0, 3).join(',')}`
+                    : (overLimit.length > 0 ? `Sınır:${overLimit.slice(0, 2).join(',')}` : 'Temiz');
+                return `Sürüm:${ver} | Alan:${keys.length} | Şema:${schemaNote} | Mühür:${sealStatus} | Oturum:${authOpen}`;
+            } catch {
+                return 'Tanı:Bilinmiyor';
+            }
+        }
+
         async function writeAthleteDocWithSealHeal(colName, uid, buildPayloadFn) {
             const docRef = fbDb.collection(colName).doc(uid);
             const firstSeal = getAthleteCloudSeal(uid, colName);
             const isTelCol = colName === 'system_telemetry';
+            let attemptLabel = 'İlkYazım';
+            let usedSeal = firstSeal;
+            let lastPayload = buildPayloadFn(firstSeal);
             try {
-                await docRef.set(buildPayloadFn(firstSeal), { merge: true });
+                await docRef.set(lastPayload, { merge: true });
                 return true;
             } catch (err) {
                 const isPermErr = err && (err.code === 'permission-denied' || /permission|insufficient/i.test(String(err.message || '')));
@@ -497,7 +528,10 @@
                             : await docRef.get();
                         const remoteSeal = snap && snap.exists ? adoptCloudSyncSealIfPresent(colName, uid, snap.data()) : '';
                         if (remoteSeal && remoteSeal !== firstSeal) {
-                            await docRef.set(buildPayloadFn(remoteSeal), { merge: true });
+                            attemptLabel = 'MühürYenileme';
+                            usedSeal = remoteSeal;
+                            lastPayload = buildPayloadFn(remoteSeal);
+                            await docRef.set(lastPayload, { merge: true });
                             if (!IS_LOCAL_DEV && !isTelCol) {
                                 recordCloudGateTelemetry('warn', `${colName} Mühür Onarımı`, uid, 'Bulut mühür uyuşmazlığı otomatik onarıldı', uid);
                             }
@@ -509,7 +543,8 @@
                 }
                 if (!IS_LOCAL_DEV && !isTelCol) {
                     const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
-                    recordCloudGateTelemetry(offline ? 'warn' : 'error', `${colName} Bulut Yazımı`, uid, String((err && err.message) || err || 'Bulut yazım hatası'), uid);
+                    const diagSummary = diagnoseCloudPayloadPreFlight(colName, lastPayload, usedSeal);
+                    recordCloudGateTelemetry(offline ? 'warn' : 'error', `${colName} Bulut Yazımı`, `${uid} (${diagSummary} | Deneme:${attemptLabel})`, String((err && err.message) || err || 'Bulut yazım hatası'), uid);
                     if (err && typeof err === 'object') err._k4Recorded = true;
                 }
                 throw err;
@@ -2251,37 +2286,44 @@
                 };
                 const ensureListMax = (val, maxItems) => (Array.isArray(val) ? val.slice(0, maxItems) : []);
 
-                const clientUpdatedAt = Number(localStorage.getItem(`celik_kodu_state_updated_at_${uid}`) || Date.now());
-                const statePayloadCore = stripWatchBridgeSecretsFromObj({
-                    weeklySchedule: ensureMapOr(safeParse(`celik_kodu_weekly_schedule_${uid}`, {}), 50, {}),
-                    nextWeeklySchedule: ensureMapOr(safeParse(`celik_kodu_next_weekly_schedule_${uid}`, {}), 50, {}),
-                    dateSchedule: ensureMapOr(safeParse(`celik_kodu_date_schedule_${uid}`, {}), 1500, {}),
-                    rememberedWeights: ensureMapOr(safeParse(`celik_kodu_last_weights_${uid}`, {}), 1500, {}),
-                    excludedExercises: ensureListMax(safeExclIds, 1000),
-                    excludedExercisesUpdatedAt: Number.isFinite(Number(exclUpdatedAt)) ? Number(exclUpdatedAt) : 0,
-                    customPrograms: ensureListMax(safeCustomPrograms, 200),
-                    deletedCustomProgramIds: ensureListMax(safeDeletedIds, 500),
-                    deletedWorkoutLogIds: ensureListMax(deletedWorkoutLogIds, 500),
-                    mobilityTests: ensureMapOr(safeMobilityTests, 20, { history: [], updatedAt: 0 }),
-                    selectedEquipments: ensureListMax(Array.isArray(selectedEquipments) ? selectedEquipments : [], 200),
-                    customGyms: ensureListMax(safeParse(`celik_kodu_custom_gyms_${uid}`, []), 200),
-                    aiDoctrine: String(currentSelectedDoctrine || 'bb_hybrid').slice(0, 120),
-                    aiCoachSummary: ensureMapOr(safeParse(`celik_kodu_ai_program_${uid}`, null), 100, null),
-                    lastGeneratedWorkout: ensureMapOr(safeLastGen, 100, null),
-                    activeWorkoutDraft: ensureMapOr(safeParse(`celik_kodu_active_state_${uid}`, null), 100, null),
-                    garminManifests: ensureMapOr(leanManifests, 1500, {})
-                });
-                await writeAthleteDocWithSealHeal('user_state', uid, (seal) => Object.assign({}, statePayloadCore, {
-                    clientUpdatedAt,
-                    syncSeal: seal,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }));
-                localStorage.removeItem(`celik_kodu_pending_state_sync_${uid}`);
+                let diagForCatch = uid;
+                try {
+                    const clientUpdatedAt = Number(localStorage.getItem(`celik_kodu_state_updated_at_${uid}`) || Date.now());
+                    const statePayloadCore = stripWatchBridgeSecretsFromObj({
+                        weeklySchedule: ensureMapOr(safeParse(`celik_kodu_weekly_schedule_${uid}`, {}), 50, {}),
+                        nextWeeklySchedule: ensureMapOr(safeParse(`celik_kodu_next_weekly_schedule_${uid}`, {}), 50, {}),
+                        dateSchedule: ensureMapOr(safeParse(`celik_kodu_date_schedule_${uid}`, {}), 1500, {}),
+                        rememberedWeights: ensureMapOr(safeParse(`celik_kodu_last_weights_${uid}`, {}), 1500, {}),
+                        excludedExercises: ensureListMax(safeExclIds, 1000),
+                        excludedExercisesUpdatedAt: Number.isFinite(Number(exclUpdatedAt)) ? Number(exclUpdatedAt) : 0,
+                        customPrograms: ensureListMax(safeCustomPrograms, 200),
+                        deletedCustomProgramIds: ensureListMax(safeDeletedIds, 500),
+                        deletedWorkoutLogIds: ensureListMax(deletedWorkoutLogIds, 500),
+                        mobilityTests: ensureMapOr(safeMobilityTests, 20, { history: [], updatedAt: 0 }),
+                        selectedEquipments: ensureListMax(Array.isArray(selectedEquipments) ? selectedEquipments : [], 200),
+                        customGyms: ensureListMax(safeParse(`celik_kodu_custom_gyms_${uid}`, []), 200),
+                        aiDoctrine: String(currentSelectedDoctrine || 'bb_hybrid').slice(0, 120),
+                        aiCoachSummary: ensureMapOr(safeParse(`celik_kodu_ai_program_${uid}`, null), 100, null),
+                        lastGeneratedWorkout: ensureMapOr(safeLastGen, 100, null),
+                        activeWorkoutDraft: ensureMapOr(safeParse(`celik_kodu_active_state_${uid}`, null), 100, null),
+                        garminManifests: ensureMapOr(leanManifests, 1500, {})
+                    });
+                    diagForCatch = `${uid} (${diagnoseCloudPayloadPreFlight('user_state', statePayloadCore, '')})`;
+                    await writeAthleteDocWithSealHeal('user_state', uid, (seal) => Object.assign({}, statePayloadCore, {
+                        clientUpdatedAt,
+                        syncSeal: seal,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }));
+                    localStorage.removeItem(`celik_kodu_pending_state_sync_${uid}`);
+                } catch (innerErr) {
+                    if (innerErr && typeof innerErr === 'object' && !innerErr._k4DiagSummary) innerErr._k4DiagSummary = diagForCatch;
+                    throw innerErr;
+                }
             } catch (err) {
                 try { localStorage.setItem(`celik_kodu_pending_state_sync_${uid}`, '1'); } catch {}
                 if (!(err && err._k4Recorded)) {
                     const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
-                    recordCloudGateTelemetry(offline ? 'warn' : 'error', 'Durum Bulut Yazımı', uid, String((err && err.message) || err || 'Durum yazım hatası'), uid);
+                    recordCloudGateTelemetry(offline ? 'warn' : 'error', 'Durum Bulut Yazımı', (err && err._k4DiagSummary) || uid, String((err && err.message) || err || 'Durum yazım hatası'), uid);
                 }
                 console.warn("Kullanıcı durumu çevrimdışı kuyruğa alındı:", err);
             }
@@ -4606,6 +4648,7 @@
                 const safeModule = maskFn(ev.module || '');
                 const safeAction = maskFn(ev.action || '');
                 const safeUser = maskFn(ev.userName || ev.uid || 'Sporcu');
+                const safeVer = maskFn(ev.appVersion || 'v325');
 
                 return `
                     <div style="background:#121024; border:1px solid ${isErr ? 'rgba(248,113,113,0.45)' : 'rgba(251,191,36,0.35)'}; border-radius:10px; padding:10px 12px;">
@@ -4613,6 +4656,7 @@
                             <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
                                 <span style="background:#2C2550; color:#F3E8FF; border:1px solid rgba(167,139,250,0.4); font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px;">${escapeHTML(gateText)}</span>
                                 <span style="background:${sevBg}; color:${sevFg}; font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px;">${sevText}</span>
+                                <span style="background:#1E293B; color:#E2E8F0; font-size:10px; font-weight:800; padding:2px 6px; border-radius:6px;">${escapeHTML(safeVer)}</span>
                                 ${ev.repeatCount > 1 ? `<span style="background:#0C4A6E; color:#BAE6FD; font-size:10px; font-weight:800; padding:2px 6px; border-radius:6px;">×${Number(ev.repeatCount)}</span>` : ''}
                                 <span style="font-size:10.5px; color:#CBD5E1; font-weight:600;">${escapeHTML(timeStr)}</span>
                             </div>
@@ -4622,7 +4666,7 @@
                             ${escapeHTML(safeModule)} • ${escapeHTML(safeAction)}
                         </div>
                         <div style="font-size:11px; color:#BAE6FD; margin-bottom:3px;">
-                            Sporcu: ${escapeHTML(safeUser)}
+                            Sporcu: ${escapeHTML(safeUser)} • Sürüm: ${escapeHTML(safeVer)}
                         </div>
                         ${safeInput ? `<div style="font-size:11px; color:#CBD5E1; margin-bottom:2px; word-break:break-word;">Girdi: ${escapeHTML(safeInput)}</div>` : ''}
                         <div style="font-size:11.5px; color:${isErr ? '#FECACA' : '#FDE68A'}; font-weight:700; word-break:break-word;">Sonuç: ${escapeHTML(safeOutcome)}</div>
@@ -4685,8 +4729,8 @@
             ];
             target.forEach((ev, idx) => {
                 const tm = ev.at ? new Date(ev.at).toISOString() : '';
-                lines.push(`${idx + 1}. [${gateNames[ev.gate] || ev.gate}] (${ev.severity === 'error' ? 'ARIZA' : 'ONARIM'}${ev.repeatCount > 1 ? ' ×' + ev.repeatCount : ''})`);
-                lines.push(`   Sporcu: ${maskFn(ev.userName || ev.uid || 'Sporcu')} | Modül: ${maskFn(ev.module)} | İşlem: ${maskFn(ev.action)}`);
+                lines.push(`${idx + 1}. [${gateNames[ev.gate] || ev.gate}] (${ev.severity === 'error' ? 'ARIZA' : 'ONARIM'}${ev.repeatCount > 1 ? ' ×' + ev.repeatCount : ''}) [${maskFn(ev.appVersion || 'v325')}]`);
+                lines.push(`   Sporcu: ${maskFn(ev.userName || ev.uid || 'Sporcu')} | Sürüm: ${maskFn(ev.appVersion || 'v325')} | Modül: ${maskFn(ev.module)} | İşlem: ${maskFn(ev.action)}`);
                 if (ev.inputSummary) lines.push(`   Girdi: ${maskFn(ev.inputSummary)}`);
                 lines.push(`   Sonuç: ${maskFn(ev.outcome)} | Zaman: ${tm}`);
             });

@@ -2384,6 +2384,11 @@ function runAcademicMathSuite(moduleSources, dbText) {
       run: () => {
         ctx.__seedState();
         const gatewayCode = fs.readFileSync(path.join(ROOT, 'api', 'tredict.mjs'), 'utf8');
+        const rulesCode = fs.readFileSync(path.join(ROOT, 'config', 'firestore.rules'), 'utf8');
+        const userStateFnMatch = rulesCode.match(/function isValidUserStatePayload\(data\)\s*\{([\s\S]*?)\n\s*\}/);
+        const userStateBody = userStateFnMatch ? userStateFnMatch[1] : '';
+        const helperCallsInUserState = (userStateBody.match(/\b(isValidOptionalMapOrNull|isValidOptionalListOrNull|hasNoSensitiveSecretsInField|hasNoSensitiveSecrets|hasNoWatchBridgeTokens|isValidCustomProgramSample|isValidOptionalTimestampOrIso|isValidOptionalSyncSeal|isValidOptionalString|hasOnlyAllowedFields)\s*\(/g) || []).length;
+        const userStateRuleLeanOk = Boolean(userStateBody) && helperCallsInUserState <= 6;
         const hasGatewayGate = gatewayCode.includes("gate = 'K2'") || gatewayCode.includes("gate: 'K2'");
         const res = vm.runInContext(`(() => {
           const kk = window.CelikKaraKutu;
@@ -2529,7 +2534,9 @@ function runAcademicMathSuite(moduleSources, dbText) {
           }));
           updateAdminPendingBadges();
 
-          const storedJson = JSON.stringify(kk.getAllLocalEventsAcrossUsers(['usr_exam', 'usr_admin']));
+          const storedEvents = kk.getAllLocalEventsAcrossUsers(['usr_exam', 'usr_admin']);
+          const appVersionOk = storedEvents.length === 4 && storedEvents.every(ev => typeof ev.appVersion === 'string' && ev.appVersion.length > 0);
+          const storedJson = JSON.stringify(storedEvents);
           const combinedCheck = storedJson + '\\n' + allHtml + '\\n' + promptText;
           const leakedSecrets = ['Gizli1234', 'AIzaSyTestSecretKey999999', 'eyJSecretToken12345', 'trd_tok_99'].filter(s => combinedCheck.includes(s));
 
@@ -2546,12 +2553,14 @@ function runAcademicMathSuite(moduleSources, dbText) {
             athleteHiddenOk,
             k2FilterOk,
             promptReady: promptText.includes('SİSTEM İZLEME RAPORU') && promptText.includes('K2 Saat'),
+            appVersionOk,
             leakCount: leakedSecrets.length,
             clearedOk: afterClearCount === 0 && headerBtn.style.display === 'none' && tabBadge.style.display === 'none'
           };
         })()`, ctx);
 
         const ok = hasGatewayGate
+          && userStateRuleLeanOk
           && res.gatesCovered
           && res.hasWarnAndError
           && res.repeatOk
@@ -2561,9 +2570,10 @@ function runAcademicMathSuite(moduleSources, dbText) {
           && res.athleteHiddenOk
           && res.k2FilterOk
           && res.promptReady
+          && res.appVersionOk
           && res.leakCount === 0
           && res.clearedOk;
-        return { ok, actual: JSON.stringify({ hasGatewayGate, ...res }) };
+        return { ok, actual: JSON.stringify({ hasGatewayGate, userStateRuleLeanOk, helperCallsInUserState, ...res }) };
       }
     }
   ];

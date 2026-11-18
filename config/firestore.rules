@@ -221,7 +221,8 @@ service cloud.firestore {
           && !('passwordHash' in obj)
           && !('salt' in obj)
           && !('geminiApiKey' in obj)
-          && hasNoWatchBridgeTokens(obj)
+          && !('tredictToken' in obj)
+          && !('intervalsToken' in obj)
         );
     }
 
@@ -234,6 +235,15 @@ service cloud.firestore {
     }
 
     function isValidUserStatePayload(data) {
+      let secretKeys = ['password', 'passwordHash', 'salt', 'geminiApiKey', 'tredictToken', 'intervalsToken'];
+      let cp = data.get('customPrograms', null);
+      let dcp = data.get('deletedCustomProgramIds', null);
+      let dwl = data.get('deletedWorkoutLogIds', null);
+      let mt = data.get('mobilityTests', null);
+      let awd = data.get('activeWorkoutDraft', null);
+      let ds = data.get('dateSchedule', null);
+      let rw = data.get('rememberedWeights', null);
+      let gm = data.get('garminManifests', null);
       return hasOnlyAllowedFields(data, [
           'weeklySchedule',
           'nextWeeklySchedule',
@@ -256,85 +266,213 @@ service cloud.firestore {
           'clientUpdatedAt',
           'syncSeal'
         ])
-        && !('password' in data)
-        && !('passwordHash' in data)
-        && !('salt' in data)
-        && !('geminiApiKey' in data)
-        && !('tredictToken' in data)
-        && !('intervalsToken' in data)
-        && isValidOptionalMapOrNull(data, 'weeklySchedule', 50)
-        && isValidOptionalMapOrNull(data, 'nextWeeklySchedule', 50)
-        && isValidOptionalMapOrNull(data, 'dateSchedule', 1500)
-        && isValidOptionalMapOrNull(data, 'rememberedWeights', 1500)
-        && isValidOptionalListOrNull(data, 'excludedExercises', 1000)
-        && isValidOptionalTimestampOrIso(data, 'excludedExercisesUpdatedAt')
-        && isValidOptionalListOrNull(data, 'customPrograms', 200)
+        && !data.keys().hasAny(secretKeys)
         && (
-          !('customPrograms' in data)
-          || !(data.customPrograms is list)
-          || data.customPrograms.size() == 0
+          !('weeklySchedule' in data)
+          || data.weeklySchedule == null
           || (
-            isValidCustomProgramSample(data.customPrograms[0])
-            && (data.customPrograms.size() <= 2 || isValidCustomProgramSample(data.customPrograms[1]))
-            && isValidCustomProgramSample(data.customPrograms[data.customPrograms.size() - 1])
+            data.weeklySchedule is map
+            && data.weeklySchedule.keys().size() <= 50
+            && !data.weeklySchedule.keys().hasAny(secretKeys)
           )
         )
-        && isValidOptionalListOrNull(data, 'deletedCustomProgramIds', 500)
         && (
-          !('deletedCustomProgramIds' in data)
-          || !(data.deletedCustomProgramIds is list)
-          || data.deletedCustomProgramIds.size() == 0
+          !('nextWeeklySchedule' in data)
+          || data.nextWeeklySchedule == null
           || (
-            hasNoSensitiveSecrets(data.deletedCustomProgramIds[0])
-            && hasNoSensitiveSecrets(data.deletedCustomProgramIds[data.deletedCustomProgramIds.size() - 1])
+            data.nextWeeklySchedule is map
+            && data.nextWeeklySchedule.keys().size() <= 50
+            && !data.nextWeeklySchedule.keys().hasAny(secretKeys)
           )
         )
-        && isValidOptionalListOrNull(data, 'deletedWorkoutLogIds', 500)
         && (
-          !('deletedWorkoutLogIds' in data)
-          || !(data.deletedWorkoutLogIds is list)
-          || data.deletedWorkoutLogIds.size() == 0
+          ds == null
           || (
-            hasNoSensitiveSecrets(data.deletedWorkoutLogIds[0])
-            && hasNoSensitiveSecrets(data.deletedWorkoutLogIds[data.deletedWorkoutLogIds.size() - 1])
+            ds is map
+            && ds.keys().size() <= 1500
+            && !ds.keys().hasAny(secretKeys)
           )
         )
-        && isValidOptionalMapOrNull(data, 'mobilityTests', 20)
-        && isValidOptionalListOrNull(data, 'selectedEquipments', 200)
-        && isValidOptionalListOrNull(data, 'customGyms', 200)
-        && isValidOptionalString(data, 'aiDoctrine', 0, 120)
-        && isValidOptionalMapOrNull(data, 'aiCoachSummary', 100)
-        && isValidOptionalMapOrNull(data, 'lastGeneratedWorkout', 100)
-        && isValidOptionalMapOrNull(data, 'activeWorkoutDraft', 100)
-        && isValidOptionalMapOrNull(data, 'garminManifests', 1500)
-        && hasNoSensitiveSecretsInField(data, 'weeklySchedule')
-        && hasNoSensitiveSecretsInField(data, 'nextWeeklySchedule')
-        && hasNoSensitiveSecretsInField(data, 'dateSchedule')
-        && hasNoSensitiveSecretsInField(data, 'rememberedWeights')
-        && hasNoSensitiveSecretsInField(data, 'aiCoachSummary')
-        && hasNoSensitiveSecretsInField(data, 'lastGeneratedWorkout')
-        && hasNoSensitiveSecretsInField(data, 'activeWorkoutDraft')
-        && hasNoSensitiveSecretsInField(data, 'garminManifests')
-        && hasNoSensitiveSecretsInField(data, 'mobilityTests')
         && (
-          !('activeWorkoutDraft' in data)
-          || !(data.activeWorkoutDraft is map)
-          || hasNoSensitiveSecretsInField(data.activeWorkoutDraft, 'session')
-        )
-        && (
-          !('mobilityTests' in data)
-          || !(data.mobilityTests is map)
-          || !('history' in data.mobilityTests)
-          || !(data.mobilityTests.history is list)
-          || data.mobilityTests.history.size() == 0
+          rw == null
           || (
-            hasNoSensitiveSecrets(data.mobilityTests.history[0])
-            && hasNoSensitiveSecrets(data.mobilityTests.history[data.mobilityTests.history.size() - 1])
+            rw is map
+            && rw.keys().size() <= 1500
+            && !rw.keys().hasAny(secretKeys)
           )
         )
-        && isValidOptionalTimestampOrIso(data, 'updatedAt')
+        && (
+          !('excludedExercises' in data)
+          || data.excludedExercises == null
+          || (data.excludedExercises is list && data.excludedExercises.size() <= 1000)
+        )
+        && (
+          !('excludedExercisesUpdatedAt' in data)
+          || data.excludedExercisesUpdatedAt == null
+          || data.excludedExercisesUpdatedAt is timestamp
+          || (data.excludedExercisesUpdatedAt is string && data.excludedExercisesUpdatedAt.size() <= 64)
+          || (data.excludedExercisesUpdatedAt is number && data.excludedExercisesUpdatedAt >= 0)
+        )
+        && (
+          cp == null
+          || (
+            cp is list
+            && cp.size() <= 200
+            && (
+              cp.size() == 0
+              || (
+                cp[0] is map
+                && !cp[0].keys().hasAny(secretKeys)
+                && (
+                  cp.size() <= 2
+                  || (
+                    cp[1] is map
+                    && !cp[1].keys().hasAny(secretKeys)
+                  )
+                )
+                && cp[cp.size() - 1] is map
+                && !cp[cp.size() - 1].keys().hasAny(secretKeys)
+              )
+            )
+          )
+        )
+        && (
+          dcp == null
+          || (
+            dcp is list
+            && dcp.size() <= 500
+            && (
+              dcp.size() == 0
+              || (
+                (
+                  !(dcp[0] is map)
+                  || !dcp[0].keys().hasAny(secretKeys)
+                )
+                && (
+                  !(dcp[dcp.size() - 1] is map)
+                  || !dcp[dcp.size() - 1].keys().hasAny(secretKeys)
+                )
+              )
+            )
+          )
+        )
+        && (
+          dwl == null
+          || (
+            dwl is list
+            && dwl.size() <= 500
+            && (
+              dwl.size() == 0
+              || (
+                (
+                  !(dwl[0] is map)
+                  || !dwl[0].keys().hasAny(secretKeys)
+                )
+                && (
+                  !(dwl[dwl.size() - 1] is map)
+                  || !dwl[dwl.size() - 1].keys().hasAny(secretKeys)
+                )
+              )
+            )
+          )
+        )
+        && (
+          mt == null
+          || (
+            mt is map
+            && mt.keys().size() <= 20
+            && !mt.keys().hasAny(secretKeys)
+            && (
+              !('history' in mt)
+              || !(mt.history is list)
+              || mt.history.size() == 0
+              || (
+                (
+                  !(mt.history[0] is map)
+                  || !mt.history[0].keys().hasAny(secretKeys)
+                )
+                && (
+                  !(mt.history[mt.history.size() - 1] is map)
+                  || !mt.history[mt.history.size() - 1].keys().hasAny(secretKeys)
+                )
+              )
+            )
+          )
+        )
+        && (
+          !('selectedEquipments' in data)
+          || data.selectedEquipments == null
+          || (data.selectedEquipments is list && data.selectedEquipments.size() <= 200)
+        )
+        && (
+          !('customGyms' in data)
+          || data.customGyms == null
+          || (data.customGyms is list && data.customGyms.size() <= 200)
+        )
+        && (
+          !('aiDoctrine' in data)
+          || data.aiDoctrine == null
+          || (
+            data.aiDoctrine is string
+            && data.aiDoctrine.size() >= 0
+            && data.aiDoctrine.size() <= 120
+          )
+        )
+        && (
+          !('aiCoachSummary' in data)
+          || data.aiCoachSummary == null
+          || (
+            data.aiCoachSummary is map
+            && data.aiCoachSummary.keys().size() <= 100
+            && !data.aiCoachSummary.keys().hasAny(secretKeys)
+          )
+        )
+        && (
+          !('lastGeneratedWorkout' in data)
+          || data.lastGeneratedWorkout == null
+          || (
+            data.lastGeneratedWorkout is map
+            && data.lastGeneratedWorkout.keys().size() <= 100
+            && !data.lastGeneratedWorkout.keys().hasAny(secretKeys)
+          )
+        )
+        && (
+          awd == null
+          || (
+            awd is map
+            && awd.keys().size() <= 100
+            && !awd.keys().hasAny(secretKeys)
+            && (
+              !('session' in awd)
+              || !(awd.session is map)
+              || !awd.session.keys().hasAny(secretKeys)
+            )
+          )
+        )
+        && (
+          gm == null
+          || (
+            gm is map
+            && gm.keys().size() <= 1500
+            && !gm.keys().hasAny(secretKeys)
+          )
+        )
+        && (
+          !('updatedAt' in data)
+          || data.updatedAt == null
+          || data.updatedAt is timestamp
+          || (data.updatedAt is string && data.updatedAt.size() <= 64)
+          || (data.updatedAt is number && data.updatedAt >= 0)
+        )
         && (!('clientUpdatedAt' in data) || (data.clientUpdatedAt is number && data.clientUpdatedAt >= 0))
-        && isValidOptionalSyncSeal(data);
+        && (
+          !('syncSeal' in data)
+          || (
+            data.syncSeal is string
+            && data.syncSeal.size() >= 10
+            && data.syncSeal.size() <= 120
+          )
+        );
     }
 
     function isValidUserRecordSample(u) {
@@ -453,15 +591,53 @@ service cloud.firestore {
     function isValidTelemetryEventSample(ev) {
       return ev is map
         && ev.keys().size() <= 40
-        && hasNoSensitiveSecrets(ev)
+        && !('password' in ev)
+        && !('passwordHash' in ev)
+        && !('salt' in ev)
+        && !('geminiApiKey' in ev)
+        && !('tredictToken' in ev)
+        && !('intervalsToken' in ev)
         && !('syncSeal' in ev)
         && !('apiKey' in ev)
         && !('accessToken' in ev)
         && !('refreshToken' in ev)
         && !('privateKey' in ev)
-        && hasNoSensitiveSecretsInField(ev, 'meta')
-        && hasNoSensitiveSecretsInField(ev, 'context')
-        && hasNoSensitiveSecretsInField(ev, 'details')
+        && (
+          !('meta' in ev)
+          || !(ev.meta is map)
+          || (
+            !('password' in ev.meta)
+            && !('passwordHash' in ev.meta)
+            && !('salt' in ev.meta)
+            && !('geminiApiKey' in ev.meta)
+            && !('tredictToken' in ev.meta)
+            && !('intervalsToken' in ev.meta)
+          )
+        )
+        && (
+          !('context' in ev)
+          || !(ev.context is map)
+          || (
+            !('password' in ev.context)
+            && !('passwordHash' in ev.context)
+            && !('salt' in ev.context)
+            && !('geminiApiKey' in ev.context)
+            && !('tredictToken' in ev.context)
+            && !('intervalsToken' in ev.context)
+          )
+        )
+        && (
+          !('details' in ev)
+          || !(ev.details is map)
+          || (
+            !('password' in ev.details)
+            && !('passwordHash' in ev.details)
+            && !('salt' in ev.details)
+            && !('geminiApiKey' in ev.details)
+            && !('tredictToken' in ev.details)
+            && !('intervalsToken' in ev.details)
+          )
+        )
         && (!('message' in ev) || !(ev.message is string) || ev.message.size() <= 4000)
         && (!('stack' in ev) || !(ev.stack is string) || ev.stack.size() <= 8000)
         && (!('detail' in ev) || !(ev.detail is string) || ev.detail.size() <= 4000)
@@ -469,7 +645,7 @@ service cloud.firestore {
     }
 
     function isValidSystemTelemetryPayload(data, uid) {
-      return hasOnlyAllowedFields(data, [
+      return data.keys().hasOnly([
           'uid',
           'userName',
           'events',
@@ -479,13 +655,26 @@ service cloud.firestore {
           'updatedAt',
           'syncSeal'
         ])
-        && hasNoSensitiveSecrets(data)
+        && !('password' in data)
+        && !('passwordHash' in data)
+        && !('salt' in data)
+        && !('geminiApiKey' in data)
+        && !('tredictToken' in data)
+        && !('intervalsToken' in data)
         && 'uid' in data
         && data.uid is string
         && data.uid.size() >= 1
         && data.uid.size() <= 128
         && data.uid == uid
-        && isValidOptionalString(data, 'userName', 0, 120)
+        && (
+          !('userName' in data)
+          || data.userName == null
+          || (
+            data.userName is string
+            && data.userName.size() >= 0
+            && data.userName.size() <= 120
+          )
+        )
         && 'events' in data
         && data.events is list
         && data.events.size() <= 50
@@ -499,9 +688,22 @@ service cloud.firestore {
         )
         && (!('openErrorCount' in data) || (data.openErrorCount is number && data.openErrorCount >= 0 && data.openErrorCount <= 50))
         && (!('openWarnCount' in data) || (data.openWarnCount is number && data.openWarnCount >= 0 && data.openWarnCount <= 50))
-        && isValidOptionalTimestampOrIso(data, 'updatedAt')
+        && (
+          !('updatedAt' in data)
+          || data.updatedAt == null
+          || data.updatedAt is timestamp
+          || (data.updatedAt is string && data.updatedAt.size() <= 64)
+          || (data.updatedAt is number && data.updatedAt >= 0)
+        )
         && (!('clientUpdatedAt' in data) || (data.clientUpdatedAt is number && data.clientUpdatedAt >= 0))
-        && isValidOptionalSyncSeal(data);
+        && (
+          !('syncSeal' in data)
+          || (
+            data.syncSeal is string
+            && data.syncSeal.size() >= 10
+            && data.syncSeal.size() <= 120
+          )
+        );
     }
 
     // ===============================================================

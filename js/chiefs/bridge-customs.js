@@ -603,6 +603,19 @@
         return maskTelemetryString(String(val));
     }
 
+    function resolveAppVersionTag() {
+        try {
+            if (typeof document !== 'undefined' && typeof document.getElementById === 'function') {
+                const badge = document.getElementById('appVersionBadge');
+                const txt = badge && String(badge.innerText || badge.textContent || '').trim();
+                if (txt && /^v?\d+/i.test(txt)) {
+                    return (txt.startsWith('v') || txt.startsWith('V')) ? txt.slice(0, 20) : ('v' + txt).slice(0, 20);
+                }
+            }
+        } catch {}
+        return 'v325';
+    }
+
     function sanitizeTelemetryEvent(raw) {
         if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
         const gateRaw = String(raw.gate || 'K1').trim().toUpperCase();
@@ -614,6 +627,7 @@
         const action = maskTelemetrySecrets(raw.action || 'İşlem').trim().slice(0, 120) || 'İşlem';
         const inputSummary = maskTelemetrySecrets(raw.inputSummary || '').trim().slice(0, 240);
         const outcome = maskTelemetrySecrets(raw.outcome || '').trim().slice(0, 300) || (severity === 'error' ? 'İşlem başarısız oldu' : 'Veri otomatik onarıldı');
+        const appVersion = maskTelemetrySecrets(raw.appVersion || resolveAppVersionTag()).trim().slice(0, 20) || 'v325';
         const atNum = Number(raw.at);
         const at = (Number.isFinite(atNum) && atNum > 0) ? Math.round(atNum) : Date.now();
         const repNum = Number(raw.repeatCount);
@@ -633,6 +647,7 @@
             action,
             inputSummary,
             outcome,
+            appVersion,
             repeatCount,
             at,
             status: 'open'
@@ -895,6 +910,7 @@
         clearAllEvents: clearAllTelemetryEvents,
         sanitizeEvent: sanitizeTelemetryEvent,
         maskSecrets: maskTelemetrySecrets,
+        getAppVersion: resolveAppVersionTag,
         MAX_EVENTS_PER_USER: TELEMETRY_MAX_EVENTS_PER_USER
     };
 
