@@ -573,6 +573,7 @@
     delete fetchOpts.tredictToken;
     delete fetchOpts.intervalsToken;
     delete fetchOpts.gatewayBase;
+    delete fetchOpts.silentBackground;
 
     let targets = buildGatewayTargetUrls(apiPath, uid);
     if (customGatewayOverride) {
@@ -595,7 +596,13 @@
           continue;
         }
         if ((res.ok || res.status === 400) && ct.includes('application/json')) {
-          if (res.status === 400) {
+          if (res.ok) {
+            try {
+              if (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.resolveAction === 'function') {
+                window.CelikKaraKutu.resolveAction({ uid, gate: 'K2', inputMatch: cleanRoute });
+              }
+            } catch {}
+          } else {
             try {
               const errJson = await res.clone().json();
               const layerTag = errJson && errJson.layer ? `[${errJson.layer}] ` : '';
@@ -613,7 +620,16 @@
     if (intervalsToken) {
       try {
         const directRes = await executeDirectIntervalsBrowserFallback(apiPath, options, intervalsToken);
-        if (directRes) return directRes;
+        if (directRes) {
+          if (directRes.ok) {
+            try {
+              if (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.resolveAction === 'function') {
+                window.CelikKaraKutu.resolveAction({ uid, gate: 'K2', inputMatch: cleanRoute });
+              }
+            } catch {}
+          }
+          return directRes;
+        }
       } catch (directErr) {
         if (directErr && (directErr.code === 'WATCH_AUTH_FAILED' || directErr.message === 'WATCH_AUTH_FAILED')) {
           authError = directErr;
@@ -629,7 +645,10 @@
     }
     const gwErr = new Error('CLOUD_GATEWAY_UNREACHABLE');
     gwErr.code = 'CLOUD_GATEWAY_UNREACHABLE';
-    recordWatchBridgeTelemetry('Vercel Saat Köprüsü', cleanRoute, lastHttpDetail || 'Bulut saat geçidine ulaşılamadı');
+    const isSilentTransientNet = Boolean(options.silentBackground) && /load failed|failed to fetch|networkerror|aborterror|aborted/i.test(lastHttpDetail);
+    if (!isSilentTransientNet) {
+      recordWatchBridgeTelemetry('Vercel Saat Köprüsü', cleanRoute, lastHttpDetail || 'Bulut saat geçidine ulaşılamadı');
+    }
     throw gwErr;
   }
 
@@ -3949,7 +3968,7 @@
   async function syncGarminWellnessStepsSilent() {
     if (!isGarminEnabledForCurrentUser() || !hasGarminCredentialsConfigured()) return false;
     try {
-      const res = await fetchGarminBridge('/api/tredict/wellness?days=21');
+      const res = await fetchGarminBridge('/api/tredict/wellness?days=21', { silentBackground: true });
       const data = await res.json();
       if (data && data.ok && Array.isArray(data.daily) && data.daily.length > 0) {
         const current = getStoredWellnessStepsMap();
@@ -4141,7 +4160,7 @@
   async function syncGarminActivitiesSilent() {
     if (!isGarminEnabledForCurrentUser() || !hasGarminCredentialsConfigured()) return false;
     try {
-      const res = await fetchGarminBridge('/api/tredict/activities?days=14');
+      const res = await fetchGarminBridge('/api/tredict/activities?days=14', { silentBackground: true });
       const data = await res.json();
       if (data && data.ok && Array.isArray(data.activities) && data.activities.length > 0) {
         const uid = getActiveUidSafe();

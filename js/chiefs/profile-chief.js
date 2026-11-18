@@ -485,7 +485,7 @@
             try {
                 const ver = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAppVersion === 'function')
                     ? window.CelikKaraKutu.getAppVersion()
-                    : 'v325';
+                    : 'v326';
                 const keys = payload && typeof payload === 'object' ? Object.keys(payload) : [];
                 const undefKeys = [];
                 const overLimit = [];
@@ -509,6 +509,22 @@
             }
         }
 
+        function clearResolvedCloudErrors(colName, uid) {
+            try {
+                if (typeof window === 'undefined' || !window.CelikKaraKutu || typeof window.CelikKaraKutu.resolveAction !== 'function') return;
+                window.CelikKaraKutu.resolveAction({ uid, gate: 'K4', actionPrefix: colName });
+                const aliasPrefixMap = {
+                    user_state: 'Durum Bulut',
+                    workout_logs: 'Antrenman Bulut',
+                    scale_logs: 'Tartı Bulut',
+                    measurement_logs: 'Mezura Bulut'
+                };
+                if (aliasPrefixMap[colName]) {
+                    window.CelikKaraKutu.resolveAction({ uid, gate: 'K4', actionPrefix: aliasPrefixMap[colName] });
+                }
+            } catch {}
+        }
+
         async function writeAthleteDocWithSealHeal(colName, uid, buildPayloadFn) {
             const docRef = fbDb.collection(colName).doc(uid);
             const firstSeal = getAthleteCloudSeal(uid, colName);
@@ -518,6 +534,7 @@
             let lastPayload = buildPayloadFn(firstSeal);
             try {
                 await docRef.set(lastPayload, { merge: true });
+                if (!IS_LOCAL_DEV && !isTelCol) clearResolvedCloudErrors(colName, uid);
                 return true;
             } catch (err) {
                 const isPermErr = err && (err.code === 'permission-denied' || /permission|insufficient/i.test(String(err.message || '')));
@@ -533,6 +550,7 @@
                             lastPayload = buildPayloadFn(remoteSeal);
                             await docRef.set(lastPayload, { merge: true });
                             if (!IS_LOCAL_DEV && !isTelCol) {
+                                clearResolvedCloudErrors(colName, uid);
                                 recordCloudGateTelemetry('warn', `${colName} Mühür Onarımı`, uid, 'Bulut mühür uyuşmazlığı otomatik onarıldı', uid);
                             }
                             return true;
@@ -4387,19 +4405,20 @@
             const telEvents = (isAdmin && typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAllLocalEventsAcrossUsers === 'function')
                 ? window.CelikKaraKutu.getAllLocalEventsAcrossUsers(users)
                 : [];
-            const telCount = telEvents.length;
-            const telLabel = telCount > 99 ? '99+' : String(telCount);
+            const errEvents = telEvents.filter(ev => ev && ev.severity === 'error');
+            const errCount = errEvents.length;
+            const errLabel = errCount > 99 ? '99+' : String(errCount);
 
             const headerTelBtn = document.getElementById('headerAdminTelemetryBtn');
             const headerTelBadge = document.getElementById('headerAdminTelemetryBadge');
-            if (headerTelBadge) headerTelBadge.innerText = telLabel;
-            if (headerTelBtn) headerTelBtn.style.display = (isAdmin && telCount > 0) ? 'inline-flex' : 'none';
+            if (headerTelBadge) headerTelBadge.innerText = errLabel;
+            if (headerTelBtn) headerTelBtn.style.display = (isAdmin && errCount > 0) ? 'inline-flex' : 'none';
 
             ['popupAdminTelemetryBadge', 'sheetAdminTelemetryBadge', 'profileAdminTelemetryBadge', 'adminTelemetryTabBadge'].forEach(elId => {
                 const el = document.getElementById(elId);
                 if (!el) return;
-                if (isAdmin && telCount > 0) {
-                    el.innerText = telLabel;
+                if (isAdmin && errCount > 0) {
+                    el.innerText = errLabel;
                     el.style.display = 'inline-block';
                 } else {
                     el.style.display = 'none';
@@ -4648,7 +4667,7 @@
                 const safeModule = maskFn(ev.module || '');
                 const safeAction = maskFn(ev.action || '');
                 const safeUser = maskFn(ev.userName || ev.uid || 'Sporcu');
-                const safeVer = maskFn(ev.appVersion || 'v325');
+                const safeVer = maskFn(ev.appVersion || 'v326');
 
                 return `
                     <div style="background:#121024; border:1px solid ${isErr ? 'rgba(248,113,113,0.45)' : 'rgba(251,191,36,0.35)'}; border-radius:10px; padding:10px 12px;">
@@ -4729,8 +4748,8 @@
             ];
             target.forEach((ev, idx) => {
                 const tm = ev.at ? new Date(ev.at).toISOString() : '';
-                lines.push(`${idx + 1}. [${gateNames[ev.gate] || ev.gate}] (${ev.severity === 'error' ? 'ARIZA' : 'ONARIM'}${ev.repeatCount > 1 ? ' ×' + ev.repeatCount : ''}) [${maskFn(ev.appVersion || 'v325')}]`);
-                lines.push(`   Sporcu: ${maskFn(ev.userName || ev.uid || 'Sporcu')} | Sürüm: ${maskFn(ev.appVersion || 'v325')} | Modül: ${maskFn(ev.module)} | İşlem: ${maskFn(ev.action)}`);
+                lines.push(`${idx + 1}. [${gateNames[ev.gate] || ev.gate}] (${ev.severity === 'error' ? 'ARIZA' : 'ONARIM'}${ev.repeatCount > 1 ? ' ×' + ev.repeatCount : ''}) [${maskFn(ev.appVersion || 'v326')}]`);
+                lines.push(`   Sporcu: ${maskFn(ev.userName || ev.uid || 'Sporcu')} | Sürüm: ${maskFn(ev.appVersion || 'v326')} | Modül: ${maskFn(ev.module)} | İşlem: ${maskFn(ev.action)}`);
                 if (ev.inputSummary) lines.push(`   Girdi: ${maskFn(ev.inputSummary)}`);
                 lines.push(`   Sonuç: ${maskFn(ev.outcome)} | Zaman: ${tm}`);
             });

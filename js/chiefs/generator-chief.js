@@ -8479,6 +8479,11 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         const text = candidate?.content?.parts?.[0]?.text;
                         if (text) {
                             cachedGeminiWorkingModel = model;
+                            try {
+                                if (window.CelikKaraKutu && typeof window.CelikKaraKutu.resolveAction === 'function') {
+                                    window.CelikKaraKutu.resolveAction({ gate: 'K3', module: 'Üretici Yapay Zeka' });
+                                }
+                            } catch {}
                             return text;
                         }
                     } catch (e) {

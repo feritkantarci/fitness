@@ -2447,6 +2447,17 @@ function runAcademicMathSuite(moduleSources, dbText) {
           // 4) Yönetici Oturumu, Rozet, Sekme, K2 Filtresi, Gizlilik ve Temizleme
           // K2 ve gizli maskeli kayıtların 50 tamponunda görünmesi için temiz bir senaryo seti ekle
           kk.clearAllEvents(['usr_exam', 'usr_admin']);
+          const ignoredSw = kk.record({
+            gate: 'K1',
+            severity: 'error',
+            module: 'Çalışma Zamanı',
+            action: 'Asenkron İşlem Hatası',
+            inputSummary: 'Promise',
+            outcome: 'Script https://fitness.kantarci.io/sw.js?v=324 load failed',
+            uid: 'usr_exam'
+          });
+          const swAbortIgnoredOk = ignoredSw === null && kk.getEventsForUser('usr_exam').length === 0;
+
           kk.record({
             gate: 'K1',
             severity: 'warn',
@@ -2507,8 +2518,8 @@ function runAcademicMathSuite(moduleSources, dbText) {
           const headerBadge = document.getElementById('headerAdminTelemetryBadge');
           const tabBadge = document.getElementById('adminTelemetryTabBadge');
           const listEl = document.getElementById('adminTelemetryListContainer');
-          const headerVisibleBeforeClear = headerBtn.style.display === 'inline-flex' && headerBadge.innerText === '4';
-          const tabBadgeVisibleBeforeClear = tabBadge.style.display === 'inline-block' && tabBadge.innerText === '4';
+          const headerVisibleBeforeClear = headerBtn.style.display === 'inline-flex' && headerBadge.innerText === '2';
+          const tabBadgeVisibleBeforeClear = tabBadge.style.display === 'inline-block' && tabBadge.innerText === '2';
           const allHtml = String(listEl.innerHTML || '');
           const promptText = String(buildAdminTelemetryAiPrompt() || '');
 
@@ -2540,6 +2551,10 @@ function runAcademicMathSuite(moduleSources, dbText) {
           const combinedCheck = storedJson + '\\n' + allHtml + '\\n' + promptText;
           const leakedSecrets = ['Gizli1234', 'AIzaSyTestSecretKey999999', 'eyJSecretToken12345', 'trd_tok_99'].filter(s => combinedCheck.includes(s));
 
+          const resolvedK2Count = kk.resolveAction({ uid: 'usr_exam', gate: 'K2', inputMatch: 'Saat Bağlantısı' });
+          const afterResolveCount = kk.getAllLocalEventsAcrossUsers(['usr_exam', 'usr_admin']).length;
+          const autoResolveOk = resolvedK2Count === 1 && afterResolveCount === 3 && headerBadge.innerText === '1' && tabBadge.innerText === '1';
+
           clearAdminTelemetryEvents();
           const afterClearCount = kk.getAllLocalEventsAcrossUsers(['usr_exam', 'usr_admin']).length;
 
@@ -2548,12 +2563,14 @@ function runAcademicMathSuite(moduleSources, dbText) {
             hasWarnAndError,
             repeatOk,
             capOk,
+            swAbortIgnoredOk,
             headerVisible: headerVisibleBeforeClear,
             tabBadgeVisible: tabBadgeVisibleBeforeClear,
             athleteHiddenOk,
             k2FilterOk,
             promptReady: promptText.includes('SİSTEM İZLEME RAPORU') && promptText.includes('K2 Saat'),
             appVersionOk,
+            autoResolveOk,
             leakCount: leakedSecrets.length,
             clearedOk: afterClearCount === 0 && headerBtn.style.display === 'none' && tabBadge.style.display === 'none'
           };
@@ -2565,12 +2582,14 @@ function runAcademicMathSuite(moduleSources, dbText) {
           && res.hasWarnAndError
           && res.repeatOk
           && res.capOk
+          && res.swAbortIgnoredOk
           && res.headerVisible
           && res.tabBadgeVisible
           && res.athleteHiddenOk
           && res.k2FilterOk
           && res.promptReady
           && res.appVersionOk
+          && res.autoResolveOk
           && res.leakCount === 0
           && res.clearedOk;
         return { ok, actual: JSON.stringify({ hasGatewayGate, userStateRuleLeanOk, helperCallsInUserState, ...res }) };

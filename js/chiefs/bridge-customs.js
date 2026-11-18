@@ -613,7 +613,7 @@
                 }
             }
         } catch {}
-        return 'v325';
+        return 'v326';
     }
 
     function sanitizeTelemetryEvent(raw) {
@@ -627,7 +627,7 @@
         const action = maskTelemetrySecrets(raw.action || 'İşlem').trim().slice(0, 120) || 'İşlem';
         const inputSummary = maskTelemetrySecrets(raw.inputSummary || '').trim().slice(0, 240);
         const outcome = maskTelemetrySecrets(raw.outcome || '').trim().slice(0, 300) || (severity === 'error' ? 'İşlem başarısız oldu' : 'Veri otomatik onarıldı');
-        const appVersion = maskTelemetrySecrets(raw.appVersion || resolveAppVersionTag()).trim().slice(0, 20) || 'v325';
+        const appVersion = maskTelemetrySecrets(raw.appVersion || resolveAppVersionTag()).trim().slice(0, 20) || 'v326';
         const atNum = Number(raw.at);
         const at = (Number.isFinite(atNum) && atNum > 0) ? Math.round(atNum) : Date.now();
         const repNum = Number(raw.repeatCount);
@@ -756,8 +756,29 @@
         return all;
     }
 
+    let isPageUnloading = false;
+    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function' && !window._celikKaraKutuLifecycleHooked) {
+        window._celikKaraKutuLifecycleHooked = true;
+        window.addEventListener('beforeunload', () => { isPageUnloading = true; });
+        window.addEventListener('pagehide', () => { isPageUnloading = true; });
+        window.addEventListener('pageshow', () => { isPageUnloading = false; });
+    }
+
+    function isBenignTransientTelemetry(payload) {
+        if (!payload || typeof payload !== 'object') return false;
+        const outcomeStr = String(payload.outcome || '');
+        const inputStr = String(payload.inputSummary || '');
+        const combined = outcomeStr + ' ' + inputStr;
+        if (/\bsw\.js(?:\?v=[^\s]+)?\s+load\s+failed\b/i.test(combined)) return true;
+        if (/Failed to update a ServiceWorker/i.test(combined)) return true;
+        if (/\b(?:AbortError|The user aborted a request|Fetch is aborted)\b/i.test(combined)) return true;
+        if (isPageUnloading && /\b(?:Load failed|Failed to fetch|NetworkError)\b/i.test(combined)) return true;
+        return false;
+    }
+
     function recordTelemetryEvent(payload) {
         if (isRecordingTelemetry || !payload || typeof payload !== 'object') return null;
+        if (isBenignTransientTelemetry(payload)) return null;
         isRecordingTelemetry = true;
         try {
             const cleanEv = sanitizeTelemetryEvent(payload);
@@ -797,6 +818,43 @@
         } finally {
             isRecordingTelemetry = false;
         }
+    }
+
+    function resolveTelemetryAction(criteria) {
+        if (!criteria || typeof criteria !== 'object') return 0;
+        const uid = resolveTelemetryUid(criteria.uid);
+        const gateFilter = criteria.gate ? String(criteria.gate).trim().toUpperCase() : '';
+        const modFilter = criteria.module ? String(criteria.module).trim() : '';
+        const actionPrefix = criteria.actionPrefix ? String(criteria.actionPrefix).trim() : '';
+        const inputMatch = criteria.inputMatch ? String(criteria.inputMatch).trim() : '';
+
+        const events = getEventsForUser(uid);
+        if (!events.length) return 0;
+        let removedCount = 0;
+        const remaining = events.filter(ev => {
+            if (!ev || ev.severity !== 'error') return true;
+            if (gateFilter && ev.gate !== gateFilter) return true;
+            if (modFilter && ev.module !== modFilter) return true;
+            if (actionPrefix && !String(ev.action || '').includes(actionPrefix)) return true;
+            if (inputMatch && !String(ev.inputSummary || '').includes(inputMatch) && !String(ev.action || '').includes(inputMatch)) return true;
+            removedCount++;
+            return false;
+        });
+
+        if (removedCount > 0) {
+            setEventsForUser(uid, remaining);
+            try {
+                if (globalScope && typeof globalScope.scheduleSystemTelemetryCloudSync === 'function') {
+                    globalScope.scheduleSystemTelemetryCloudSync(uid);
+                }
+            } catch {}
+            try {
+                if (globalScope && typeof globalScope.updateAdminPendingBadges === 'function') {
+                    globalScope.updateAdminPendingBadges();
+                }
+            } catch {}
+        }
+        return removedCount;
     }
 
     function removeTelemetryEvent(uidOverride, eventId) {
@@ -906,6 +964,7 @@
         setEventsForUser,
         getAllLocalEventsAcrossUsers,
         removeEvent: removeTelemetryEvent,
+        resolveAction: resolveTelemetryAction,
         clearUserEvents: clearUserTelemetryEvents,
         clearAllEvents: clearAllTelemetryEvents,
         sanitizeEvent: sanitizeTelemetryEvent,
