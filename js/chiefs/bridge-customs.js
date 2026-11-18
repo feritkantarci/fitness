@@ -36,6 +36,18 @@
         if (stats.lastEvents.length > 50) {
             stats.lastEvents.splice(0, stats.lastEvents.length - 50);
         }
+        try {
+            if (typeof recordTelemetryEvent === 'function') {
+                recordTelemetryEvent({
+                    gate: 'K1',
+                    severity: type === 'rejected' ? 'error' : 'warn',
+                    module: 'Köprü Gümrüğü',
+                    action: String(bridge || 'Veri Geçişi'),
+                    inputSummary: String(bridge || 'Veri Geçişi'),
+                    outcome: String(detail || (type === 'rejected' ? 'Bozuk veri engellendi' : 'Eksik alan onarıldı'))
+                });
+            }
+        } catch {}
     }
 
     function toIsoDateFallback(rawDate, rawTs) {
@@ -476,6 +488,416 @@
         stats.lastEvents = [];
     }
 
+    // ==================== 4 KAPILI KARA KUTU (MODÜLER SİSTEM İZLEME MOTORU) ====================
+    const TELEMETRY_STORAGE_PREFIX = 'celik_kodu_system_telemetry_';
+    const TELEMETRY_UIDS_INDEX_KEY = 'celik_kodu_telemetry_uids';
+    const TELEMETRY_MAX_EVENTS_PER_USER = 50;
+    const TELEMETRY_DEDUP_WINDOW_MS = 5000;
+    const VALID_TELEMETRY_GATES = new Set(['K1', 'K2', 'K3', 'K4']);
+    const EXTRA_TELEMETRY_SECRET_KEYS = new Set(['syncseal', 'sealedtredict', 'sealedintervals', 'sealedgateway', 'sealedaikey', 'sealref']);
+    let isRecordingTelemetry = false;
+
+    function resolveTelemetryUid(uidOverride) {
+        const cleanOverride = String(uidOverride || '').trim();
+        if (cleanOverride && !PROTO_KEYS.has(cleanOverride)) return cleanOverride.slice(0, 64);
+        try {
+            if (globalScope && typeof globalScope.getActiveUserId === 'function') {
+                const u = globalScope.getActiveUserId();
+                if (u) return String(u).trim().slice(0, 64);
+            }
+        } catch {}
+        try {
+            if (typeof localStorage !== 'undefined' && localStorage) {
+                const rawSess = localStorage.getItem('celik_kodu_session');
+                if (rawSess) {
+                    const s = JSON.parse(rawSess);
+                    if (s && s.userId) return String(s.userId).trim().slice(0, 64);
+                }
+                const aid = localStorage.getItem('celik_kodu_active_user_id');
+                if (aid) return String(aid).trim().slice(0, 64);
+            }
+        } catch {}
+        return 'guest';
+    }
+
+    function resolveTelemetryUserName(uid, nameOverride) {
+        const cleanName = String(nameOverride || '').trim();
+        if (cleanName) return cleanName.slice(0, 80);
+        try {
+            if (globalScope && typeof globalScope.getActiveUser === 'function') {
+                const u = globalScope.getActiveUser();
+                if (u && (!uid || u.id === uid)) {
+                    const nm = String(u.name || u.username || '').trim();
+                    if (nm) return nm.slice(0, 80);
+                }
+            }
+        } catch {}
+        try {
+            if (typeof localStorage !== 'undefined' && localStorage) {
+                const rawUsers = localStorage.getItem('celik_kodu_auth_users');
+                if (rawUsers) {
+                    const arr = JSON.parse(rawUsers);
+                    if (Array.isArray(arr)) {
+                        const found = arr.find(u => u && String(u.id) === String(uid));
+                        if (found) {
+                            const nm = String(found.name || found.username || '').trim();
+                            if (nm) return nm.slice(0, 80);
+                        }
+                    }
+                }
+                const rawSess = localStorage.getItem('celik_kodu_session');
+                if (rawSess) {
+                    const s = JSON.parse(rawSess);
+                    if (s && String(s.userId) === String(uid) && (s.name || s.username)) {
+                        return String(s.name || s.username).trim().slice(0, 80);
+                    }
+                }
+            }
+        } catch {}
+        return String(uid || 'Sporcu').slice(0, 80);
+    }
+
+    function stripTelemetrySecretKeysDeep(val, depth = 0) {
+        if (depth > 6 || val === null || val === undefined) return val;
+        if (typeof val === 'string') return maskTelemetryString(val);
+        if (typeof val !== 'object') return val;
+        if (Array.isArray(val)) {
+            return val.slice(0, 30).map(item => stripTelemetrySecretKeysDeep(item, depth + 1));
+        }
+        const clean = {};
+        for (const [k, v] of Object.entries(val)) {
+            if (PROTO_KEYS.has(k)) continue;
+            const kl = String(k || '').toLowerCase();
+            if (isSensitiveSecretEntry(k, v) || EXTRA_TELEMETRY_SECRET_KEYS.has(kl)) {
+                clean[k] = '[GİZLİ]';
+                continue;
+            }
+            if (v !== undefined) {
+                clean[k] = stripTelemetrySecretKeysDeep(v, depth + 1);
+            }
+        }
+        return clean;
+    }
+
+    function maskTelemetryString(raw) {
+        let s = String(raw === undefined || raw === null ? '' : raw);
+        if (!s) return '';
+        s = s.replace(/([?&](?:key|api_key|apikey|token|access_token|secret|password)=)[^&\s]+/gi, '$1[GİZLİ]');
+        s = s.replace(/AIza[0-9A-Za-z_-]{10,}/g, '[GEMINI_ANAHTARI_GİZLİ]');
+        s = s.replace(/sk-[0-9A-Za-z_-]{10,}/g, '[API_ANAHTARI_GİZLİ]');
+        s = s.replace(/\b(?:Bearer|Basic)\s+[A-Za-z0-9._~+/=-]{6,}/gi, '[YETKİ_ANAHTARI_GİZLİ]');
+        s = s.replace(/(?:password|passwordHash|salt|geminiApiKey|tredictToken|intervalsToken|apiKey|syncSeal|sealedTredict|sealedIntervals|sealedGateway|sealedAiKey)\s*[:=]\s*(?:'[^']*'|"[^"]*"|[^\s,'"}]+)/gi, '[GİZLİ_ALAN]');
+        return s;
+    }
+
+    function maskTelemetrySecrets(val) {
+        if (val === undefined || val === null) return '';
+        if (typeof val === 'object') {
+            try {
+                const stripped = stripTelemetrySecretKeysDeep(val, 0);
+                return maskTelemetryString(JSON.stringify(stripped));
+            } catch {
+                return '[Nesne]';
+            }
+        }
+        return maskTelemetryString(String(val));
+    }
+
+    function sanitizeTelemetryEvent(raw) {
+        if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+        const gateRaw = String(raw.gate || 'K1').trim().toUpperCase();
+        const gate = VALID_TELEMETRY_GATES.has(gateRaw) ? gateRaw : 'K1';
+        const severity = raw.severity === 'error' ? 'error' : 'warn';
+        const uid = resolveTelemetryUid(raw.uid);
+        const userName = maskTelemetrySecrets(resolveTelemetryUserName(uid, raw.userName)).slice(0, 80) || uid;
+        const mod = maskTelemetrySecrets(raw.module || 'Sistem').trim().slice(0, 80) || 'Sistem';
+        const action = maskTelemetrySecrets(raw.action || 'İşlem').trim().slice(0, 120) || 'İşlem';
+        const inputSummary = maskTelemetrySecrets(raw.inputSummary || '').trim().slice(0, 240);
+        const outcome = maskTelemetrySecrets(raw.outcome || '').trim().slice(0, 300) || (severity === 'error' ? 'İşlem başarısız oldu' : 'Veri otomatik onarıldı');
+        const atNum = Number(raw.at);
+        const at = (Number.isFinite(atNum) && atNum > 0) ? Math.round(atNum) : Date.now();
+        const repNum = Number(raw.repeatCount);
+        const repeatCount = (Number.isFinite(repNum) && repNum >= 1) ? Math.min(999, Math.round(repNum)) : 1;
+        const idRaw = String(raw.id || '').trim();
+        const id = (idRaw && idRaw.length <= 100)
+            ? idRaw
+            : ('tel_' + at + '_' + Math.random().toString(36).slice(2, 6));
+
+        return {
+            id,
+            uid,
+            userName,
+            gate,
+            severity,
+            module: mod,
+            action,
+            inputSummary,
+            outcome,
+            repeatCount,
+            at,
+            status: 'open'
+        };
+    }
+
+    function readTelemetryUidIndex() {
+        try {
+            if (typeof localStorage === 'undefined' || !localStorage) return [];
+            const raw = localStorage.getItem(TELEMETRY_UIDS_INDEX_KEY);
+            if (!raw) return [];
+            const arr = JSON.parse(raw);
+            return Array.isArray(arr) ? arr.map(x => String(x || '').trim()).filter(Boolean) : [];
+        } catch {
+            return [];
+        }
+    }
+
+    function writeTelemetryUidIndex(uids) {
+        try {
+            if (typeof localStorage === 'undefined' || !localStorage) return;
+            const clean = Array.from(new Set((uids || []).map(x => String(x || '').trim()).filter(Boolean))).slice(0, 200);
+            if (clean.length > 0) {
+                localStorage.setItem(TELEMETRY_UIDS_INDEX_KEY, JSON.stringify(clean));
+            } else {
+                localStorage.removeItem(TELEMETRY_UIDS_INDEX_KEY);
+            }
+        } catch {}
+    }
+
+    function getEventsForUser(uidOverride) {
+        const uid = resolveTelemetryUid(uidOverride);
+        try {
+            if (typeof localStorage === 'undefined' || !localStorage) return [];
+            const raw = localStorage.getItem(`${TELEMETRY_STORAGE_PREFIX}${uid}`);
+            if (!raw) return [];
+            const arr = JSON.parse(raw);
+            if (!Array.isArray(arr)) return [];
+            return arr.map(sanitizeTelemetryEvent).filter(Boolean).slice(0, TELEMETRY_MAX_EVENTS_PER_USER);
+        } catch {
+            return [];
+        }
+    }
+
+    function setEventsForUser(uidOverride, events) {
+        const uid = resolveTelemetryUid(uidOverride);
+        const cleanList = Array.isArray(events)
+            ? events.map(e => sanitizeTelemetryEvent(Object.assign({}, e, { uid }))).filter(Boolean).slice(0, TELEMETRY_MAX_EVENTS_PER_USER)
+            : [];
+        try {
+            if (typeof localStorage !== 'undefined' && localStorage) {
+                const key = `${TELEMETRY_STORAGE_PREFIX}${uid}`;
+                const idxList = readTelemetryUidIndex();
+                if (cleanList.length > 0) {
+                    localStorage.setItem(key, JSON.stringify(cleanList));
+                    if (!idxList.includes(uid)) {
+                        idxList.push(uid);
+                        writeTelemetryUidIndex(idxList);
+                    }
+                } else {
+                    localStorage.removeItem(key);
+                    writeTelemetryUidIndex(idxList.filter(u => u !== uid));
+                }
+            }
+        } catch {}
+        return cleanList;
+    }
+
+    function getAllLocalEventsAcrossUsers(knownUsers) {
+        const uidSet = new Set(readTelemetryUidIndex());
+        if (Array.isArray(knownUsers)) {
+            knownUsers.forEach(u => {
+                const id = typeof u === 'string' ? u : (u && u.id);
+                if (id) uidSet.add(String(id).trim());
+            });
+        }
+        try {
+            if (typeof localStorage !== 'undefined' && localStorage) {
+                const rawUsers = localStorage.getItem('celik_kodu_auth_users');
+                if (rawUsers) {
+                    const parsedUsers = JSON.parse(rawUsers);
+                    if (Array.isArray(parsedUsers)) {
+                        parsedUsers.forEach(u => { if (u && u.id) uidSet.add(String(u.id).trim()); });
+                    }
+                }
+                if (typeof localStorage.key === 'function' && typeof localStorage.length === 'number') {
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const k = localStorage.key(i);
+                        if (typeof k === 'string' && k.startsWith(TELEMETRY_STORAGE_PREFIX)) {
+                            const uidPart = k.slice(TELEMETRY_STORAGE_PREFIX.length).trim();
+                            if (uidPart) uidSet.add(uidPart);
+                        }
+                    }
+                }
+            }
+        } catch {}
+        uidSet.add(resolveTelemetryUid());
+
+        const all = [];
+        uidSet.forEach(u => {
+            if (!u) return;
+            const list = getEventsForUser(u);
+            list.forEach(ev => all.push(ev));
+        });
+        all.sort((a, b) => Number(b.at || 0) - Number(a.at || 0));
+        return all;
+    }
+
+    function recordTelemetryEvent(payload) {
+        if (isRecordingTelemetry || !payload || typeof payload !== 'object') return null;
+        isRecordingTelemetry = true;
+        try {
+            const cleanEv = sanitizeTelemetryEvent(payload);
+            if (!cleanEv) return null;
+            const uid = cleanEv.uid;
+            const events = getEventsForUser(uid);
+            const head = events[0];
+            if (
+                head &&
+                head.status === 'open' &&
+                head.gate === cleanEv.gate &&
+                head.module === cleanEv.module &&
+                head.action === cleanEv.action &&
+                head.outcome === cleanEv.outcome &&
+                (cleanEv.at - Number(head.at || 0)) <= TELEMETRY_DEDUP_WINDOW_MS
+            ) {
+                head.repeatCount = Math.min(999, Number(head.repeatCount || 1) + 1);
+                head.at = cleanEv.at;
+                if (cleanEv.severity === 'error') head.severity = 'error';
+            } else {
+                events.unshift(cleanEv);
+            }
+            const saved = setEventsForUser(uid, events);
+            try {
+                if (globalScope && typeof globalScope.scheduleSystemTelemetryCloudSync === 'function') {
+                    globalScope.scheduleSystemTelemetryCloudSync(uid);
+                }
+            } catch {}
+            try {
+                if (globalScope && typeof globalScope.updateAdminPendingBadges === 'function') {
+                    globalScope.updateAdminPendingBadges();
+                }
+            } catch {}
+            return saved[0] || cleanEv;
+        } catch {
+            return null;
+        } finally {
+            isRecordingTelemetry = false;
+        }
+    }
+
+    function removeTelemetryEvent(uidOverride, eventId) {
+        const uid = resolveTelemetryUid(uidOverride);
+        const targetId = String(eventId || '').trim();
+        if (!targetId) return getEventsForUser(uid);
+        const filtered = getEventsForUser(uid).filter(ev => ev.id !== targetId);
+        const saved = setEventsForUser(uid, filtered);
+        try {
+            if (globalScope && typeof globalScope.scheduleSystemTelemetryCloudSync === 'function') {
+                globalScope.scheduleSystemTelemetryCloudSync(uid);
+            }
+            if (globalScope && typeof globalScope.updateAdminPendingBadges === 'function') {
+                globalScope.updateAdminPendingBadges();
+            }
+        } catch {}
+        return saved;
+    }
+
+    function clearUserTelemetryEvents(uidOverride) {
+        const uid = resolveTelemetryUid(uidOverride);
+        setEventsForUser(uid, []);
+        try {
+            if (globalScope && typeof globalScope.updateAdminPendingBadges === 'function') {
+                globalScope.updateAdminPendingBadges();
+            }
+        } catch {}
+        return [];
+    }
+
+    function clearAllTelemetryEvents(knownUsers) {
+        const uidSet = new Set(readTelemetryUidIndex());
+        if (Array.isArray(knownUsers)) {
+            knownUsers.forEach(u => {
+                const id = typeof u === 'string' ? u : (u && u.id);
+                if (id) uidSet.add(String(id).trim());
+            });
+        }
+        try {
+            if (typeof localStorage !== 'undefined' && localStorage) {
+                const rawUsers = localStorage.getItem('celik_kodu_auth_users');
+                if (rawUsers) {
+                    const parsedUsers = JSON.parse(rawUsers);
+                    if (Array.isArray(parsedUsers)) {
+                        parsedUsers.forEach(u => { if (u && u.id) uidSet.add(String(u.id).trim()); });
+                    }
+                }
+                if (typeof localStorage.key === 'function' && typeof localStorage.length === 'number') {
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const k = localStorage.key(i);
+                        if (typeof k === 'string' && k.startsWith(TELEMETRY_STORAGE_PREFIX)) {
+                            const uidPart = k.slice(TELEMETRY_STORAGE_PREFIX.length).trim();
+                            if (uidPart) uidSet.add(uidPart);
+                        }
+                    }
+                }
+            }
+        } catch {}
+        uidSet.add(resolveTelemetryUid());
+        uidSet.forEach(u => {
+            if (u) setEventsForUser(u, []);
+        });
+        writeTelemetryUidIndex([]);
+        try {
+            if (globalScope && typeof globalScope.updateAdminPendingBadges === 'function') {
+                globalScope.updateAdminPendingBadges();
+            }
+        } catch {}
+        return true;
+    }
+
+    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function' && !window._celikKaraKutuGlobalHooked) {
+        window._celikKaraKutuGlobalHooked = true;
+        window.addEventListener('error', (ev) => {
+            try {
+                const msg = (ev && ev.message) || (ev && ev.error && ev.error.message) || 'Beklenmeyen çalışma zamanı hatası';
+                const src = ev && ev.filename ? String(ev.filename).split('/').pop().split('?')[0] : 'sayfa';
+                recordTelemetryEvent({
+                    gate: 'K1',
+                    severity: 'error',
+                    module: 'Çalışma Zamanı',
+                    action: 'Sayfa Hatası',
+                    inputSummary: `${src}:${Number(ev?.lineno || 0)}`,
+                    outcome: msg
+                });
+            } catch {}
+        });
+        window.addEventListener('unhandledrejection', (ev) => {
+            try {
+                const r = ev && ev.reason;
+                const msg = (r && r.message) ? r.message : String(r || 'Beklenmeyen asenkron hata');
+                recordTelemetryEvent({
+                    gate: 'K1',
+                    severity: 'error',
+                    module: 'Çalışma Zamanı',
+                    action: 'Asenkron İşlem Hatası',
+                    inputSummary: 'Promise',
+                    outcome: msg
+                });
+            } catch {}
+        });
+    }
+
+    const karaKutuApi = {
+        record: recordTelemetryEvent,
+        getEventsForUser,
+        setEventsForUser,
+        getAllLocalEventsAcrossUsers,
+        removeEvent: removeTelemetryEvent,
+        clearUserEvents: clearUserTelemetryEvents,
+        clearAllEvents: clearAllTelemetryEvents,
+        sanitizeEvent: sanitizeTelemetryEvent,
+        maskSecrets: maskTelemetrySecrets,
+        MAX_EVENTS_PER_USER: TELEMETRY_MAX_EVENTS_PER_USER
+    };
+
     const api = {
         sanitizeWorkoutLogEntry,
         sanitizeWorkoutLogsList,
@@ -492,5 +914,6 @@
 
     if (globalScope) {
         globalScope.CelikBridgeCustoms = api;
+        globalScope.CelikKaraKutu = karaKutuApi;
     }
 })(typeof window !== 'undefined' ? window : globalThis);

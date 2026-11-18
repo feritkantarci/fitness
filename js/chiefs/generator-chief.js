@@ -8347,7 +8347,21 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             if (!apiKey) {
                 apiKey = await fastFetchCloudAiConfig();
             }
-            if (!apiKey) throw new Error("Google Gemini API anahtarı eksik. Lütfen profilinizden veya modal üzerinden anahtar tanımlayın.");
+            if (!apiKey) {
+                try {
+                    if (window.CelikKaraKutu && typeof window.CelikKaraKutu.record === 'function') {
+                        window.CelikKaraKutu.record({
+                            gate: 'K3',
+                            severity: 'error',
+                            module: 'Üretici Yapay Zeka',
+                            action: 'Koç Analizi Üretimi',
+                            inputSummary: 'API Anahtarı Kontrolü',
+                            outcome: 'Google Gemini API anahtarı eksik.'
+                        });
+                    }
+                } catch {}
+                throw new Error("Google Gemini API anahtarı eksik. Lütfen profilinizden veya modal üzerinden anahtar tanımlayın.");
+            }
 
             let candidateModels = [];
             if (cachedGeminiWorkingModel) {
@@ -8441,6 +8455,18 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                                 continue;
                             } else if (resp.status === 429 || resp.status === 503) {
                                 // Kota veya geçici yoğunlukta sıradaki modele geç
+                                try {
+                                    if (window.CelikKaraKutu && typeof window.CelikKaraKutu.record === 'function') {
+                                        window.CelikKaraKutu.record({
+                                            gate: 'K3',
+                                            severity: 'warn',
+                                            module: 'Üretici Yapay Zeka',
+                                            action: 'Model Yedek Geçişi',
+                                            inputSummary: String(model || ''),
+                                            outcome: `${model} [${resp.status}] nedeniyle yedek modele geçildi`
+                                        });
+                                    }
+                                } catch {}
                                 break;
                             } else {
                                 // Yetki (401, 403) hatasında tüm döngüyü durdur
@@ -8461,7 +8487,20 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 }
             }
 
-            throw lastError || new Error("Gemini API yanıt üretemedi.");
+            const finalErr = lastError || new Error("Gemini API yanıt üretemedi.");
+            try {
+                if (window.CelikKaraKutu && typeof window.CelikKaraKutu.record === 'function') {
+                    window.CelikKaraKutu.record({
+                        gate: 'K3',
+                        severity: 'error',
+                        module: 'Üretici Yapay Zeka',
+                        action: 'Koç Analizi Üretimi',
+                        inputSummary: `Modeller (${candidateModels.slice(0, 3).join(', ')})`,
+                        outcome: String(finalErr.message || finalErr)
+                    });
+                }
+            } catch {}
+            throw finalErr;
         }
 
         function quickAskGemini(reasonType) {

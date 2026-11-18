@@ -201,3 +201,68 @@ sequenceDiagram
    - Seans bittiğinde hem `workoutTimerInterval` hem de `timerInterval` temizlenir; `releaseWakeLock()` ile telefon ekranının arka planda pili tüketmesi önlenir.
 4. **Formula Injection Koruması:**
    - Kaydedilen loglar CSV olarak dışa aktarılırken, formül tetikleyebilecek metinlerin başına tek tırnak (`'`) eklenerek kullanıcı veri güvenliği sağlanır.
+
+---
+
+## 7. Güncel Sistem Mimarisi, 4 Kapılı Kara Kutu (`K1–K4`) ve Yönetici Sistem İzleme
+
+7 Kısım Şefi, Köprü Gümrüğü, Vercel bulut köprü sunucusu, Garmin/Tredict saat hattı, Google Gemini ve Google Firebase bulut veritabanı arasındaki güncel veri ve hata yakalama akışı:
+
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "20px", "fontFamily": "system-ui, -apple-system, sans-serif", "textColor": "#FFFFFF", "primaryTextColor": "#FFFFFF", "secondaryTextColor": "#FFFFFF", "tertiaryTextColor": "#FFFFFF", "lineColor": "#94A3B8", "edgeLabelBackground": "#0F172A"}, "flowchart": {"nodeSpacing": 28, "rankSpacing": 46, "padding": 18}}}%%
+flowchart TD
+    subgraph Telefon["1. SPORCU TELEFONU"]
+        Sefler["7 Kısım Şefi"]:::mavi
+        Gumruk["İç Gümrük ve Alt Şefler"]:::mavi
+        Onbellek["Telefon Önbelleği"]:::mavi
+    end
+
+    subgraph Servisler["2. BULUT VE DIŞ SERVİSLER"]
+        FirebaseVeri["Google Firebase Hafızası"]:::turuncu
+        SaatHatti["Vercel ve Garmin Saat"]:::turuncu
+        YapayZeka["Google Gemini"]:::turuncu
+    end
+
+    subgraph Ariza["3. KARA KUTU VE ARIZA DEFTERİ"]
+        KaraKutu["4 Kapılı Kara Kutu"]:::kirmizi
+        ArizaDefteri["Firebase Arıza Defteri (system_telemetry)"]:::kirmizi
+    end
+
+    subgraph Yonetim["4. YÖNETİCİ TELEFONU"]
+        AdminPanel["Yönetici: Sistem İzleme"]:::yesil
+        EmirKopyala["Düzeltme Emri Kopyala"]:::yesil
+    end
+
+    Sefler -->|"İşlem"| Gumruk
+    Gumruk -->|"Temiz Kayıt"| Onbellek
+    Onbellek <-->|"Eşitleme"| FirebaseVeri
+    Gumruk <-->|"Saat Hattı"| SaatHatti
+    Gumruk <-->|"Koç Analizi"| YapayZeka
+
+    Gumruk -.->|"K1 Gümrük"| KaraKutu
+    SaatHatti -.->|"K2 Saat"| KaraKutu
+    YapayZeka -.->|"K3 Gemini"| KaraKutu
+    FirebaseVeri -.->|"K4 Bulut"| KaraKutu
+
+    KaraKutu ==>|"Şifresiz Kayıt"| ArizaDefteri
+    ArizaDefteri ==>|"Sadece Yönetici"| AdminPanel
+    AdminPanel ==>|"Tek Dokunuş"| EmirKopyala
+
+    classDef mavi fill:#1E3A8A,stroke:#60A5FA,stroke-width:3px,color:#FFFFFF,font-weight:bold;
+    classDef turuncu fill:#9A3412,stroke:#FB923C,stroke-width:3px,color:#FFFFFF,font-weight:bold;
+    classDef kirmizi fill:#991B1B,stroke:#FCA5A5,stroke-width:3.5px,color:#FFFFFF,font-weight:bold;
+    classDef yesil fill:#065F46,stroke:#4ADE80,stroke-width:3px,color:#FFFFFF,font-weight:bold;
+
+    style Telefon fill:#0B192C,stroke:#38BDF8,stroke-width:4px,color:#FFFFFF
+    style Servisler fill:#271509,stroke:#FB923C,stroke-width:4px,color:#FFFFFF
+    style Ariza fill:#2A0A0E,stroke:#F87171,stroke-width:4px,color:#FFFFFF
+    style Yonetim fill:#052E16,stroke:#4ADE80,stroke-width:4px,color:#FFFFFF
+
+    linkStyle 0,1,2,3,4 stroke:#60A5FA,stroke-width:2.5px
+    linkStyle 5,6,7,8 stroke:#F87171,stroke-width:3px
+    linkStyle 9,10,11 stroke:#4ADE80,stroke-width:3.5px
+```
+
+- **Kara Kutu Kapıları:** `K1` (Şefler & Köprü Gümrüğü & Çalışma Zamanı), `K2` (Vercel & Garmin/Tredict Saat Hattı), `K3` (Google Gemini Yapay Zeka), `K4` (Google Firebase Bulut Eşitleme).
+- **Gizlilik ve Tampon Sınırı:** Tüm parola, `syncSeal`, Gemini API anahtarı ve saat tokenları maskelenir; sporcu başına son 50 olay saklanır; `system_telemetry/{uid}` yalnızca sahibi veya Yönetici tarafından okunabilir.
+- **Yönetici Portalı:** `#adminModal` içindeki **Sistem İzleme** sekmesinden kapı/arıza filtresiyle canlı incelenir, tek dokunuşla AI düzeltme emri kopyalanır veya temizlenir.

@@ -55,7 +55,7 @@
         }, 4500);
     }
 
-    function pushUserNotice(subChiefTitle, receiverLabel, actionSummary) {
+    function pushUserNotice(subChiefTitle, receiverLabel, actionSummary, options) {
         const item = {
             id: 'ntc_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
             subChief: subChiefTitle,
@@ -66,6 +66,20 @@
         auditNotices.unshift(item);
         if (auditNotices.length > 40) auditNotices.length = 40;
         renderNoticeBanner(item.message);
+        if (!(options && options.skipTelemetry)) {
+            try {
+                if (globalScope && globalScope.CelikKaraKutu && typeof globalScope.CelikKaraKutu.record === 'function') {
+                    globalScope.CelikKaraKutu.record({
+                        gate: 'K1',
+                        severity: subChiefTitle === 'Arıza Duvarı' ? 'error' : 'warn',
+                        module: String(subChiefTitle || 'Bağlantı Alt Şefi'),
+                        action: String(receiverLabel || 'Alıcı Koruma'),
+                        inputSummary: String(receiverLabel || ''),
+                        outcome: String(actionSummary || '')
+                    });
+                }
+            } catch {}
+        }
         return item;
     }
 
@@ -73,6 +87,18 @@
     function withLoopGuard(channelKey, fn) {
         if (activeDispatchLocks.has(channelKey)) {
             loopBlockedCount++;
+            try {
+                if (globalScope && globalScope.CelikKaraKutu && typeof globalScope.CelikKaraKutu.record === 'function') {
+                    globalScope.CelikKaraKutu.record({
+                        gate: 'K1',
+                        severity: 'warn',
+                        module: 'Döngü Kilidi',
+                        action: String(channelKey || 'Döngü'),
+                        inputSummary: String(channelKey || 'Döngü'),
+                        outcome: 'Sonsuz tetikleme döngüsü kesildi'
+                    });
+                }
+            } catch {}
             return { blockedByLoopGuard: true };
         }
         activeDispatchLocks.add(channelKey);
@@ -90,6 +116,7 @@
             return { ok: true, value: renderFn() };
         } catch (err) {
             totalQuarantinedCount++;
+            const errMsg = String((err && err.message) || err || 'Bilinmeyen ekran hatası');
             if (containerEl) {
                 containerEl.innerHTML = prevHtml || (
                     '<div data-quarantined="true" style="background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;padding:12px;border-radius:12px;font-size:12.5px;font-weight:700;">' +
@@ -97,8 +124,20 @@
                     '</div>'
                 );
             }
-            pushUserNotice('Arıza Duvarı', zoneName || 'Ekran Kutusu', 'Hatalı kutu karantinaya alındı');
-            return { ok: false, quarantined: true, error: String((err && err.message) || err) };
+            pushUserNotice('Arıza Duvarı', zoneName || 'Ekran Kutusu', 'Hatalı kutu karantinaya alındı', { skipTelemetry: true });
+            try {
+                if (globalScope && globalScope.CelikKaraKutu && typeof globalScope.CelikKaraKutu.record === 'function') {
+                    globalScope.CelikKaraKutu.record({
+                        gate: 'K1',
+                        severity: 'error',
+                        module: 'Arıza Duvarı',
+                        action: String(zoneName || 'Ekran Kutusu'),
+                        inputSummary: String(zoneName || 'Ekran Kutusu'),
+                        outcome: errMsg
+                    });
+                }
+            } catch {}
+            return { ok: false, quarantined: true, error: errMsg };
         }
     }
 

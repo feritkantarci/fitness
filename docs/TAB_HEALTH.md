@@ -1,6 +1,6 @@
 # 🛡️ ÇELİK KODU — 7 BAĞIMSIZ ŞEF ODASI, KÖPRÜ GÜMRÜĞÜ & HATA HAFIZASI PANELİ (TAB_HEALTH)
 
-> **Son Otomatik Kontrol:** `2026-11-17 21:57:25` | **Bağımsız Oda Dosyası:** `11/11` | **Toplam Hareket:** `311` | **Kırık Bağlantı:** `0` | **Matematik & Gümrük Sınavı:** `38/38`
+> **Son Otomatik Kontrol:** `2026-11-18 20:24:05` | **Bağımsız Oda Dosyası:** `11/11` | **Toplam Hareket:** `311` | **Kırık Bağlantı:** `0` | **Matematik & Gümrük Sınavı:** `40/40`
 
 ---
 
@@ -13,8 +13,8 @@
 | **3. Kütüphane Şefi** (`library-guard`) | `js/chiefs/library-chief.js` (46 fn) | Tüm hareketlerin form/kas/birim kimliğini korur, istemediğin hareketi tüm sistemden gizler | Süreli/dakikalı hareketi tekrarlı sanması, gizlenen hareketin sayacı bozması | 🟢 Sorunsuz | 🟢 4/4 Geçti |
 | **4. Geçmiş Şefi** (`history-guard`) | `js/chiefs/history-chief.js` (66 fn) | Tamamlanan seansları gümrükten geçirip saklar, bozuk veriyi engeller, düzenleme/silmeyi Analiz ile eşitler | Bozuk/boş kaydın geçmişe sızması, kardiyo dakikasının tonaj şişirmesi, silinen kaydın Analizden düşmemesi | 🟢 Sorunsuz | 🟢 2/2 Geçti |
 | **5. Analiz Şefi** (`analytics-guard`) | `js/chiefs/analytics-chief.js` (92 fn) | Kas yükünü, set dayanıklılığını, Epley zirve rekorunu, haftalık fitness/kardiyo puanını ve güncel kiloyu hesaplar | Piramit/drop-seti güç düşüşü sanmak, çift Zirve Rekor basmak, 30 günlük eski tartı kiloyu sıfırlamak | 🟢 Sorunsuz | 🟢 12/12 Geçti |
-| **6. Profil Şefi** (`profile-guard`) | `js/chiefs/profile-chief.js` (130 fn) | Verilerini güvenle yedekler, şifre/API anahtarlarını buluttan izole eder ve tema okunabilirliğini korur | Açık zeminde açık renk yazı kalması, dışa aktarımda gizli anahtar/şifre sızması | 🟢 Sorunsuz | 🟢 2/2 Geçti |
-| **7. Garmin & Tredict Şefi** (`garmin-tredict-guard`) | `js/garmin-tredict-bridge.js` (97 fn) | Yeni hareketlerin Garmin karşılığını library-guard kaslarıyla kıyaslar, olmayanları isimsiz+notlu gönderir, dönüşte saatin adını değil bizdeki orijinal adı koruyup sağlık verilerini ilgili şefe iletir | Saatten gelen ham hareket adının olduğu gibi alınması, Garmin’de olmayan harekete zorlama isim verilmesi | 🟢 Sorunsuz | 🟢 5/5 Geçti |
+| **6. Profil Şefi** (`profile-guard`) | `js/chiefs/profile-chief.js` (142 fn) | Verilerini güvenle yedekler, şifre/API anahtarlarını buluttan izole eder ve tema okunabilirliğini korur | Açık zeminde açık renk yazı kalması, dışa aktarımda gizli anahtar/şifre sızması | 🟢 Sorunsuz | 🟢 3/3 Geçti |
+| **7. Garmin & Tredict Şefi** (`garmin-tredict-guard`) | `js/garmin-tredict-bridge.js` (107 fn) | Yeni hareketlerin Garmin karşılığını library-guard kaslarıyla kıyaslar, olmayanları isimsiz+notlu gönderir, dönüşte saatin adını değil bizdeki orijinal adı koruyup sağlık verilerini ilgili şefe iletir | Saatten gelen ham hareket adının olduğu gibi alınması, Garmin’de olmayan harekete zorlama isim verilmesi | 🟢 Sorunsuz | 🟢 6/6 Geçti |
 
 ---
 
@@ -46,7 +46,7 @@
 
 ---
 
-## 4. Otomatik Bekçi Raporu — B) 7 Şef Matematik, Gümrük & Hata Hafızası Sınavı (38/38)
+## 4. Otomatik Bekçi Raporu — B) 7 Şef Matematik, Gümrük & Hata Hafızası Sınavı (40/40)
 
 | Test | Sorumlu Şef | Senaryo | Beklenen (Olması Gereken) | Gerçekleşen (Sistem Çıktısı) | Sonuç |
 | :--- | :--- | :--- | :--- | :--- | :---: |
@@ -88,3 +88,5 @@
 | `T37` | `analytics-guard` | Kimlik Öncelikli Biyomekanik Çözümleme & Artan Ağırlık Piramidi Muafiyeti | bb_overhead_press=Omuz; 20kgx12->25kgx10 piramidi +40s sonrasında sahte yorgunluk bloğu tetiklemez | {"primary":"Omuz","noPyramidOverload":true} | ✅ Geçti |
 | `T38` | `workout-guard` | Üretici & Antrenman Sekmeleri Arası Arayüz ve Kart Düzeni Bütünlüğü | Üretici, Takvim gün önizlemesi ve Canlı Odak ekranı .wk-carousel-wrap/.wk-card-media-box/.wk-carousel-dock kullanır; CSS Koyu Mor (#181530) tema aktif | {"hasThemeCss":true,"genUnified":true,"calUnified":true,"liveUnified":true} | ✅ Geçti |
 | `T39` | `workout-guard` | Tarih Bazlı Hafta Bağımsızlığı: Eklenen Hareket Geçmiş ve Gelecek Haftalara Sızmaz | Bu hafta/gelecek hafta Çarşambasına eklenen hareketler sadece kendi tarihine yazılır; -7g, +7g, +14g izoledir | {"addCurOk":true,"addNextOk":true,"curHasLateral":true,"prevIsRest":true,"nextBeforeIsRest":true,"twoWkBeforeIsRest":true,"nextHasFacePullOnly":true,"curUnaffectedByNext":true,"twoWkStillRest":true} | ✅ Geçti |
+| `T40` | `garmin-tredict-guard` | Zaman Penceresi Eşleşmesi, Eski Kayıt Filtresi & Aynı Gün 4 Antrenman Analizi | aynı saat dilimindeki telefon+saat tek seansta birleşir (0 bildirim), eski 3 Ekim onaya düşmez, aynı gün 4 ayrı antrenman bulut birleşmesinde ve Analizde eksiksiz sayılır | {"nov16Count":1,"nov16HrAvg":103,"nov16HrMax":148,"nov16Cal":519,"nov16LinkedId":"nov16_watch_1","zeroPendingNotifications":true,"fourSessionsSurvived":true,"weeklyStrengthSessions":4,"weeklyStrengthSets":15,"musclesCounted":true,"walkStillInHistory":true,"cardioNotifClosed":true} | ✅ Geçti |
+| `T41` | `profile-guard` | 4 Kapılı Kara Kutu (K1-K4), Gizli Anahtar Maskeleme, 50 Kayıt Tamponu & Yönetici Sistem İzleme Sekmesi | 4 kapı (error+warn) kaydedilir, 4 gizli anahtar sızıntısı=0, dedup repeatCount=3, max=50 kayıt, Yönetici rozeti+filtre+temizleme eksiksiz çalışır | {"hasGatewayGate":true,"gatesCovered":true,"hasWarnAndError":true,"repeatOk":true,"capOk":true,"headerVisible":true,"tabBadgeVisible":true,"athleteHiddenOk":true,"k2FilterOk":true,"promptReady":true,"leakCount":0,"clearedOk":true} | ✅ Geçti |

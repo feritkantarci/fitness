@@ -465,20 +465,52 @@
             return seal;
         }
 
+        function recordCloudGateTelemetry(severity, action, inputSummary, outcome, uidOverride) {
+            try {
+                if (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.record === 'function') {
+                    window.CelikKaraKutu.record({
+                        gate: 'K4',
+                        severity: severity === 'error' ? 'error' : 'warn',
+                        module: 'Bulut Eşitleme',
+                        action: String(action || 'Bulut İşlemi'),
+                        inputSummary: String(inputSummary || ''),
+                        outcome: String(outcome || ''),
+                        uid: uidOverride || undefined
+                    });
+                }
+            } catch {}
+        }
+
         async function writeAthleteDocWithSealHeal(colName, uid, buildPayloadFn) {
             const docRef = fbDb.collection(colName).doc(uid);
             const firstSeal = getAthleteCloudSeal(uid, colName);
+            const isTelCol = colName === 'system_telemetry';
             try {
                 await docRef.set(buildPayloadFn(firstSeal), { merge: true });
                 return true;
             } catch (err) {
                 const isPermErr = err && (err.code === 'permission-denied' || /permission|insufficient/i.test(String(err.message || '')));
-                if (!isPermErr) throw err;
-                const snap = await docRef.get();
-                const remoteSeal = snap.exists ? adoptCloudSyncSealIfPresent(colName, uid, snap.data()) : '';
-                if (!remoteSeal || remoteSeal === firstSeal) throw err;
-                await docRef.set(buildPayloadFn(remoteSeal), { merge: true });
-                return true;
+                if (isPermErr) {
+                    try {
+                        const snap = await docRef.get();
+                        const remoteSeal = snap.exists ? adoptCloudSyncSealIfPresent(colName, uid, snap.data()) : '';
+                        if (remoteSeal && remoteSeal !== firstSeal) {
+                            await docRef.set(buildPayloadFn(remoteSeal), { merge: true });
+                            if (!IS_LOCAL_DEV && !isTelCol) {
+                                recordCloudGateTelemetry('warn', `${colName} Mühür Onarımı`, uid, 'Bulut mühür uyuşmazlığı otomatik onarıldı', uid);
+                            }
+                            return true;
+                        }
+                    } catch (healErr) {
+                        err = healErr;
+                    }
+                }
+                if (!IS_LOCAL_DEV && !isTelCol) {
+                    const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+                    recordCloudGateTelemetry(offline ? 'warn' : 'error', `${colName} Bulut Yazımı`, uid, String((err && err.message) || err || 'Bulut yazım hatası'), uid);
+                    if (err && typeof err === 'object') err._k4Recorded = true;
+                }
+                throw err;
             }
         }
 
@@ -493,6 +525,130 @@
             } catch {}
         }
 
+        const systemTelemetrySyncTimers = {};
+
+        async function syncSystemTelemetryToCloud(targetUid) {
+            const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            if (IS_LOCAL_DEV || !uid || !/^usr_[a-zA-Z0-9_-]{1,64}$/.test(uid)) return false;
+            if (!isFirebaseReady || !fbDb || (typeof navigator !== 'undefined' && navigator.onLine === false)) {
+                try { localStorage.setItem(`celik_kodu_pending_telemetry_sync_${uid}`, '1'); } catch {}
+                return false;
+            }
+            if (typeof window === 'undefined' || !window.CelikKaraKutu) return false;
+            try {
+                const rawEvents = window.CelikKaraKutu.getEventsForUser(uid).slice(0, 50);
+                let cleanEvents = [];
+                try { cleanEvents = JSON.parse(JSON.stringify(rawEvents)); } catch { cleanEvents = []; }
+                let openErrorCount = 0;
+                let openWarnCount = 0;
+                cleanEvents.forEach(ev => {
+                    if (ev && ev.severity === 'error') openErrorCount++;
+                    else openWarnCount++;
+                });
+                const users = typeof getAuthUsers === 'function' ? getAuthUsers() : [];
+                const uObj = users.find(u => u && u.id === uid);
+                const userName = String((uObj && (uObj.name || uObj.username)) || (cleanEvents[0] && cleanEvents[0].userName) || uid).slice(0, 120);
+
+                await writeAthleteDocWithSealHeal('system_telemetry', uid, (seal) => ({
+                    uid,
+                    userName,
+                    events: cleanEvents,
+                    openErrorCount,
+                    openWarnCount,
+                    clientUpdatedAt: Date.now(),
+                    syncSeal: seal,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }));
+                try { localStorage.removeItem(`celik_kodu_pending_telemetry_sync_${uid}`); } catch {}
+                return true;
+            } catch {
+                try { localStorage.setItem(`celik_kodu_pending_telemetry_sync_${uid}`, '1'); } catch {}
+                return false;
+            }
+        }
+
+        function scheduleSystemTelemetryCloudSync(targetUid) {
+            const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            if (!uid || !/^usr_[a-zA-Z0-9_-]{1,64}$/.test(uid)) return;
+            if (IS_LOCAL_DEV) return;
+            if (!isFirebaseReady || !fbDb || (typeof navigator !== 'undefined' && navigator.onLine === false)) {
+                try { localStorage.setItem(`celik_kodu_pending_telemetry_sync_${uid}`, '1'); } catch {}
+                return;
+            }
+            if (systemTelemetrySyncTimers[uid]) clearTimeout(systemTelemetrySyncTimers[uid]);
+            systemTelemetrySyncTimers[uid] = setTimeout(() => {
+                syncSystemTelemetryToCloud(uid);
+            }, 1500);
+        }
+
+        async function fetchAllCloudSystemTelemetryForAdmin() {
+            const session = typeof getSession === 'function' ? getSession() : null;
+            if (!session || session.role !== 'admin') return false;
+            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || (typeof navigator !== 'undefined' && navigator.onLine === false)) return false;
+            if (typeof window === 'undefined' || !window.CelikKaraKutu) return false;
+
+            try {
+                const docEntries = [];
+                try {
+                    const snap = await fbDb.collection('system_telemetry').get();
+                    if (snap && typeof snap.forEach === 'function') {
+                        snap.forEach(doc => {
+                            if (doc && doc.exists) docEntries.push({ id: doc.id, data: doc.data() || {} });
+                        });
+                    }
+                } catch {
+                    const users = typeof getAuthUsers === 'function' ? getAuthUsers() : [];
+                    for (const u of users) {
+                        if (!u || !u.id) continue;
+                        try {
+                            const d = await fbDb.collection('system_telemetry').doc(u.id).get();
+                            if (d && d.exists) docEntries.push({ id: d.id, data: d.data() || {} });
+                        } catch {}
+                    }
+                }
+
+                docEntries.forEach(({ id, data }) => {
+                    const targetUid = String(data.uid || id || '').trim();
+                    if (!targetUid || !Array.isArray(data.events)) return;
+                    const clearedAt = Number(localStorage.getItem(`celik_kodu_telemetry_cleared_at_${targetUid}`) || 0);
+                    const remoteUpdated = Number(data.clientUpdatedAt || 0);
+                    if (clearedAt > 0 && remoteUpdated > 0 && clearedAt >= remoteUpdated) return;
+
+                    const localEvents = window.CelikKaraKutu.getEventsForUser(targetUid);
+                    const byId = new Map();
+                    localEvents.forEach(ev => { if (ev && ev.id) byId.set(ev.id, ev); });
+                    data.events.forEach(rawEv => {
+                        const cleanEv = window.CelikKaraKutu.sanitizeEvent(Object.assign({}, rawEv, { uid: targetUid }));
+                        if (!cleanEv) return;
+                        if (clearedAt > 0 && Number(cleanEv.at || 0) <= clearedAt) return;
+                        const prev = byId.get(cleanEv.id);
+                        if (!prev || Number(cleanEv.at || 0) > Number(prev.at || 0) || Number(cleanEv.repeatCount || 1) > Number(prev.repeatCount || 1)) {
+                            byId.set(cleanEv.id, cleanEv);
+                        }
+                    });
+                    const merged = Array.from(byId.values())
+                        .sort((a, b) => Number(b.at || 0) - Number(a.at || 0))
+                        .slice(0, 50);
+                    window.CelikKaraKutu.setEventsForUser(targetUid, merged);
+                });
+
+                updateAdminPendingBadges();
+                const telView = document.getElementById('adminViewTelemetry');
+                if (telView && telView.style.display !== 'none' && typeof renderAdminSystemTelemetry === 'function') {
+                    renderAdminSystemTelemetry();
+                }
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        if (typeof window !== 'undefined') {
+            window.scheduleSystemTelemetryCloudSync = scheduleSystemTelemetryCloudSync;
+            window.syncSystemTelemetryToCloud = syncSystemTelemetryToCloud;
+            window.fetchAllCloudSystemTelemetryForAdmin = fetchAllCloudSystemTelemetryForAdmin;
+        }
+
         async function flushPendingCloudOutbox() {
             if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || !navigator.onLine) return;
             const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
@@ -504,6 +660,9 @@
                 }
                 if (localStorage.getItem(`celik_kodu_pending_state_sync_${uid}`) === '1') {
                     await syncUserStateToCloud(uid);
+                }
+                if (localStorage.getItem(`celik_kodu_pending_telemetry_sync_${uid}`) === '1') {
+                    await syncSystemTelemetryToCloud(uid);
                 }
             } catch {}
         }
@@ -1132,6 +1291,9 @@
                         }
                     } catch (err) {
                         console.warn("Antrenmanlar buluttan doğrudan çekilemedi:", err);
+                        if (!IS_LOCAL_DEV && (typeof navigator === 'undefined' || navigator.onLine !== false)) {
+                            recordCloudGateTelemetry('error', 'Antrenman Bulut Okuma', uid, String((err && err.message) || err || 'Bulut okuma hatası'), uid);
+                        }
                     }
                 }
 
@@ -1220,6 +1382,10 @@
                 try {
                     localStorage.setItem(`celik_kodu_pending_workout_sync_${uid}`, '1');
                 } catch {}
+                if (!IS_LOCAL_DEV && !(err && err._k4Recorded)) {
+                    const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+                    recordCloudGateTelemetry(offline ? 'warn' : 'error', 'Antrenman Bulut Yazımı', uid, offline ? 'Çevrimdışı kuyruğa alındı' : String((err && err.message) || err || 'Bulut yazım hatası'), uid);
+                }
                 console.warn("Antrenmanlar çevrimdışı kuyruğa alındı (internet gelince eşitlenecek):", err);
                 updateCloudSyncBadge('offline', 'Kuyrukta (İnternet Bekleniyor)');
             }
@@ -1387,7 +1553,12 @@
                     syncSeal: seal,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }));
-            } catch(e) {}
+            } catch (e) {
+                if (!(e && e._k4Recorded)) {
+                    const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+                    recordCloudGateTelemetry(offline ? 'warn' : 'error', 'Tartı Bulut Yazımı', uid, String((e && e.message) || e || 'Tartı yazım hatası'), uid);
+                }
+            }
         }
 
         async function syncUserMeasurementsFromCloud(uid) {
@@ -1430,7 +1601,12 @@
                     syncSeal: seal,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }));
-            } catch(e) {}
+            } catch (e) {
+                if (!(e && e._k4Recorded)) {
+                    const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+                    recordCloudGateTelemetry(offline ? 'warn' : 'error', 'Mezura Bulut Yazımı', uid, String((e && e.message) || e || 'Mezura yazım hatası'), uid);
+                }
+            }
         }
 
         // ==================== KULLANICI DURUMU (TAKVİM, AI KOÇ, AĞIRLIK HAFIZASI, GİZLİ HAREKETLER) BULUT SENKRONU ====================
@@ -1886,6 +2062,7 @@
             if (!uid) return;
             if (!isFirebaseReady || !fbDb || navigator.onLine === false) {
                 try { localStorage.setItem(`celik_kodu_pending_state_sync_${uid}`, '1'); } catch {}
+                recordCloudGateTelemetry('warn', 'Durum Bulut Yazımı', uid, 'Çevrimdışı kuyruğa alındı', uid);
                 return;
             }
             try {
@@ -2092,6 +2269,10 @@
                 localStorage.removeItem(`celik_kodu_pending_state_sync_${uid}`);
             } catch (err) {
                 try { localStorage.setItem(`celik_kodu_pending_state_sync_${uid}`, '1'); } catch {}
+                if (!(err && err._k4Recorded)) {
+                    const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+                    recordCloudGateTelemetry(offline ? 'warn' : 'error', 'Durum Bulut Yazımı', uid, String((err && err.message) || err || 'Durum yazım hatası'), uid);
+                }
                 console.warn("Kullanıcı durumu çevrimdışı kuyruğa alındı:", err);
             }
         }
@@ -2993,9 +3174,7 @@
                 roleBadge.className = 'auth-role-tag ' + (isAdmin ? 'role-admin' : 'role-athlete');
             }
 
-            if (isAdmin) {
-                updateAdminPendingBadges();
-            }
+            updateAdminPendingBadges();
 
             applyActiveUserProfile();
         }
@@ -4129,6 +4308,9 @@
         }
 
         // ADMIN PANEL
+        let adminTelemetryFilterGate = 'ALL';
+        let adminTelemetryFilterSeverity = 'ALL';
+
         function updateAdminPendingBadges() {
             const users = getAuthUsers();
             const pendingCount = users.filter(u => u.status === 'pending').length;
@@ -4143,11 +4325,37 @@
                 }
             }
 
-            const roleBadge = document.getElementById('headerUserRoleBadge');
             const session = getSession();
-            if (roleBadge && session && session.role === 'admin') {
+            const isAdmin = Boolean(session && session.role === 'admin');
+            const roleBadge = document.getElementById('headerUserRoleBadge');
+            if (roleBadge && isAdmin) {
                 roleBadge.innerText = pendingCount > 0 ? `YÖNETİCİ (${pendingCount} ONAY)` : 'YÖNETİCİ';
             }
+
+            const telEvents = (isAdmin && typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAllLocalEventsAcrossUsers === 'function')
+                ? window.CelikKaraKutu.getAllLocalEventsAcrossUsers(users)
+                : [];
+            const telCount = telEvents.length;
+            const telLabel = telCount > 99 ? '99+' : String(telCount);
+
+            const headerTelBtn = document.getElementById('headerAdminTelemetryBtn');
+            const headerTelBadge = document.getElementById('headerAdminTelemetryBadge');
+            if (headerTelBadge) headerTelBadge.innerText = telLabel;
+            if (headerTelBtn) headerTelBtn.style.display = (isAdmin && telCount > 0) ? 'inline-flex' : 'none';
+
+            ['popupAdminTelemetryBadge', 'sheetAdminTelemetryBadge', 'profileAdminTelemetryBadge', 'adminTelemetryTabBadge'].forEach(elId => {
+                const el = document.getElementById(elId);
+                if (!el) return;
+                if (isAdmin && telCount > 0) {
+                    el.innerText = telLabel;
+                    el.style.display = 'inline-block';
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+        }
+        if (typeof window !== 'undefined') {
+            window.updateAdminPendingBadges = updateAdminPendingBadges;
         }
 
         function renderPendingApprovalsBanner() {
@@ -4204,7 +4412,7 @@
             }).join('');
         }
 
-        async function openAdminModal() {
+        async function openAdminModal(initialTab = 'status') {
             const session = getSession();
             if (!session || session.role !== 'admin') {
                 alert("Bu alana sadece yöneticiler erişebilir.");
@@ -4231,57 +4439,276 @@
             renderPendingApprovalsBanner();
             renderAdminAthleteStatuses();
             renderAdminUserList();
-            switchAdminModalTab('status');
+            const targetTab = (initialTab === 'manage' || initialTab === 'telemetry') ? initialTab : 'status';
+            switchAdminModalTab(targetTab);
             if (adminModalEl) adminModalEl.classList.add('active');
+            fetchAllCloudSystemTelemetryForAdmin();
         }
 
         function closeAdminModal() {
             document.getElementById('adminModal').classList.remove('active');
         }
 
+        function setAdminModalTabBtnStyle(btn, isActive) {
+            if (!btn) return;
+            if (isActive) {
+                btn.className = 'btn btn-gold';
+                btn.style.background = 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)';
+                btn.style.backgroundColor = '#6D28D9';
+                btn.style.color = '#FFFFFF';
+                btn.style.borderColor = 'rgba(167, 139, 250, 0.45)';
+            } else {
+                btn.className = 'btn btn-outline';
+                btn.style.background = '#121024';
+                btn.style.color = '#CBD5E1';
+                btn.style.borderColor = 'rgba(167, 139, 250, 0.25)';
+            }
+        }
+
         function switchAdminModalTab(tabKey) {
             const statusView = document.getElementById('adminViewStatus');
             const manageView = document.getElementById('adminViewManage');
+            const telemetryView = document.getElementById('adminViewTelemetry');
             const btnStatus = document.getElementById('adminTabBtnStatus');
             const btnManage = document.getElementById('adminTabBtnManage');
+            const btnTelemetry = document.getElementById('adminTabBtnTelemetry');
 
             renderPendingApprovalsBanner();
 
-            if (tabKey === 'status') {
-                if (statusView) statusView.style.display = 'block';
-                if (manageView) manageView.style.display = 'none';
-                if (btnStatus) {
-                    btnStatus.className = 'btn btn-gold';
-                    btnStatus.style.background = 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)';
-                    btnStatus.style.backgroundColor = '#6D28D9';
-                    btnStatus.style.color = '#FFFFFF';
-                    btnStatus.style.borderColor = 'rgba(167, 139, 250, 0.45)';
-                }
-                if (btnManage) {
-                    btnManage.className = 'btn btn-outline';
-                    btnManage.style.background = '#121024';
-                    btnManage.style.color = '#CBD5E1';
-                    btnManage.style.borderColor = 'rgba(167, 139, 250, 0.25)';
-                }
+            const activeKey = (tabKey === 'manage' || tabKey === 'telemetry') ? tabKey : 'status';
+            if (statusView) statusView.style.display = activeKey === 'status' ? 'block' : 'none';
+            if (manageView) manageView.style.display = activeKey === 'manage' ? 'block' : 'none';
+            if (telemetryView) telemetryView.style.display = activeKey === 'telemetry' ? 'block' : 'none';
+
+            setAdminModalTabBtnStyle(btnStatus, activeKey === 'status');
+            setAdminModalTabBtnStyle(btnManage, activeKey === 'manage');
+            setAdminModalTabBtnStyle(btnTelemetry, activeKey === 'telemetry');
+
+            if (activeKey === 'status') {
                 renderAdminAthleteStatuses();
-            } else {
-                if (statusView) statusView.style.display = 'none';
-                if (manageView) manageView.style.display = 'block';
-                if (btnStatus) {
-                    btnStatus.className = 'btn btn-outline';
-                    btnStatus.style.background = '#121024';
-                    btnStatus.style.color = '#CBD5E1';
-                    btnStatus.style.borderColor = 'rgba(167, 139, 250, 0.25)';
-                }
-                if (btnManage) {
-                    btnManage.className = 'btn btn-gold';
-                    btnManage.style.background = 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)';
-                    btnManage.style.backgroundColor = '#6D28D9';
-                    btnManage.style.color = '#FFFFFF';
-                    btnManage.style.borderColor = 'rgba(167, 139, 250, 0.45)';
-                }
+            } else if (activeKey === 'manage') {
                 renderAdminUserList();
+            } else {
+                renderAdminSystemTelemetry();
+                fetchAllCloudSystemTelemetryForAdmin();
             }
+        }
+
+        function getFilteredAdminTelemetryEvents() {
+            const users = getAuthUsers();
+            const all = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAllLocalEventsAcrossUsers === 'function')
+                ? window.CelikKaraKutu.getAllLocalEventsAcrossUsers(users)
+                : [];
+            const filtered = all.filter(ev => {
+                if (adminTelemetryFilterGate !== 'ALL' && ev.gate !== adminTelemetryFilterGate) return false;
+                if (adminTelemetryFilterSeverity === 'error' && ev.severity !== 'error') return false;
+                return true;
+            });
+            return { all, filtered };
+        }
+
+        function setAdminTelemetryFilter(gate, severity) {
+            if (gate) adminTelemetryFilterGate = gate;
+            if (severity) adminTelemetryFilterSeverity = severity;
+            renderAdminSystemTelemetry();
+        }
+
+        function renderAdminSystemTelemetry() {
+            const kpisEl = document.getElementById('adminTelemetryKpis');
+            const listEl = document.getElementById('adminTelemetryListContainer');
+            const { all, filtered } = getFilteredAdminTelemetryEvents();
+
+            ['ALL', 'K1', 'K2', 'K3', 'K4'].forEach(g => {
+                const btn = document.getElementById(`adminTelGateBtn_${g}`);
+                if (!btn) return;
+                const active = adminTelemetryFilterGate === g;
+                btn.style.background = active ? '#6D28D9' : '#121024';
+                btn.style.color = active ? '#FFFFFF' : '#CBD5E1';
+                btn.style.borderColor = active ? 'rgba(167,139,250,0.45)' : 'rgba(167,139,250,0.25)';
+            });
+            const sevAllBtn = document.getElementById('adminTelSevBtn_ALL');
+            const sevErrBtn = document.getElementById('adminTelSevBtn_error');
+            if (sevAllBtn) {
+                const active = adminTelemetryFilterSeverity === 'ALL';
+                sevAllBtn.style.background = active ? '#2C2550' : '#121024';
+                sevAllBtn.style.color = active ? '#FFFFFF' : '#CBD5E1';
+                sevAllBtn.style.borderColor = active ? 'rgba(167,139,250,0.45)' : 'rgba(167,139,250,0.25)';
+            }
+            if (sevErrBtn) {
+                const active = adminTelemetryFilterSeverity === 'error';
+                sevErrBtn.style.background = active ? '#DC2626' : '#121024';
+                sevErrBtn.style.color = active ? '#FFFFFF' : '#FECACA';
+                sevErrBtn.style.borderColor = active ? '#F87171' : 'rgba(248,113,113,0.35)';
+            }
+
+            let errorCount = 0;
+            let warnCount = 0;
+            all.forEach(ev => {
+                if (ev.severity === 'error') errorCount++;
+                else warnCount++;
+            });
+
+            if (kpisEl) {
+                kpisEl.innerHTML = `
+                    <div style="background:#121024; border:1px solid rgba(167,139,250,0.25); border-radius:10px; padding:8px; text-align:center;">
+                        <div style="font-size:17px; font-weight:900; color:#FFFFFF;">${all.length}</div>
+                        <div style="font-size:10px; font-weight:700; color:#CBD5E1;">Toplam Açık</div>
+                    </div>
+                    <div style="background:#7F1D1D; border:1px solid rgba(248,113,113,0.45); border-radius:10px; padding:8px; text-align:center;">
+                        <div style="font-size:17px; font-weight:900; color:#FFFFFF;">${errorCount}</div>
+                        <div style="font-size:10px; font-weight:700; color:#FECACA;">Kırmızı Arıza</div>
+                    </div>
+                    <div style="background:#78350F; border:1px solid rgba(251,191,36,0.45); border-radius:10px; padding:8px; text-align:center;">
+                        <div style="font-size:17px; font-weight:900; color:#FFFFFF;">${warnCount}</div>
+                        <div style="font-size:10px; font-weight:700; color:#FDE68A;">Sarı Onarım</div>
+                    </div>
+                `;
+            }
+
+            if (!listEl) return;
+            const savedScrollTop = listEl.scrollTop || 0;
+            if (filtered.length === 0) {
+                listEl.innerHTML = `
+                    <div style="background:#14532D; border:1px solid rgba(74,222,128,0.45); color:#BBF7D0; border-radius:10px; padding:14px; text-align:center; font-size:12px; font-weight:700;">
+                        ${all.length === 0 ? 'Tüm kapılar temiz, açık kayıt yok.' : 'Seçili filtrede açık kayıt yok.'}
+                    </div>
+                `;
+                listEl.scrollTop = savedScrollTop;
+                return;
+            }
+
+            const gateNames = { K1: 'K1 Gümrük', K2: 'K2 Saat', K3: 'K3 Gemini', K4: 'K4 Bulut' };
+            const maskFn = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.maskSecrets === 'function')
+                ? window.CelikKaraKutu.maskSecrets
+                : (s) => String(s || '');
+
+            listEl.innerHTML = filtered.map(ev => {
+                const isErr = ev.severity === 'error';
+                const sevBg = isErr ? '#7F1D1D' : '#78350F';
+                const sevFg = isErr ? '#FECACA' : '#FDE68A';
+                const sevText = isErr ? 'Arıza' : 'Onarım';
+                const gateText = gateNames[ev.gate] || ev.gate || 'K1';
+                const timeStr = ev.at ? new Date(ev.at).toLocaleString('tr-TR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+                const safeUidAttr = encodeURIComponent(String(ev.uid || ''));
+                const safeEvIdAttr = encodeURIComponent(String(ev.id || ''));
+                const safeInput = maskFn(ev.inputSummary || '');
+                const safeOutcome = maskFn(ev.outcome || '');
+                const safeModule = maskFn(ev.module || '');
+                const safeAction = maskFn(ev.action || '');
+                const safeUser = maskFn(ev.userName || ev.uid || 'Sporcu');
+
+                return `
+                    <div style="background:#121024; border:1px solid ${isErr ? 'rgba(248,113,113,0.45)' : 'rgba(251,191,36,0.35)'}; border-radius:10px; padding:10px 12px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
+                            <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
+                                <span style="background:#2C2550; color:#F3E8FF; border:1px solid rgba(167,139,250,0.4); font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px;">${escapeHTML(gateText)}</span>
+                                <span style="background:${sevBg}; color:${sevFg}; font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px;">${sevText}</span>
+                                ${ev.repeatCount > 1 ? `<span style="background:#0C4A6E; color:#BAE6FD; font-size:10px; font-weight:800; padding:2px 6px; border-radius:6px;">×${Number(ev.repeatCount)}</span>` : ''}
+                                <span style="font-size:10.5px; color:#CBD5E1; font-weight:600;">${escapeHTML(timeStr)}</span>
+                            </div>
+                            <button type="button" onclick="removeSingleAdminTelemetryEvent(decodeURIComponent('${safeUidAttr}'), decodeURIComponent('${safeEvIdAttr}'))" style="background:#2C2550; color:#F3E8FF; border:1px solid rgba(167,139,250,0.35); border-radius:6px; padding:3px 8px; font-size:10.5px; font-weight:800; cursor:pointer;">Kapat</button>
+                        </div>
+                        <div style="font-size:12px; font-weight:800; color:#FFFFFF; margin-bottom:3px;">
+                            ${escapeHTML(safeModule)} • ${escapeHTML(safeAction)}
+                        </div>
+                        <div style="font-size:11px; color:#BAE6FD; margin-bottom:3px;">
+                            Sporcu: ${escapeHTML(safeUser)}
+                        </div>
+                        ${safeInput ? `<div style="font-size:11px; color:#CBD5E1; margin-bottom:2px; word-break:break-word;">Girdi: ${escapeHTML(safeInput)}</div>` : ''}
+                        <div style="font-size:11.5px; color:${isErr ? '#FECACA' : '#FDE68A'}; font-weight:700; word-break:break-word;">Sonuç: ${escapeHTML(safeOutcome)}</div>
+                    </div>
+                `;
+            }).join('');
+            listEl.scrollTop = savedScrollTop;
+        }
+
+        function removeSingleAdminTelemetryEvent(uid, eventId) {
+            if (typeof window === 'undefined' || !window.CelikKaraKutu) return;
+            window.CelikKaraKutu.removeEvent(uid, eventId);
+            updateAdminPendingBadges();
+            renderAdminSystemTelemetry();
+        }
+
+        async function clearAdminTelemetryEvents() {
+            const users = getAuthUsers();
+            const all = (typeof window !== 'undefined' && window.CelikKaraKutu)
+                ? window.CelikKaraKutu.getAllLocalEventsAcrossUsers(users)
+                : [];
+            if (all.length === 0) {
+                alert('Temizlenecek açık sistem kaydı bulunmuyor.');
+                return;
+            }
+            if (typeof confirm === 'function' && !confirm(`Toplam ${all.length} sistem izleme kaydını temizlemek istiyor musunuz?`)) {
+                return;
+            }
+            const uidSet = new Set(users.map(u => u && u.id).filter(Boolean));
+            all.forEach(ev => { if (ev && ev.uid) uidSet.add(ev.uid); });
+            const nowMs = Date.now();
+            uidSet.forEach(u => {
+                try { localStorage.setItem(`celik_kodu_telemetry_cleared_at_${u}`, String(nowMs)); } catch {}
+            });
+            if (typeof window !== 'undefined' && window.CelikKaraKutu) {
+                window.CelikKaraKutu.clearAllEvents(users);
+            }
+            if (!IS_LOCAL_DEV && isFirebaseReady && fbDb && (typeof navigator === 'undefined' || navigator.onLine !== false)) {
+                for (const u of uidSet) {
+                    if (!/^usr_[a-zA-Z0-9_-]{1,64}$/.test(String(u))) continue;
+                    try { await fbDb.collection('system_telemetry').doc(String(u)).delete(); } catch {}
+                }
+            }
+            updateAdminPendingBadges();
+            renderAdminSystemTelemetry();
+        }
+
+        function buildAdminTelemetryAiPrompt() {
+            const { all, filtered } = getFilteredAdminTelemetryEvents();
+            const target = filtered.length > 0 ? filtered : all;
+            if (target.length === 0) return '';
+            const maskFn = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.maskSecrets === 'function')
+                ? window.CelikKaraKutu.maskSecrets
+                : (s) => String(s || '');
+            const gateNames = { K1: 'K1 Gümrük & Şefler', K2: 'K2 Saat & Vercel Köprüsü', K3: 'K3 Gemini Yapay Zeka', K4: 'K4 Firebase Bulut' };
+            const lines = [
+                'ÇELİK KODU SİSTEM İZLEME RAPORU — LÜTFEN AŞAĞIDAKİ ARIZA VE ONARIMLARI İNCELE VE ÇÖZ:',
+                `Toplam Kayıt: ${target.length}`,
+                ''
+            ];
+            target.forEach((ev, idx) => {
+                const tm = ev.at ? new Date(ev.at).toISOString() : '';
+                lines.push(`${idx + 1}. [${gateNames[ev.gate] || ev.gate}] (${ev.severity === 'error' ? 'ARIZA' : 'ONARIM'}${ev.repeatCount > 1 ? ' ×' + ev.repeatCount : ''})`);
+                lines.push(`   Sporcu: ${maskFn(ev.userName || ev.uid || 'Sporcu')} | Modül: ${maskFn(ev.module)} | İşlem: ${maskFn(ev.action)}`);
+                if (ev.inputSummary) lines.push(`   Girdi: ${maskFn(ev.inputSummary)}`);
+                lines.push(`   Sonuç: ${maskFn(ev.outcome)} | Zaman: ${tm}`);
+            });
+            return maskFn(lines.join('\n'));
+        }
+
+        async function copyAdminTelemetryPromptToClipboard() {
+            const text = buildAdminTelemetryAiPrompt();
+            if (!text) {
+                alert('Kopyalanacak sistem izleme kaydı yok.');
+                return;
+            }
+            try {
+                if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+                    await navigator.clipboard.writeText(text);
+                    if (typeof showToast === 'function') showToast('Düzeltme emri panoya kopyalandı.');
+                    else alert('Düzeltme emri panoya kopyalandı.');
+                    return;
+                }
+            } catch {}
+            alert(text);
+        }
+
+        if (typeof window !== 'undefined') {
+            window.openAdminModal = openAdminModal;
+            window.switchAdminModalTab = switchAdminModalTab;
+            window.setAdminTelemetryFilter = setAdminTelemetryFilter;
+            window.renderAdminSystemTelemetry = renderAdminSystemTelemetry;
+            window.removeSingleAdminTelemetryEvent = removeSingleAdminTelemetryEvent;
+            window.clearAdminTelemetryEvents = clearAdminTelemetryEvents;
+            window.buildAdminTelemetryAiPrompt = buildAdminTelemetryAiPrompt;
+            window.copyAdminTelemetryPromptToClipboard = copyAdminTelemetryPromptToClipboard;
         }
 
         function selectNewAvatar(av) {

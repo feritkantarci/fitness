@@ -6,7 +6,7 @@ description: Çelik Kodu Profil sekmesini (#profileTab, js/chiefs/profile-chief.
 # 🛡️ 6. Oda — Profil & Güvenlik Şefi (`profile-guard`)
 
 - **Fiziksel Oda Dosyası:** `js/chiefs/profile-chief.js` + Gümrük Sızıntı Kalkanı: `js/chiefs/bridge-customs.js`
-- **Zorunlu Sınav Maddeleri:** `T15` (Parola/salt/Gemini API anahtarı sızıntı engeli + açık zeminde beyaz/pastel metin kontrast denetimi), `T24` (Bulut birleşmesinde sıfır `undefined` alan)
+- **Zorunlu Sınav Maddeleri:** `T15` (Parola/salt/Gemini API anahtarı sızıntı engeli + açık zeminde beyaz/pastel metin kontrast denetimi), `T24` (Bulut birleşmesinde sıfır `undefined` alan), `T41` (4 Kapılı Kara Kutu K1–K4, gizli anahtar maskeleme, sporcu başına 50 kayıt tamponu & Yönetici Sistem İzleme sekmesi)
 
 ## Görev Kapsamı (`#profileTab`)
 1. Kullanıcı oturumu, çok kullanıcılı (`uid`) yerel/bulut veri ayrımı ve profil ayarlarını yönetir.
@@ -19,3 +19,4 @@ description: Çelik Kodu Profil sekmesini (#profileTab, js/chiefs/profile-chief.
 - **Güvenlik Başlıkları & İçerik Koruması:** Dinamik HTML şablonlarında güvenli öznitelik kaçışı (`encodeURIComponent` / `dataset` / `textContent`) ve sıkı CSP uygulanır.
 - **Hata Hafızası Sicili:** Kullanıcının profil, yedekleme veya tema kontrastında yakaladığı her hata `scripts/tab-watchdog.js` sınavına kalıcı madde olarak eklenir.
 - **Sıfır `undefined` Bulut Yazımı (T24 — 16 Kas 2026 hatası):** Firestore `set()` tek bir `undefined` alanda TÜM yazımı reddeder ve kayıtlar sessizce "Kuyrukta" kalır. `mergeWorkoutLogCollections` içinde `a || b` ile üretilen alanlar `dropUndefinedKeys` ile temizlenir, `fbDb.settings({ ignoreUndefinedProperties: true })` açık tutulur ve `syncWorkoutLogsToCloud` yazımdan önce JSON temizliği yapar. (Belirti: telefonda yapılan antrenman başka cihazda/bulutta görünmez.)
+- **4 Kapılı Kara Kutu ve Sistem İzleme (`T41`):** `window.CelikKaraKutu`, `K1` (Şefler & Gümrük & Çalışma Zamanı), `K2` (Vercel & Garmin/Tredict Saat Hattı), `K3` (Gemini Yapay Zeka) ve `K4` (Firebase Bulut Eşitleme) olaylarını sporcu başına en fazla 50 kayıtla toplar; tüm parola/token/API anahtarları ve `syncSeal` kayıt öncesi maskelenir (`maskSecrets`). Yalnızca Yönetici (`role === 'admin'`) üst bar kırmızı izleme rozetini ve `#adminModal` → **Sistem İzleme** sekmesini görür; `system_telemetry/{uid}` yalnızca sahibi veya Yönetici tarafından okunabilir.

@@ -455,6 +455,8 @@
 Şema: {"date":null,"weight":null,"skeletalMuscle":null,"muscleMass":null,"leanBodyMass":null,"bodyFat":null,"bodyFatKg":null,"subcutaneousFatKg":null,"totalWater":null,"totalWaterPct":null,"intraWater":null,"extraWater":null,"protein":null,"minerals":null,"bone":null,"visceralFat":null,"bmr":null,"recommendedCalories":null,"bmi":null,"bodyScore":null,"bodyAge":null,"idealWeight":null,"heightCm":null,"segmental":{"leftArm":{"fatKg":null,"fatPct":null,"muscleKg":null,"musclePct":null},"rightArm":{"fatKg":null,"fatPct":null,"muscleKg":null,"musclePct":null},"trunk":{"fatKg":null,"fatPct":null,"muscleKg":null,"musclePct":null},"leftLeg":{"fatKg":null,"fatPct":null,"muscleKg":null,"musclePct":null},"rightLeg":{"fatKg":null,"fatPct":null,"muscleKg":null,"musclePct":null}},"measurements":{"waist":null,"chest":null,"shoulder":null,"arms":null,"thigh":null,"hips":null,"neck":null}}`;
 
             const visionModels = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+            let lastVisionErr = '';
+            let authFailed = false;
             for (const model of visionModels) {
                 const controller = new AbortController();
                 const timer = setTimeout(() => controller.abort(), 8000);
@@ -470,7 +472,23 @@
                     });
                     clearTimeout(timer);
                     if (!resp.ok) {
-                        if (resp.status === 401 || resp.status === 403) break;
+                        lastVisionErr = `HTTP ${resp.status} (${model})`;
+                        if (resp.status === 401 || resp.status === 403) {
+                            authFailed = true;
+                            try {
+                                if (window.CelikKaraKutu && typeof window.CelikKaraKutu.record === 'function') {
+                                    window.CelikKaraKutu.record({
+                                        gate: 'K3',
+                                        severity: 'error',
+                                        module: 'Analiz Görsel Okuma',
+                                        action: 'Tartı Görseli Okuma',
+                                        inputSummary: model,
+                                        outcome: `Gemini API anahtarı yetkisiz (${resp.status})`
+                                    });
+                                }
+                            } catch {}
+                            break;
+                        }
                         continue;
                     }
                     const json = await resp.json();
@@ -480,9 +498,24 @@
                     const parsedJson = JSON.parse(cleaned);
                     const normalized = normalizeAndValidateScaleData(parsedJson);
                     if (hasParsedScaleOrMeasData(normalized)) return normalized;
-                } catch (_) {
+                } catch (visionErr) {
                     clearTimeout(timer);
+                    lastVisionErr = String((visionErr && visionErr.message) || visionErr || 'Görsel okuma zaman aşımı');
                 }
+            }
+            if (!authFailed) {
+                try {
+                    if (window.CelikKaraKutu && typeof window.CelikKaraKutu.record === 'function') {
+                        window.CelikKaraKutu.record({
+                            gate: 'K3',
+                            severity: 'warn',
+                            module: 'Analiz Görsel Okuma',
+                            action: 'Tartı Görseli Okuma',
+                            inputSummary: visionModels.slice(0, 3).join(', '),
+                            outcome: lastVisionErr || 'Görsel modeller tartı raporu çıkaramadı'
+                        });
+                    }
+                } catch {}
             }
             return null;
         }

@@ -97,7 +97,7 @@ const TABS = [
     whatItDoes: 'Verilerini güvenle yedekler, şifre/API anahtarlarını buluttan izole eder ve tema okunabilirliğini korur',
     commonMistakes: 'Açık zeminde açık renk yazı kalması, dışa aktarımda gizli anahtar/şifre sızması',
     entryFns: ['updateProfileGeminiStatusUI', 'applyTheme', 'stripWatchBridgeSecretsFromObj', 'persistLastGeneratedWorkout'],
-    keyPatterns: ['auth_users', 'session', 'active_user_id', 'logged_out', 'GEMINI', 'gcal_', 'emailjs_', 'bug_reports']
+    keyPatterns: ['auth_users', 'session', 'active_user_id', 'logged_out', 'GEMINI', 'gcal_', 'emailjs_', 'bug_reports', 'system_telemetry_']
   },
   {
     id: 'garminTredictBridge',
@@ -269,6 +269,8 @@ function createAppVmSandbox(moduleSources, dbText) {
     return elCache.get(k);
   };
   class MockStorage {
+    get length() { return store.size; }
+    key(i) { return Array.from(store.keys())[i] ?? null; }
     getItem(k) { return store.has(k) ? store.get(k) : null; }
     setItem(k, v) { store.set(k, String(v)); }
     removeItem(k) { store.delete(k); }
@@ -2372,6 +2374,196 @@ function runAcademicMathSuite(moduleSources, dbText) {
           && res.walkStillInHistory
           && res.cardioNotifClosed;
         return { ok, actual: JSON.stringify(res) };
+      }
+    },
+    {
+      id: 'T41',
+      owner: 'profile-guard',
+      title: '4 Kapılı Kara Kutu (K1-K4), Gizli Anahtar Maskeleme, 50 Kayıt Tamponu & Yönetici Sistem İzleme Sekmesi',
+      expected: '4 kapı (error+warn) kaydedilir, 4 gizli anahtar sızıntısı=0, dedup repeatCount=3, max=50 kayıt, Yönetici rozeti+filtre+temizleme eksiksiz çalışır',
+      run: () => {
+        ctx.__seedState();
+        const gatewayCode = fs.readFileSync(path.join(ROOT, 'api', 'tredict.mjs'), 'utf8');
+        const hasGatewayGate = gatewayCode.includes("gate = 'K2'") || gatewayCode.includes("gate: 'K2'");
+        const res = vm.runInContext(`(() => {
+          const kk = window.CelikKaraKutu;
+          if (!kk) return { missingKaraKutu: true };
+
+          // 1) K1 gerçek Gümrük onarımı + reddi + Arıza Duvarı karantinası + K2/K3/K4 kapıları
+          window.CelikBridgeCustoms.sanitizeScaleEntry({ id: 't41_sc_1', weight: 80 }); // K1 warn (eksik tarih onarıldı)
+          window.CelikBridgeCustoms.sanitizeWorkoutLogEntry({ exercises: [] }); // K1 error (boş antrenman engellendi)
+          window.CelikLiaisonSubChiefs.runWithFaultWall('T41Kutusu', { innerHTML: '' }, () => { throw new Error('T41 Kutu Hatası'); }, 'Yedek');
+
+          kk.record({ gate: 'K2', severity: 'error', module: 'Saat Köprüsü', action: '/api/tredict/activities', inputSummary: '/api/tredict/activities', outcome: 'HTTP 502 Saat geçidi hatası' });
+          kk.record({ gate: 'K3', severity: 'warn', module: 'Üretici Yapay Zeka', action: 'Model Yedek Geçişi', inputSummary: 'gemini-3-flash-preview', outcome: '429 nedeniyle yedek modele geçildi' });
+          kk.record({ gate: 'K4', severity: 'error', module: 'Bulut Eşitleme', action: 'workout_logs Bulut Yazımı', inputSummary: 'usr_exam', outcome: 'Firestore yazım reddedildi' });
+
+          const afterGates = kk.getEventsForUser('usr_exam');
+          const gatesCovered = ['K1', 'K2', 'K3', 'K4'].every(g => afterGates.some(ev => ev.gate === g));
+          const hasWarnAndError = afterGates.some(ev => ev.severity === 'warn') && afterGates.some(ev => ev.severity === 'error');
+
+          // 2) Sıfır Gizli Bilgi Sızıntısı
+          kk.record({
+            gate: 'K2',
+            severity: 'error',
+            module: 'Saat Testi',
+            action: 'Bağlantı',
+            inputSummary: "password=Gizli1234&key=AIzaSyTestSecretKey999999",
+            outcome: "Bearer eyJSecretToken12345 failed with tredictToken: 'trd_tok_99'"
+          });
+
+          // 3) Fırtına Koruması (repeatCount=3) & 50 Kayıt Tamponu
+          for (let i = 0; i < 3; i++) {
+            kk.record({
+              gate: 'K3',
+              severity: 'error',
+              module: 'TekrarTest',
+              action: 'AynıHata',
+              inputSummary: 'modelA',
+              outcome: 'Aynı API kesintisi'
+            });
+          }
+          const headAfterRepeat = kk.getEventsForUser('usr_exam')[0];
+          const repeatOk = Boolean(headAfterRepeat && headAfterRepeat.repeatCount === 3);
+
+          for (let j = 0; j < 60; j++) {
+            kk.record({
+              gate: j % 2 === 0 ? 'K1' : 'K4',
+              severity: j % 3 === 0 ? 'error' : 'warn',
+              module: 'TamponTest',
+              action: 'Adım_' + j,
+              inputSummary: 'in_' + j,
+              outcome: 'out_' + j
+            });
+          }
+          const eventsAfterFlood = kk.getEventsForUser('usr_exam');
+          const capOk = eventsAfterFlood.length === 50;
+
+          // 4) Yönetici Oturumu, Rozet, Sekme, K2 Filtresi, Gizlilik ve Temizleme
+          // K2 ve gizli maskeli kayıtların 50 tamponunda görünmesi için temiz bir senaryo seti ekle
+          kk.clearAllEvents(['usr_exam', 'usr_admin']);
+          kk.record({
+            gate: 'K1',
+            severity: 'warn',
+            module: 'Köprü Gümrüğü',
+            action: 'scale',
+            inputSummary: 's1',
+            outcome: 'Tarih onarıldı',
+            uid: 'usr_exam',
+            userName: 'Test Sporcu'
+          });
+          kk.record({
+            gate: 'K2',
+            severity: 'error',
+            module: 'Saat Köprüsü',
+            action: 'Saat Bağlantısı',
+            inputSummary: 'password=Gizli1234 key=AIzaSyTestSecretKey999999',
+            outcome: "Bearer eyJSecretToken12345 tredictToken: 'trd_tok_99'",
+            uid: 'usr_exam',
+            userName: 'Test Sporcu'
+          });
+          kk.record({
+            gate: 'K3',
+            severity: 'error',
+            module: 'Üretici Yapay Zeka',
+            action: 'Koç Analizi',
+            inputSummary: 'gemini-3-flash',
+            outcome: 'Yanıt alınamadı',
+            uid: 'usr_admin',
+            userName: 'Yönetici'
+          });
+          kk.record({
+            gate: 'K4',
+            severity: 'warn',
+            module: 'Bulut Eşitleme',
+            action: 'Durum Bulut Yazımı',
+            inputSummary: 'usr_exam',
+            outcome: 'Çevrimdışı kuyruğa alındı',
+            uid: 'usr_exam',
+            userName: 'Test Sporcu'
+          });
+
+          localStorage.setItem('celik_kodu_auth_users', JSON.stringify([
+            { id: 'usr_admin', username: 'admin', name: 'Yönetici', role: 'admin', status: 'approved' },
+            { id: 'usr_exam', username: 'sporcu', name: 'Test Sporcu', role: 'athlete', status: 'approved' }
+          ]));
+          localStorage.setItem('celik_kodu_session', JSON.stringify({
+            userId: 'usr_admin',
+            role: 'admin',
+            authVerified: true,
+            passwordPolicyVerified: true
+          }));
+
+          updateAdminPendingBadges();
+          openAdminModal('telemetry');
+          setAdminTelemetryFilter('ALL', 'ALL');
+
+          const headerBtn = document.getElementById('headerAdminTelemetryBtn');
+          const headerBadge = document.getElementById('headerAdminTelemetryBadge');
+          const tabBadge = document.getElementById('adminTelemetryTabBadge');
+          const listEl = document.getElementById('adminTelemetryListContainer');
+          const headerVisibleBeforeClear = headerBtn.style.display === 'inline-flex' && headerBadge.innerText === '4';
+          const tabBadgeVisibleBeforeClear = tabBadge.style.display === 'inline-block' && tabBadge.innerText === '4';
+          const allHtml = String(listEl.innerHTML || '');
+          const promptText = String(buildAdminTelemetryAiPrompt() || '');
+
+          setAdminTelemetryFilter('K2', 'ALL');
+          const k2Html = String(listEl.innerHTML || '');
+          const k2FilterOk = k2Html.includes('Saat Köprüsü') && !k2Html.includes('Koç Analizi');
+          setAdminTelemetryFilter('ALL', 'ALL');
+
+          localStorage.setItem('celik_kodu_session', JSON.stringify({
+            userId: 'usr_exam',
+            role: 'athlete',
+            authVerified: true,
+            passwordPolicyVerified: true
+          }));
+          updateAdminPendingBadges();
+          const athleteHiddenOk = headerBtn.style.display === 'none' && tabBadge.style.display === 'none';
+
+          localStorage.setItem('celik_kodu_session', JSON.stringify({
+            userId: 'usr_admin',
+            role: 'admin',
+            authVerified: true,
+            passwordPolicyVerified: true
+          }));
+          updateAdminPendingBadges();
+
+          const storedJson = JSON.stringify(kk.getAllLocalEventsAcrossUsers(['usr_exam', 'usr_admin']));
+          const combinedCheck = storedJson + '\\n' + allHtml + '\\n' + promptText;
+          const leakedSecrets = ['Gizli1234', 'AIzaSyTestSecretKey999999', 'eyJSecretToken12345', 'trd_tok_99'].filter(s => combinedCheck.includes(s));
+
+          clearAdminTelemetryEvents();
+          const afterClearCount = kk.getAllLocalEventsAcrossUsers(['usr_exam', 'usr_admin']).length;
+
+          return {
+            gatesCovered,
+            hasWarnAndError,
+            repeatOk,
+            capOk,
+            headerVisible: headerVisibleBeforeClear,
+            tabBadgeVisible: tabBadgeVisibleBeforeClear,
+            athleteHiddenOk,
+            k2FilterOk,
+            promptReady: promptText.includes('SİSTEM İZLEME RAPORU') && promptText.includes('K2 Saat'),
+            leakCount: leakedSecrets.length,
+            clearedOk: afterClearCount === 0 && headerBtn.style.display === 'none' && tabBadge.style.display === 'none'
+          };
+        })()`, ctx);
+
+        const ok = hasGatewayGate
+          && res.gatesCovered
+          && res.hasWarnAndError
+          && res.repeatOk
+          && res.capOk
+          && res.headerVisible
+          && res.tabBadgeVisible
+          && res.athleteHiddenOk
+          && res.k2FilterOk
+          && res.promptReady
+          && res.leakCount === 0
+          && res.clearedOk;
+        return { ok, actual: JSON.stringify({ hasGatewayGate, ...res }) };
       }
     }
   ];

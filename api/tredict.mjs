@@ -32,11 +32,33 @@ function applyCorsHeaders(res, origin) {
   }
 }
 
+function maskGatewayErrorText(raw) {
+  let s = String(raw || '');
+  s = s.replace(/([?&](?:key|api_key|apikey|token|access_token|secret|password)=)[^&\s]+/gi, '$1[GİZLİ]');
+  s = s.replace(/AIza[0-9A-Za-z_-]{10,}/g, '[GEMINI_ANAHTARI_GİZLİ]');
+  s = s.replace(/sk-[0-9A-Za-z_-]{10,}/g, '[API_ANAHTARI_GİZLİ]');
+  s = s.replace(/\b(?:Bearer|Basic)\s+[A-Za-z0-9._~+/=-]{6,}/gi, '[YETKİ_ANAHTARI_GİZLİ]');
+  return s;
+}
+
 function sendJson(res, status, data, origin) {
   applyCorsHeaders(res, origin);
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.end(JSON.stringify(data));
+  let payload = data;
+  if (status >= 400 && data && typeof data === 'object' && !Array.isArray(data)) {
+    payload = { ...data };
+    if (!payload.gate) payload.gate = 'K2';
+    if (!payload.layer) {
+      const errText = String(payload.error || '');
+      if (/tredict/i.test(errText)) payload.layer = 'tredict-upstream';
+      else if (/intervals/i.test(errText)) payload.layer = 'intervals-upstream';
+      else if (/gemini|ai anahtarı/i.test(errText)) payload.layer = 'gemini-bridge';
+      else payload.layer = 'vercel-gateway';
+    }
+    if (payload.error) payload.error = maskGatewayErrorText(payload.error);
+  }
+  res.end(JSON.stringify(payload));
 }
 
 function parseTzOffsetMinutes(raw) {
@@ -120,6 +142,7 @@ async function callIntervalsApi(endpoint, method = 'GET', bodyObj = null, token 
   if (!res.ok) {
     const err = new Error(`Intervals.icu HTTP ${res.status}: ${text.slice(0, 240)}`);
     err.statusCode = res.status;
+    err.layer = 'intervals-upstream';
     throw err;
   }
   if (!text) return null;
@@ -134,6 +157,7 @@ function unwrapMcpPayload(payload) {
   if (payload?.error) {
     const err = new Error(payload.error.message || 'Tredict MCP error');
     err.statusCode = 502;
+    err.layer = 'tredict-upstream';
     throw err;
   }
   const contentText = payload?.result?.content?.[0]?.text;
@@ -181,6 +205,7 @@ function createTredictClient(token) {
     if (!res.ok) {
       const err = new Error(`Tredict HTTP ${res.status}: ${text.slice(0, 240)}`);
       err.statusCode = res.status === 401 || res.status === 403 ? res.status : 502;
+      err.layer = 'tredict-upstream';
       throw err;
     }
     const ct = res.headers.get('content-type') || '';
@@ -714,9 +739,9 @@ export default async function handler(req, res) {
       const prompt = String(body?.prompt || '').trim();
       const systemInstruction = String(body?.systemInstruction || '').trim();
       const maxTokens = Math.min(8192, Math.max(64, Number(body?.maxTokens || 3500)));
-      if (!prompt) return sendJson(res, 400, { ok: false, error: 'Prompt gerekli.' }, origin);
+      if (!prompt) return sendJson(res, 400, { ok: false, layer: 'gemini-bridge', error: 'Prompt gerekli.' }, origin);
       const apiKey = await resolveCentralGeminiApiKey(req);
-      if (!apiKey) return sendJson(res, 503, { ok: false, error: 'Merkez AI anahtarı tanımlı değil.' }, origin);
+      if (!apiKey) return sendJson(res, 503, { ok: false, layer: 'gemini-bridge', error: 'Merkez AI anahtarı tanımlı değil.' }, origin);
 
       const candidateModels = ['gemini-3-flash-preview', 'gemini-3.1-flash-lite-preview', 'gemini-flash-lite-latest', 'gemini-flash-latest', 'gemini-3.8-flash'];
       let lastErr = 'Gemini yanıt üretemedi.';
@@ -738,7 +763,7 @@ export default async function handler(req, res) {
           const errJson = await gResp.json().catch(() => ({}));
           lastErr = errJson?.error?.message || `Gemini HTTP ${gResp.status}`;
           if (gResp.status === 401 || gResp.status === 403) {
-            return sendJson(res, gResp.status, { ok: false, error: lastErr }, origin);
+            return sendJson(res, gResp.status, { ok: false, layer: 'gemini-bridge', error: lastErr }, origin);
           }
           continue;
         }
@@ -748,9 +773,9 @@ export default async function handler(req, res) {
           return sendJson(res, 200, { ok: true, text, model, source: 'central_ai_bridge' }, origin);
         }
       }
-      return sendJson(res, 502, { ok: false, error: lastErr }, origin);
+      return sendJson(res, 502, { ok: false, layer: 'gemini-bridge', error: lastErr }, origin);
     } catch (err) {
-      return sendJson(res, 500, { ok: false, error: String(err?.message || err) }, origin);
+      return sendJson(res, 500, { ok: false, layer: 'gemini-bridge', error: String(err?.message || err) }, origin);
     }
   }
 
@@ -1078,6 +1103,8 @@ export default async function handler(req, res) {
     const status = Number(err?.statusCode) || 500;
     return sendJson(res, status >= 400 && status < 600 ? status : 500, {
       ok: false,
+      gate: 'K2',
+      layer: err?.layer || 'vercel-gateway',
       error: String(err?.message || err)
     }, origin);
   }

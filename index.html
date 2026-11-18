@@ -54,7 +54,7 @@
                     <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                 </svg>
             </div>
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v322</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v323</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -253,11 +253,12 @@
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
                             <span class="modern-brand-subdot" aria-hidden="true">•</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v322</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v323</span>
                         </div>
                     </div>
                 </div>
                 <div class="modern-bar-actions">
+                    <button type="button" id="headerAdminTelemetryBtn" onclick="event.stopPropagation(); openAdminModal('telemetry');" style="display:none; align-items:center; gap:4px; height:30px; padding:0 9px; border-radius:999px; background:#DC2626; color:#FFFFFF; border:1px solid #FCA5A5; font-size:11px; font-weight:800; white-space:nowrap; cursor:pointer;" title="Sistem İzleme Kayıtları">İzleme <span id="headerAdminTelemetryBadge">0</span></button>
                     <div class="modern-user-badge" onclick="if(window.innerWidth <= 768){ openMoreSheet(); } else { switchTab('profileTab'); }" title="Profil & Menü">
                         <span class="modern-user-avatar" id="headerUserAvatar">F</span>
                         <span class="modern-user-name" id="headerUserName">Sporcu</span>
@@ -293,6 +294,7 @@
                         <button type="button" class="header-popup-item" id="btnAdminPanelPopup" onclick="closeHeaderPopupMenu(); openAdminModal();" style="display:none;">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
                             <span>Sporcu Yönetimi (Admin)</span>
+                            <span id="popupAdminTelemetryBadge" style="display:none; margin-left:auto; background:#DC2626; color:#FFFFFF; font-size:10px; font-weight:800; padding:1px 6px; border-radius:999px;">0</span>
                         </button>
                         <button type="button" class="header-popup-item" onclick="closeHeaderPopupMenu(); forceAppUpdate();">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
@@ -1210,7 +1212,7 @@
 
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
                         <button class="btn btn-outline" id="profileTabAdminBtn" style="font-size:11px; border-color:rgba(252, 211, 77, 0.45); color:#FCD34D; display:none;" onclick="openAdminModal()">
-                            👑 Sporcu Yönetim Portalı (Admin)
+                            👑 Sporcu Yönetim Portalı (Admin) <span id="profileAdminTelemetryBadge" style="display:none; background:#DC2626; color:#FFFFFF; font-size:10px; font-weight:800; padding:1px 6px; border-radius:999px; margin-left:4px;">0</span>
                         </button>
                     </div>
                 </div>
@@ -1228,12 +1230,15 @@
             </div>
 
             <!-- ADMIN NAVIGATION TABS -->
-            <div style="display:flex; gap:8px; margin-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
-                <button id="adminTabBtnStatus" class="btn btn-gold" style="flex:1; font-size:12px; padding:9px 12px; font-weight:800;" onclick="switchAdminModalTab('status')">
-                    📊 Sporcu Çalışma Durumları
+            <div style="display:flex; gap:6px; margin-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+                <button id="adminTabBtnStatus" class="btn btn-gold" style="flex:1; font-size:11.5px; padding:9px 8px; font-weight:800; white-space:nowrap;" onclick="switchAdminModalTab('status')">
+                    Durumlar
                 </button>
-                <button id="adminTabBtnManage" class="btn btn-outline" style="flex:1; font-size:12px; padding:9px 12px; font-weight:800; color:var(--text-secondary);" onclick="switchAdminModalTab('manage')">
-                    ⚙️ Sporcu Hesap Yönetimi <span id="adminManagePendingBadge" style="display:none; background:#f59e0b; color:#090d16; font-size:10px; font-weight:900; padding:1px 6px; border-radius:99px; margin-left:4px;">0</span>
+                <button id="adminTabBtnManage" class="btn btn-outline" style="flex:1; font-size:11.5px; padding:9px 8px; font-weight:800; color:var(--text-secondary); white-space:nowrap;" onclick="switchAdminModalTab('manage')">
+                    Hesaplar <span id="adminManagePendingBadge" style="display:none; background:#f59e0b; color:#090d16; font-size:10px; font-weight:900; padding:1px 6px; border-radius:99px; margin-left:3px;">0</span>
+                </button>
+                <button id="adminTabBtnTelemetry" class="btn btn-outline" style="flex:1.15; font-size:11.5px; padding:9px 8px; font-weight:800; color:var(--text-secondary); white-space:nowrap;" onclick="switchAdminModalTab('telemetry')">
+                    Sistem İzleme <span id="adminTelemetryTabBadge" style="display:none; background:#DC2626; color:#FFFFFF; font-size:10px; font-weight:900; padding:1px 6px; border-radius:99px; margin-left:3px;">0</span>
                 </button>
             </div>
 
@@ -1353,6 +1358,31 @@
                 <!-- ATHLETES LIST -->
                 <h3 style="font-size:13px; font-weight:800; color:#FFFFFF; margin-bottom:10px;">📋 Kayıtlı Sporcu Hesapları</h3>
                 <div id="adminUserListContainer"></div>
+            </div>
+
+            <!-- TAB 3: SİSTEM İZLEME (4 KAPILI KARA KUTU) -->
+            <div id="adminViewTelemetry" style="display:none;">
+                <div id="adminTelemetryKpis" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-bottom:12px;"></div>
+
+                <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                    <button type="button" id="adminTelGateBtn_ALL" onclick="setAdminTelemetryFilter('ALL', null)" style="font-size:11px; font-weight:800; padding:6px 10px; border-radius:8px; border:1px solid rgba(167,139,250,0.45); background:#6D28D9; color:#FFFFFF; cursor:pointer; white-space:nowrap;">Tümü</button>
+                    <button type="button" id="adminTelGateBtn_K1" onclick="setAdminTelemetryFilter('K1', null)" style="font-size:11px; font-weight:800; padding:6px 10px; border-radius:8px; border:1px solid rgba(167,139,250,0.25); background:#121024; color:#CBD5E1; cursor:pointer; white-space:nowrap;">K1 Gümrük</button>
+                    <button type="button" id="adminTelGateBtn_K2" onclick="setAdminTelemetryFilter('K2', null)" style="font-size:11px; font-weight:800; padding:6px 10px; border-radius:8px; border:1px solid rgba(167,139,250,0.25); background:#121024; color:#CBD5E1; cursor:pointer; white-space:nowrap;">K2 Saat</button>
+                    <button type="button" id="adminTelGateBtn_K3" onclick="setAdminTelemetryFilter('K3', null)" style="font-size:11px; font-weight:800; padding:6px 10px; border-radius:8px; border:1px solid rgba(167,139,250,0.25); background:#121024; color:#CBD5E1; cursor:pointer; white-space:nowrap;">K3 Gemini</button>
+                    <button type="button" id="adminTelGateBtn_K4" onclick="setAdminTelemetryFilter('K4', null)" style="font-size:11px; font-weight:800; padding:6px 10px; border-radius:8px; border:1px solid rgba(167,139,250,0.25); background:#121024; color:#CBD5E1; cursor:pointer; white-space:nowrap;">K4 Bulut</button>
+                </div>
+
+                <div style="display:flex; gap:6px; margin-bottom:10px;">
+                    <button type="button" id="adminTelSevBtn_ALL" onclick="setAdminTelemetryFilter(null, 'ALL')" style="flex:1; font-size:11px; font-weight:800; padding:6px 10px; border-radius:8px; border:1px solid rgba(167,139,250,0.45); background:#2C2550; color:#FFFFFF; cursor:pointer; white-space:nowrap;">Tüm Kayıtlar</button>
+                    <button type="button" id="adminTelSevBtn_error" onclick="setAdminTelemetryFilter(null, 'error')" style="flex:1; font-size:11px; font-weight:800; padding:6px 10px; border-radius:8px; border:1px solid rgba(248,113,113,0.35); background:#121024; color:#FECACA; cursor:pointer; white-space:nowrap;">Sadece Arıza</button>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:12px;">
+                    <button type="button" onclick="copyAdminTelemetryPromptToClipboard()" style="font-size:11.5px; font-weight:800; padding:9px 10px; border-radius:10px; border:1px solid rgba(74,222,128,0.45); background:#14532D; color:#BBF7D0; cursor:pointer; white-space:nowrap;">Düzeltme Emri Kopyala</button>
+                    <button type="button" onclick="clearAdminTelemetryEvents()" style="font-size:11.5px; font-weight:800; padding:9px 10px; border-radius:10px; border:1px solid rgba(248,113,113,0.45); background:#7F1D1D; color:#FECACA; cursor:pointer; white-space:nowrap;">Tümünü Temizle</button>
+                </div>
+
+                <div id="adminTelemetryListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:46vh; overflow-y:auto;"></div>
             </div>
         </div>
     </div>
@@ -3047,6 +3077,7 @@
             <div class="more-sheet-btn" id="sheetAdminBtn" onclick="closeMoreSheet(); openAdminModal();" style="display:none;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-secondary);"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
                 <span>Sporcu Yönetimi</span>
+                <span id="sheetAdminTelemetryBadge" style="display:none; background:#DC2626; color:#FFFFFF; font-size:9.5px; font-weight:800; padding:1px 6px; border-radius:999px; margin-left:auto;">0</span>
             </div>
             <div class="more-sheet-btn logout" onclick="closeMoreSheet(); handleAuthLogout();">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#e11d48;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>

@@ -528,8 +528,24 @@
     return urls;
   }
 
+  function recordWatchBridgeTelemetry(action, inputSummary, outcome, severity = 'error') {
+    try {
+      if (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.record === 'function') {
+        window.CelikKaraKutu.record({
+          gate: 'K2',
+          severity: severity === 'warn' ? 'warn' : 'error',
+          module: 'Saat Köprüsü',
+          action: String(action || 'Saat İletişimi'),
+          inputSummary: String(inputSummary || ''),
+          outcome: String(outcome || 'Saat servisine ulaşılamadı')
+        });
+      }
+    } catch {}
+  }
+
   async function fetchGarminBridge(apiPath, options = {}) {
     const uid = options.uid || getActiveUidSafe();
+    const cleanRoute = String(apiPath || '').split('?')[0] || '/api/tredict';
     const tredictToken = options.tredictToken !== undefined
       ? String(options.tredictToken || '').trim()
       : getUserTredictToken(uid);
@@ -543,6 +559,7 @@
     if (!tredictToken && !intervalsToken) {
       const err = new Error('MISSING_USER_WATCH_TOKEN');
       err.code = 'MISSING_USER_WATCH_TOKEN';
+      recordWatchBridgeTelemetry('Saat Anahtarı Eksik', cleanRoute, 'Kullanıcı saat bağlantı anahtarı tanımlı değil', 'warn');
       throw err;
     }
 
@@ -566,6 +583,7 @@
     }
 
     let authError = null;
+    let lastHttpDetail = '';
     for (const targetUrl of targets) {
       try {
         const res = await fetch(targetUrl, fetchOpts);
@@ -573,12 +591,23 @@
         if (res.status === 401 || res.status === 403) {
           authError = new Error('WATCH_AUTH_FAILED');
           authError.code = 'WATCH_AUTH_FAILED';
+          lastHttpDetail = `HTTP ${res.status}`;
           continue;
         }
         if ((res.ok || res.status === 400) && ct.includes('application/json')) {
+          if (res.status === 400) {
+            try {
+              const errJson = await res.clone().json();
+              const layerTag = errJson && errJson.layer ? `[${errJson.layer}] ` : '';
+              recordWatchBridgeTelemetry('Saat Köprüsü İsteği', cleanRoute, `${layerTag}${(errJson && errJson.error) || 'HTTP 400 Geçersiz istek'}`);
+            } catch {}
+          }
           return res;
         }
-      } catch {}
+        lastHttpDetail = `HTTP ${res.status}`;
+      } catch (fetchErr) {
+        lastHttpDetail = String((fetchErr && fetchErr.message) || fetchErr || 'Ağ hatası');
+      }
     }
 
     if (intervalsToken) {
@@ -588,13 +617,19 @@
       } catch (directErr) {
         if (directErr && (directErr.code === 'WATCH_AUTH_FAILED' || directErr.message === 'WATCH_AUTH_FAILED')) {
           authError = directErr;
+        } else {
+          lastHttpDetail = String((directErr && directErr.message) || directErr || lastHttpDetail);
         }
       }
     }
 
-    if (authError) throw authError;
+    if (authError) {
+      recordWatchBridgeTelemetry('Saat Yetkilendirme', cleanRoute, 'Saat bağlantı anahtarı reddedildi (401/403)');
+      throw authError;
+    }
     const gwErr = new Error('CLOUD_GATEWAY_UNREACHABLE');
     gwErr.code = 'CLOUD_GATEWAY_UNREACHABLE';
+    recordWatchBridgeTelemetry('Vercel Saat Köprüsü', cleanRoute, lastHttpDetail || 'Bulut saat geçidine ulaşılamadı');
     throw gwErr;
   }
 
@@ -2760,6 +2795,9 @@
           }
           if (inFlightPushSig === computedSig) inFlightPushSig = '';
           return;
+        }
+        if (res.ok) {
+          recordWatchBridgeTelemetry('Saat Antrenman Gönderimi', '/api/tredict/push-workout', (data && data.error) || 'Saat servisi senkronizasyonu onaylamadı');
         }
         const failErr = new Error((data && data.error) || 'CLOUD_GATEWAY_UNREACHABLE');
         failErr.code = 'CLOUD_GATEWAY_UNREACHABLE';

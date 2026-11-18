@@ -53,6 +53,18 @@ rules_version = '2';
 //   - 'ai_config': Admin-managed AI configuration (write restricted strictly to isAdmin()).
 //   - 'master_catalog': Non-sensitive static exercise catalog metadata/JSON (version, updatedAt, exerciseCount, totalCatalogIds, opengymCount, guideCount, exercisesJson, opengymCatalogJson, exerciseGuideMapJson; read public/athlete, write restricted strictly to isAdmin() via isValidAdminSystemDoc()).
 //
+// Collection: system_telemetry/{uid}
+// Document ID: Athlete ID (^usr_[a-zA-Z0-9_-]{1,64}$)
+// Fields (strictly isolated from credentials, API keys & watch tokens):
+//   - uid: string (required, must match document {uid})
+//   - userName: string | null (optional, <= 120 chars)
+//   - events: list (required, max 50 telemetry event maps, zero secrets/syncSeal)
+//   - openErrorCount: number (optional, 0..50)
+//   - openWarnCount: number (optional, 0..50)
+//   - clientUpdatedAt: number (optional, >= 0)
+//   - updatedAt: timestamp | string | number | null (optional)
+//   - syncSeal: string (optional, 10..120 chars)
+//
 // ===============================================================
 
 service cloud.firestore {
@@ -426,6 +438,60 @@ service cloud.firestore {
         && !('salt' in data);
     }
 
+    function isValidTelemetryEventSample(ev) {
+      return ev is map
+        && ev.keys().size() <= 40
+        && hasNoSensitiveSecrets(ev)
+        && !('syncSeal' in ev)
+        && !('apiKey' in ev)
+        && !('accessToken' in ev)
+        && !('refreshToken' in ev)
+        && !('privateKey' in ev)
+        && hasNoSensitiveSecretsInField(ev, 'meta')
+        && hasNoSensitiveSecretsInField(ev, 'context')
+        && hasNoSensitiveSecretsInField(ev, 'details')
+        && (!('message' in ev) || !(ev.message is string) || ev.message.size() <= 4000)
+        && (!('stack' in ev) || !(ev.stack is string) || ev.stack.size() <= 8000)
+        && (!('detail' in ev) || !(ev.detail is string) || ev.detail.size() <= 4000)
+        && (!('url' in ev) || !(ev.url is string) || ev.url.size() <= 1000);
+    }
+
+    function isValidSystemTelemetryPayload(data, uid) {
+      return hasOnlyAllowedFields(data, [
+          'uid',
+          'userName',
+          'events',
+          'openErrorCount',
+          'openWarnCount',
+          'clientUpdatedAt',
+          'updatedAt',
+          'syncSeal'
+        ])
+        && hasNoSensitiveSecrets(data)
+        && 'uid' in data
+        && data.uid is string
+        && data.uid.size() >= 1
+        && data.uid.size() <= 128
+        && data.uid == uid
+        && isValidOptionalString(data, 'userName', 0, 120)
+        && 'events' in data
+        && data.events is list
+        && data.events.size() <= 50
+        && (
+          data.events.size() == 0
+          || (
+            isValidTelemetryEventSample(data.events[0])
+            && (data.events.size() <= 2 || isValidTelemetryEventSample(data.events[1]))
+            && isValidTelemetryEventSample(data.events[data.events.size() - 1])
+          )
+        )
+        && (!('openErrorCount' in data) || (data.openErrorCount is number && data.openErrorCount >= 0 && data.openErrorCount <= 50))
+        && (!('openWarnCount' in data) || (data.openWarnCount is number && data.openWarnCount >= 0 && data.openWarnCount <= 50))
+        && isValidOptionalTimestampOrIso(data, 'updatedAt')
+        && (!('clientUpdatedAt' in data) || (data.clientUpdatedAt is number && data.clientUpdatedAt >= 0))
+        && isValidOptionalSyncSeal(data);
+    }
+
     // ===============================================================
     // Koleksiyon Kuralları (Collection Match Rules)
     // ===============================================================
@@ -521,6 +587,18 @@ service cloud.firestore {
           && isSafeNonAdminUsersUpdate()
         )
         || (isAdmin() && isValidAdminSystemDoc(request.resource.data));
+      allow delete: if isAdmin();
+    }
+
+    // Sistem Telemetrisi ve İstemci Hata/Uyarı İzleme Kayıtları
+    match /system_telemetry/{uid} {
+      allow read: if isAdmin() || isOwner(uid);
+      allow create: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
+        && isValidSystemTelemetryPayload(request.resource.data, uid)
+        && isSealValidForCreate();
+      allow update: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
+        && isValidSystemTelemetryPayload(request.resource.data, uid)
+        && isSealValidForWrite(uid);
       allow delete: if isAdmin();
     }
   }
