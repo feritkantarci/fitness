@@ -1012,23 +1012,39 @@
             (Array.isArray(baseLogs) ? baseLogs : []).forEach(upsertLog);
             (Array.isArray(incomingLogs) ? incomingLogs : []).forEach(upsertLog);
 
-            // Aynı gün gerçek uygulama kaydı varsa yalnızca düzenlenmemiş kuvvet saat mükerrerlerini temizle (kardiyo & kullanıcı düzenlemeleri korunur)
-            const realDates = new Set();
+            // Aynı gün aynı saat diliminde olan mükerrer saat kuvvet kayıtlarını zaman penceresiyle temizle;
+            // farklı saatlerde yapılan 2., 3. ve 4. antrenmanlar (hem saat hem uygulama) kesinlikle korunur
+            const appStrengthLogs = [];
             for (const item of logMap.values()) {
-                if (item && !String(item.id || '').startsWith('garmin_') && item.date) {
-                    realDates.add(String(item.date).slice(0, 10));
+                if (item && !String(item.id || '').startsWith('garmin_') && item.sourceChief !== 'garmin-tredict-guard' && !item.isCardioActivity && item.date) {
+                    appStrengthLogs.push(item);
                 }
             }
+            const hasSessionOverlapFn = (typeof window !== 'undefined' && window.GarminTredictChief && typeof window.GarminTredictChief.areSameDaySessionTimeWindow === 'function');
             for (const [k, item] of logMap.entries()) {
                 if (
                     String(k).startsWith('garmin_') &&
                     item &&
                     item.date &&
                     !item.isCardioActivity &&
-                    !item.userEditedAt &&
-                    realDates.has(String(item.date).slice(0, 10))
+                    !item.userEditedAt
                 ) {
-                    logMap.delete(k);
+                    const matchedApp = appStrengthLogs.find(appItem => {
+                        if (hasSessionOverlapFn) {
+                            return window.GarminTredictChief.areSameDaySessionTimeWindow(item, appItem);
+                        }
+                        const gAid = item.garminActivityId || String(item.id || '').slice('garmin_'.length);
+                        return Boolean(appItem.garminActivityId && gAid && String(appItem.garminActivityId) === String(gAid));
+                    });
+                    if (matchedApp) {
+                        if (!matchedApp.garminActivityId && item.garminActivityId) {
+                            matchedApp.garminActivityId = item.garminActivityId;
+                        }
+                        if (!matchedApp.healthSummary && item.healthSummary) {
+                            matchedApp.healthSummary = item.healthSummary;
+                        }
+                        logMap.delete(k);
+                    }
                 }
             }
 
@@ -1918,17 +1934,58 @@
                 delete manifestsMerged.__watchVault;
                 delete manifestsMerged.__watchActivities;
                 delete manifestsMerged.__wellnessSteps;
+                delete manifestsMerged.__approvedWatchIds;
+                delete manifestsMerged.__dismissedWatchIds;
 
-                const manifestKeys = Object.keys(manifestsMerged);
-                if (manifestKeys.length > 300) {
-                    manifestKeys.sort().slice(0, manifestKeys.length - 300).forEach(oldKey => {
-                        delete manifestsMerged[oldKey];
-                    });
-                }
+                const localHistoryLogs = safeParse(`celik_kodu_history_${uid}`, []);
+                const rawWatchTelemetry = safeParse(`celik_garmin_telemetry_v2_${uid}`, []);
+                const approvedWatchIds = (Array.isArray(safeParse(`celik_garmin_approved_activities_v1_${uid}`, []))
+                    ? safeParse(`celik_garmin_approved_activities_v1_${uid}`, [])
+                    : []).map(String).filter(Boolean).slice(-40);
+                const dismissedWatchIds = (Array.isArray(safeParse(`celik_garmin_dismissed_activities_v1_${uid}`, []))
+                    ? safeParse(`celik_garmin_dismissed_activities_v1_${uid}`, [])
+                    : []).map(String).filter(Boolean).slice(-40);
+                const deletedWorkoutLogIds = (Array.isArray(safeParse(`celik_kodu_deleted_logs_${uid}`, []))
+                    ? safeParse(`celik_kodu_deleted_logs_${uid}`, [])
+                    : []).map(String).filter(Boolean).slice(-60);
+
+                let refDayMs = NaN;
+                const considerRefDate = (val) => {
+                    if (!val) return;
+                    const iso = String(val).slice(0, 10);
+                    if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return;
+                    const ms = Date.parse(iso + 'T12:00:00Z');
+                    if (Number.isFinite(ms) && (!Number.isFinite(refDayMs) || ms > refDayMs)) refDayMs = ms;
+                };
+                if (Array.isArray(localHistoryLogs)) localHistoryLogs.forEach(l => considerRefDate(l?.date));
+                if (Array.isArray(rawWatchTelemetry)) rawWatchTelemetry.forEach(a => considerRefDate(a?.date));
+                if (!Number.isFinite(refDayMs)) refDayMs = Date.now();
+
+                const prunedManifestEntries = Object.entries(manifestsMerged)
+                    .filter(([k, v]) => {
+                        if (!v || typeof v !== 'object') return false;
+                        if (k === '__lastSent') return true;
+                        const mDate = String(k).match(/^date_(\d{4}-\d{2}-\d{2})$/);
+                        const iso = mDate ? mDate[1] : String(v.sentAt || '').slice(0, 10);
+                        if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+                            const dMs = Date.parse(iso + 'T12:00:00Z');
+                            if (Number.isFinite(dMs) && (refDayMs - dMs) > 10 * 86400000) return false;
+                        }
+                        return true;
+                    })
+                    .sort((a, b) => {
+                        if (a[0] === '__lastSent') return -1;
+                        if (b[0] === '__lastSent') return 1;
+                        return String(b[1]?.sentAt || b[0]).localeCompare(String(a[1]?.sentAt || a[0]));
+                    })
+                    .slice(0, 12);
+                const leanManifests = Object.fromEntries(prunedManifestEntries);
+                if (approvedWatchIds.length > 0) leanManifests.__approvedWatchIds = approvedWatchIds;
+                if (dismissedWatchIds.length > 0) leanManifests.__dismissedWatchIds = dismissedWatchIds;
 
                 const localWatchVault = safeParse(`celik_garmin_watch_vault_v1_${uid}`, null);
                 if (localWatchVault && typeof localWatchVault === 'object' && !Array.isArray(localWatchVault)) {
-                    manifestsMerged.__watchVault = {
+                    leanManifests.__watchVault = {
                         enabled: localWatchVault.enabled !== false,
                         sealedTredict: typeof localWatchVault.sealedTredict === 'string' ? localWatchVault.sealedTredict : '',
                         sealedIntervals: typeof localWatchVault.sealedIntervals === 'string' ? localWatchVault.sealedIntervals : '',
@@ -1938,11 +1995,34 @@
                     };
                 }
 
-                const rawWatchTelemetry = safeParse(`celik_garmin_telemetry_v2_${uid}`, null);
                 if (Array.isArray(rawWatchTelemetry) && rawWatchTelemetry.length > 0) {
-                    manifestsMerged.__watchActivities = rawWatchTelemetry
-                        .filter(a => a && typeof a === 'object' && a.id)
-                        .slice(0, 15)
+                    const approvedSet = new Set(approvedWatchIds);
+                    const dismissedSet = new Set(dismissedWatchIds);
+                    const deletedSet = new Set(deletedWorkoutLogIds);
+                    const historyActIds = new Set();
+                    if (Array.isArray(localHistoryLogs)) {
+                        localHistoryLogs.forEach(l => {
+                            if (!l) return;
+                            if (l.garminActivityId) historyActIds.add(String(l.garminActivityId));
+                            const lid = String(l.id || '');
+                            if (lid.startsWith('garmin_')) historyActIds.add(lid.slice('garmin_'.length));
+                        });
+                    }
+                    const compactWatchList = rawWatchTelemetry
+                        .filter(a => {
+                            if (!a || typeof a !== 'object' || !a.id) return false;
+                            const aid = String(a.id);
+                            if (dismissedSet.has(aid) || approvedSet.has(aid) || historyActIds.has(aid) || deletedSet.has(aid) || deletedSet.has(`garmin_${aid}`)) {
+                                return false;
+                            }
+                            const iso = String(a.date || '').slice(0, 10);
+                            if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+                                const dMs = Date.parse(iso + 'T12:00:00Z');
+                                if (Number.isFinite(dMs) && (refDayMs - dMs) > 7 * 86400000) return false;
+                            }
+                            return true;
+                        })
+                        .slice(0, 5)
                         .map(a => {
                             const sm = (a.summary && typeof a.summary === 'object') ? a.summary : a;
                             return {
@@ -1965,6 +2045,9 @@
                                 sourceProvider: String(a.sourceProvider || '')
                             };
                         });
+                    if (compactWatchList.length > 0) {
+                        leanManifests.__watchActivities = compactWatchList;
+                    }
                 }
 
                 const rawWellnessSteps = safeParse(`celik_garmin_wellness_steps_v1_${uid}`, null);
@@ -1979,7 +2062,7 @@
                             const entry = rawWellnessSteps[dt];
                             if (entry && typeof entry === 'object') compactWellness[dt] = entry;
                         });
-                        manifestsMerged.__wellnessSteps = compactWellness;
+                        leanManifests.__wellnessSteps = compactWellness;
                     }
                 }
 
@@ -1993,6 +2076,7 @@
                     excludedExercisesUpdatedAt: exclUpdatedAt,
                     customPrograms: safeCustomPrograms,
                     deletedCustomProgramIds: safeDeletedIds,
+                    deletedWorkoutLogIds,
                     mobilityTests: safeMobilityTests,
                     selectedEquipments: Array.isArray(selectedEquipments) ? selectedEquipments : [],
                     customGyms: safeParse(`celik_kodu_custom_gyms_${uid}`, []),
@@ -2000,7 +2084,7 @@
                     aiCoachSummary: safeParse(`celik_kodu_ai_program_${uid}`, null),
                     lastGeneratedWorkout: safeLastGen,
                     activeWorkoutDraft: safeParse(`celik_kodu_active_state_${uid}`, null),
-                    garminManifests: manifestsMerged,
+                    garminManifests: leanManifests,
                     clientUpdatedAt,
                     syncSeal: seal,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -2234,14 +2318,68 @@
                 if (data.activeWorkoutDraft && typeof data.activeWorkoutDraft === 'object' && !localStorage.getItem(`celik_kodu_active_state_${uid}`)) {
                     localStorage.setItem(`celik_kodu_active_state_${uid}`, JSON.stringify(data.activeWorkoutDraft));
                 }
+
+                // Silinen geçmiş kayıtlarını çift yönlü birleştir (yeni eklenen silme kararları buluta da çıkar)
+                const delLogKey = `celik_kodu_deleted_logs_${uid}`;
+                const localDeletedLogs = Array.isArray(safeParseCloud(delLogKey, []))
+                    ? safeParseCloud(delLogKey, []).map(String).filter(Boolean)
+                    : [];
+                const cloudDeletedLogs = Array.isArray(data.deletedWorkoutLogIds)
+                    ? data.deletedWorkoutLogIds.map(String).filter(Boolean)
+                    : [];
+                const cloudDeletedLogsSet = new Set(cloudDeletedLogs);
+                if (localDeletedLogs.some(id => !cloudDeletedLogsSet.has(id))) {
+                    hasUnsyncedLocalDiff = true;
+                }
+                const mergedDeletedLogs = Array.from(new Set([...cloudDeletedLogs, ...localDeletedLogs])).slice(-60);
+                if (mergedDeletedLogs.length > 0) {
+                    localStorage.setItem(delLogKey, JSON.stringify(mergedDeletedLogs));
+                }
+                const mergedDeletedLogsSet = new Set(mergedDeletedLogs);
+
                 if (data.garminManifests && typeof data.garminManifests === 'object') {
                     const cloudManifests = Object.assign({}, data.garminManifests);
                     const cloudWatchVault = cloudManifests.__watchVault;
                     const cloudWatchActivities = cloudManifests.__watchActivities;
                     const cloudWellnessSteps = cloudManifests.__wellnessSteps;
+                    const cloudApprovedWatchIds = Array.isArray(cloudManifests.__approvedWatchIds)
+                        ? cloudManifests.__approvedWatchIds.map(String).filter(Boolean)
+                        : [];
+                    const cloudDismissedWatchIds = Array.isArray(cloudManifests.__dismissedWatchIds)
+                        ? cloudManifests.__dismissedWatchIds.map(String).filter(Boolean)
+                        : [];
                     delete cloudManifests.__watchVault;
                     delete cloudManifests.__watchActivities;
                     delete cloudManifests.__wellnessSteps;
+                    delete cloudManifests.__approvedWatchIds;
+                    delete cloudManifests.__dismissedWatchIds;
+
+                    const appWatchKey = `celik_garmin_approved_activities_v1_${uid}`;
+                    const localApprovedWatchIds = Array.isArray(safeParseCloud(appWatchKey, []))
+                        ? safeParseCloud(appWatchKey, []).map(String).filter(Boolean)
+                        : [];
+                    const cloudAppSet = new Set(cloudApprovedWatchIds);
+                    if (localApprovedWatchIds.some(id => !cloudAppSet.has(id))) {
+                        hasUnsyncedLocalDiff = true;
+                    }
+                    const mergedApprovedWatchIds = Array.from(new Set([...cloudApprovedWatchIds, ...localApprovedWatchIds])).slice(-100);
+                    if (mergedApprovedWatchIds.length > 0) {
+                        localStorage.setItem(appWatchKey, JSON.stringify(mergedApprovedWatchIds));
+                    }
+
+                    const disWatchKey = `celik_garmin_dismissed_activities_v1_${uid}`;
+                    const localDismissedWatchIds = Array.isArray(safeParseCloud(disWatchKey, []))
+                        ? safeParseCloud(disWatchKey, []).map(String).filter(Boolean)
+                        : [];
+                    const cloudDisSet = new Set(cloudDismissedWatchIds);
+                    if (localDismissedWatchIds.some(id => !cloudDisSet.has(id))) {
+                        hasUnsyncedLocalDiff = true;
+                    }
+                    const mergedDismissedWatchIds = Array.from(new Set([...cloudDismissedWatchIds, ...localDismissedWatchIds])).slice(-100);
+                    if (mergedDismissedWatchIds.length > 0) {
+                        localStorage.setItem(disWatchKey, JSON.stringify(mergedDismissedWatchIds));
+                    }
+                    const mergedDismissedSet = new Set(mergedDismissedWatchIds);
 
                     if (cloudWatchVault && typeof cloudWatchVault === 'object' && !Array.isArray(cloudWatchVault)) {
                         const vKey = `celik_garmin_watch_vault_v1_${uid}`;
@@ -2283,18 +2421,22 @@
                             return base;
                         };
                         cloudWatchActivities.forEach(a => {
-                            if (a && a.id) actMap.set(String(a.id), a);
+                            if (!a || !a.id) return;
+                            const aid = String(a.id);
+                            if (mergedDismissedSet.has(aid) || mergedDeletedLogsSet.has(aid) || mergedDeletedLogsSet.has(`garmin_${aid}`)) return;
+                            actMap.set(aid, a);
                         });
                         if (Array.isArray(localActs)) {
                             localActs.forEach(a => {
                                 if (!a || !a.id) return;
-                                const key = String(a.id);
-                                actMap.set(key, pickPreferredWatchAct(actMap.get(key), a));
+                                const aid = String(a.id);
+                                if (mergedDismissedSet.has(aid) || mergedDeletedLogsSet.has(aid) || mergedDeletedLogsSet.has(`garmin_${aid}`)) return;
+                                actMap.set(aid, pickPreferredWatchAct(actMap.get(aid), a));
                             });
                         }
                         const mergedActs = Array.from(actMap.values())
                             .sort((a, b) => String(b?.date || '').localeCompare(String(a?.date || '')))
-                            .slice(0, 30);
+                            .slice(0, 12);
                         localStorage.setItem(tKey, JSON.stringify(mergedActs));
                     }
 
@@ -2322,7 +2464,17 @@
                     delete localM.__watchVault;
                     delete localM.__watchActivities;
                     delete localM.__wellnessSteps;
-                    localStorage.setItem(mKey, JSON.stringify(Object.assign({}, cloudManifests, localM)));
+                    delete localM.__approvedWatchIds;
+                    delete localM.__dismissedWatchIds;
+                    const combinedManifestEntries = Object.entries(Object.assign({}, cloudManifests, localM))
+                        .filter(([, v]) => v && typeof v === 'object')
+                        .sort((a, b) => {
+                            if (a[0] === '__lastSent') return -1;
+                            if (b[0] === '__lastSent') return 1;
+                            return String(b[1]?.sentAt || b[0]).localeCompare(String(a[1]?.sentAt || a[0]));
+                        })
+                        .slice(0, 12);
+                    localStorage.setItem(mKey, JSON.stringify(Object.fromEntries(combinedManifestEntries)));
 
                     if (typeof window !== 'undefined' && window.GarminTredictChief && typeof window.GarminTredictChief.refreshFromCentralVault === 'function') {
                         try { window.GarminTredictChief.refreshFromCentralVault(uid); } catch {}

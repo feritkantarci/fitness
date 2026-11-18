@@ -795,7 +795,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'GET' && action === 'activities') {
-      const days = Math.min(90, Math.max(7, Number(url.searchParams.get('days') || 30)));
+      const days = Math.min(90, Math.max(7, Number(url.searchParams.get('days') || 14)));
       const { dateStr: todayStr } = getClientNowParts(tzOffsetMinutes);
       const oldest = addDaysToIsoDate(todayStr, -days);
       const newest = addDaysToIsoDate(todayStr, 1);
@@ -809,6 +809,7 @@ export default async function handler(req, res) {
           const lines = csvPart.split(/\r?\n/).filter(Boolean);
           const headers = (lines[0] || '').split(',').map(h => h.trim());
           const idIdx = headers.indexOf('id');
+          const dateIdx = headers.indexOf('date') >= 0 ? headers.indexOf('date') : headers.indexOf('activityStartDate');
           const sportIdx = headers.indexOf('sportType');
           const subIdx = headers.indexOf('subSportType');
           for (let i = 1; i < lines.length; i++) {
@@ -817,6 +818,10 @@ export default async function handler(req, res) {
             const sp = cols[sportIdx];
             const sub = cols[subIdx];
             if (!id) continue;
+            if (dateIdx >= 0) {
+              const canDate = extractCanonicalDate(cols[dateIdx], tzOffsetMinutes);
+              if (canDate && canDate < oldest) continue;
+            }
             if (
               sub === 'strength_training' ||
               sub === 'indoor_rowing' ||
@@ -834,18 +839,22 @@ export default async function handler(req, res) {
           }
         } else if (Array.isArray(listRes?.activities)) {
           candidateIds = listRes.activities
-            .filter(a => (
-              a.subSportType === 'strength_training' ||
-              a.subSportType === 'indoor_rowing' ||
-              a.subSportType === 'rowing' ||
-              a.subSportType === 'walking' ||
-              a.subSportType === 'hiking' ||
-              a.subSportType === 'casual_walking' ||
-              a.subSportType === 'speed_walking' ||
-              a.sportType === 'walking' ||
-              a.sportType === 'hiking' ||
-              a.sportType === 'running'
-            ))
+            .filter(a => {
+              const canDate = extractCanonicalDate(a.date || a.activityStartDate, tzOffsetMinutes);
+              if (canDate && canDate < oldest) return false;
+              return (
+                a.subSportType === 'strength_training' ||
+                a.subSportType === 'indoor_rowing' ||
+                a.subSportType === 'rowing' ||
+                a.subSportType === 'walking' ||
+                a.subSportType === 'hiking' ||
+                a.subSportType === 'casual_walking' ||
+                a.subSportType === 'speed_walking' ||
+                a.sportType === 'walking' ||
+                a.sportType === 'hiking' ||
+                a.sportType === 'running'
+              );
+            })
             .map(a => a.id);
         }
 
@@ -868,6 +877,10 @@ export default async function handler(req, res) {
             const detRes = await tredict.callTool('activity', { activityId: actId });
             const detObj = unwrapMcpJsonEntity(detRes);
             if (!detObj || (!detObj._id && !detObj.id)) continue;
+
+            const actDate = detObj.date || detObj.activityStartDate;
+            const canDetDate = extractCanonicalDate(actDate, tzOffsetMinutes);
+            if (canDetDate && canDetDate < oldest) continue;
 
             const canonicalId = detObj._id || detObj.id;
             const resolvedPlannedId = detObj.plannedWorkoutId || plannedIdByExecutedId[canonicalId] || null;

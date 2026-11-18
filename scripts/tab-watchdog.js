@@ -2186,6 +2186,193 @@ function runAcademicMathSuite(moduleSources, dbText) {
         const ok = Object.values(res).every(Boolean);
         return { ok, actual: JSON.stringify(res) };
       }
+    },
+    {
+      id: 'T40',
+      owner: 'garmin-tredict-guard',
+      title: 'Zaman Penceresi Eşleşmesi, Eski Kayıt Filtresi & Aynı Gün 4 Antrenman Analizi',
+      expected: 'aynı saat dilimindeki telefon+saat tek seansta birleşir (0 bildirim), eski 3 Ekim onaya düşmez, aynı gün 4 ayrı antrenman bulut birleşmesinde ve Analizde eksiksiz sayılır',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const uid = 'usr_exam';
+          localStorage.setItem('celik_garmin_enabled_' + uid, 'true');
+          localStorage.removeItem('celik_garmin_approved_activities_v1_' + uid);
+          localStorage.removeItem('celik_garmin_dismissed_activities_v1_' + uid);
+
+          const nov16AppLog = {
+            id: 'log_1794849864968',
+            date: '2026-11-16',
+            timestamp: Date.parse('2026-11-16T17:24:24.973Z'),
+            duration: 54,
+            durationSecs: 3241,
+            program: 'Tüm Vücut Antrenmanı',
+            title: 'Tüm Vücut Antrenmanı',
+            totalVolumeKg: 2400,
+            totalSetsCompleted: 3,
+            exercises: [
+              { id: 'db_bench_press', name: 'Dambıl Bench Press', sets: [{ setNo: 1, weight: 20, reps: 10, completed: true, volume: 200 }, { setNo: 2, weight: 20, reps: 10, completed: true, volume: 200 }, { setNo: 3, weight: 20, reps: 10, completed: true, volume: 200 }] }
+            ]
+          };
+          const nov16WatchAct = {
+            id: 'nov16_watch_1',
+            date: '2026-11-16T16:31:00.000Z',
+            title: 'Pazartesi: Üst Vücut',
+            sportType: 'misc',
+            subSportType: 'strength_training',
+            summary: { duration: 3120, durationTotal: 3120, calories: 519, heartrate: 103, heartrateMax: 148 },
+            rounds: [
+              { setType: 'active', exerciseCategory: 'chest', exerciseName: 'dumbbell_chest_press', repetitions: 10, weight: 20, duration: 40, heartrate: 101, heartrateMax: 135, startTime: '2026-11-16T16:31:30.000Z' },
+              { setType: 'active', exerciseCategory: 'chest', exerciseName: 'dumbbell_chest_press', repetitions: 10, weight: 20, duration: 40, heartrate: 103, heartrateMax: 144, startTime: '2026-11-16T16:33:00.000Z' },
+              { setType: 'active', exerciseCategory: 'chest', exerciseName: 'dumbbell_chest_press', repetitions: 10, weight: 20, duration: 40, heartrate: 105, heartrateMax: 148, startTime: '2026-11-16T16:34:30.000Z' }
+            ]
+          };
+          const oct03StaleWatchAct = {
+            id: 'oct03_stale_watch',
+            date: '2026-10-03T09:11:16.040Z',
+            title: 'Güç',
+            sportType: 'misc',
+            subSportType: 'strength_training',
+            summary: { duration: 2400, durationTotal: 2400, calories: 300, heartrate: 125, heartrateMax: 150 },
+            rounds: [
+              { setType: 'active', exerciseCategory: 'chest', exerciseName: 'dumbbell_chest_press', repetitions: 10, weight: 20, duration: 40, heartrate: 125, heartrateMax: 150 }
+            ]
+          };
+
+          localStorage.setItem('celik_kodu_history_' + uid, JSON.stringify([nov16AppLog]));
+          localStorage.setItem('celik_garmin_telemetry_v2_' + uid, JSON.stringify([nov16WatchAct, oct03StaleWatchAct]));
+
+          const gt = window.GarminTredictChief;
+          gt.handoffCompletedActivitiesToTabChiefs();
+          gt.renderHistoryGarminSyncPanel();
+
+          const afterNov16Logs = JSON.parse(localStorage.getItem('celik_kodu_history_' + uid) || '[]');
+          const mergedNov16 = afterNov16Logs.find(l => l && l.id === 'log_1794849864968') || {};
+          const panelHtml = String(document.getElementById('garminHistorySyncContainer').innerHTML || '');
+          const hasPendingBadge = /\d+\s*Bildirim/.test(panelHtml);
+
+          // Senaryo 2: Aynı gün 4 farklı antrenman (09:00, 13:00, 16:30, 20:00) bulut birleştirmesi + haftalık analiz
+          const todayYMD = toIsoDateKeyLocal(new Date());
+          const mkSet = (n, w, r) => ({ setNo: n, weight: w, reps: r, completed: true, volume: w * r });
+          const s1 = {
+            id: 'log_s1',
+            date: todayYMD,
+            timestamp: new Date(todayYMD + 'T09:45:00').getTime(),
+            duration: 45,
+            durationSecs: 2700,
+            program: 'Sabah İtiş',
+            title: 'Sabah İtiş',
+            totalSetsCompleted: 3,
+            totalVolumeKg: 600,
+            exercises: [{ id: 'db_bench_press', name: 'Dambıl Bench Press', muscle: 'Göğüs', category: 'push', sets: [mkSet(1, 20, 10), mkSet(2, 20, 10), mkSet(3, 20, 10)], completedSetsCount: 3 }]
+          };
+          const s2 = {
+            id: 'garmin_s2',
+            garminActivityId: 's2',
+            sourceChief: 'garmin-tredict-guard',
+            date: todayYMD,
+            timestamp: new Date(todayYMD + 'T13:00:00').getTime(),
+            duration: 45,
+            durationSecs: 2700,
+            program: 'Öğle Çekiş',
+            title: 'Öğle Çekiş',
+            totalSetsCompleted: 4,
+            totalVolumeKg: 1600,
+            exercises: [{ id: 'mach_lat_pulldown', name: 'Lat Pulldown', muscle: 'Sırt', category: 'pull', sets: [mkSet(1, 40, 10), mkSet(2, 40, 10), mkSet(3, 40, 10), mkSet(4, 40, 10)], completedSetsCount: 4 }]
+          };
+          const s3 = {
+            id: 'log_s3',
+            date: todayYMD,
+            timestamp: new Date(todayYMD + 'T17:15:00').getTime(),
+            duration: 45,
+            durationSecs: 2700,
+            program: 'İkindi Bacak',
+            title: 'İkindi Bacak',
+            totalSetsCompleted: 5,
+            totalVolumeKg: 1000,
+            exercises: [{ id: 'db_goblet_squat', name: 'Dambıl Goblet Squat', muscle: 'Ön Bacak', category: 'legs_quad', sets: [mkSet(1, 20, 10), mkSet(2, 20, 10), mkSet(3, 20, 10), mkSet(4, 20, 10), mkSet(5, 20, 10)], completedSetsCount: 5 }]
+          };
+          const s4 = {
+            id: 'garmin_s4',
+            garminActivityId: 's4',
+            sourceChief: 'garmin-tredict-guard',
+            date: todayYMD,
+            timestamp: new Date(todayYMD + 'T20:00:00').getTime(),
+            duration: 45,
+            durationSecs: 2700,
+            program: 'Akşam Arka Zincir',
+            title: 'Akşam Arka Zincir',
+            totalSetsCompleted: 3,
+            totalVolumeKg: 600,
+            exercises: [{ id: 'db_rdl', name: 'Dambıl RDL', muscle: 'Arka Bacak', category: 'legs_hinge', sets: [mkSet(1, 20, 10), mkSet(2, 20, 10), mkSet(3, 20, 10)], completedSetsCount: 3 }]
+          };
+
+          const mergedFour = mergeWorkoutLogCollections([s1, s2], [s3, s4], uid).mergedLogs;
+          localStorage.setItem('celik_kodu_history_' + uid, JSON.stringify(mergedFour));
+          const fitnessReport = calculateWeeklyFitnessAndCardioScores(0);
+          const muscleReport = calculateWeeklyMuscleSufficiency('week_done', 0);
+          const mSets = (id) => {
+            const m = (muscleReport.muscles || []).find(x => x.id === id);
+            return m ? (m.effectiveDone || 0) : 0;
+          };
+
+          // Senaryo 3: Kardiyo bildirimi kapatılınca geçmiş kaydı silinmez
+          const walkAct = {
+            id: 'cardio_keep_14',
+            date: '2026-11-14T16:00:00.000Z',
+            title: 'Yürüyüş',
+            sportType: 'walking',
+            subSportType: 'walking',
+            summary: { duration: 1200, durationTotal: 1200, distance: 1800, calories: 120, heartrate: 118, heartrateMax: 138 },
+            rounds: []
+          };
+          const walkLog = {
+            id: 'garmin_cardio_keep_14',
+            garminActivityId: 'cardio_keep_14',
+            sourceChief: 'garmin-tredict-guard',
+            isCardioActivity: true,
+            date: '2026-11-14',
+            timestamp: Date.parse('2026-11-14T16:00:00.000Z'),
+            program: 'Yürüyüş',
+            title: 'Yürüyüş',
+            exercises: [{ id: 'cond_walking', name: 'Tempo Yürüyüş', sets: [{ setNo: 1, weight: 0, reps: 20, completed: true }] }]
+          };
+          localStorage.setItem('celik_garmin_telemetry_v2_' + uid, JSON.stringify([walkAct]));
+          localStorage.setItem('celik_kodu_history_' + uid, JSON.stringify([...mergedFour, walkLog]));
+          gt.dismissGarminStrengthActivity('cardio_keep_14');
+          const afterDismissLogs = JSON.parse(localStorage.getItem('celik_kodu_history_' + uid) || '[]');
+          const walkStillInHistory = afterDismissLogs.some(l => l && l.id === 'garmin_cardio_keep_14');
+          const panelAfterDismiss = String(document.getElementById('garminHistorySyncContainer').innerHTML || '');
+
+          return {
+            nov16Count: afterNov16Logs.length,
+            nov16HrAvg: mergedNov16?.healthSummary?.heartrateAvg || 0,
+            nov16HrMax: mergedNov16?.healthSummary?.heartrateMax || 0,
+            nov16Cal: mergedNov16?.healthSummary?.calories || 0,
+            nov16LinkedId: mergedNov16?.garminActivityId || '',
+            zeroPendingNotifications: !hasPendingBadge && !panelHtml.includes('oct03_stale_watch') && !panelHtml.includes('nov16_watch_1'),
+            fourSessionsSurvived: mergedFour.length === 4,
+            weeklyStrengthSessions: (fitnessReport.fitness && fitnessReport.fitness.strengthSessionsList ? fitnessReport.fitness.strengthSessionsList.length : 0),
+            weeklyStrengthSets: (fitnessReport.fitness && fitnessReport.fitness.totalStrengthSetsDone ? fitnessReport.fitness.totalStrengthSetsDone : 0),
+            musclesCounted: mSets('chest') >= 2.5 && mSets('back') >= 3.5 && mSets('quads') >= 4.5 && mSets('hamstrings') >= 2.5,
+            walkStillInHistory,
+            cardioNotifClosed: !panelAfterDismiss.includes('cardio_keep_14')
+          };
+        })()`, ctx);
+        const ok = res.nov16Count === 1
+          && res.nov16HrAvg === 103
+          && res.nov16HrMax === 148
+          && res.nov16Cal === 519
+          && res.nov16LinkedId === 'nov16_watch_1'
+          && res.zeroPendingNotifications
+          && res.fourSessionsSurvived
+          && res.weeklyStrengthSessions === 4
+          && res.weeklyStrengthSets === 15
+          && res.musclesCounted
+          && res.walkStillInHistory
+          && res.cardioNotifClosed;
+        return { ok, actual: JSON.stringify(res) };
+      }
     }
   ];
 
