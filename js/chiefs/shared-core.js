@@ -3533,7 +3533,7 @@
                 const name = _normMetricKey(t.name);
                 if (id.includes('plank_jack') || name.includes('plank jack') || name.includes('aç-kapa')) return false;
             }
-            const timeKeywords = ['plank', 'hollow', 'carry', 'farmers_walk', 'suitcase_carry', 'waiter', 'cross_body', 'taşıma', 'çiftçi yürüyüşü', 'bavul', 'dead hang', 'wall sit', 'l-sit', 'izometrik'];
+            const timeKeywords = ['plank', 'hollow', 'carry', 'farmers_walk', 'suitcase_carry', 'waiter', 'cross_body_carry', 'taşıma', 'çiftçi yürüyüşü', 'bavul', 'dead hang', 'wall sit', 'l-sit', 'izometrik'];
             for (const t of targets) {
                 const id = _normMetricKey(t.id || t.exId);
                 const name = _normMetricKey(t.name);

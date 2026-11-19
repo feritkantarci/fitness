@@ -491,8 +491,8 @@ function runAcademicMathSuite(moduleSources, dbText) {
     {
       id: 'T6',
       owner: 'library-guard',
-      title: '3-Mod DB Denetimi (3 Cardio/6 Time/131 Rep) & Miras Hollow Body',
-      expected: 'cardio=3, time=6, reps=131; Hollow 12→10→8 normal_fatigue(sn), 40→20 early_drop',
+      title: '3-Mod DB Denetimi (3 Cardio/7 Time/146 Rep) & Miras Hollow Body',
+      expected: 'cardio=3, time=7, reps=146; Hollow 12→10→8 normal_fatigue(sn), 40→20 early_drop',
       run: () => {
         ctx.__seedState();
         const counts = vm.runInContext(`(() => {
@@ -522,7 +522,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
             ]
           }]
         }]).items[0];
-        const ok = counts.cardio_min === 3 && counts.time_sec === 6 && counts.reps === 131
+        const ok = counts.cardio_min === 3 && counts.time_sec === 7 && counts.reps === 146
           && hMode === 'time_sec'
           && Boolean(h1 && h1.category === 'normal_fatigue' && String(h1.setChainText).includes('sn') && !String(h1.adviceText).includes('kiloya'))
           && Boolean(h2 && h2.category === 'early_drop' && String(h2.badgeText).includes('Süre Düşüşü'));

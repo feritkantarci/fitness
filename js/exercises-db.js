@@ -7875,5 +7875,824 @@
       "LOWER_BACK"
     ],
     "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "push",
+    "cue": "Kalçayı yukarıda sabitleyip gövdeyi aşağı eğimli açıya getir; dambılları alt göğüs hizasından it.",
+    "diagram": "assets/exercises/db_glute_bridge_chest_press.gif",
+    "equipment": "dumbbell",
+    "id": "db_glute_bridge_chest_press",
+    "isComplex": false,
+    "mechanic": "compound",
+    "muscle": "Alt Göğüs, Arka Kol Dış Baş, Arka Kol Alt Baş",
+    "name": "Kalça Köprüsü Dambıl Presi",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Yere sırtüstü uzan, dizler bükülü ve ayak tabanları yerde. Kalçayı tavana kaldırıp köprü pozisyonunu sabitle.",
+        "phase": "1. Köprü Kurulumu"
+      },
+      {
+        "badge": "action",
+        "desc": "Gövde aşağı eğimli açıdayken dirsekleri yere hafifçe değdirip dambılları alt göğüs hizasında tut.",
+        "phase": "2. Kontrollü İniş"
+      },
+      {
+        "badge": "finish",
+        "desc": "Kalçayı düşürmeden dambılları alt göğsü sıkarak yukarı it ve tepe noktada kilitle.",
+        "phase": "3. Alt Göğüs İtişi"
+      }
+    ],
+    "primaryMuscles": [
+      "chest",
+      "triceps"
+    ],
+    "secondaryMuscles": [
+      "shoulders",
+      "glutes"
+    ],
+    "tags": [
+      "full_body",
+      "upper_push",
+      "upper"
+    ],
+    "weightKey": "press",
+    "primarySubMuscles": "Alt Göğüs, Arka Kol Dış Baş, Arka Kol Alt Baş",
+    "secondarySubMuscles": "Orta Göğüs, Ön Omuz, Ana Kalça",
+    "biomechanicalProof": "Yerde kalça köprüsü kurulduğunda gövde aşağı eğimli açıya geçer; dambılları alt göğüs hizasına indirip itmek sehpa olmadan alt göğüs liflerini doğrudan hedefler.",
+    "fitCategory": "bench_press",
+    "fitName": "dumbbell_floor_press",
+    "fitNote": "Kalça Köprüsü Dambıl Presi [id:db_glute_bridge_chest_press]",
+    "garminPrimaryMuscles": [
+      "CHEST"
+    ],
+    "garminSecondaryMuscles": [
+      "TRICEPS",
+      "SHOULDERS",
+      "GLUTES"
+    ]
+  },
+  {
+    "category": "push",
+    "cue": "Makaraları baş üstü hizasına al, tutacakları öne ve hafif aşağı iterek alt göğsü sık.",
+    "diagram": "assets/exercises/mach_decline_cable_press.gif",
+    "equipment": "machine",
+    "id": "mach_decline_cable_press",
+    "isComplex": false,
+    "mechanic": "compound",
+    "muscle": "Alt Göğüs, Arka Kol Dış Baş, Arka Kol Alt Baş",
+    "name": "Aşağı Açılı Kablo Göğüs Presi",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Makaraları baş üstü hizasına ayarla, sırtın kabloya dönük bir adım öne çıkıp tutacakları göğüs yanına al.",
+        "phase": "1. Yüksek Kablo Kurulumu"
+      },
+      {
+        "badge": "action",
+        "desc": "Gövdeyi hafif öne eğik sabitleyip tutacakları öne ve hafif aşağı doğru güçlüce it.",
+        "phase": "2. Aşağı Açılı İtiş"
+      },
+      {
+        "badge": "finish",
+        "desc": "Eller alt göğüs önünde birleşirken kasları sık ve kablo gerginliğini bozmadan başlangıca dön.",
+        "phase": "3. Tepe Sıkıştırma"
+      }
+    ],
+    "primaryMuscles": [
+      "chest",
+      "triceps"
+    ],
+    "secondaryMuscles": [
+      "shoulders"
+    ],
+    "tags": [
+      "full_body",
+      "upper_push",
+      "upper"
+    ],
+    "weightKey": "press",
+    "primarySubMuscles": "Alt Göğüs, Arka Kol Dış Baş, Arka Kol Alt Baş",
+    "secondarySubMuscles": "Orta Göğüs, Ön Omuz",
+    "biomechanicalProof": "Yüksek makaradan öne ve aşağı doğru yapılan itiş, kablodaki kesintisiz direnci doğrudan alt göğüs liflerinin çekiş hattına hizalar.",
+    "fitCategory": "bench_press",
+    "fitName": "cable_chest_press",
+    "fitNote": "Aşağı Açılı Kablo Göğüs Presi [id:mach_decline_cable_press]",
+    "garminPrimaryMuscles": [
+      "CHEST"
+    ],
+    "garminSecondaryMuscles": [
+      "TRICEPS",
+      "SHOULDERS"
+    ]
+  },
+  {
+    "category": "push",
+    "cue": "Tek makarayı en üste al, kolu aşağı ve gövde orta çizgisinin biraz ötesine çapraz kapat.",
+    "diagram": "assets/exercises/mach_single_arm_decline_cable_fly.gif",
+    "equipment": "machine",
+    "id": "mach_single_arm_decline_cable_fly",
+    "isComplex": false,
+    "mechanic": "isolation",
+    "muscle": "Alt Göğüs, Orta Göğüs",
+    "name": "Tek Kol Yüksekten Aşağıya Kablo Çekişi",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Tek makarayı en üst seviyeye ayarla, tutacağı kavrayıp bir adım yana ve öne çık.",
+        "phase": "1. Tek Kol Kablo Duruşu"
+      },
+      {
+        "badge": "action",
+        "desc": "Dirsekteki hafif sabit açıyı koruyarak kolu yukarıdan aşağı ve içe doğru yay çizerek çek.",
+        "phase": "2. Aşağı Çapraz Çekiş"
+      },
+      {
+        "badge": "finish",
+        "desc": "El göbek-alt göğüs orta çizgisinin biraz ötesine geçtiğinde 1 saniye sık ve kontrollü aç.",
+        "phase": "3. Orta Çizgi Sıkışması"
+      }
+    ],
+    "primaryMuscles": [
+      "chest"
+    ],
+    "secondaryMuscles": [
+      "shoulders",
+      "core"
+    ],
+    "tags": [
+      "upper_push",
+      "upper"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Alt Göğüs, Orta Göğüs",
+    "secondarySubMuscles": "Ön Omuz, Yan Karın",
+    "biomechanicalProof": "Tek kolla yukarıdan aşağıya orta çizgiyi geçecek şekilde yapılan çekiş, alt ve iç göğüs liflerinde maksimum kısalma sağlar.",
+    "fitCategory": "fly",
+    "fitName": "cable_crossover",
+    "fitNote": "Tek Kol Yüksekten Aşağıya Kablo Çekişi [id:mach_single_arm_decline_cable_fly]",
+    "garminPrimaryMuscles": [
+      "CHEST"
+    ],
+    "garminSecondaryMuscles": [
+      "SHOULDERS",
+      "ABS"
+    ]
+  },
+  {
+    "category": "push",
+    "cue": "Koltuğu tutacaklar alt göğüs hizasına gelecek şekilde ayarla ve omuzları geride tutarak ileri it.",
+    "diagram": "assets/exercises/mach_decline_chest_press.gif",
+    "equipment": "machine",
+    "id": "mach_decline_chest_press",
+    "isComplex": false,
+    "mechanic": "compound",
+    "muscle": "Alt Göğüs, Arka Kol Dış Baş, Arka Kol Alt Baş",
+    "name": "Makinede Aşağı İtiş (Decline Chest Press)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Koltuğu tutacaklar göğsün alt çizgisine denk gelecek yükseklikte ayarla, sırtı ve kürek kemiklerini mindere yasla.",
+        "phase": "1. Makine Kurulumu"
+      },
+      {
+        "badge": "action",
+        "desc": "Nefes vererek kolları öne ve hafif aşağı açıda güçlüce it, omuzları öne düşürme.",
+        "phase": "2. Kontrollü Aşağı İtiş"
+      },
+      {
+        "badge": "finish",
+        "desc": "Dirsekleri tamamen kilitlemeden alt göğsü sık ve ağırlığı çarptırmadan başlangıca indir.",
+        "phase": "3. Tam Kasılma & Dönüş"
+      }
+    ],
+    "primaryMuscles": [
+      "chest",
+      "triceps"
+    ],
+    "secondaryMuscles": [
+      "shoulders"
+    ],
+    "tags": [
+      "full_body",
+      "upper_push",
+      "upper"
+    ],
+    "weightKey": "press",
+    "primarySubMuscles": "Alt Göğüs, Arka Kol Dış Baş, Arka Kol Alt Baş",
+    "secondarySubMuscles": "Orta Göğüs, Ön Omuz",
+    "biomechanicalProof": "Makine rayının sabit aşağı açılı itiş yolu, denge ihtiyacını ortadan kaldırarak alt göğse yüksek mekanik gerilim yükler.",
+    "fitCategory": "bench_press",
+    "fitName": "leverage_decline_chest_press",
+    "fitNote": "Makinede Aşağı İtiş [id:mach_decline_chest_press]",
+    "garminPrimaryMuscles": [
+      "CHEST"
+    ],
+    "garminSecondaryMuscles": [
+      "TRICEPS",
+      "SHOULDERS"
+    ]
+  },
+  {
+    "category": "core",
+    "cue": "Beli yere tam yapıştır, zıt kol ve bacağı yere değdirmeden kontrollü açıp kapat.",
+    "diagram": "assets/opengym/stills/0276.webp",
+    "equipment": "bodyweight",
+    "id": "bw_dead_bug",
+    "isComplex": false,
+    "mechanic": "isolation",
+    "muscle": "Derin İç Karın, Ön Karın",
+    "name": "Dead Bug",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Sırtüstü yat, kolları tavana uzat ve dizleri 90 derece bükerek havada tut.",
+        "phase": "1. Başlangıç Duruşu"
+      },
+      {
+        "badge": "action",
+        "desc": "Beli yerden kaldırmadan sağ kolu geriye, sol bacağı öne doğru yere paralel uzat.",
+        "phase": "2. Çapraz Uzatma"
+      },
+      {
+        "badge": "finish",
+        "desc": "Nefes vererek merkeze dön ve diğer çaprazla tekrarla.",
+        "phase": "3. Merkeze Dönüş"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [
+      "quads"
+    ],
+    "tags": [
+      "core",
+      "bodyweight"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Derin İç Karın, Ön Karın",
+    "secondarySubMuscles": "Yan Karın",
+    "biomechanicalProof": "Uzuvlar yere yaklaşırken bel boşluğunu sıfırda tutmak, omurgayı koruyan derin karın kaslarını doğrudan çalıştırır.",
+    "fitCategory": "crunch",
+    "fitName": "dead_bug",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS"
+    ],
+    "garminSecondaryMuscles": [
+      "HIPS"
+    ],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Omuzları yerden kaldır, zıt dirseği dize götürürken diğer bacağı düz uzat.",
+    "diagram": "assets/opengym/stills/0443.webp",
+    "equipment": "bodyweight",
+    "id": "bw_bicycle_crunch",
+    "isComplex": false,
+    "mechanic": "compound",
+    "muscle": "Yan Karın, Ön Karın",
+    "name": "Bicycle Crunch (Bisiklet Mekik)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Sırtüstü yat, eller başın arkasında hafifçe dursun, bacakları yerden kes.",
+        "phase": "1. Hazır Pozisyon"
+      },
+      {
+        "badge": "action",
+        "desc": "Sağ dirseği sol dize yaklaştırırken sağ bacağı öne düz uzat.",
+        "phase": "2. Çapraz Dönüş"
+      },
+      {
+        "badge": "finish",
+        "desc": "Boynu çekmeden akıcı bisiklet ritmiyle diğer tarafa dön.",
+        "phase": "3. Akıcı Değişim"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [
+      "quads"
+    ],
+    "tags": [
+      "core",
+      "bodyweight"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Yan Karın, Ön Karın",
+    "secondarySubMuscles": "Derin İç Karın",
+    "biomechanicalProof": "Gövde rotasyonu ile bacak pedalını birleştirmek hem ön karnı hem yan karın kaslarını aynı anda yüksek gerilime sokar.",
+    "fitCategory": "crunch",
+    "fitName": "bicycle_crunch",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS"
+    ],
+    "garminSecondaryMuscles": [
+      "HIPS"
+    ],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Dizleri göğse çekerken kalçayı yerden hafifçe yuvarlayıp alt karnı sık.",
+    "diagram": "assets/opengym/stills/0872.webp",
+    "equipment": "bodyweight",
+    "id": "bw_reverse_crunch",
+    "isComplex": false,
+    "mechanic": "isolation",
+    "muscle": "Ön Karın, Derin İç Karın",
+    "name": "Reverse Crunch (Ters Mekik)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Sırtüstü yat, elleri iki yanda yere sabitle, dizleri 90 derece kaldır.",
+        "phase": "1. Kalça Sabitleme"
+      },
+      {
+        "badge": "action",
+        "desc": "Dizleri göğse doğru çekip kuyruk sokumunu yerden hafifçe kaldır.",
+        "phase": "2. Alt Karın Sıkışması"
+      },
+      {
+        "badge": "finish",
+        "desc": "Hızla bırakmadan kalçayı ve bacakları kontrollü başlangıca indir.",
+        "phase": "3. Kontrollü İniş"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [],
+    "tags": [
+      "core",
+      "bodyweight"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Ön Karın, Derin İç Karın",
+    "secondarySubMuscles": "Yan Karın",
+    "biomechanicalProof": "Leğen kemiğini göğse doğru yuvarlamak, alt karın bölgesini bacak savurmadan doğrudan izole eder.",
+    "fitCategory": "crunch",
+    "fitName": "reverse_crunch",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS"
+    ],
+    "garminSecondaryMuscles": [],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Boynu çekmeden sadece kürek kemiklerini yerden sıyırıp üst karnı sık.",
+    "diagram": "assets/opengym/stills/0274.webp",
+    "equipment": "bodyweight",
+    "id": "bw_crunch",
+    "isComplex": false,
+    "mechanic": "isolation",
+    "muscle": "Ön Karın",
+    "name": "Abdominal Crunch (Klasik Mekik)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Sırtüstü yat, dizler bükülü, ayaklar yerde; eller göğüste veya şakaklarda.",
+        "phase": "1. Mat Kurulumu"
+      },
+      {
+        "badge": "action",
+        "desc": "Nefes vererek kaburgaları kalçaya yaklaştır ve kürek kemiklerini yerden kaldır.",
+        "phase": "2. Üst Karın Kasılması"
+      },
+      {
+        "badge": "finish",
+        "desc": "Tepe noktada kısa bekle, beli vurmadan yavaşça başlangıca in.",
+        "phase": "3. Kontrollü Dönüş"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [],
+    "tags": [
+      "core",
+      "bodyweight"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Ön Karın",
+    "secondarySubMuscles": "Derin İç Karın",
+    "biomechanicalProof": "Bel yerdeyken göğüs kafesini öne bükmek, üst karın liflerini eklem yükü olmadan izole eder.",
+    "fitCategory": "crunch",
+    "fitName": "crunch",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS"
+    ],
+    "garminSecondaryMuscles": [],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Omuzlar hafif kalkıkken gövdeyi yana bükerek sırayla topuklara dokun.",
+    "diagram": "assets/opengym/stills/0006.webp",
+    "equipment": "bodyweight",
+    "id": "bw_heel_touches",
+    "isComplex": false,
+    "mechanic": "isolation",
+    "muscle": "Yan Karın, Ön Karın",
+    "name": "Heel Touches (Topuk Dokunuşu)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Dizler bükülü sırtüstü yat, kolları iki yana uzat ve omuzları hafifçe kaldır.",
+        "phase": "1. Başlangıç Gerilimi"
+      },
+      {
+        "badge": "action",
+        "desc": "Gövdeyi sağa bükerek sağ elinle sağ topuğuna uzanıp dokun.",
+        "phase": "2. Yanal Sıkıştırma"
+      },
+      {
+        "badge": "finish",
+        "desc": "Omuzları yere indirmeden sol tarafa bükülüp sol topuğa dokun.",
+        "phase": "3. Çift Yönlü Akış"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [],
+    "tags": [
+      "core",
+      "bodyweight"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Yan Karın, Ön Karın",
+    "secondarySubMuscles": "Derin İç Karın",
+    "biomechanicalProof": "Üst gövde havadayken yana eğilmek, yan karın kaslarını doğrudan sıkıştırır.",
+    "fitCategory": "crunch",
+    "fitName": "heel_touches",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS"
+    ],
+    "garminSecondaryMuscles": [],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Yan dirsek üzerinde kalçayı yukarı iterek baştan topuğa düz bir hat koru.",
+    "diagram": "assets/opengym/stills/0705.webp",
+    "equipment": "bodyweight",
+    "id": "bw_side_plank",
+    "isComplex": false,
+    "mechanic": "isolation",
+    "muscle": "Yan Karın, Derin İç Karın",
+    "name": "Side Plank (Yan Plank)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Yan yat, alt dirseği omuzun tam altına yerleştir ve ayakları üst üste koy.",
+        "phase": "1. Yan Dirsek Kurulumu"
+      },
+      {
+        "badge": "action",
+        "desc": "Kalçayı yerden kaldırıp gövdeyi düz bir çizgiye getir.",
+        "phase": "2. Yan Çizgi Kilidi"
+      },
+      {
+        "badge": "finish",
+        "desc": "Kalçayı düşürmeden yan karnı sıkılı tutup nefesle süreyi tamamla.",
+        "phase": "3. Statik Yan Direnç"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [
+      "shoulders",
+      "glutes"
+    ],
+    "tags": [
+      "core",
+      "bodyweight"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Yan Karın, Derin İç Karın",
+    "secondarySubMuscles": "Yan Kalça, Yan Omuz",
+    "biomechanicalProof": "Yerçekimine karşı yan gövdeyi sabit tutmak, yan karın ve omurga yan destek kaslarını izometrik olarak güçlendirir.",
+    "fitCategory": "plank",
+    "fitName": "side_plank",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS"
+    ],
+    "garminSecondaryMuscles": [
+      "GLUTES",
+      "SHOULDERS"
+    ],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Düz kollar ve düz bacakları aynı anda yukarı kaldırıp ortada V harfi oluştur.",
+    "diagram": "assets/opengym/stills/0507.webp",
+    "equipment": "bodyweight",
+    "id": "bw_v_up",
+    "isComplex": false,
+    "mechanic": "compound",
+    "muscle": "Ön Karın, Derin İç Karın",
+    "name": "V-Up (Çakı)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Sırtüstü tamamen düz uzan, kolları baş gerisine aç.",
+        "phase": "1. Açık Vücut Duruşu"
+      },
+      {
+        "badge": "action",
+        "desc": "Gövdeyi ve düz bacakları eşzamanlı kaldırarak elleri ayak uçlarına uzat.",
+        "phase": "2. Zirvede V Kapanışı"
+      },
+      {
+        "badge": "finish",
+        "desc": "Kontrolü kaybetmeden yavaşça açılıp başlangıç pozisyonuna in.",
+        "phase": "3. Kontrollü Açılış"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [
+      "quads"
+    ],
+    "tags": [
+      "core",
+      "bodyweight"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Ön Karın, Derin İç Karın",
+    "secondarySubMuscles": "Orta Ön Bacak",
+    "biomechanicalProof": "Üst gövde ve bacakların aynı anda kapanması, tüm ön karın duvarını en yüksek kaldıraçla çalıştırır.",
+    "fitCategory": "sit_up",
+    "fitName": "v_up",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS"
+    ],
+    "garminSecondaryMuscles": [
+      "HIPS"
+    ],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Dizler bükülü sırtüstü yatarken elleri ileri uzatıp diz kapaklarına dokunarak üst karnı sık.",
+    "diagram": "assets/opengym/stills/3640.webp",
+    "equipment": "bodyweight",
+    "id": "bw_knee_touch_crunch",
+    "isComplex": false,
+    "mechanic": "isolation",
+    "muscle": "Ön Karın",
+    "name": "Knee Touch Crunch (Dize Dokunarak Mekik)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Dizler bükülü ve ayaklar yerde sırtüstü yat, avuç içlerini uylukların üzerine koy.",
+        "phase": "1. Başlangıç Duruşu"
+      },
+      {
+        "badge": "action",
+        "desc": "Nefes vererek ellerini bacakların üzerinden kaydırıp diz kapaklarına dokun.",
+        "phase": "2. Dize Uzanma"
+      },
+      {
+        "badge": "finish",
+        "desc": "Tepe noktada kısa sıkıştır, boynu zorlamadan kontrollü in.",
+        "phase": "3. Kontrollü Dönüş"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [],
+    "tags": [
+      "core",
+      "bodyweight"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Ön Karın",
+    "secondarySubMuscles": "Derin İç Karın",
+    "biomechanicalProof": "Ellerin dizlere kadar kaydırılması üst karın kasılma mesafesini sabitler ve boyun çekmesini önler.",
+    "fitCategory": "crunch",
+    "fitName": "knee_touch_crunch",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS"
+    ],
+    "garminSecondaryMuscles": [],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Dizler 90 derece havada sabitken kürek kemiklerini yerden kaldırıp üst karnı sık.",
+    "diagram": "assets/opengym/stills/0871.webp",
+    "equipment": "bodyweight",
+    "id": "bw_tuck_crunch",
+    "isComplex": false,
+    "mechanic": "isolation",
+    "muscle": "Ön Karın, Derin İç Karın",
+    "name": "Tuck Crunch (Dizler Havada Mekik)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Sırtüstü yat, dizleri 90 derece büküp havada tut, eller göğüste veya şakaklarda.",
+        "phase": "1. Masa Pozisyonu"
+      },
+      {
+        "badge": "action",
+        "desc": "Nefes vererek göğsü dizlere yaklaştırıp üst ve alt karnı aynı anda sık.",
+        "phase": "2. Merkez Sıkışması"
+      },
+      {
+        "badge": "finish",
+        "desc": "Bacakları indirmeden omuzları yavaşça başlangıca yaklaştır.",
+        "phase": "3. Kontrollü Dönüş"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [],
+    "tags": [
+      "core",
+      "bodyweight"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Ön Karın, Derin İç Karın",
+    "secondarySubMuscles": "Yan Karın",
+    "biomechanicalProof": "Bacakları yerden kesip masa pozisyonunda mekik çekmek, kalça fleksörlerini devreden çıkarıp ön karnı doğrudan zorlar.",
+    "fitCategory": "crunch",
+    "fitName": "tuck_crunch",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS"
+    ],
+    "garminSecondaryMuscles": [],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Bir ayak diğer dizin üstündeyken zıt dirseği yukarıdaki dize doğru çapraz çevir.",
+    "diagram": "assets/opengym/stills/0262.webp",
+    "equipment": "bodyweight",
+    "id": "bw_cross_body_crunch",
+    "isComplex": false,
+    "mechanic": "isolation",
+    "muscle": "Yan Karın, Ön Karın",
+    "name": "Cross-Body Crunch (Çapraz Mekik)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Sırtüstü yat, sağ ayak bileğini sol dizin üstüne koy, sol el baş arkasında.",
+        "phase": "1. Çapraz Kurulum"
+      },
+      {
+        "badge": "action",
+        "desc": "Sol omuzu yerden kaldırıp sol dirseği sağ dize doğru çevir.",
+        "phase": "2. Yan Karın Sıkışması"
+      },
+      {
+        "badge": "finish",
+        "desc": "Kontrollü biçimde in, set bitiminde diğer tarafa geç.",
+        "phase": "3. Kontrollü Dönüş"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [],
+    "tags": [
+      "core",
+      "bodyweight"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Yan Karın, Ön Karın",
+    "secondarySubMuscles": "Derin İç Karın",
+    "biomechanicalProof": "Sabit bacak düzeninde çapraz omuz rotasyonu yapmak, yan karın kaslarını ivmesiz izole eder.",
+    "fitCategory": "crunch",
+    "fitName": "cross_body_crunch",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS"
+    ],
+    "garminSecondaryMuscles": [],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Eller kalça yanında yerde, bitişik düz bacakları ortadaki noktanın bir sağından bir solundan aşır.",
+    "diagram": "assets/opengym/stills/bw_seated_leg_overs.webp",
+    "equipment": "bodyweight",
+    "id": "bw_seated_leg_overs",
+    "isComplex": false,
+    "mechanic": "compound",
+    "muscle": "Ön Karın, Yan Karın",
+    "name": "Seated Leg Overs (Oturarak Bacak Aşırma)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Yerde hafif geriye yaslanıp elleri kalça yanına koy, düz bacakları bitişik tut.",
+        "phase": "1. Oturma Kurulumu"
+      },
+      {
+        "badge": "action",
+        "desc": "Bacakları yerden kesip ortadaki hayali bir engelin üzerinden sağa doğru yay çizerek geçir.",
+        "phase": "2. Sağdan Aşırma"
+      },
+      {
+        "badge": "finish",
+        "desc": "Ayakları yere değdirmeden aynı yayla sola doğru aşırarak alt ve yan karnı sık.",
+        "phase": "3. Soldan Dönüş"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [
+      "quads"
+    ],
+    "tags": [
+      "core",
+      "bodyweight"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Ön Karın, Yan Karın",
+    "secondarySubMuscles": "Derin İç Karın, Orta Ön Bacak",
+    "biomechanicalProof": "Oturur pozisyonda düz bacakları sağa sola yay çizerek aşırmak alt karın, yan karın ve kalça fleksörlerini yüksek gerilimde çalıştırır.",
+    "fitCategory": "leg_raise",
+    "fitName": "seated_leg_overs",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS"
+    ],
+    "garminSecondaryMuscles": [
+      "HIPS"
+    ],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Eller arkada destekliyken bitişik dizleri bir sağa bir sola çevirerek göğse çek.",
+    "diagram": "assets/opengym/stills/bw_seated_oblique_knee_tucks.webp",
+    "equipment": "bodyweight",
+    "id": "bw_seated_oblique_knee_tucks",
+    "isComplex": false,
+    "mechanic": "compound",
+    "muscle": "Yan Karın, Ön Karın",
+    "name": "Seated Oblique Knee Tucks (Oturarak Yana Diz Çekme)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Kalça gerisinde ellerden destek alarak otur, ayakları bitişik şekilde yerden kaldır.",
+        "phase": "1. Başlangıç Dengesi"
+      },
+      {
+        "badge": "action",
+        "desc": "Kalçayı hafif yana yatırıp bitişik dizleri sağ omza doğru göğse çek.",
+        "phase": "2. Sağ Yana Diz Çekişi"
+      },
+      {
+        "badge": "finish",
+        "desc": "Bacakları ileri uzatıp hemen sol tarafa çevirerek aynı çekişi tekrarla.",
+        "phase": "3. Sol Yana Geçiş"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [
+      "quads"
+    ],
+    "tags": [
+      "core",
+      "bodyweight"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Yan Karın, Ön Karın",
+    "secondarySubMuscles": "Derin İç Karın",
+    "biomechanicalProof": "Otururken bitişik dizleri sağa ve sola döndürerek karna çekmek, yan karın ve alt karın kaslarını aynı anda sıkıştırır.",
+    "fitCategory": "crunch",
+    "fitName": "seated_oblique_knee_tucks",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS"
+    ],
+    "garminSecondaryMuscles": [
+      "HIPS"
+    ],
+    "garminMatchType": "exact_verified"
   }
 ];

@@ -505,7 +505,19 @@
             'bw_skater_jumps': { id: '3361', name: "Skater Jumps (Paten Sıçraması)", clip: 'assets/opengym/clips/bw_skater_jumps.mp4', still: 'assets/opengym/stills/bw_skater_jumps.webp' },
             'bw_plank_jacks': { id: '1478', name: "Plank Jacks (Plank Bacak Aç-Kapa)", clip: 'assets/opengym/clips/bw_plank_jacks.mp4', still: 'assets/opengym/stills/bw_plank_jacks.webp' },
             'bw_squat_thrust': { id: '3705', name: "Squat Thrust (Yarım Burpee)", clip: 'assets/opengym/clips/bw_squat_thrust.mp4', still: 'assets/opengym/stills/bw_squat_thrust.webp' },
-            'bw_lateral_shuffle': { id: '4241', name: "Lateral Shuffle (Yanal Hızlı Adımlama)", clip: 'assets/opengym/clips/bw_lateral_shuffle.mp4', still: 'assets/opengym/stills/bw_lateral_shuffle.webp' }
+            'bw_lateral_shuffle': { id: '4241', name: "Lateral Shuffle (Yanal Hızlı Adımlama)", clip: 'assets/opengym/clips/bw_lateral_shuffle.mp4', still: 'assets/opengym/stills/bw_lateral_shuffle.webp' },
+            'bw_dead_bug': { id: '0276', name: "Dead Bug", clip: 'assets/opengym/clips/0276.mp4', still: 'assets/opengym/stills/0276.webp' },
+            'bw_bicycle_crunch': { id: '0443', name: "Bicycle Crunch (Bisiklet Mekik)", clip: 'assets/opengym/clips/0443.mp4', still: 'assets/opengym/stills/0443.webp' },
+            'bw_reverse_crunch': { id: '0872', name: "Reverse Crunch (Ters Mekik)", clip: 'assets/opengym/clips/0872.mp4', still: 'assets/opengym/stills/0872.webp' },
+            'bw_crunch': { id: '0274', name: "Abdominal Crunch (Klasik Mekik)", clip: 'assets/opengym/clips/0274.mp4', still: 'assets/opengym/stills/0274.webp' },
+            'bw_heel_touches': { id: '0006', name: "Heel Touches (Topuk Dokunuşu)", clip: 'assets/opengym/clips/0006.mp4', still: 'assets/opengym/stills/0006.webp' },
+            'bw_side_plank': { id: '0705', name: "Side Plank (Yan Plank)", clip: 'assets/opengym/clips/0705.mp4', still: 'assets/opengym/stills/0705.webp' },
+            'bw_v_up': { id: '0507', name: "V-Up (Çakı)", clip: 'assets/opengym/clips/0507.mp4', still: 'assets/opengym/stills/0507.webp' },
+            'bw_knee_touch_crunch': { id: '3640', name: "Knee Touch Crunch (Dize Dokunarak Mekik)", clip: 'assets/opengym/clips/3640.mp4', still: 'assets/opengym/stills/3640.webp' },
+            'bw_tuck_crunch': { id: '0871', name: "Tuck Crunch (Dizler Havada Mekik)", clip: 'assets/opengym/clips/0871.mp4', still: 'assets/opengym/stills/0871.webp' },
+            'bw_cross_body_crunch': { id: '0262', name: "Cross-Body Crunch (Çapraz Mekik)", clip: 'assets/opengym/clips/0262.mp4', still: 'assets/opengym/stills/0262.webp' },
+            'bw_seated_leg_overs': { id: 'bw_seated_leg_overs', name: "Seated Leg Overs (Oturarak Bacak Aşırma)", clip: 'assets/opengym/clips/bw_seated_leg_overs.mp4', still: 'assets/opengym/stills/bw_seated_leg_overs.webp' },
+            'bw_seated_oblique_knee_tucks': { id: 'bw_seated_oblique_knee_tucks', name: "Seated Oblique Knee Tucks (Oturarak Yana Diz Çekme)", clip: 'assets/opengym/clips/bw_seated_oblique_knee_tucks.mp4', still: 'assets/opengym/stills/bw_seated_oblique_knee_tucks.webp' }
         };
 
 
@@ -7656,7 +7668,23 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 'bw_skater_jumps': { form: 'assets/exercises/bw_skater_jumps.webp', anatomi: null },
                 'bw_plank_jacks': { form: 'assets/exercises/bw_plank_jacks.webp', anatomi: null },
                 'bw_squat_thrust': { form: 'assets/exercises/bw_squat_thrust.webp', anatomi: null },
-                'bw_lateral_shuffle': { form: 'assets/exercises/bw_lateral_shuffle.webp', anatomi: null }
+                'bw_lateral_shuffle': { form: 'assets/exercises/bw_lateral_shuffle.webp', anatomi: null },
+                'db_glute_bridge_chest_press': { form: 'assets/exercises/db_glute_bridge_chest_press.gif', anatomi: null },
+                'mach_decline_cable_press': { form: 'assets/exercises/mach_decline_cable_press.gif', anatomi: null },
+                'mach_single_arm_decline_cable_fly': { form: 'assets/exercises/mach_single_arm_decline_cable_fly.gif', anatomi: null },
+                'mach_decline_chest_press': { form: 'assets/exercises/mach_decline_chest_press.gif', anatomi: null },
+                'bw_dead_bug': { form: 'assets/opengym/stills/0276.webp', anatomi: null },
+                'bw_bicycle_crunch': { form: 'assets/opengym/stills/0443.webp', anatomi: null },
+                'bw_reverse_crunch': { form: 'assets/opengym/stills/0872.webp', anatomi: null },
+                'bw_crunch': { form: 'assets/opengym/stills/0274.webp', anatomi: null },
+                'bw_heel_touches': { form: 'assets/opengym/stills/0006.webp', anatomi: null },
+                'bw_side_plank': { form: 'assets/opengym/stills/0705.webp', anatomi: null },
+                'bw_v_up': { form: 'assets/opengym/stills/0507.webp', anatomi: null },
+                'bw_knee_touch_crunch': { form: 'assets/opengym/stills/3640.webp', anatomi: null },
+                'bw_tuck_crunch': { form: 'assets/opengym/stills/0871.webp', anatomi: null },
+                'bw_cross_body_crunch': { form: 'assets/opengym/stills/0262.webp', anatomi: null },
+                'bw_seated_leg_overs': { form: 'assets/opengym/stills/bw_seated_leg_overs.webp', anatomi: null },
+                'bw_seated_oblique_knee_tucks': { form: 'assets/opengym/stills/bw_seated_oblique_knee_tucks.webp', anatomi: null }
             };
         window.guideLibrary = guideLibrary;
         window.exerciseGuideMap = exerciseGuideMap;
