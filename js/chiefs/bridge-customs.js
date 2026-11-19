@@ -201,20 +201,26 @@
             return null;
         }
 
-        let repaired = dateCheck.repaired || (cleanExercises.length !== rawExercises.length);
+        const repairReasons = new Set();
+        if (dateCheck.repaired) repairReasons.add('tarih düzeltildi');
+        if (cleanExercises.length !== rawExercises.length) repairReasons.add('bozuk hareket çıkarıldı');
+        let repaired = repairReasons.size > 0;
         const log = Object.assign({}, rawLog);
         if (!log.id) {
             log.id = 'log_' + (Number(rawLog.timestamp) || Date.now()) + '_' + Math.random().toString(36).slice(2, 6);
             repaired = true;
+            repairReasons.add('eksik kimlik eklendi');
         }
         if (log.date !== dateCheck.iso) {
             log.date = dateCheck.iso;
             repaired = true;
+            repairReasons.add('tarih biçimi düzeltildi');
         }
         if (!log.timestamp || isNaN(Number(log.timestamp)) || Number(log.timestamp) <= 0) {
             const parsedD = new Date(dateCheck.iso + 'T18:00:00');
             log.timestamp = !isNaN(parsedD.getTime()) ? parsedD.getTime() : Date.now();
             repaired = true;
+            repairReasons.add('zaman damgası eklendi');
         }
         log.exercises = cleanExercises;
         if (Array.isArray(log.detailedExercises)) {
@@ -244,11 +250,13 @@
             if (hasExplicitSets && Number(log.totalVolumeKg) > Math.round(recomputedVol) + 1) {
                 log.totalVolumeKg = Math.round(recomputedVol);
                 repaired = true;
+                repairReasons.add('kardiyo tonaj şişmesi düzeltildi');
             }
         }
 
         if (repaired) {
-            recordCustomsEvent('repaired', 'history', log.id);
+            const reasonText = repairReasons.size > 0 ? ` (${Array.from(repairReasons).join(', ')})` : '';
+            recordCustomsEvent('repaired', 'history', `${log.id}${reasonText}`);
         }
         return log;
     }
@@ -279,12 +287,16 @@
         }
 
         let repaired = false;
+        const repairReasons = new Set();
+        let droppedExercises = false;
         const cleanWorkout = Object.assign({}, workout);
         const filteredExercises = [];
 
         for (const rawEx of workout.exercises) {
             if (!rawEx || typeof rawEx !== 'object') {
                 repaired = true;
+                droppedExercises = true;
+                repairReasons.add('geçersiz hareket çıkarıldı');
                 continue;
             }
             const ex = (typeof resolveCanonicalDbExercise === 'function')
@@ -292,28 +304,39 @@
                 : Object.assign({}, rawEx);
             if (!ex.id && !ex.name) {
                 repaired = true;
+                droppedExercises = true;
+                repairReasons.add('kimliksiz hareket çıkarıldı');
                 continue;
             }
             if (ex.id && typeof isExerciseExcludedByUser === 'function' && isExerciseExcludedByUser(ex.id)) {
                 repaired = true;
+                droppedExercises = true;
+                repairReasons.add('gizli hareket çıkarıldı');
                 continue;
             }
             const mode = (typeof getExerciseMetricMode === 'function') ? getExerciseMetricMode(ex) : 'reps';
             ex.metricMode = mode;
             if (mode === 'cardio_min') {
                 const defMin = (typeof resolveDefaultExerciseSetTarget === 'function') ? resolveDefaultExerciseSetTarget(ex, '') : 20;
-                if (Number(ex.targetSets) !== 1 && ex.targetSets !== undefined) repaired = true;
+                if (Number(ex.targetSets) !== 1 && ex.targetSets !== undefined) {
+                    repaired = true;
+                    repairReasons.add('kardiyo seti 1 yapıldı');
+                }
                 ex.targetSets = 1;
                 ex.sets = 1;
                 if (!ex.targetReps || !/\b(dk|dak|min)\b/i.test(String(ex.targetReps))) {
                     ex.targetReps = `${defMin} dk`;
                     repaired = true;
+                    repairReasons.add('kardiyo süresi düzeltildi');
                 }
             } else if (mode === 'time_sec') {
                 const defSec = (typeof resolveDefaultExerciseSetTarget === 'function') ? resolveDefaultExerciseSetTarget(ex, '') : 30;
-                if (!ex.targetReps || /^\d+\s*-\s*\d+$/.test(String(ex.targetReps).trim()) || (!/\b(sn|saniye|sec)\b/i.test(String(ex.targetReps)) && Number(ex.targetReps) < 15)) {
+                const rawRepsStr = String(ex.targetReps || '').trim();
+                const numS = parseFloat(rawRepsStr);
+                if (!rawRepsStr || /^\d+\s*-\s*\d+$/.test(rawRepsStr) || /\b(dk|dak|min|maks|max)\b/i.test(rawRepsStr) || (!/\b(sn|saniye|sec)\b/i.test(rawRepsStr) && (isNaN(numS) || numS < 15))) {
                     ex.targetReps = `${defSec} sn`;
                     repaired = true;
+                    repairReasons.add('süre birimi düzeltildi');
                 }
             }
             filteredExercises.push(ex);
@@ -332,9 +355,12 @@
         if (typeof enforceUniversalBiomechanicalOrder === 'function' && filteredExercises.length >= 2) {
             const ordered = enforceUniversalBiomechanicalOrder(filteredExercises, cleanWorkout.style || 'superset');
             const changedOrder = ordered.some((e, i) => e !== filteredExercises[i]);
-            if (changedOrder && typeof assignAcademicBlockStructure === 'function') {
+            if ((changedOrder || droppedExercises) && typeof assignAcademicBlockStructure === 'function') {
                 cleanWorkout.exercises = assignAcademicBlockStructure(ordered, cleanWorkout.style || 'superset', cleanWorkout.scheme || null);
-                repaired = true;
+                if (changedOrder) {
+                    repaired = true;
+                    repairReasons.add('biyomekanik sıra düzenlendi');
+                }
             } else {
                 cleanWorkout.exercises = ordered;
             }
@@ -344,9 +370,11 @@
         if (!cleanWorkout.id) {
             cleanWorkout.id = 'gen_' + Date.now();
             repaired = true;
+            repairReasons.add('eksik kimlik eklendi');
         }
         if (repaired) {
-            recordCustomsEvent('repaired', 'generator', cleanWorkout.id);
+            const reasonText = repairReasons.size > 0 ? ` (${Array.from(repairReasons).join(', ')})` : '';
+            recordCustomsEvent('repaired', 'generator', `${cleanWorkout.id}${reasonText}`);
         }
         return cleanWorkout;
     }
