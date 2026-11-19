@@ -54,7 +54,7 @@
                     <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                 </svg>
             </div>
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v327</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v328</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -253,7 +253,7 @@
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
                             <span class="modern-brand-subdot" aria-hidden="true">•</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v327</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v328</span>
                         </div>
                     </div>
                 </div>
@@ -745,14 +745,6 @@
                                 <button type="button" class="wk-info-modal-close" onclick="closeCalendarToolsModal()" aria-label="Kapat">✕</button>
                             </div>
                             <div class="wk-info-modal-body" style="display:flex;flex-direction:column;gap:14px;">
-                                <div>
-                                    <div style="font-size:11px;font-weight:800;color:#64748B;margin-bottom:6px;text-transform:uppercase;">DIŞA AKTAR & SENKRON</div>
-                                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
-                                        <button type="button" class="wk-chip-action" onclick="closeCalendarToolsModal(); openGoogleCalendarWeb()">Google Takvim</button>
-                                        <button type="button" class="wk-chip-action" onclick="closeCalendarToolsModal(); downloadFullScheduleICS()">Cihaza İndir</button>
-                                        <button type="button" class="wk-chip-action" onclick="closeCalendarToolsModal(); openCalendarSyncModal()">Ayarlar</button>
-                                    </div>
-                                </div>
                                 <div>
                                     <div style="font-size:11px;font-weight:800;color:#64748B;margin-bottom:6px;text-transform:uppercase;">HIZLI HAFTALIK ŞABLON</div>
                                     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
@@ -1543,7 +1535,7 @@
                         Yerel Plan
                     </span>
                 </div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:2px;">
                     <div>
                         <label style="font-size:11px; font-weight:700; color:#475569; display:block; margin-bottom:4px;">Başlama Saati</label>
                         <input type="time" id="schedDayTimeInput" class="input-base" style="width:100%; padding:7px 10px; font-size:13px; font-weight:800; background:#F8FAFC; color:#0F172A; border:1.5px solid #CBD5E1;" value="18:30" onchange="updateScheduledDayTime(this.value)">
@@ -1553,214 +1545,8 @@
                         <input type="number" id="schedDayDurationInput" class="input-base" style="width:100%; padding:7px 10px; font-size:13px; font-weight:800; background:#F8FAFC; color:#0F172A; border:1.5px solid #CBD5E1;" min="15" max="180" step="5" value="50" onchange="updateScheduledDayDuration(this.value)">
                     </div>
                 </div>
-                <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                    <button type="button" id="btnSyncSingleDayGCal" class="btn btn-gold" style="font-size:11.5px; padding:7px 12px; font-weight:800; flex:1;" onclick="syncCurrentDayToCalendar()">
-                        📅 Bu Günü Takvime İşle / Güncelle
-                    </button>
-                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 10px; color:#0F172A; border-color:#CBD5E1; background:#F8FAFC;" onclick="openSingleDayDirectGoogleCalendar()" title="Google Takvimde Aç veya Ekle">
-                        🔗 Takvimde Aç
-                    </button>
-                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 10px; color:#0F172A; border-color:#CBD5E1; background:#F8FAFC;" onclick="downloadSingleDayICS()" title="Apple Takvim / iCal Olarak İndir">
-                        📥 .ics
-                    </button>
-                </div>
             </div>
 
-        </div>
-    </div>
-
-    <!-- ==================== GOOGLE & DEVICE CALENDAR SYNC MODAL ==================== -->
-    <div id="calendarSyncModal" class="modal-overlay">
-        <div class="modal-box" style="max-width: 580px; max-height: 92vh; overflow-y: auto;">
-            <div class="modal-header">
-                <div>
-                    <span class="auth-role-tag role-admin" style="font-size:10px; background:var(--gold); color:#000;">CANLI SENKRONİZASYON</span>
-                    <h3 class="modal-title" style="font-size:16px; margin-top:4px;">Google & Cihaz Takvim Merkezi</h3>
-                </div>
-                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeCalendarSyncModal()">✕</button>
-            </div>
-            
-            <p style="font-size:12px; color:var(--text-secondary); margin:0 0 14px 0; line-height:1.5;">
-                FitLab programınızı Google Takviminizle canlı ve iki yönlü senkronize edin. Kişisel etkinliklerinize karışmadan <strong>"FitLab • Antrenmanlarım"</strong> adında özel bir takvim oluşturulur. Takviminizde yaptığınız saat veya gün düzeltmeleri doğrudan FitLab'e yansır.
-            </p>
-
-            <!-- BAĞLANTI DURUM KARTI -->
-            <div id="calendarConnectionCard" style="margin-bottom:14px;">
-                <!-- Rendered dynamically -->
-            </div>
-
-            <!-- HIZLI AKSİYONLAR -->
-            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
-                <div style="background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:12px; padding:12px; box-shadow:0 2px 8px rgba(15,23,42,0.04);">
-                    <div style="font-size:12.5px; font-weight:800; color:#0F172A; margin-bottom:4px;">🔄 İki Yönlü Canlı Eşitleme</div>
-                    <div style="font-size:11px; color:var(--text-secondary); margin-bottom:10px; line-height:1.5;">
-                        • Google Takvim'deki "FitLab • Antrenmanlarım" takviminde taşıdığınız saat veya günleri FitLab'e çeker.<br>
-                        • FitLab'deki yeni veya güncellenmiş antrenmanları Google Takvim'e yazar.
-                    </div>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                        <button type="button" class="btn btn-gold" style="font-size:12px; padding:8px 14px; font-weight:900;" onclick="openGoogleCalendarWeb()">
-                            📅 Google Takvim'i Aç
-                        </button>
-                        <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:var(--cyan); border-color:rgba(56,189,248,0.4);" onclick="performFullCalendarSync()">
-                            🔄 Takvimi Eşitle / İndir
-                        </button>
-                    </div>
-                </div>
-
-                <!-- APPLE TAKVİM / iCAL / WEBCAL SEKMESİ -->
-                <div style="background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:12px; padding:12px; box-shadow:0 2px 8px rgba(15,23,42,0.04);">
-                    <div style="font-size:12.5px; font-weight:800; color:#0F172A; margin-bottom:4px;">🍏 Apple Takvim / Mac & iPhone Desteği</div>
-                    <div style="font-size:11px; color:var(--text-secondary); margin-bottom:10px; line-height:1.5;">
-                        • <strong>Yöntem 1 (Önerilen):</strong> macOS ve iOS Sistem Ayarları > İnternet Hesapları'ndan Google hesabınızı açın; "FitLab • Antrenmanlarım" anında Apple Takvim uygulamanıza yansır.<br>
-                        • <strong>Yöntem 2:</strong> Tüm haftalık programınızı anında Apple Takvim'e aktarmak için .ics dosyasını tek dokunuşla indirin.
-                    </div>
-                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:7px 12px; color:#0F172A;" onclick="downloadFullScheduleICS()">
-                        📥 Tüm Haftalık Takvimi (.ics) İndir
-                    </button>
-                </div>
-
-                <!-- TERCİHLER VE GELİŞMİŞ AYARLAR -->
-                <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:12px; padding:12px;">
-                    <div style="font-size:12px; font-weight:800; color:#B45309; margin-bottom:8px;">⚙️ Takvim Tercihleri</div>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-                        <div>
-                            <label style="font-size:10.5px; font-weight:700; color:#475569; display:block; margin-bottom:3px;">Varsayılan Seans Saati</label>
-                            <input type="time" id="calPrefDefaultTime" class="input-base" style="width:100%; padding:5px 8px; font-size:12px;" value="18:30" onchange="saveCalendarPreferences()">
-                        </div>
-                        <div>
-                            <label style="font-size:10.5px; font-weight:700; color:#475569; display:block; margin-bottom:3px;">Bildirim Hatırlatıcısı</label>
-                            <select id="calPrefReminderMin" class="select-base" style="width:100%; padding:5px 8px; font-size:12px;" onchange="saveCalendarPreferences()">
-                                <option value="15">15 Dakika Önce</option>
-                                <option value="30" selected>30 Dakika Önce</option>
-                                <option value="60">1 Saat Önce</option>
-                                <option value="120">2 Saat Önce</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- GELİŞMİŞ GOOGLE OAUTH CLIENT ID (OPSİYONEL) -->
-                    <details style="margin-top:8px; font-size:11px; color:#475569;">
-                        <summary style="cursor:pointer; color:var(--cyan); font-weight:700;">🔧 Özel OAuth İstemci / Manuel Token Girişi</summary>
-                        <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
-                            <div>
-                                <label style="font-size:10px; font-weight:700; color:#475569;">Google OAuth Client ID (Opsiyonel Canlı API):</label>
-                                <input type="text" id="calCustomClientId" class="input-base" style="width:100%; padding:5px 8px; font-size:11px;" placeholder="ör. xxx.apps.googleusercontent.com" onchange="saveCustomGoogleClientId(this.value)">
-                            </div>
-                            <div style="display:flex; gap:6px; margin-top:2px;">
-                                <button type="button" class="btn btn-outline" style="font-size:10.5px; padding:4px 10px; color:#B45309; border-color:rgba(245,158,11,0.4);" onclick="connectGoogleCalendarPrompt()">
-                                    ⚡ Client ID ile Canlı Bağlan
-                                </button>
-                            </div>
-                            <div style="margin-top:4px;">
-                                <label style="font-size:10px; font-weight:700; color:#475569;">OAuth Access Token (Manuel Yapıştırma):</label>
-                                <div style="display:flex; gap:6px;">
-                                    <input type="password" id="calCustomTokenInput" class="input-base" style="flex:1; padding:5px 8px; font-size:11px;" placeholder="ya29.a0...">
-                                    <button type="button" class="btn btn-outline" style="font-size:10px; padding:4px 8px;" onclick="applyManualGoogleToken()">Uygula</button>
-                                </div>
-                            </div>
-                        </div>
-                    </details>
-                </div>
-            </div>
-
-            <div style="display:flex; justify-content:flex-end; gap:8px; border-top:1px solid var(--border); padding-top:12px;">
-                <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 16px;" onclick="closeCalendarSyncModal()">
-                    Kapat
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== GOOGLE TAKVİM AKILLI AKTARIM MODALI ==================== -->
-    <div id="googleCalendarExportModal" class="modal-overlay">
-        <div class="modal-box" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
-            <div class="modal-header">
-                <div>
-                    <span class="auth-role-tag role-admin" style="font-size:10px; background:var(--gold); color:#000;">GOOGLE TAKVİM AKTARIMI</span>
-                    <h3 class="modal-title" style="font-size:16px; margin-top:4px;" id="gcalExportModalTitle">📅 Google Takvim'e Aktar</h3>
-                </div>
-                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeGoogleCalendarExportModal()">✕</button>
-            </div>
-            
-            <p style="font-size:12px; color:var(--text-secondary); margin:0 0 14px 0; line-height:1.5;">
-                Aşağıdaki <strong>1 kereye mahsus Google bağlantısını</strong> kurarak tüm antrenmanların arka planda otomatik yüklenmesini sağlayabilir veya dosya yöntemlerini kullanabilirsiniz:
-            </p>
-
-            <!-- SIFIR TIKLAMA / TAM OTOMATİK CANLI GOOGLE SENKRONİZASYONU -->
-            <div id="gcalAutoSyncCard" style="background: linear-gradient(135deg, #ECFDF5, #F0FDF4); border: 1.5px solid #10B981; border-radius: 12px; padding: 14px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(16,185,129,0.12);">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
-                    <div style="flex:1; min-width:240px;">
-                        <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
-                            <span style="font-size:16px;">⚡</span>
-                            <span style="font-size:13.5px; font-weight:900; color:#0F172A;" id="gcalAutoSyncCardTitle">1 Kereye Mahsus Onay: Sıfır Tıklama & Tam Otomasyon</span>
-                            <span class="auth-role-tag" id="gcalAutoSyncCardBadge" style="background:#10b981; color:#000; font-weight:900; font-size:9px;">CANLI API</span>
-                        </div>
-                        <p style="font-size:11.5px; color:#065F46; margin:0; line-height:1.5;" id="gcalAutoSyncCardDesc">
-                            Google hesabınızı <strong>1 kere bağlayın</strong>. Artık hiçbir dosya indirmekle veya butona basmakla uğraşmayın; FitLAB veya web üzerinden atanan tüm programlar Google Takviminize <strong>kendiliğinden otomatik yüklensin</strong>.
-                        </p>
-                    </div>
-                    <div id="gcalAutoSyncCardAction" style="display:flex; align-items:center; gap:8px;">
-                        <button type="button" class="btn btn-gold" style="font-size:12px; padding:9px 18px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.3); white-space:nowrap;" onclick="connectGoogleCalendarPrompt()">
-                            ⚡ Google Hesabımı Bağla
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- YÖNTEM 1: TÜM HAFTAYI TEK SEFERDE AKTAR -->
-            <div style="background: linear-gradient(135deg, #FFFBEB, #FFFFFF); border: 1.5px solid var(--gold); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <div style="font-size:13.5px; font-weight:800; color:#0F172A; display:flex; align-items:center; gap:6px;">
-                        <span>⚡ Yöntem 1: Tüm Haftayı Tek Seferde Aktar</span>
-                        <span style="font-size:9.5px; background:var(--gold); color:#000; font-weight:900; padding:2px 6px; border-radius:4px;">ÖNERİLEN</span>
-                    </div>
-                </div>
-                <div style="font-size:11.5px; color:#0F172A; line-height:1.5; margin-bottom:12px;">
-                    Haftadaki tüm antrenman seanslarını tek bir takvim dosyası (.ics) halinde indirir ve Google Takvim'in içe aktarma sayfasını açar.
-                </div>
-                
-                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
-                    <button type="button" class="btn btn-gold" style="font-size:12px; padding:9px 16px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.3);" onclick="executeOneClickGoogleCalendarExport()">
-                        🚀 Tek Tıkla İndir & Google Takvim'e Yükle
-                    </button>
-                    <button type="button" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:#0F172A;" onclick="downloadFullScheduleICS()">
-                        📥 Yalnızca Dosyayı İndir (.ics)
-                    </button>
-                </div>
-
-                <!-- 2 ADIMLI REHBER -->
-                <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:8px; padding:10px 12px; font-size:11px; color:#334155; line-height:1.6;">
-                    <div style="color:#B45309; font-weight:800; margin-bottom:4px;">📋 Nasıl Yapılır? (10 Saniyelik İşlem)</div>
-                    <div>1. <strong>"Tek Tıkla İndir & Google Takvim'e Yükle"</strong> butonuna basın (takvim dosyanız iner ve Google Takvim İçe Aktar ekranı açılır).</div>
-                    <div>2. Açılan Google Takvim ekranında <strong>"Bilgisayarınızdan bir dosya seçin"</strong>e tıklayıp indirilen <code>fitlab-takvim-....ics</code> dosyasını seçin ve <strong>"İçe Aktar"</strong>a basın. Tüm hafta takviminize işlenir!</div>
-                </div>
-            </div>
-
-            <!-- YÖNTEM 2: GÜNLERİ TEK TEK GOOGLE TAKVİM'E EKLE -->
-            <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 14px; margin-bottom: 14px;">
-                <div style="font-size:13px; font-weight:800; color:#0F172A; margin-bottom:4px;">
-                    📅 Yöntem 2: Dosyasız — Günleri Tek Tıkla Google Takvim'e Ekle
-                </div>
-                <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:10px; line-height:1.4;">
-                    Herhangi bir dosya indirmeden, istediğiniz günün yanındaki <strong>"Google Takvim'e Ekle"</strong> butonuna basarak seansı doğrudan Google Takvim formu içinde açıp tek tıkla kaydedebilirsiniz:
-                </div>
-                <div id="gcalExportDaysList" style="display:flex; flex-direction:column; gap:8px;">
-                    <!-- JS ile dinamik doldurulur -->
-                </div>
-            </div>
-
-            <!-- APPLE TAKVİM / MOBİL CİHAZ BİLGİSİ -->
-            <div style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.25); border-radius: 10px; padding: 10px 14px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                <div style="font-size:11px; color:#065F46; line-height:1.4;">
-                    🍏 <strong>Mac veya iPhone mu kullanıyorsunuz?</strong> İndirilen <code>.ics</code> dosyasına çift dokunduğunuzda tüm hafta anında Apple Takvim uygulamanıza eklenir.
-                </div>
-            </div>
-
-            <div style="display:flex; justify-content:flex-end; gap:8px; border-top:1px solid var(--border); padding-top:12px; margin-top:14px;">
-                <button type="button" class="btn btn-outline" style="font-size:12px; padding:7px 16px;" onclick="closeGoogleCalendarExportModal()">
-                    Kapat
-                </button>
-            </div>
         </div>
     </div>
 

@@ -13331,6 +13331,30 @@ div[style*="linear-gradient"][style*="F43F5E"] div {
     flex-shrink: 0;
 }
 
+.wk-view-toggle-btn {
+    height: 26px;
+    min-width: 48px;
+    padding: 0 8px;
+    border-radius: 8px;
+    background: #2C2550;
+    border: 1px solid rgba(167, 139, 250, 0.35);
+    color: #F3E8FF;
+    font-size: 11.5px;
+    font-weight: 900;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.wk-list-view {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 12px 12px;
+    background: #0E0B1F;
+}
+
 .wk-carousel-close-btn {
     width: 26px;
     height: 26px;
@@ -13576,6 +13600,54 @@ div[style*="linear-gradient"][style*="F43F5E"] div {
     background: rgba(17, 14, 36, 0.98);
     border-top: 1px solid rgba(167, 139, 250, 0.15);
     flex-shrink: 0;
+}
+
+.wk-garmin-send-btn {
+    width: calc(100% - 24px);
+    height: 38px;
+    margin: 6px 12px 8px;
+    border: 1px solid rgba(52, 211, 153, 0.28);
+    border-radius: 12px;
+    background: rgba(16, 185, 129, 0.08);
+    color: #D1FAE5;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 0 11px;
+    font-size: 12.5px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.wk-garmin-send-btn svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    fill: none;
+    stroke: #6EE7B7;
+    stroke-width: 1.5;
+}
+
+.wk-garmin-send-btn svg circle {
+    fill: #6EE7B7;
+    stroke: none;
+}
+
+.wk-garmin-send-label {
+    color: #ECFDF5;
+    font-weight: 900;
+}
+
+.wk-garmin-send-action {
+    margin-left: auto;
+    color: #A7F3D0;
+    font-size: 11.5px;
+    font-weight: 800;
+}
+
+.wk-garmin-send-btn:active {
+    background: rgba(16, 185, 129, 0.16);
 }
 
 .wk-dock-nav-btn {

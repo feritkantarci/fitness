@@ -4,9 +4,9 @@
 // 1) Garmin Kullanmayan Kullanıcı Koruması: Garmin özelliği yalnızca aktif kullanıcıda
 //    açıksa (veya Profil'den açıldıysa) çalışır. Garmin kullanmayan kullanıcıda 0 istek,
 //    0 hata, 0 ek panel ve 0 bildirim üretir.
-// 2) Sıfır Ekstra Buton & Otomatik Takvim Senkronu: Program/Antrenman sekmelerinde
-//    ayrı "Saate Gönder" butonu yoktur. Kullanıcı bir programı Takvime eklediği anda
-//    (Bugüne/Yarına/Bu Haftaya/Gelecek Haftaya Ekle), 7. Şef otomatik devreye girer.
+// 2) Yalnızca Antrenman Sekmesinden Manuel Gönderim: Program Oluştur veya takvime atama
+//    sırasında arka planda otomatik Garmin gönderimi yapılmaz. Gönderim yalnızca
+//    Antrenman sekmesindeki "Garmin — Saate Gönder" butonu ile manuel tetiklenir.
 // 3) Kütüphane Kas Doğrulaması & İsimsiz+Notlu Gönderim: Yeni hareketlerin kaslarını
 //    library-guard ile kıyaslar; Garmin'de karşılığı olmayan hareketleri zorlama isimle
 //    değil, isimsiz (exerciseName: undefined) ama orijinal adımız notlu (note) gönderir.
@@ -293,6 +293,7 @@
   function hasGarminCredentialsConfigured(uidOverride) {
     return Boolean(getUserTredictToken(uidOverride) || getUserIntervalsToken(uidOverride));
   }
+  window.hasGarminCredentialsConfigured = hasGarminCredentialsConfigured;
 
   function makeSyntheticJsonResponse(payload, status = 200) {
     return {
@@ -773,6 +774,7 @@
     } catch {}
     return false;
   }
+  window.isGarminEnabledForCurrentUser = isGarminEnabledForCurrentUser;
 
   window.toggleGarminIntegrationForUser = function (enableFlag) {
     const u = getCurrentUserObj();
@@ -2658,38 +2660,7 @@
   }
 
   function syncExtraCardioToGarmin(dayKey, sessionObj) {
-    if (!isGarminEnabledForCurrentUser() || !sessionObj) return;
-    const dateStr = getIsoDateForWeekday(dayKey, false);
-    const sw = buildStandaloneCardioStructuredWorkout(sessionObj, dateStr);
-    const payload = {
-      llmDescription: 'Celik Kodu PWA — 7. Sef (garmin-tredict-guard)',
-      plan: {
-        title: sw.title,
-        description: '7. Şef tarafından 2. Bağımsız Kardiyo Seansı olarak eklendi.',
-        categories: ['general'],
-        targetgroups: ['intermediate'],
-        zonetypes: ['heartrate'],
-        language: 'en'
-      },
-      planTrainings: [
-        {
-          day: 1,
-          calendarDate: dateStr,
-          structuredWorkout: sw
-        }
-      ]
-    };
-    const icuType = sw.subSportType === 'indoor_rowing' ? 'Rowing' : (sw.subSportType === 'walking' ? 'Walk' : 'Run');
-    const durMin = Math.max(5, Number(sessionObj.durationMin || 20));
-    const icuEvent = {
-      category: 'WORKOUT',
-      type: icuType,
-      start_date_local: `${dateStr}T19:00:00`,
-      external_id: `celik_cardio_${dateStr}_${sessionObj.id || 'cardio'}`,
-      name: sw.title,
-      description: `- ${sw.title} ${durMin}m 70% HR`
-    };
-    pushPayloadToGarminSilent(payload, [icuEvent]);
+    return;
   }
   window.syncExtraCardioToGarmin = syncExtraCardioToGarmin;
 
@@ -2766,9 +2737,10 @@
   let pushQueueChain = Promise.resolve();
   const storageWriteDebounceTimers = {};
 
-  async function pushPayloadToGarminSilent(planPayload, intervalsEvents, dedupSig = '') {
+  async function pushPayloadToGarminSilent(planPayload, intervalsEvents, dedupSig = '', pushOpts = {}) {
     // Garmin kullanmayan kullanıcıda kesinlikle hiçbir ağ isteği veya kuyruk çalışmaz!
     if (!isGarminEnabledForCurrentUser()) return;
+    const forceManual = Boolean(pushOpts && pushOpts.forceManual);
     const hasIntervals = Array.isArray(intervalsEvents) && intervalsEvents.length > 0;
     const hasTredict = planPayload && Array.isArray(planPayload.planTrainings) && planPayload.planTrainings.length > 0;
     if (!hasIntervals && !hasTredict) return;
@@ -2787,7 +2759,7 @@
         : (intervalsEvents || [])
     );
 
-    if (inFlightPushSig === computedSig || localStorage.getItem(sigKey) === computedSig) {
+    if (!forceManual && (inFlightPushSig === computedSig || localStorage.getItem(sigKey) === computedSig)) {
       return;
     }
     inFlightPushSig = computedSig;
@@ -2811,6 +2783,10 @@
           if (!firstItem || !firstItem.skippedDuplicate) {
             const count = Number(data.count) || (Array.isArray(planPayload?.planTrainings) ? planPayload.planTrainings.length : 1);
             showGarminDirectCalendarSyncNotice(planPayload?.plan?.title || 'Çelik Kodu Seansı', count);
+          } else if (forceManual) {
+            const msg = 'Bu program Garmin saat takviminde zaten güncel.';
+            if (typeof showToast === 'function') showToast(msg);
+            else if (typeof window.pushAppNotification === 'function') window.pushAppNotification(msg, 'info', 'garmin');
           }
           if (inFlightPushSig === computedSig) inFlightPushSig = '';
           return;
@@ -2991,42 +2967,52 @@
     if (window.__garminCalendarStorageHooked) return;
     window.__garminCalendarStorageHooked = true;
     const origSetItem = Storage.prototype.setItem;
-    const origRemoveItem = Storage.prototype.removeItem;
     Storage.prototype.setItem = function (key, value) {
       origSetItem.call(this, key, value);
-      if (typeof key === 'string') {
-        if (
-          key.startsWith('celik_kodu_date_schedule_') ||
-          key.startsWith('celik_kodu_weekly_schedule_') ||
-          key.startsWith('celik_kodu_next_weekly_schedule_')
-        ) {
-          if (unifiedCalendarSyncTimer) clearTimeout(unifiedCalendarSyncTimer);
-          unifiedCalendarSyncTimer = setTimeout(() => syncCanonicalCalendarToGarmin('storage_hook'), 450);
-        } else if (key === 'celik_kodu_active_user_id' || key === 'celik_kodu_session') {
-          setTimeout(() => refreshGarminPanelsForUserState(), 0);
-        }
-      }
-    };
-    Storage.prototype.removeItem = function (key) {
-      origRemoveItem.call(this, key);
-      if (typeof key === 'string' && key.startsWith('celik_kodu_date_schedule_')) {
-        setTimeout(() => deleteDatesFromGarminSilent([], true), 0);
+      if (key === 'celik_kodu_active_user_id' || key === 'celik_kodu_session') {
+        setTimeout(() => refreshGarminPanelsForUserState(), 0);
       }
     };
   }
 
   // Geriye dönük uyumluluk için manuel tetikleyici (yalnızca Garmin açıksa çalışır)
   window.sendWorkoutToGarminWatch = async function () {
-    if (!isGarminEnabledForCurrentUser()) return;
-    const activeGen = typeof currentGeneratedWorkout !== 'undefined' && currentGeneratedWorkout
-      ? currentGeneratedWorkout
-      : window.currentGeneratedWorkout;
-    if (activeGen && Array.isArray(activeGen.exercises) && activeGen.exercises.length > 0) {
-      const todayStr = formatLocalIsoDate(new Date());
-      const title = formatWorkoutTitleWithDate(activeGen.title || 'Çelik Kodu Güç Seansı', todayStr);
-      const payload = buildTredictPlanPayload(title, activeGen.exercises, null, todayStr);
-      const ev = buildIntervalsWorkoutEvent(todayStr, title, activeGen.exercises);
-      await pushPayloadToGarminSilent(payload, ev ? [ev] : []);
+    return;
+  };
+
+  window.sendScheduledWorkoutToGarminWatch = async function (dateStr, btnEl) {
+    if (!isGarminEnabledForCurrentUser() || !hasGarminCredentialsConfigured()) return;
+    const calendarDate = /^\d{4}-\d{2}-\d{2}$/.test(String(dateStr || ''))
+      ? String(dateStr)
+      : formatLocalIsoDate(new Date());
+    let matched = null;
+    try {
+      const resolved = resolveUnifiedScheduleForNextDays(21);
+      const items = Array.isArray(resolved && resolved.multiDays) ? resolved.multiDays : [];
+      matched = items.find(item => item.calendarDate === calendarDate) || null;
+    } catch {}
+    if (!matched || !Array.isArray(matched.exercises) || matched.exercises.length === 0) {
+      const msg = 'Bu gün için saate gönderilecek antrenman bulunamadı.';
+      if (typeof showToast === 'function') showToast(msg);
+      return;
+    }
+
+    const actionSpan = btnEl ? btnEl.querySelector('.wk-garmin-send-action') : null;
+    const prevActionText = actionSpan ? actionSpan.textContent : '';
+    if (btnEl) {
+      btnEl.disabled = true;
+      if (actionSpan) actionSpan.textContent = 'Gönderiliyor...';
+    }
+    try {
+      const title = String(matched.title || 'Çelik Kodu Güç Seansı');
+      const payload = buildTredictPlanPayload(title, matched.exercises, null, calendarDate);
+      const event = buildIntervalsWorkoutEvent(calendarDate, formatWorkoutTitleWithDate(title, calendarDate), matched.exercises);
+      await pushPayloadToGarminSilent(payload, event ? [event] : [], '', { forceManual: true });
+    } finally {
+      if (btnEl) {
+        btnEl.disabled = false;
+        if (actionSpan) actionSpan.textContent = prevActionText || 'Saate Gönder';
+      }
     }
   };
 
@@ -3933,15 +3919,8 @@
   }
 
   function syncActiveSchedulesOnBoot() {
-    if (!isGarminEnabledForCurrentUser() || !hasGarminCredentialsConfigured()) return;
-    try {
-      const outboxKey = getScopedGarminKey(OUTBOX_PLANS_KEY);
-      const outbox = JSON.parse(localStorage.getItem(outboxKey) || '[]');
-      if (Array.isArray(outbox) && outbox.length > 0 && outbox[0] && outbox[0].planPayload) {
-        pushPayloadToGarminSilent(outbox[0].planPayload, outbox[0].intervalsEvents || [], outbox[0].sig || '');
-      }
-      syncCanonicalCalendarToGarmin('boot');
-    } catch {}
+    // Otomatik Garmin takvim gönderimi kullanıcı talebiyle devre dışı bırakıldı; yalnızca Antrenman sekmesindeki butonla manuel gönderilir.
+    return;
   }
 
   function getStoredWellnessStepsMap() {

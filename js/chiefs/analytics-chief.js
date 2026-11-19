@@ -2084,6 +2084,16 @@
                     "sfr": "HIGH",
                     "lengthened": true
           },
+          "db_rear_delt_fly": {
+                    "primary": "Omuz",
+                    "pFactor": 0.85,
+                    "sec": {
+                              "Sırt": 0.7
+                    },
+                    "type": "ISOLATION",
+                    "sfr": "HIGH",
+                    "lengthened": true
+          },
           "db_quadruped_external_rotation": {
                     "primary": "Omuz",
                     "pFactor": 0.9,
@@ -4276,7 +4286,7 @@
                 title: 'SIRT & KANAT',
                 columns: [
                     { key: 'lats', label: 'KANATLAR (SIRT GENİŞLİĞİ)', subKeys: ['back_lats'], recId: 'mach_lat_pulldown', recName: 'Sırt Çekiş (Lat Pulldown)', keywords: ['kanat', 'lats', 'latissimus', 'pulldown', 'pullup', 'pull-up', 'barfiks', 'chinup', 'chin-up', 'saw row', 'pullover', 'straight arm', 'düz kol'] },
-                    { key: 'mid', label: 'ORTA SIRT & KÜREK KEMİĞİ', subKeys: ['back_mid'], recId: 'db_chest_supported_row', recName: 'Göğüs Destekli Sırt Çekiş', keywords: ['orta sırt', 'kürek kemiği', 'rhomboid', 'row', 'kürek', 'pendlay', 'renegade row'] },
+                    { key: 'mid', label: 'ORTA SIRT & KÜREK KEMİĞİ', subKeys: ['back_mid'], recId: 'db_chest_supported_row', recName: 'Eğilerek Dambıl Row', keywords: ['orta sırt', 'kürek kemiği', 'rhomboid', 'row', 'kürek', 'pendlay', 'renegade row'] },
                     { key: 'traps', label: 'ÜST SIRT & BOYUN ÇEVRESİ', subKeys: ['traps'], recId: 'db_dumbbell_shrug_burnout', recName: 'Dambıl Trapez Silkme', keywords: ['trapez', 'üst sırt', 'shrug', 'clean', 'farmers', 'high pull'] },
                     { key: 'lower', label: 'ALT SIRT & BEL (OMURGA DESTEK)', subKeys: ['back_lower', 'core_lower'], recId: 'bw_hyperextension', recName: 'Sırt Uzatma (Hiperekstansiyon)', keywords: ['alt sırt', 'bel kas', 'hiperekstansiyon', 'hyperextension', 'back extension', 'good morning', 'rdl', 'deadlift', 'swing', 'gorilla'] }
                 ]

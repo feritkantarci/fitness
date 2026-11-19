@@ -403,7 +403,7 @@
             'db_rdl': { id: '1459', name: "Dambıl RDL", clip: 'assets/opengym/clips/1459.mp4', still: 'assets/opengym/stills/1459.webp' },
             'db_single_leg_rdl': { id: '1757', name: "Tek Bacak RDL", clip: 'assets/opengym/clips/1757.mp4', still: 'assets/opengym/stills/1757.webp' },
             'db_saw_row': { id: '0292', name: "Dambıl Saw Row", clip: 'assets/opengym/clips/0292.mp4', still: 'assets/opengym/stills/0292.webp' },
-            'db_chest_supported_row': { id: '0293', name: "Göğüs Destekli Dambıl Row", clip: 'assets/opengym/clips/0293.mp4', still: 'assets/opengym/stills/0293.webp' },
+            'db_chest_supported_row': { id: '0293', name: "Eğilerek Dambıl Row", clip: 'assets/opengym/clips/0293.mp4', still: 'assets/opengym/stills/0293.webp' },
             'db_renegade_row': { id: '2980', name: "Renegade Row", clip: 'assets/opengym/clips/2980.mp4', still: 'assets/opengym/stills/2980.webp' },
             'db_pullover': { id: '0375', name: "Dambıl Pullover", clip: 'assets/opengym/clips/0375.mp4', still: 'assets/opengym/stills/0375.webp' },
             'db_hammer_curl': { id: '0313', name: "Dambıl Hammer Curl", clip: 'assets/opengym/clips/0313.mp4', still: 'assets/opengym/stills/0313.webp' },
@@ -494,6 +494,7 @@
             'db_rotational_lunge_chop': { id: 'db_rotational_lunge_chop', name: "Rotasyonel Lunge & Dambıl Savuruş", clip: 'assets/opengym/clips/db_rotational_lunge_chop.mp4', still: 'assets/opengym/stills/db_rotational_lunge_chop.webp' },
             'db_rotational_gorilla_row': { id: 'db_rotational_gorilla_row', name: "Rotasyonel Gorilla Row", clip: 'assets/opengym/clips/db_rotational_gorilla_row.mp4', still: 'assets/opengym/stills/db_rotational_gorilla_row.webp' },
             'db_single_arm_rear_delt_row': { id: 'db_single_arm_rear_delt_row', name: "Eğilerek Tek Kol Arka Omuz Çekişi (Parabolik Sweep)", clip: 'assets/opengym/clips/db_single_arm_rear_delt_row.mp4?v=285', still: 'assets/opengym/stills/db_single_arm_rear_delt_row.webp?v=285' },
+            'db_rear_delt_fly': { id: 'db_rear_delt_fly', name: "Dambıl Rear Delt Fly (Eğilerek Ters Açış)", clip: 'assets/opengym/clips/db_rear_delt_fly.mp4', still: 'assets/opengym/stills/db_rear_delt_fly.webp' },
             'db_high_pull_cuban_rotation': { id: 'db_high_pull_cuban_rotation', name: "Eğilerek Row & High Pull + Cuban Rotasyon", clip: 'assets/opengym/clips/db_high_pull_cuban_rotation.mp4?v=284', still: 'assets/opengym/stills/db_high_pull_cuban_rotation.webp?v=284' },
             'db_dumbbell_shrug_burnout': { id: 'db_dumbbell_shrug_burnout', name: "Dambıl Trapez Silkme (Burnout)", clip: 'assets/opengym/clips/db_dumbbell_shrug_burnout.mp4', still: 'assets/opengym/stills/db_dumbbell_shrug_burnout.webp' },
             'db_quadruped_external_rotation': { id: 'db_quadruped_external_rotation', name: "Dört Ayak Pozisyonunda Yatay Arka Omuz Uçuşu", clip: 'assets/opengym/clips/db_quadruped_external_rotation.mp4', still: 'assets/opengym/stills/db_quadruped_external_rotation.webp' },
@@ -2325,6 +2326,13 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
         // ==================== WORKOUT CARDS CAROUSEL ENGINE (HORIZONTAL SWIPEABLE CARDS) ====================
         window.activeWorkoutCarouselIndex = 0;
+        window.generatedWorkoutViewMode = 'cards';
+
+        function toggleGeneratedWorkoutViewMode() {
+            window.generatedWorkoutViewMode = window.generatedWorkoutViewMode === 'list' ? 'cards' : 'list';
+            renderGeneratedWorkout({ preserveScroll: true, preserveCardIndex: true });
+        }
+        window.toggleGeneratedWorkoutViewMode = toggleGeneratedWorkoutViewMode;
 
         function stepWorkoutCarousel(delta) {
             const track = document.getElementById('wkCarouselTrack');
@@ -2579,6 +2587,40 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 </button>
             ` : '';
 
+            const listModeActive = mode === 'generated' && window.generatedWorkoutViewMode === 'list';
+            const viewToggleLabel = listModeActive ? 'Kart' : 'Liste';
+            const viewToggleTitle = listModeActive ? 'Kart görünümüne geç' : 'Liste görünümüne geç';
+            const viewToggleBtn = mode === 'generated' ? `
+                <button type="button" class="wk-view-toggle-btn" onclick="toggleGeneratedWorkoutViewMode()" title="${viewToggleTitle}" aria-label="${viewToggleTitle}">
+                    ${viewToggleLabel}
+                </button>
+            ` : '';
+            const bodyHtml = listModeActive
+                ? `<div class="wk-list-view" id="wkListView">${buildTimelineStationsHtml(list, w.scheme, weights, 'generated')}</div>`
+                : `<div class="wk-carousel-track" id="wkCarouselTrack" onscroll="handleWorkoutCarouselScroll()">
+                        ${cardsHtml}
+                        ${finisherCardHtml}
+                    </div>`;
+            const dockHtml = listModeActive
+                ? `<div class="wk-carousel-dock">
+                        <button type="button" class="wk-dock-nav-btn is-disabled" aria-label="Kart yok">—</button>
+                        <button type="button" class="wk-dock-start-btn" onclick="startActiveWorkoutFromGenerated()">
+                            <span>Seansı Başlat</span>
+                        </button>
+                        <button type="button" class="wk-dock-nav-btn is-disabled" aria-label="Kart yok">—</button>
+                    </div>`
+                : `<div class="wk-carousel-dock">
+                        <button type="button" class="wk-dock-nav-btn ${currentIdx === 0 ? 'is-disabled' : ''}" id="wkDockPrevBtn" onclick="stepWorkoutCarousel(-1)" aria-label="Önceki Hareket">
+                            ◀
+                        </button>
+                        <button type="button" class="wk-dock-start-btn" onclick="startActiveWorkoutFromGenerated()">
+                            <span>Seansı Başlat</span>
+                        </button>
+                        <button type="button" class="wk-dock-nav-btn ${currentIdx >= totalCards - 1 ? 'is-disabled' : ''}" id="wkDockNextBtn" onclick="stepWorkoutCarousel(1)" aria-label="Sonraki Hareket">
+                            ▶
+                        </button>
+                    </div>`;
+
             return `
                 <div class="wk-carousel-wrap" id="wkCarouselWrap">
                     <!-- TOP STORY BAR & CONTROLS -->
@@ -2591,30 +2633,15 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             <span class="wk-carousel-title-strip" title="${escapeHTML(cleanWorkoutTitle)}">${escapeHTML(cleanWorkoutTitle)}</span>
                             <div class="wk-carousel-top-actions">
                                 ${backToWeeklyBtn}
+                                ${viewToggleBtn}
                                 <button type="button" class="wk-i-badge" style="border:none; cursor:pointer;" onclick="openWorkoutInfoModal('coach')" title="Koç Özeti & Isınma">i</button>
                                 <button type="button" class="wk-carousel-close-btn" onclick="dismissGeneratedWorkoutView()" title="Vazgeç / Düzenle" aria-label="Kapat">✕</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- HORIZONTAL SWIPEABLE TRACK -->
-                    <div class="wk-carousel-track" id="wkCarouselTrack" onscroll="handleWorkoutCarouselScroll()">
-                        ${cardsHtml}
-                        ${finisherCardHtml}
-                    </div>
-
-                    <!-- FIXED BOTTOM DOCK (ALWAYS IN REACH) -->
-                    <div class="wk-carousel-dock">
-                        <button type="button" class="wk-dock-nav-btn ${currentIdx === 0 ? 'is-disabled' : ''}" id="wkDockPrevBtn" onclick="stepWorkoutCarousel(-1)" aria-label="Önceki Hareket">
-                            ◀
-                        </button>
-                        <button type="button" class="wk-dock-start-btn" onclick="startActiveWorkoutFromGenerated()">
-                            <span>▶️ Seansı Başlat</span>
-                        </button>
-                        <button type="button" class="wk-dock-nav-btn ${currentIdx >= totalCards - 1 ? 'is-disabled' : ''}" id="wkDockNextBtn" onclick="stepWorkoutCarousel(1)" aria-label="Sonraki Hareket">
-                            ▶
-                        </button>
-                    </div>
+                    ${bodyHtml}
+                    ${dockHtml}
 
                     ${buildWorkoutInfoModalsHtml(w, mode)}
                 </div>
@@ -2629,6 +2656,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             }
             window.expandedGeneratedExIndex = null;
             window.activeWorkoutCarouselIndex = 0;
+            window.generatedWorkoutNeedsPreview = false;
             const container = document.getElementById('generatedWorkoutOutput');
             if (container) container.innerHTML = '';
             const heroBanner = document.getElementById('aiHybridHeroBanner');
@@ -2920,6 +2948,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 selectSplit(currentGeneratedWorkout.split);
             }
             window.expandedGeneratedExIndex = null;
+            window.generatedWorkoutNeedsPreview = true;
             renderGeneratedWorkout();
         }
         window.inspectDayFromPendingWeeklyPlan = inspectDayFromPendingWeeklyPlan;
@@ -3354,7 +3383,7 @@ Aşağıdaki JSON şemasında çıktı ver:
             db_pullover: 'lat_pullover',
             mach_straight_arm_pulldown: 'lat_pullover',
             // 11. Yatay Orta Sırt Çekiş (Horizontal Row)
-            db_chest_supported_row: 'supported_midback_row',
+            db_chest_supported_row: 'barbell_hinge_row',
             mach_cable_row: 'supported_midback_row',
             bw_inverted_row: 'inverted_body_row',
             bb_bent_over_row: 'barbell_hinge_row',
@@ -3436,6 +3465,7 @@ Aşağıdaki JSON şemasında çıktı ver:
             db_rotational_lunge_chop: 'lunge_chop_rotational',
             db_rotational_gorilla_row: 'gorilla_row_rotational',
             db_single_arm_rear_delt_row: 'rear_delt_sweep_parabolic',
+            db_rear_delt_fly: 'rear_delt_reverse_fly',
             db_high_pull_cuban_rotation: 'row_high_pull_cuban',
             db_dumbbell_shrug_burnout: 'shrug_burnout',
             db_quadruped_external_rotation: 'quadruped_horizontal_fly',
@@ -3483,6 +3513,7 @@ Aşağıdaki JSON şemasında çıktı ver:
         // aynı sırt kaslarını aynı eğik yatay açıyla vuran Barbell Row + Rotasyonel Gorilla Row gibi ikizler engellenir.
         const EXERCISE_ANGLE_VECTOR_MAP = {
             // Desteksiz Eğik Yatay Sırt/Kanat Çekişleri (Aynı seansta en fazla 1 adet!)
+            db_chest_supported_row: 'pull_hinge_unsupported_back',
             bb_bent_over_row: 'pull_hinge_unsupported_back',
             bb_pendlay_row: 'pull_hinge_unsupported_back',
             kb_gorilla_row: 'pull_hinge_unsupported_back',
@@ -3490,7 +3521,6 @@ Aşağıdaki JSON şemasında çıktı ver:
             db_gorilla_row_to_clean: 'pull_hinge_unsupported_back',
             db_renegade_row: 'pull_hinge_unsupported_back',
             // Göğüs veya Diz Destekli Yatay Sırt/Kanat Çekişleri
-            db_chest_supported_row: 'pull_horiz_supported_back',
             mach_cable_row: 'pull_horiz_supported_back',
             bw_inverted_row: 'pull_horiz_supported_back',
             db_saw_row: 'pull_horiz_supported_back',
@@ -3504,6 +3534,7 @@ Aşağıdaki JSON şemasında çıktı ver:
             // Arka Omuz & Skapular Dış Rotasyon (Eğik yapılsa bile hedef kası Arka Omuzdur; sırt row ile çakışmaz)
             mach_face_pull: 'pull_high_face_cuban',
             db_single_arm_rear_delt_row: 'pull_rear_delt_external',
+            db_rear_delt_fly: 'pull_rear_delt_external',
             db_high_pull_cuban_rotation: 'pull_high_face_cuban',
             db_quadruped_external_rotation: 'pull_quadruped_rear_fly',
             kb_halo: 'shoulder_halo_mobility',
@@ -7108,6 +7139,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 } catch(e) {}
 
                 window.expandedGeneratedExIndex = null;
+                window.generatedWorkoutNeedsPreview = true;
                 renderGeneratedWorkout();
                 playAlertSound();
             }
@@ -7613,6 +7645,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 'db_rotational_lunge_chop': { form: 'assets/exercises/db_rotational_lunge_chop.webp', anatomi: null },
                 'db_rotational_gorilla_row': { form: 'assets/exercises/db_rotational_gorilla_row.webp', anatomi: null },
                 'db_single_arm_rear_delt_row': { form: 'assets/exercises/db_single_arm_rear_delt_row.gif', anatomi: null },
+                'db_rear_delt_fly': { form: 'assets/exercises/db_rear_delt_fly.gif', anatomi: null },
                 'db_high_pull_cuban_rotation': { form: 'assets/exercises/db_high_pull_cuban_rotation.gif', anatomi: null },
                 'db_dumbbell_shrug_burnout': { form: 'assets/exercises/db_dumbbell_shrug_burnout.webp', anatomi: null },
                 'db_quadruped_external_rotation': { form: 'assets/exercises/db_quadruped_external_rotation.webp', anatomi: null },

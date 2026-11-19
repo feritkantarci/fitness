@@ -2747,7 +2747,7 @@
                 };
                 if (isActiveTab('libraryTab') && typeof renderLibrary === 'function') renderLibrary();
                 if (isActiveTab('analyticsTab') && typeof renderAnalytics === 'function') renderAnalytics();
-                if (isActiveTab('generatorTab') && typeof currentGeneratedWorkout !== 'undefined' && currentGeneratedWorkout && typeof renderGeneratedWorkout === 'function') {
+                if (isActiveTab('generatorTab') && window.generatedWorkoutNeedsPreview === true && typeof currentGeneratedWorkout !== 'undefined' && currentGeneratedWorkout && typeof renderGeneratedWorkout === 'function') {
                     renderGeneratedWorkout({ preserveScroll: true });
                 }
                 if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {

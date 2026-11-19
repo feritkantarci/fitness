@@ -491,8 +491,8 @@ function runAcademicMathSuite(moduleSources, dbText) {
     {
       id: 'T6',
       owner: 'library-guard',
-      title: '3-Mod DB Denetimi (3 Cardio/6 Time/130 Rep) & Miras Hollow Body',
-      expected: 'cardio=3, time=6, reps=130; Hollow 12→10→8 normal_fatigue(sn), 40→20 early_drop',
+      title: '3-Mod DB Denetimi (3 Cardio/6 Time/131 Rep) & Miras Hollow Body',
+      expected: 'cardio=3, time=6, reps=131; Hollow 12→10→8 normal_fatigue(sn), 40→20 early_drop',
       run: () => {
         ctx.__seedState();
         const counts = vm.runInContext(`(() => {
@@ -522,7 +522,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
             ]
           }]
         }]).items[0];
-        const ok = counts.cardio_min === 3 && counts.time_sec === 6 && counts.reps === 130
+        const ok = counts.cardio_min === 3 && counts.time_sec === 6 && counts.reps === 131
           && hMode === 'time_sec'
           && Boolean(h1 && h1.category === 'normal_fatigue' && String(h1.setChainText).includes('sn') && !String(h1.adviceText).includes('kiloya'))
           && Boolean(h2 && h2.category === 'early_drop' && String(h2.badgeText).includes('Süre Düşüşü'));
@@ -2593,6 +2593,37 @@ function runAcademicMathSuite(moduleSources, dbText) {
           && res.leakCount === 0
           && res.clearedOk;
         return { ok, actual: JSON.stringify({ hasGatewayGate, userStateRuleLeanOk, helperCallsInUserState, ...res }) };
+      }
+    },
+    {
+      id: 'T42',
+      owner: 'garmin-tredict-guard',
+      title: 'Yalnızca Antrenman Sekmesinden Manuel Garmin Gönderimi & Sıfır Harici Takvim (Google/Apple)',
+      expected: 'index.html içinde Google/Apple Takvim modalları/butonları yok, otomatik Garmin takvim gönderimi kapalı, Antrenman sekmesinde manuel Garmin butonu var',
+      run: () => {
+        const htmlCode = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+        const bridgeCode = fs.readFileSync(path.join(ROOT, 'js', 'garmin-tredict-bridge.js'), 'utf8');
+        const workoutCode = fs.readFileSync(path.join(ROOT, 'js', 'chiefs', 'workout-chief.js'), 'utf8');
+
+        const noExternalCalHtml = !htmlCode.includes('id="calendarSyncModal"')
+          && !htmlCode.includes('id="googleCalendarExportModal"')
+          && !htmlCode.includes('openGoogleCalendarWeb()')
+          && !htmlCode.includes('downloadFullScheduleICS()')
+          && !htmlCode.includes('downloadSingleDayICS()');
+
+        const hookMatch = bridgeCode.match(/function installCalendarAutoSyncHook\(\)\s*\{([\s\S]*?)\n  \}/);
+        const hookBody = hookMatch ? hookMatch[1] : '';
+        const noAutoCalendarHook = Boolean(hookBody)
+          && !hookBody.includes('syncCanonicalCalendarToGarmin')
+          && !hookBody.includes('deleteDatesFromGarminSilent');
+
+        const manualBtnInWorkout = workoutCode.includes('sendScheduledWorkoutToGarminWatch(')
+          && bridgeCode.includes('forceManual: true');
+
+        const liveBarEmpty = vm.runInContext(`(() => getCalendarLiveBarHtml() === '')()`, ctx);
+
+        const ok = noExternalCalHtml && noAutoCalendarHook && manualBtnInWorkout && liveBarEmpty;
+        return { ok, actual: JSON.stringify({ noExternalCalHtml, noAutoCalendarHook, manualBtnInWorkout, liveBarEmpty }) };
       }
     }
   ];

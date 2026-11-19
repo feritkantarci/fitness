@@ -41,9 +41,10 @@ Bu şef, **Çelik Kodu PWA** ile **Garmin Forerunner 945 / Tredict** arasındaki
    - Bu setler saatin uydurduğu kategori adıyla kaydedilmez; `"⚠️ Plan Dışı İlave Set"` olarak gruplanır.
    - Sporcu tek tıkla bizdeki orijinal hareketi seçtiğinde, saatten gelen sağlık verileri o orijinal hareketin içine yazılarak ilgili şeflere aktarılır.
 
-### Görev 5: Sıfır Ekstra Buton (Otomatik Takvim Senkronu) & Garmin Kullanmayan Kullanıcı Koruması
-1. **Sıfır Ekstra Buton:** `Program` veya `Antrenman` sekmelerinde ayrı bir *"Saate Gönder"* butonu bulunmaz. Kullanıcı bir programı **Antrenman Takvimine** eklediği anda (`Bugüne Ekle`, `Yarına Ekle`, `Bu Haftaya Ekle`, `Gelecek Haftaya Ekle` -> `celik_kodu_date_schedule_`, `celik_kodu_weekly_schedule_`, `celik_kodu_next_weekly_schedule_`), `garmin-tredict-guard` takvim kaydını yakalar ve arka planda otomatik olarak saate gönderir.
-2. **Garmin Kullanmayan Kullanıcı Koruması (`isGarminEnabledForCurrentUser`):** Garmin özelliği kullanıcı bazlıdır (`celik_garmin_enabled_${uid}`). Garmin kullanmayan bir hesapta arka planda **hiçbir ağ isteği atılmaz**, **hiçbir hata oluşmaz** ve `Geçmiş`/`Analiz` sekmelerinde Garmin kartları gösterilmez (yalnızca `Profil` sekmesinden istenirse açılabilir).
+### Görev 5: Yalnızca Antrenman Sekmesinden Manuel Gönderim & Garmin Kullanmayan Kullanıcı Koruması
+1. **Otomatik Takvim Gönderimi Yasağı (Yalnızca Manuel Buton):** `Program Oluştur` veya takvime program atama (`celik_kodu_date_schedule_`, `celik_kodu_weekly_schedule_`, `celik_kodu_next_weekly_schedule_`) sırasında arka planda Garmin'e otomatik gönderim **YAPILMAZ**. Garmin'e gönderim yalnızca **Antrenman** sekmesinde seçili günün altındaki **"Garmin — Saate Gönder"** butonu (`sendScheduledWorkoutToGarminWatch`) ile manuel yapılır (hem tekrar gönderimi hem gelecek haftayı destekler).
+2. **Harici Takvim (Google / Apple Takvim) Yasağı:** Google Takvim ve Apple Takvim (`.ics`) dışa aktarma ve senkronizasyon özellikleri sistemden tamamen kaldırılmıştır.
+3. **Garmin Kullanmayan Kullanıcı Koruması (`isGarminEnabledForCurrentUser`):** Garmin özelliği kullanıcı bazlıdır (`celik_garmin_enabled_${uid}`). Garmin kullanmayan bir hesapta arka planda **hiçbir ağ isteği atılmaz**, **hiçbir hata oluşmaz** ve `Geçmiş`/`Analiz` sekmelerinde Garmin kartları gösterilmez (yalnızca `Profil` sekmesinden istenirse açılabilir).
 
 ### Görev 6: Doğrudan Canlı Takvim -> Garmin Güç (`Strength`) Kategorisi Protokolü (Kesin Kural)
 1. **Neden Tredict Canlı Takvim (Intervals.icu Yasağı):**

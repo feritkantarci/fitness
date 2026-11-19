@@ -2573,6 +2573,24 @@
                     "isComplex": false,
                     "proof": "Öne eğilip dirseği vücuda yapıştırmak yerine yana doğru geniş açıyla çekmek, yükü kanatlardan alıp doğrudan arka omuza ve kürek kemiği çevresine verir."
           },
+          "db_rear_delt_fly": {
+                    "primary": "Arka Omuz, Orta Sırt",
+                    "secondary": "Üst Sırt & Trapez",
+                    "subKey": "shoulders_rear",
+                    "primarySubKeys": [
+                              "shoulders_rear",
+                              "back_mid"
+                    ],
+                    "secondarySubKeys": [
+                              "traps"
+                    ],
+                    "allSubKeys": [
+                              "shoulders_rear",
+                              "back_mid"
+                    ],
+                    "isComplex": false,
+                    "proof": "Öne eğik pozisyonda iki kolu yana yukarı açmak arka omuzları ve kürek kemikleri arasındaki orta sırt (rhomboid) kaslarını aynı anda hedefler."
+          },
           "db_high_pull_cuban_rotation": {
                     "primary": "Arka Omuz, Orta Sırt, Üst Sırt & Trapez",
                     "secondary": "Yan Omuz, Alt Sırt & Bel, Ön Kol & Dış Pazı",
@@ -3300,7 +3318,15 @@
                 }
             }
 
-            if (tabId === 'generatorTab') renderAiHybridHeroBanner();
+            if (tabId === 'generatorTab') {
+                renderAiHybridHeroBanner();
+                if (window.generatedWorkoutNeedsPreview !== true) {
+                    const generatedOutput = document.getElementById('generatedWorkoutOutput');
+                    if (generatedOutput) generatedOutput.innerHTML = '';
+                    const heroBanner = document.getElementById('aiHybridHeroBanner');
+                    if (heroBanner) heroBanner.style.display = '';
+                }
+            }
             if (tabId === 'libraryTab') renderLibrary();
             if (tabId === 'historyTab') {
                 renderHistory();

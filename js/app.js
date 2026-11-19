@@ -52,7 +52,7 @@ window.CELIK_CHIEF_ROOMS = Object.freeze({
             } else if ('serviceWorker' in navigator && navigator.serviceWorker) {
                 window.addEventListener('load', () => {
                     try {
-                        navigator.serviceWorker.register('./sw.js?v=327')
+                        navigator.serviceWorker.register('./sw.js?v=328')
                             .then(reg => {
                                 console.log('SW scope:', reg.scope);
                                 if (reg.update) reg.update();
@@ -74,6 +74,7 @@ window.CELIK_CHIEF_ROOMS = Object.freeze({
 
         // INITIALIZE APPLICATION
         window.addEventListener('DOMContentLoaded', () => {
+            window.generatedWorkoutNeedsPreview = false;
             ensureBilingualExerciseNames();
             initAuthDatabase();
             initFirebaseEngine();

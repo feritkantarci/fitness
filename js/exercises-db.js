@@ -6408,6 +6408,63 @@
   },
   {
     "category": "pull",
+    "cue": "Kalçadan 45-60° öne eğil, sırtını düz tut ve iki dambılı dirsekleri hafif bükülü şekilde yana yukarı aç.",
+    "diagram": "assets/exercises/db_rear_delt_fly.gif",
+    "equipment": "dumbbell",
+    "id": "db_rear_delt_fly",
+    "isComplex": false,
+    "mechanic": "isolation",
+    "muscle": "Arka Omuz, Orta Sırt",
+    "name": "Dambıl Rear Delt Fly (Eğilerek Ters Açış)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Ayaklar omuz genişliğinde, dizler hafif bükülü. Gövde kalçadan 45-60° öne eğik, sırt düz ve dambıllar göğüs altında serbest.",
+        "phase": "1. Başlangıç (Öne Eğik Duruş)"
+      },
+      {
+        "badge": "action",
+        "desc": "Dirseklerdeki hafif açıyı bozmadan iki dambılı aynı anda geniş bir yay çizerek yana ve yukarı kaldır.",
+        "phase": "2. Yana Yukarı Açış"
+      },
+      {
+        "badge": "finish",
+        "desc": "Kollar omuz hizasına (T pozisyonu) ulaşınca kürek kemiklerini ve arka omuzu 1 saniye sık, sonra kontrollü indir.",
+        "phase": "3. Tepe Sıkıştırma"
+      }
+    ],
+    "primaryMuscles": [
+      "shoulders",
+      "back"
+    ],
+    "secondaryMuscles": [
+      "traps"
+    ],
+    "tags": [
+      "upper_pull",
+      "shoulders",
+      "back",
+      "isolation",
+      "dumbbell"
+    ],
+    "weightKey": "pull",
+    "primarySubMuscles": "Arka Omuz, Orta Sırt",
+    "secondarySubMuscles": "Üst Sırt & Trapez",
+    "biomechanicalProof": "Öne eğik pozisyonda kolları yana yukarı açmak arka omuzları, kürek kemikleri arasındaki orta sırt (rhomboid) ve orta trapez kaslarını doğrudan çalıştırır.",
+    "fitCategory": "lateral_raise",
+    "fitName": "bent_over_dumbbell_lateral_raise",
+    "fitNote": "Dumbbell Rear Delt Fly",
+    "garminPrimaryMuscles": [
+      "SHOULDERS",
+      "TRAPS"
+    ],
+    "garminSecondaryMuscles": [
+      "LATS"
+    ],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "pull",
     "cue": "Eğilerek row yap, doğrulurken dirsekleri yüksek çekip scarecrow pozisyonundan bilekleri W şeklinde tavana çevir.",
     "diagram": "assets/exercises/db_high_pull_cuban_rotation.gif",
     "equipment": "dumbbell",

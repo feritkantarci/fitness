@@ -195,6 +195,17 @@ Kullanıcı "canlıya al / push et" dediğinde şu adımlar uygulanır:
 * **4 Boyutlu Ortak Tartı Zorunluluğu:**
   - Her algoritma ve kural değişikliğinde **1. Çeşitlilik**, **2. Biyomekanik Verimlilik**, **3. Eklem Güvenliği** ve **4. İstasyon/Süperset Akışı** birlikte değerlendirilir; önerilen kuralın olası yan etkileri gizlenmeden açıkça analiz edilir.
 
+---
+
+## 17. Mimari Öncelik & Modüller Arası Etki Senkronizasyonu Yasası
+* **Önce Mimariyi Oku & Etki Haritasını Çıkar:**
+  - İşleyişi, buton akışını, veri yolunu veya entegrasyonları değiştiren her talepte tek satır kod düzenlemeden önce ilgili Kısım Şefi kılavuzları (`.agents/skills/*/SKILL.md`) ve proje kuralları (`GEMINI.md`) okunur; değişikliğin etkileyeceği tüm bağlı modüller ve arka plan dinleyicileri tespit edilir.
+* **Eşzamanlı Mimari, Kod ve Sınav Revizyonu:**
+  - Mimari bir kural değiştiğinde yalnızca görünen ekran değil; etkilenen tüm bağlı modüller, ilgili Kısım Şefi kılavuzu ve kalıcı doğrulama sınavı (`scripts/tab-watchdog.js`) aynı görev içinde eşzamanlı güncellenir; bu adım kullanıcının hatırlatmasına bırakılmaz.
+* **Çapraz Modül Bağımlılık Denetimi:**
+  - Bir özelliğin kaldırılması veya değiştirilmesi durumunda başka ekranlarda, arka plan kancalarında veya dış servis köprülerinde kalan tetikleyiciler tamamen temizlenmeden görev tamamlandı sayılmaz.
+
+
 
 
 

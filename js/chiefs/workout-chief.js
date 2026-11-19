@@ -7284,6 +7284,7 @@ KURALLAR:
         }
 
         async function callGoogleCalendarApi(endpoint, options = {}) {
+            throw new Error("Google Takvim entegrasyonu devre dışı.");
             const token = getGoogleCalendarToken();
             if (!token) throw new Error("Google Takvim oturumu açık değil.");
             const url = endpoint.startsWith('http') ? endpoint : `https://www.googleapis.com/calendar/v3${endpoint}`;
@@ -7651,6 +7652,7 @@ KURALLAR:
         }
 
         async function performFullCalendarSync() {
+            return;
             if (!isGoogleCalendarConnected()) {
                 downloadFullScheduleICS();
                 if (typeof showToast === 'function') showToast("📥 Tüm haftalık antrenman takvimi (.ics) indirildi! Takviminize aktarabilirsiniz.");
@@ -7700,6 +7702,7 @@ KURALLAR:
         }
 
         async function syncCurrentDayToCalendar() {
+            return;
             if (activeSchedulingDayIdx === null) return;
             if (!isGoogleCalendarConnected()) {
                 openSingleDayDirectGoogleCalendar();
@@ -7925,7 +7928,7 @@ KURALLAR:
         }
 
         function openGoogleCalendarWeb() {
-            openGoogleCalendarExportModal();
+            return;
         }
 
         function openGoogleCalendarLegacyFallback() {
@@ -8012,6 +8015,7 @@ KURALLAR:
         }
 
         function downloadFullScheduleICS() {
+            return;
             const anchor = new Date((calendarScreenState && calendarScreenState.anchorDate) || new Date());
             const icsContent = generateScheduleICS(anchor);
             const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
@@ -8025,6 +8029,7 @@ KURALLAR:
         }
 
         function downloadSingleDayICS() {
+            return;
             if (activeSchedulingDayIdx === null) return;
             const isNext = activePlannerWeek === 'next';
             const user = getActiveUser();
@@ -8047,6 +8052,7 @@ KURALLAR:
         }
 
         function getCalendarLiveBarHtml() {
+            return '';
             const connected = isGoogleCalendarConnected();
             if (connected) {
                 return `
@@ -8838,6 +8844,22 @@ KURALLAR:
 
                 const activeCalIdx = Math.min(Math.max(0, window.activeCalCarouselIndex || 0), exCount - 1);
                 window.activeCalCarouselIndex = activeCalIdx;
+                const garminSendHtml = (
+                    typeof window.isGarminEnabledForCurrentUser === 'function'
+                    && window.isGarminEnabledForCurrentUser()
+                    && typeof window.hasGarminCredentialsConfigured === 'function'
+                    && window.hasGarminCredentialsConfigured()
+                ) ? `
+                    <button type="button" class="wk-garmin-send-btn" onclick="sendScheduledWorkoutToGarminWatch('${selDay.dayYMD}', this)" title="Programı Garmin saatine gönder" aria-label="Programı Garmin saatine gönder">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="7" y="2" width="10" height="20" rx="3"/>
+                            <circle cx="12" cy="12" r="2.6"/>
+                            <path d="M10 5h4M10 19h4"/>
+                        </svg>
+                        <span class="wk-garmin-send-label">Garmin</span>
+                        <span class="wk-garmin-send-action">Saate Gönder</span>
+                    </button>
+                ` : '';
 
                 const storyBarsHtml = exList.map((_, i) => {
                     const cls = i === activeCalIdx ? 'wk-story-bar is-active' : (i < activeCalIdx ? 'wk-story-bar is-passed' : 'wk-story-bar');
@@ -8941,6 +8963,7 @@ KURALLAR:
                                 ▶
                             </button>
                         </div>
+                        ${garminSendHtml}
                     </div>
                 `;
             };
@@ -8981,9 +9004,6 @@ KURALLAR:
                 focusBodyHtml = `
                     <div class="stitch-sel-rest-box">
                         <div class="stitch-sel-workout-title" style="font-size:15px;">Dinlenme ve Toparlanma Günü</div>
-                        <button type="button" class="wk-btn-utility-compact" style="margin-top:10px;" onclick="openScheduleDayModal(${selDay.dayIdx}, '${selDay.dayYMD}')">
-                            + Bu Güne Antrenman Ekle
-                        </button>
                     </div>
                 `;
             }
