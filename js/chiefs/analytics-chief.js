@@ -4009,13 +4009,6 @@
                 saveWeeklySchedule(schedule);
             }
 
-            try {
-                const user = getActiveUser();
-                if (user && typeof upsertUserCustomProgram === 'function') {
-                    upsertUserCustomProgram(customWorkout, user.id);
-                }
-            } catch(e) {}
-
             return true;
         }
 

@@ -10202,11 +10202,7 @@ KESİN KURALLAR:
                         }
                     }
 
-                    // 2. Also persist in custom programs library
-                    upsertUserCustomProgram(updatedWorkout, user.id);
-                    if (typeof renderLibrary === 'function') renderLibrary();
-
-                    // 3. Update active day and calendar view
+                    // 2. Update active day and calendar view
                     renderActiveWorkout();
                     if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
                 }

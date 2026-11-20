@@ -5530,13 +5530,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     saveDateScheduleOverride(targetDateStr, updatedPlanObj, uid);
                 }
 
-                try {
-                    if (updatedWorkout && typeof upsertUserCustomProgram === 'function') {
-                        const withId = updatedWorkout.id ? updatedWorkout : Object.assign({}, updatedWorkout, { id: 'moved_' + Date.now() });
-                        upsertUserCustomProgram(withId, uid);
-                    }
-                } catch (e) {}
-
                 window.lastScheduleMoveSummary = summaryObj;
                 return summaryObj;
             };
@@ -5958,11 +5951,6 @@ KURALLAR:
             const targetDateStr = customRoutineState.editingDateStr || resolveScheduleDateStr(dayIdx, null, activePlannerWeek === 'next' ? 1 : 0) || (dayIdx === todayIdx ? todayYMD : null);
             const user = getActiveUser();
             syncDayPlanToDateAndWeek(dayIdx, targetDateStr, planObj, user ? user.id : null, activePlannerWeek === 'next');
-
-            // Also update or add to custom programs in library
-            if (user && typeof upsertUserCustomProgram === 'function') {
-                upsertUserCustomProgram(updatedWorkout, user.id);
-            }
 
             // Clear editing state cleanly without prompt
             cancelStudioEditingSilent();
@@ -6547,14 +6535,6 @@ KURALLAR:
                 activePlannerWeek = 'current';
             }
 
-            if (workout.isCustom || workout.type === 'custom' || workout.type === 'custom_saved' || workout.type === 'custom_generated') {
-                try {
-                    if (planObj && planObj.customWorkout && typeof upsertUserCustomProgram === 'function') {
-                        upsertUserCustomProgram(planObj.customWorkout, uid);
-                    }
-                } catch(e) {}
-            }
-
             if (isAssigningToToday) {
                 currentGeneratedWorkout = planObj.customWorkout;
                 window.currentGeneratedWorkout = planObj.customWorkout;
@@ -6858,13 +6838,6 @@ KURALLAR:
                     exercises: workout.exercises
                 };
                 saveWeeklySchedule(schedule);
-
-                // Kütüphaneye de kaydet
-                const user = getActiveUser();
-                if (user && typeof upsertUserCustomProgram === 'function') {
-                    const progEntry = workout.id ? workout : Object.assign({}, workout, { id: schedule[todayIdx].id, isCustom: true });
-                    upsertUserCustomProgram(progEntry, user.id);
-                }
 
                 renderActiveWorkout();
                 playAlertSound();

@@ -3433,6 +3433,100 @@ function runAcademicMathSuite(moduleSources, dbText) {
           actual: JSON.stringify({ htmlMenuOk, cssHistOk, ...vmRes })
         };
       }
+    },
+    {
+      id: 'T57',
+      owner: 'library-guard',
+      title: 'Programlarım Listesi Otomatik Kirlenme Koruması (Yalnızca Açık Kayıt)',
+      expected: 'takvim atama/değiştirme/analiz/direktif sonrası Programlarım=0; açık Kaydet sonrası=2',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const uid = 'usr_exam';
+          const origPrompt = prompt;
+          try {
+            const w1 = {
+              id: 'gen_t57_1',
+              title: 'Üretici Test Seansı',
+              type: 'custom_generated',
+              isCustom: true,
+              duration: 40,
+              exercises: [EXERCISES_DB.find(e => e.id === 'db_bench_press'), EXERCISES_DB.find(e => e.id === 'db_goblet_squat')]
+            };
+            pendingWorkoutToAssign = w1;
+            executeAssignWorkoutToDay(1, null, 'current');
+            const c1 = getUserCustomPrograms(uid).length;
+
+            pickerContext = { scope: 'day_schedule', dayIdx: 1, dateStr: null, scheduleExIndex: 0 };
+            selectExerciseFromPicker('db_overhead_press');
+            const c2 = getUserCustomPrograms(uid).length;
+
+            addExerciseToDaySchedule(1, 'db_saw_row', 3, '8-12');
+            const c3 = getUserCustomPrograms(uid).length;
+
+            customRoutineState.editingDayIdx = 1;
+            customRoutineState.editingProgramId = getWeeklySchedule()[1].id;
+            customRoutineState.exercises = [
+              { exId: 'db_overhead_press', sets: 3, reps: '10', weight: '' },
+              { exId: 'db_rdl', sets: 3, reps: '10', weight: '' }
+            ];
+            document.getElementById('customWorkoutTitleInput').value = 'Pazartesi Takvim Revize';
+            document.getElementById('customWorkoutRestSelect').value = '60';
+            saveEditingRoutineToDay();
+            const c4 = getUserCustomPrograms(uid).length;
+
+            localStorage.setItem('celik_kodu_coach_directive_' + uid, JSON.stringify({
+              title: 'Koç Direktifi',
+              parsedWorkout: { id: 'dir_t57', title: 'Koç Seansı', duration: 30, exercises: [EXERCISES_DB.find(e => e.id === 'bw_pushup')] }
+            }));
+            assignDirectiveWorkoutToToday(uid);
+            const c5 = getUserCustomPrograms(uid).length;
+
+            const schedMove = getWeeklySchedule();
+            schedMove[2] = schedMove[1];
+            saveWeeklySchedule(schedMove);
+            reviseConsecutiveDayWorkoutWithAI(2, null, [{ dayIdx: 1, exercises: [EXERCISES_DB.find(e => e.id === 'db_overhead_press')] }], false, { fromDayIdx: 1, wasSwapped: false });
+            const c6 = getUserCustomPrograms(uid).length;
+
+            renderSavedProgramsPane();
+            const btnTextBeforeSave = document.getElementById('libSubTabProgramsBtn').textContent;
+            const mondayTitleOk = getWeeklySchedule()[1] && getWeeklySchedule()[1].title === 'Pazartesi Takvim Revize';
+
+            prompt = () => 'Manuel Kayıtlı Program';
+            currentGeneratedWorkout = w1;
+            saveGeneratedToLibrary();
+
+            customRoutineState.editingDayIdx = null;
+            customRoutineState.editingProgramId = null;
+            customRoutineState.exercises = [{ exId: 'db_bench_press', sets: 3, reps: '10', weight: '' }];
+            document.getElementById('customWorkoutTitleInput').value = 'Özel Stüdyo Şablonu';
+            saveCustomRoutineToLibrary();
+
+            renderSavedProgramsPane();
+            const finalProgs = getUserCustomPrograms(uid);
+            const btnTextAfterSave = document.getElementById('libSubTabProgramsBtn').textContent;
+            const listHtmlAfterSave = document.getElementById('savedProgramsList').innerHTML;
+
+            return {
+              autoCounts: [c1, c2, c3, c4, c5, c6],
+              mondayTitleOk,
+              btnTextBeforeSave,
+              finalCount: finalProgs.length,
+              btnTextAfterSave,
+              hasBothInDom: listHtmlAfterSave.includes('Manuel Kayıtlı Program') && listHtmlAfterSave.includes('Özel Stüdyo Şablonu')
+            };
+          } finally {
+            prompt = origPrompt;
+          }
+        })()`, ctx);
+        const ok = res.autoCounts.every(n => n === 0)
+          && res.mondayTitleOk
+          && res.btnTextBeforeSave === 'Programlarım'
+          && res.finalCount === 2
+          && res.btnTextAfterSave === 'Programlarım (2)'
+          && res.hasBothInDom;
+        return { ok, actual: JSON.stringify(res) };
+      }
     }
   ];
 
