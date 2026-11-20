@@ -753,7 +753,7 @@
             if (cardViewport) cardViewport.style.display = isList ? 'none' : 'block';
             if (listView) listView.style.display = isList ? 'flex' : 'none';
 
-            if (iconEl) iconEl.textContent = isList ? '🗂️' : '📋';
+            if (iconEl) iconEl.textContent = isList ? 'Kart' : 'Liste';
             if (textEl) textEl.textContent = isList ? 'Kart' : 'Liste';
 
             if (isList) {
@@ -792,8 +792,8 @@
                             <span style="font-size:11px; font-weight:700; color:#E2E8F0;">
                                 ${completedSetsCount} Set
                             </span>
-                            <button type="button" onclick="window.openWorkoutExerciseDetailSubModal(${idx})" style="height:28px; width:28px; background:#0C4A6E; border:1px solid #38BDF8; color:#BAE6FD; border-radius:50%; font-size:12px; font-weight:900; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;" title="Set Detaylarını Gör">
-                                ℹ️
+                            <button type="button" onclick="window.openWorkoutExerciseDetailSubModal(${idx})" style="height:28px; width:28px; background:#181530; border:1px solid rgba(167, 139, 250, 0.3); color:#CBD5E1; border-radius:50%; font-size:12px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;" title="Set Detaylarını Gör">
+                                i
                             </button>
                         </div>
                     </div>
@@ -814,29 +814,60 @@
             const statsEl = document.getElementById('workoutDetailsStats');
             if (statsEl) {
                 statsEl.style.background = '#121024';
-                statsEl.style.borderColor = 'rgba(167, 139, 250, 0.25)';
-                const totalVol = (l.totalVolumeKg > 0) ? `${Math.round(l.totalVolumeKg).toLocaleString('tr-TR')} kg` : '0 kg';
+                statsEl.style.borderColor = 'rgba(255, 255, 255, 0.08)';
                 const durSecs = Number(l.durationSecs || 0);
                 const durMin = Number(l.duration || 0);
-                const durStr = durSecs > 0 ? formatSecondsToHMS(durSecs) : (durMin > 0 ? `${durMin}:00` : '00:00');
-                const setsCount = l.totalSetsCompleted || l.completedSetsCount || (l.exercises ? l.exercises.reduce((a, b) => a + (b.completedSets || (b.sets ? b.sets.filter(s => s.completed).length : 0)), 0) : 0);
-                const repsCount = l.totalRepsCompleted || l.completedRepsCount || (l.exercises ? l.exercises.reduce((a, b) => a + (b.sets ? b.sets.filter(s => s.completed).reduce((rA, rB) => rA + (Number(rB.reps) || 0), 0) : 0), 0) : 0);
-                const setsReps = repsCount > 0 ? `${setsCount} Set • ${repsCount} Tk` : `${setsCount} Set`;
+                let durStr = durSecs > 0 ? formatSecondsToHMS(durSecs) : (durMin > 0 ? `${durMin} Dk` : '-');
+                const computedVol = Number(l.totalVolumeKg) || 0;
+                const isCardio = isHistoryCardioSession(l, computedVol);
 
-                statsEl.innerHTML = `
-                    <div>
-                        <div style="font-size:10.5px; font-weight:700; color:#E2E8F0;">Toplam Tonaj</div>
-                        <div style="font-size:13.5px; font-weight:900; color:#FCD34D; margin-top:2px;">🏋️ ${totalVol}</div>
-                    </div>
-                    <div>
-                        <div style="font-size:10.5px; font-weight:700; color:#E2E8F0;">Set / Tekrar</div>
-                        <div style="font-size:13.5px; font-weight:900; color:#FFFFFF; margin-top:2px;">🎯 ${setsReps}</div>
-                    </div>
-                    <div>
-                        <div style="font-size:10.5px; font-weight:700; color:#E2E8F0;">Toplam Süre</div>
-                        <div style="font-size:13.5px; font-weight:900; color:#FFFFFF; margin-top:2px;">⏱️ ${durStr}</div>
-                    </div>
-                `;
+                if (isCardio) {
+                    const hs = l.healthSummary || l.summary || {};
+                    const avgHr = Number(hs.heartrateAvg || hs.heartrate || l.avgHeartrate || 0);
+                    const cal = Number(hs.calories || l.calories || 0);
+                    if (durStr === '-' && Array.isArray(l.exercises)) {
+                        let mSum = 0;
+                        l.exercises.forEach(ex => {
+                            if (Array.isArray(ex.sets)) ex.sets.forEach(st => { if (st.completed) mSum += (Number(st.reps) || 0); });
+                        });
+                        if (mSum > 0) durStr = `${mSum} Dk`;
+                    }
+                    statsEl.innerHTML = `
+                        <div>
+                            <div style="font-size:10.5px; font-weight:700; color:#94A3B8;">Ort. Nabız</div>
+                            <div style="font-size:13.5px; font-weight:900; color:#FFFFFF; margin-top:2px;">${avgHr > 0 ? `${Math.round(avgHr)} bpm` : '—'}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:10.5px; font-weight:700; color:#94A3B8;">Kalori</div>
+                            <div style="font-size:13.5px; font-weight:900; color:#FFFFFF; margin-top:2px;">${cal > 0 ? `${Math.round(cal)} kcal` : '—'}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:10.5px; font-weight:700; color:#94A3B8;">Süre</div>
+                            <div style="font-size:13.5px; font-weight:900; color:#FFFFFF; margin-top:2px;">${durStr}</div>
+                        </div>
+                    `;
+                } else {
+                    const totalVol = computedVol > 0 ? `${Math.round(computedVol).toLocaleString('tr-TR')} kg` : 'Vücut Ağırlığı';
+                    const setsCount = l.totalSetsCompleted || l.completedSetsCount || (l.exercises ? l.exercises.reduce((a, b) => a + (b.completedSets || (b.sets ? b.sets.filter(s => s.completed).length : 0)), 0) : 0);
+                    const repsCount = l.totalRepsCompleted || l.completedRepsCount || (l.exercises ? l.exercises.reduce((a, b) => a + (b.sets ? b.sets.filter(s => s.completed).reduce((rA, rB) => rA + (Number(rB.reps) || 0), 0) : 0), 0) : 0);
+                    const setsReps = repsCount > 0 ? `${setsCount} Set • ${repsCount} Tk` : `${setsCount} Set`;
+                    if (durStr === '-') durStr = '00:00';
+
+                    statsEl.innerHTML = `
+                        <div>
+                            <div style="font-size:10.5px; font-weight:700; color:#94A3B8;">Toplam Tonaj</div>
+                            <div style="font-size:13.5px; font-weight:900; color:#FFFFFF; margin-top:2px;">${totalVol}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:10.5px; font-weight:700; color:#94A3B8;">Set / Tekrar</div>
+                            <div style="font-size:13.5px; font-weight:900; color:#FFFFFF; margin-top:2px;">${setsReps}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:10.5px; font-weight:700; color:#94A3B8;">Toplam Süre</div>
+                            <div style="font-size:13.5px; font-weight:900; color:#FFFFFF; margin-top:2px;">${durStr}</div>
+                        </div>
+                    `;
+                }
             }
 
             const musclesContainer = document.getElementById('workoutDetailsMusclesContainer');
@@ -870,7 +901,7 @@
 
                 if (shortMuscles.length > 0) {
                     musclesContainer.style.display = 'block';
-                    if (countTextEl) countTextEl.textContent = `💪 ${shortMuscles.length} Kas`;
+                    if (countTextEl) countTextEl.textContent = `${shortMuscles.length} Kas`;
                     musclesEl.innerHTML = shortMuscles.map(m => `
                         <span style="background:#14532D; border:1px solid #22C55E; color:#BBF7D0; font-size:11px; font-weight:700; padding:2px 7px; border-radius:6px;">
                             ${escapeHTML(m)}
@@ -1371,8 +1402,8 @@
                 cardEl.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid rgba(167, 139, 250, 0.25);">
                         <div>
-                            <span style="font-size:11px; font-weight:800; color:#7DD3FC; text-transform:uppercase; letter-spacing:0.5px;">
-                                ✏️ SETLERİ DÜZENLE
+                            <span style="font-size:11px; font-weight:800; color:#C4B5FD; text-transform:uppercase; letter-spacing:0.5px;">
+                                SETLERİ DÜZENLE
                             </span>
                             <h4 style="font-size:14.5px; font-weight:900; color:#FFFFFF; margin:2px 0 0 0; line-height:1.25;">
                                 ${escapeHTML(cleanExTitle)}
@@ -1401,23 +1432,23 @@
                                 <button type="button" onclick="window.toggleCardEditSetCompleted(${sIdx})" style="padding:4px 7px; border-radius:6px; font-size:11px; font-weight:800; border:1px solid ${st.completed ? '#22C55E' : '#475569'}; background:${st.completed ? '#14532D' : '#1E293B'}; color:${st.completed ? '#BBF7D0' : '#E2E8F0'}; cursor:pointer;">
                                     ${st.completed ? '✓' : '—'}
                                 </button>
-                                <button type="button" onclick="window.removeCardEditSet(${sIdx})" style="background:none; border:none; color:#FCA5A5; font-size:13px; cursor:pointer; padding:2px 4px;" title="Seti Sil">
-                                    🗑️
+                                <button type="button" onclick="window.removeCardEditSet(${sIdx})" style="background:none; border:none; color:#94A3B8; font-size:13px; cursor:pointer; padding:2px 4px;" title="Seti Sil">
+                                    ✕
                                 </button>
                             </div>
                         `).join('')}
                     </div>
 
-                    <button type="button" onclick="window.addCardEditSet()" style="width:100%; margin-top:8px; padding:7px; background:#181530; border:1px dashed rgba(167, 139, 250, 0.45); color:#7DD3FC; font-size:11.5px; font-weight:800; border-radius:8px; cursor:pointer;">
-                        ➕ Set Ekle
+                    <button type="button" onclick="window.addCardEditSet()" style="width:100%; margin-top:8px; padding:7px; background:#181530; border:1px dashed rgba(167, 139, 250, 0.45); color:#C4B5FD; font-size:11.5px; font-weight:800; border-radius:8px; cursor:pointer;">
+                        + Set Ekle
                     </button>
 
                     <div style="display:flex; gap:8px; margin-top:12px; padding-top:10px; border-top:1px solid rgba(167, 139, 250, 0.25);">
                         <button type="button" onclick="window.saveDetailCardExerciseEdit()" style="flex:1; background:#6D28D9; border:none; color:#FFFFFF; border-radius:8px; padding:9px; font-size:12.5px; font-weight:800; cursor:pointer;">
-                            💾 Kaydet
+                            Kaydet
                         </button>
                         <button type="button" onclick="window.cancelDetailCardExerciseEdit()" style="flex:1; background:#2C2550; border:1px solid rgba(167, 139, 250, 0.35); color:#F3E8FF; border-radius:8px; padding:9px; font-size:12.5px; font-weight:800; cursor:pointer;">
-                            ✕ İptal
+                            İptal
                         </button>
                     </div>
                 `;
@@ -1436,19 +1467,19 @@
                     </div>
                     <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
                         ${volText ? `
-                            <span style="font-size:11px; font-weight:800; color:#FDE68A; background:#451A03; border:1px solid #D97706; border-radius:6px; padding:3px 7px; white-space:nowrap;">
-                                🏋️ ${volText}
+                            <span style="font-size:11px; font-weight:700; color:#CBD5E1; padding:3px 7px; white-space:nowrap;">
+                                ${volText}
                             </span>
                         ` : ''}
-                        <button type="button" onclick="window.startDetailCardExerciseEdit()" style="background:#2C2550; border:1px solid rgba(167, 139, 250, 0.4); color:#F3E8FF; border-radius:7px; padding:3px 8px; font-size:11px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="Bu Hareketi Düzenle">
-                            ✏️ Düzenle
+                        <button type="button" onclick="window.startDetailCardExerciseEdit()" style="background:#2C2550; border:1px solid rgba(167, 139, 250, 0.4); color:#F3E8FF; border-radius:7px; padding:4px 10px; font-size:11px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="Bu Hareketi Düzenle">
+                            Düzenle
                         </button>
                     </div>
                 </div>
 
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid rgba(167, 139, 250, 0.2); font-size:11.5px; color:#E2E8F0; font-weight:700;">
                     <span>Toplam ${completedSetsCount} / ${safeSetsArr.length} Set</span>
-                    ${ex.equipment ? `<span style="text-transform:capitalize;">🔧 ${escapeHTML(ex.equipment)}</span>` : ''}
+                    ${ex.equipment ? `<span style="text-transform:capitalize;">${escapeHTML(ex.equipment)}</span>` : ''}
                 </div>
 
                 <!-- SETS LIST -->
@@ -1484,10 +1515,10 @@
                 </div>
 
                 <!-- SWIPE GUIDANCE -->
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:8px; border-top:1px dashed rgba(167, 139, 250, 0.25); font-size:11px; color:#E2E8F0; font-weight:600; user-select:none;">
-                    <span style="cursor:pointer;" onclick="window.navigateWorkoutDetailsExercise(-1)">${currentIndex > 0 ? '◀ Önceki' : ''}</span>
-                    <span>👈 Sağa / Sola Kaydırın 👉</span>
-                    <span style="cursor:pointer;" onclick="window.navigateWorkoutDetailsExercise(1)">${currentIndex < exercises.length - 1 ? 'Sonraki ▶' : ''}</span>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:8px; border-top:1px solid rgba(255, 255, 255, 0.06); font-size:11px; color:#94A3B8; font-weight:600; user-select:none;">
+                    <span style="cursor:pointer;" onclick="window.navigateWorkoutDetailsExercise(-1)">${currentIndex > 0 ? 'Önceki' : ''}</span>
+                    <span>Sağa / Sola Kaydırın</span>
+                    <span style="cursor:pointer;" onclick="window.navigateWorkoutDetailsExercise(1)">${currentIndex < exercises.length - 1 ? 'Sonraki' : ''}</span>
                 </div>
             `;
 
@@ -1610,18 +1641,14 @@
                     subtitleEl.style.color = '#CBD5E1';
                     const locType = l.locationType || (l.locationName === 'Ev' ? 'ev' : 'salon');
                     const locName = l.locationName || (locType === 'ev' ? 'Ev' : (locType === 'acik_hava' ? 'Açık Hava' : 'Spor Salonu'));
-                    const isEv = locType === 'ev';
-                    const isPark = locType === 'acik_hava';
-                    const locIcon = isEv ? '🏠' : (isPark ? '🌲' : '🏋️');
+                    const cleanDateText = formatHistoryDateShortTR(l.date || l.dateFormatted, l.timestamp);
 
                     subtitleEl.innerHTML = `
-                        <span style="font-size:12px; font-weight:700; color:#CBD5E1; white-space:nowrap;">📅 ${escapeHTML(l.dateFormatted || l.date)}</span>
-                        <span style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); color:#E2E8F0; border-radius:6px; padding:2px 7px; font-size:11px; font-weight:600; white-space:nowrap;">
-                            ${locIcon} ${escapeHTML(locName)}
-                        </span>
+                        <span style="font-size:12px; font-weight:700; color:#CBD5E1; white-space:nowrap;">${escapeHTML(cleanDateText)}</span>
+                        <span style="color:#94A3B8; font-size:11.5px; font-weight:600; white-space:nowrap;">• ${escapeHTML(stripHistoryEmojis(locName))}</span>
                         ${l.healthSummary && l.healthSummary.heartrateAvg ? `
-                            <span style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); color:#E2E8F0; border-radius:6px; padding:2px 7px; font-size:11px; font-weight:600; white-space:nowrap;">
-                                ⌚ ❤️ ${Number(l.healthSummary.heartrateAvg)} bpm${l.healthSummary.calories ? ` • 🔥 ${Number(l.healthSummary.calories)} kcal` : ''}
+                            <span style="color:#94A3B8; font-size:11.5px; font-weight:600; white-space:nowrap;">
+                                • Ort. ${Number(l.healthSummary.heartrateAvg)} bpm${l.healthSummary.calories ? ` • ${Number(l.healthSummary.calories)} kcal` : ''}
                             </span>
                         ` : ''}
                     `;
@@ -1630,7 +1657,7 @@
                 const titleEl = document.getElementById('workoutDetailsTitle');
                 if (titleEl) {
                     titleEl.style.color = '#FFFFFF';
-                    const cleanProgramTitle = String(l.program || l.programName || l.title || 'Antrenman Seansı').replace(/\s*\([^)]*\)/g, '').trim() || 'Antrenman Seansı';
+                    const cleanProgramTitle = cleanHistorySessionTitle(l.program || l.programName || l.title || 'Antrenman Seansı');
                     titleEl.textContent = cleanProgramTitle;
                 }
 
@@ -1655,12 +1682,14 @@
 
                 const notesEl = document.getElementById('workoutDetailsNotes');
                 if (notesEl) {
-                    notesEl.style.background = '#121024';
-                    notesEl.style.borderColor = 'rgba(252, 211, 77, 0.35)';
-                    notesEl.style.color = '#FDE68A';
-                    if (l.notes) {
+                    notesEl.style.background = 'transparent';
+                    notesEl.style.borderColor = 'transparent';
+                    notesEl.style.color = '#94A3B8';
+                    notesEl.style.fontStyle = 'italic';
+                    const cleanNoteModal = stripHistoryEmojis(l.notes);
+                    if (cleanNoteModal) {
                         notesEl.style.display = 'block';
-                        notesEl.textContent = `📝 Not: ${l.notes}`;
+                        notesEl.textContent = cleanNoteModal;
                     } else {
                         notesEl.style.display = 'none';
                         notesEl.textContent = '';
@@ -1747,10 +1776,183 @@
 
         let currentHistoryLocationFilter = 'all';
 
+        const HISTORY_MONTHS_SHORT_TR = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+        const HISTORY_MONTH_FULL_TO_SHORT_TR = {
+            ocak: 'Oca', subat: 'Şub', şubat: 'Şub', mart: 'Mar', nisan: 'Nis',
+            mayis: 'May', mayıs: 'May', haziran: 'Haz', temmuz: 'Tem',
+            agustos: 'Ağu', ağustos: 'Ağu', eylul: 'Eyl', eylül: 'Eyl',
+            ekim: 'Eki', kasim: 'Kas', kasım: 'Kas', aralik: 'Ara', aralık: 'Ara'
+        };
+
+        function stripHistoryEmojis(str) {
+            return String(str || '')
+                .replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function formatHistoryDateShortTR(rawDate, fallbackTs) {
+            const rawStr = stripHistoryEmojis(rawDate);
+            if (rawStr) {
+                const ymdMatch = rawStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                if (ymdMatch) {
+                    const mIdx = Number(ymdMatch[2]) - 1;
+                    if (mIdx >= 0 && mIdx < 12) {
+                        return `${Number(ymdMatch[3])} ${HISTORY_MONTHS_SHORT_TR[mIdx]} ${ymdMatch[1]}`;
+                    }
+                }
+                if (/^\d{4}-\d{2}-\d{2}T/.test(rawStr)) {
+                    const isoDt = new Date(rawStr);
+                    if (!isNaN(isoDt.getTime())) {
+                        return `${isoDt.getDate()} ${HISTORY_MONTHS_SHORT_TR[isoDt.getMonth()]} ${isoDt.getFullYear()}`;
+                    }
+                }
+                const dotMatch = rawStr.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+                if (dotMatch) {
+                    const mIdx = Number(dotMatch[2]) - 1;
+                    if (mIdx >= 0 && mIdx < 12) {
+                        return `${Number(dotMatch[1])} ${HISTORY_MONTHS_SHORT_TR[mIdx]} ${dotMatch[3]}`;
+                    }
+                }
+                const trNoTime = rawStr.replace(/\s*[•·,-]?\s*\d{1,2}:\d{2}(:\d{2})?.*$/, '').trim();
+                const trTextMatch = trNoTime.match(/^(\d{1,2})\s+([A-Za-zÇŞĞÖÜıİçşğöü]+)\s+(\d{4})$/);
+                if (trTextMatch) {
+                    const mKey = trTextMatch[2].replace(/[İIı]/g, 'i').toLowerCase();
+                    const shortM = HISTORY_MONTH_FULL_TO_SHORT_TR[mKey] || trTextMatch[2];
+                    return `${Number(trTextMatch[1])} ${shortM} ${trTextMatch[3]}`;
+                }
+                const parsedDt = new Date(rawStr);
+                if (!isNaN(parsedDt.getTime())) {
+                    return `${parsedDt.getDate()} ${HISTORY_MONTHS_SHORT_TR[parsedDt.getMonth()]} ${parsedDt.getFullYear()}`;
+                }
+            }
+            const tsNum = Number(fallbackTs);
+            if (Number.isFinite(tsNum) && tsNum > 0) {
+                const tsDt = new Date(tsNum);
+                if (!isNaN(tsDt.getTime())) {
+                    return `${tsDt.getDate()} ${HISTORY_MONTHS_SHORT_TR[tsDt.getMonth()]} ${tsDt.getFullYear()}`;
+                }
+            }
+            return rawStr || '';
+        }
+
+        function isHistoryCardioSession(log, computedVolKg) {
+            if (!log || typeof log !== 'object') return false;
+            if (log.isCardioActivity === true) return true;
+            const exs = Array.isArray(log.exercises) ? log.exercises : [];
+            if (exs.length > 0 && exs.every(ex => ex && ((typeof isExerciseCardioMinutes === 'function' && isExerciseCardioMinutes(ex)) || /^cond_/.test(String(ex.id || ex.exId || ''))))) {
+                return true;
+            }
+            const vol = Number(computedVolKg) || 0;
+            const reps = Number(log.totalRepsCompleted) || 0;
+            if (vol === 0 && reps === 0 && /yürüyüş|koşu|kürek|kardiyo|walking|running|rowing|bisiklet/i.test(String(log.program || log.title || ''))) {
+                return true;
+            }
+            return false;
+        }
+
+        function normalizeHistoryTextKey(str) {
+            return String(str || '')
+                .replace(/[İIı]/g, 'i')
+                .toLowerCase()
+                .replace(/\u0307/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function getCanonicalHistoryLocation(log) {
+            const raw = stripHistoryEmojis(log && (log.locationName || (log.locationType === 'ev' ? 'Ev' : (log.locationType === 'acik_hava' ? 'Açık Hava' : 'Spor Salonu')))) || 'Spor Salonu';
+            const key = normalizeHistoryTextKey(raw) || 'spor salonu';
+            let label = raw;
+            if (key === 'ev') label = 'Ev';
+            else if (key === 'spor salonu' || key === 'salon') label = 'Spor Salonu';
+            else if (key === 'acik hava' || key === 'acik hava / park' || key === 'açık hava' || key === 'açık hava / park') label = 'Açık Hava';
+            else {
+                label = raw.split(' ').map(w => w ? (w.charAt(0).toLocaleUpperCase('tr-TR') + w.slice(1).toLocaleLowerCase('tr-TR')) : '').join(' ');
+            }
+            return { key, label };
+        }
+
+        function cleanHistorySessionTitle(rawTitle) {
+            let s = stripHistoryEmojis(String(rawTitle || '').replace(/\s*\([^)]*\)/g, ''));
+            const colonParts = s.split(/\s*:\s*/);
+            if (colonParts.length >= 2) {
+                const deduped = [];
+                colonParts.forEach(part => {
+                    const t = part.trim();
+                    if (!t) return;
+                    const prevNorm = deduped.length ? normalizeHistoryTextKey(deduped[deduped.length - 1]) : '';
+                    if (normalizeHistoryTextKey(t) !== prevNorm) deduped.push(t);
+                });
+                s = deduped.join(': ');
+            }
+            return s.replace(/\s+/g, ' ').trim() || 'Antrenman Seansı';
+        }
+
+        function formatHistoryCompactMinutes(log) {
+            if (!log || typeof log !== 'object') return '';
+            const durMinNum = Number(log.duration);
+            if (Number.isFinite(durMinNum) && durMinNum > 0) {
+                return `${Math.round(durMinNum)} dk`;
+            }
+            const durSecNum = Number(log.durationSecs);
+            if (Number.isFinite(durSecNum) && durSecNum > 0) {
+                return `${Math.max(1, Math.round(durSecNum / 60))} dk`;
+            }
+            const rawFmt = String(log.durationFormatted || '').trim();
+            if (rawFmt) {
+                const hmsMatch = rawFmt.match(/^(\d+):(\d{2}):(\d{2})$/);
+                if (hmsMatch) {
+                    const mins = Number(hmsMatch[1]) * 60 + Number(hmsMatch[2]) + (Number(hmsMatch[3]) >= 30 ? 1 : 0);
+                    if (mins > 0) return `${mins} dk`;
+                }
+                const msMatch = rawFmt.match(/^(\d+):(\d{2})$/);
+                if (msMatch) {
+                    const mins = Number(msMatch[1]) + (Number(msMatch[2]) >= 30 ? 1 : 0);
+                    return `${Math.max(1, mins)} dk`;
+                }
+            }
+            if (Array.isArray(log.exercises)) {
+                let cardioMinsSum = 0;
+                log.exercises.forEach(ex => {
+                    const isCardioEx = (typeof isExerciseCardioMinutes === 'function' && isExerciseCardioMinutes(ex)) || /^cond_/.test(String(ex && (ex.id || ex.exId) || ''));
+                    if (isCardioEx && Array.isArray(ex.sets)) {
+                        ex.sets.forEach(st => {
+                            if (st.completed !== false) cardioMinsSum += (Number(st.reps) || 0);
+                        });
+                    }
+                });
+                if (cardioMinsSum > 0) return `${Math.round(cardioMinsSum)} dk`;
+            }
+            return '';
+        }
+
+        window.formatHistoryDateShortTR = formatHistoryDateShortTR;
+        window.stripHistoryEmojis = stripHistoryEmojis;
+        window.cleanHistorySessionTitle = cleanHistorySessionTitle;
+
         function filterHistoryByLocation(loc) {
-            currentHistoryLocationFilter = loc;
+            currentHistoryLocationFilter = loc === 'all' ? 'all' : (normalizeHistoryTextKey(loc) || 'all');
             renderHistory();
         }
+
+        window.closeHistoryTopMenu = function () {
+            const menu = document.getElementById('historyTopDropdownMenu');
+            if (menu) menu.style.display = 'none';
+        };
+
+        window.toggleHistoryTopMenu = function (e) {
+            if (e) {
+                if (e.stopPropagation) e.stopPropagation();
+                if (e.preventDefault) e.preventDefault();
+            }
+            const menu = document.getElementById('historyTopDropdownMenu');
+            if (!menu) return;
+            const isClosed = menu.style.display === 'none' || !menu.style.display;
+            document.querySelectorAll('[id^="menu_actions_"]').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('[id^="bubble_muscles_"]').forEach(el => el.style.display = 'none');
+            menu.style.display = isClosed ? 'block' : 'none';
+        };
 
         window.toggleHistoryMuscleBubble = function (key, e) {
             if (e) {
@@ -1762,6 +1964,7 @@
             const isClosed = target.style.display === 'none' || !target.style.display;
             document.querySelectorAll('[id^="bubble_muscles_"]').forEach(el => el.style.display = 'none');
             document.querySelectorAll('[id^="menu_actions_"]').forEach(el => el.style.display = 'none');
+            window.closeHistoryTopMenu();
             if (isClosed) {
                 target.style.display = 'block';
             }
@@ -1777,6 +1980,7 @@
             const isClosed = target.style.display === 'none' || !target.style.display;
             document.querySelectorAll('[id^="menu_actions_"]').forEach(el => el.style.display = 'none');
             document.querySelectorAll('[id^="bubble_muscles_"]').forEach(el => el.style.display = 'none');
+            window.closeHistoryTopMenu();
             if (isClosed) {
                 target.style.display = 'block';
             }
@@ -1789,6 +1993,9 @@
                 }
                 if (!e.target.closest('[id^="menu_actions_"]') && !e.target.closest('button[onclick*="toggleHistoryActionMenu"]')) {
                     document.querySelectorAll('[id^="menu_actions_"]').forEach(el => el.style.display = 'none');
+                }
+                if (!e.target.closest('#historyTopDropdownMenu') && !e.target.closest('#btnHistoryTopMenu')) {
+                    window.closeHistoryTopMenu();
                 }
             });
         }
@@ -1815,50 +2022,49 @@
             const statStreakEl = document.getElementById('statStreak');
             if (statTotalEl) {
                 statTotalEl.innerText = total;
-                if (statTotalEl.style && typeof statTotalEl.style.setProperty === 'function') statTotalEl.style.setProperty('color', '#FCD34D', 'important');
+                if (statTotalEl.style && typeof statTotalEl.style.setProperty === 'function') statTotalEl.style.setProperty('color', '#FFFFFF', 'important');
             }
             if (statWeekEl) {
                 statWeekEl.innerText = `${thisWeek}/3`;
-                if (statWeekEl.style && typeof statWeekEl.style.setProperty === 'function') statWeekEl.style.setProperty('color', '#7DD3FC', 'important');
+                if (statWeekEl.style && typeof statWeekEl.style.setProperty === 'function') statWeekEl.style.setProperty('color', '#FFFFFF', 'important');
             }
             if (statStreakEl) {
                 statStreakEl.innerText = streak;
-                if (statStreakEl.style && typeof statStreakEl.style.setProperty === 'function') statStreakEl.style.setProperty('color', '#4ADE80', 'important');
+                if (statStreakEl.style && typeof statStreakEl.style.setProperty === 'function') statStreakEl.style.setProperty('color', '#FFFFFF', 'important');
             }
 
             if (allLogs.length === 0) {
                 container.innerHTML = `
-                    <div style="background:#121024; padding:20px; text-align:center; border:1px dashed rgba(167, 139, 250, 0.3); border-radius:12px; color:#E2E8F0; font-size:12.5px;">
-                        Henüz kayıtlı antrenman seansınız yok. Bugün ilk antrenmanınızı yapıp kaydedin! 🚀
+                    <div style="background:#121024; padding:20px; text-align:center; border:1px dashed rgba(167, 139, 250, 0.3); border-radius:12px; color:#94A3B8; font-size:12.5px;">
+                        Henüz kayıtlı antrenman seansınız yok. İlk antrenmanınızı tamamlayıp kaydedin.
                     </div>
                 `;
                 return;
             }
 
-            // Group by location for filtering & stats
-            const locationCounts = { 'all': allLogs.length };
+            // Group by location for filtering & stats (case-insensitive)
+            const locationGroups = {};
             allLogs.forEach(l => {
-                const locKey = l.locationName || (l.locationType === 'ev' ? 'Ev' : 'Spor Salonu');
-                locationCounts[locKey] = (locationCounts[locKey] || 0) + 1;
+                const { key, label } = getCanonicalHistoryLocation(l);
+                if (!locationGroups[key]) locationGroups[key] = { key, label, count: 0 };
+                locationGroups[key].count += 1;
             });
 
-            const distinctLocations = Object.keys(locationCounts).filter(k => k !== 'all');
+            const distinctLocations = Object.values(locationGroups);
+            const activeLocKey = currentHistoryLocationFilter === 'all' ? 'all' : normalizeHistoryTextKey(currentHistoryLocationFilter);
 
             let filterBarHTML = '';
             if (distinctLocations.length > 0) {
                 filterBarHTML = `
-                    <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:12px;" class="hide-scrollbar">
-                        <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; border-radius:20px; white-space:nowrap; ${currentHistoryLocationFilter === 'all' ? 'background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); background-color:#6D28D9; color:#FFFFFF; border:1px solid #A78BFA; font-weight:800;' : 'background:#121024; color:#E2E8F0; border:1px solid rgba(167, 139, 250, 0.28); font-weight:700;'}" onclick="filterHistoryByLocation('all')">
-                            Tüm Mekanlar (${locationCounts['all']})
+                    <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:8px;" class="hide-scrollbar">
+                        <button type="button" class="history-loc-chip ${activeLocKey === 'all' ? 'is-active' : ''}" onclick="filterHistoryByLocation('all')">
+                            Tümü (${allLogs.length})
                         </button>
-                        ${distinctLocations.map(loc => {
-                            const isEv = loc === 'Ev';
-                            const isPark = loc === 'Açık Hava / Park';
-                            const icon = isEv ? '🏠' : (isPark ? '🌲' : '🏋️');
-                            const isActive = currentHistoryLocationFilter === loc;
+                        ${distinctLocations.map(grp => {
+                            const isActive = activeLocKey === grp.key;
                             return `
-                                <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; border-radius:20px; white-space:nowrap; ${isActive ? 'background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); background-color:#6D28D9; color:#FFFFFF; border:1px solid #A78BFA; font-weight:800;' : 'background:#121024; color:#E2E8F0; border:1px solid rgba(167, 139, 250, 0.28); font-weight:700;'}" onclick="filterHistoryByLocation(decodeURIComponent('${encodeURIComponent(loc)}'))">
-                                    ${icon} ${escapeHTML(loc)} (${locationCounts[loc]})
+                                <button type="button" class="history-loc-chip ${isActive ? 'is-active' : ''}" onclick="filterHistoryByLocation(decodeURIComponent('${encodeURIComponent(grp.key)}'))">
+                                    ${escapeHTML(grp.label)} (${grp.count})
                                 </button>
                             `;
                         }).join('')}
@@ -1866,14 +2072,15 @@
                 `;
             }
 
-            const logs = currentHistoryLocationFilter === 'all'
+            const logs = activeLocKey === 'all'
                 ? allLogs
-                : allLogs.filter(l => (l.locationName || (l.locationType === 'ev' ? 'Ev' : 'Spor Salonu')) === currentHistoryLocationFilter);
+                : allLogs.filter(l => getCanonicalHistoryLocation(l).key === activeLocKey);
 
             if (logs.length === 0) {
+                const activeGroupLabel = (locationGroups[activeLocKey] && locationGroups[activeLocKey].label) || currentHistoryLocationFilter;
                 container.innerHTML = filterBarHTML + `
-                    <div style="background:#121024; padding:16px; text-align:center; border:1px dashed rgba(167, 139, 250, 0.3); border-radius:12px; color:#E2E8F0; font-size:12px;">
-                        "${escapeHTML(currentHistoryLocationFilter)}" mekanında kayıtlı antrenman seansı bulunamadı.
+                    <div style="background:#121024; padding:16px; text-align:center; border:1px dashed rgba(167, 139, 250, 0.3); border-radius:12px; color:#94A3B8; font-size:12px;">
+                        "${escapeHTML(activeGroupLabel)}" mekanında kayıtlı antrenman seansı bulunamadı.
                     </div>
                 `;
                 return;
@@ -1892,59 +2099,65 @@
                         }
                     });
                 }
-                const totalVol = logVol > 0 ? `${Math.round(logVol).toLocaleString('tr-TR')} kg` : 'Belirtilmedi';
-                const setsReps = l.totalSetsCompleted ? `${l.totalSetsCompleted} Set • ${l.totalRepsCompleted || 0} Tk` : '-';
-                const durStr = l.durationFormatted || `${l.duration} Dk`;
-                const rpeLabel = l.rpe ? (l.rpe.split(' ')[0] + ' ' + (l.rpe.split(' ')[1] || '')) : 'RPE 8';
 
+                const durCompact = formatHistoryCompactMinutes(l);
+                const isCardioLog = isHistoryCardioSession(l, logVol);
+                let inlineMetricParts = [];
+
+                if (isCardioLog) {
+                    const hs = l.healthSummary || l.summary || {};
+                    let avgHr = Number(hs.heartrateAvg || hs.heartrate || l.avgHeartrate || 0);
+                    if (avgHr === 0 && Array.isArray(l.exercises)) {
+                        const hrVals = l.exercises.map(ex => Number(ex && ex.healthTelemetry && ex.healthTelemetry.avgHeartrate || 0)).filter(v => v > 0);
+                        if (hrVals.length > 0) avgHr = hrVals.reduce((a, b) => a + b, 0) / hrVals.length;
+                    }
+                    const calVal = Number(hs.calories || l.calories || 0);
+                    if (avgHr > 0) inlineMetricParts.push(`${Math.round(avgHr)} bpm`);
+                    if (calVal > 0) inlineMetricParts.push(`${Math.round(calVal)} kcal`);
+                    if (durCompact) inlineMetricParts.push(durCompact);
+                    if (inlineMetricParts.length === 0) inlineMetricParts.push('Kardiyo');
+                } else {
+                    inlineMetricParts.push(logVol > 0 ? `${Math.round(logVol).toLocaleString('tr-TR')} kg` : 'Vücut Ağırlığı');
+                    const setsCnt = Number(l.totalSetsCompleted || 0);
+                    const repsCnt = Number(l.totalRepsCompleted || 0);
+                    if (setsCnt > 0) {
+                        inlineMetricParts.push(repsCnt > 0 ? `${setsCnt} Set (${repsCnt} Tk)` : `${setsCnt} Set`);
+                    }
+                    if (durCompact) inlineMetricParts.push(durCompact);
+                }
+
+                const statsInlineText = inlineMetricParts.join(' · ');
+                const displayDate = formatHistoryDateShortTR(l.date || l.dateFormatted, l.timestamp);
                 const safeLogKey = String(l.id || Math.random().toString(36).slice(2)).replace(/[^a-zA-Z0-9_]/g, '_');
-                const cleanProgramTitle = String(l.program || l.title || 'Antrenman Seansı').replace(/\s*\([^)]*\)/g, '').trim();
+                const cleanProgramTitle = cleanHistorySessionTitle(l.program || l.title || 'Antrenman Seansı');
+                const cleanNote = stripHistoryEmojis(l.notes);
 
                 return `
-                    <div class="log-history-card" style="background:#121024 !important; border:1px solid rgba(167, 139, 250, 0.25) !important; border-radius:16px !important; padding:14px 16px !important; margin-bottom:12px !important; color:#FFFFFF !important;">
-                        <div class="log-card-header" style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-                            <div style="min-width:0; flex:1;">
-                                <div style="display:flex; align-items:center; gap:6px; margin-bottom:2px;">
-                                    <span class="log-date" style="font-size:12px; font-weight:700; color:#CBD5E1 !important; white-space:nowrap;">📅 ${escapeHTML(l.dateFormatted || l.date)}</span>
-                                </div>
-                                <h3 style="font-size:14.5px; font-weight:800; color:#FFFFFF !important; line-height:1.25; margin:2px 0 0 0;">${escapeHTML(cleanProgramTitle)}</h3>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0; white-space:nowrap;">
-                                <!-- ÜÇ NOKTA BUTONU VE AÇILIR MENÜ -->
+                    <div class="log-history-card">
+                        <div class="log-card-header">
+                            <h3 class="log-card-title">${escapeHTML(cleanProgramTitle)}</h3>
+                            <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+                                <span class="log-date">${escapeHTML(displayDate)}</span>
                                 <div style="position:relative; display:inline-block;">
-                                    <button type="button" onclick="window.toggleHistoryActionMenu('${safeLogKey}', event)" title="Seans İşlemleri" style="height:30px; width:30px; background:#2C2550; border:1px solid rgba(167, 139, 250, 0.35); color:#F3E8FF; border-radius:8px; font-size:15px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;">
+                                    <button type="button" onclick="window.toggleHistoryActionMenu('${safeLogKey}', event)" title="Seans İşlemleri" style="height:24px; width:24px; background:transparent; border:none; color:#94A3B8; border-radius:6px; font-size:15px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;">
                                         ⋮
                                     </button>
-                                    <div id="menu_actions_${safeLogKey}" style="display:none; position:absolute; right:0; top:calc(100% + 6px); z-index:9999; background:#181530; border:1px solid rgba(167, 139, 250, 0.35); border-radius:12px; padding:6px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.6); width:150px; animation:popIn 0.15s ease-out;">
+                                    <div id="menu_actions_${safeLogKey}" style="display:none; position:absolute; right:0; top:calc(100% + 4px); z-index:9999; background:#181530; border:1px solid rgba(167, 139, 250, 0.3); border-radius:12px; padding:6px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.6); width:145px; animation:popIn 0.15s ease-out;">
                                         <button type="button" class="btn-view-log" onclick="window.toggleHistoryActionMenu('${safeLogKey}'); window.openWorkoutDetailsModal(decodeURIComponent('${encodeURIComponent(l.id)}'));" style="width:100%; text-align:left; background:none; border:none; padding:8px 10px; border-radius:6px; font-size:12px; font-weight:700; color:#FFFFFF; cursor:pointer; display:flex; align-items:center; gap:8px;">
-                                            <span>👁️</span> <span>Görüntüle</span>
+                                            <span>Görüntüle</span>
                                         </button>
-                                        <div style="height:1px; background:rgba(167, 139, 250, 0.2); margin:4px 0;"></div>
+                                        <div style="height:1px; background:rgba(255, 255, 255, 0.06); margin:4px 0;"></div>
                                         <button type="button" class="btn-delete-log" onclick="window.toggleHistoryActionMenu('${safeLogKey}'); deleteWorkoutLog(decodeURIComponent('${encodeURIComponent(l.id)}'));" style="width:100%; text-align:left; background:none; border:none; padding:8px 10px; border-radius:6px; font-size:12px; font-weight:700; color:#FCA5A5; cursor:pointer; display:flex; align-items:center; gap:8px;">
-                                            <span>🗑️</span> <span>Seansı Sil</span>
+                                            <span>Seansı Sil</span>
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- STATS ROW -->
-                        <div class="log-stats-bar" style="background:#181530 !important; border:1px solid rgba(167, 139, 250, 0.22) !important; color:#FFFFFF !important;">
-                            <div class="log-stat-item">
-                                <span class="log-stat-label" style="color:#E2E8F0 !important;">Toplam Tonaj</span>
-                                <span class="log-stat-val" style="color:#FCD34D !important;">🏋️ ${totalVol}</span>
-                            </div>
-                            <div class="log-stat-item">
-                                <span class="log-stat-label" style="color:#E2E8F0 !important;">Set / Tekrar</span>
-                                <span class="log-stat-val" style="color:#FFFFFF !important;">🎯 ${setsReps}</span>
-                            </div>
-                            <div class="log-stat-item">
-                                <span class="log-stat-label" style="color:#E2E8F0 !important;">Toplam Süre</span>
-                                <span class="log-stat-val" style="color:#7DD3FC !important;">⏱️ ${durStr}</span>
-                            </div>
-                        </div>
+                        <div class="log-stats-inline tabular-nums">${escapeHTML(statsInlineText)}</div>
 
-                        ${l.notes ? `<div class="log-notes-box" style="margin-top:6px; background:#181530 !important; border:1px solid rgba(167, 139, 250, 0.22) !important; color:#E2E8F0 !important; padding:8px 10px; border-radius:8px; font-size:12px;">📝 ${escapeHTML(l.notes)}</div>` : ''}
+                        ${cleanNote ? `<div class="log-note-inline" title="${escapeHTML(cleanNote)}">${escapeHTML(cleanNote)}</div>` : ''}
                     </div>
                 `;
             }).join('');

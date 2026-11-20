@@ -6,7 +6,7 @@ description: Çelik Kodu Geçmiş sekmesini (#historyTab, js/chiefs/history-chie
 # 🗂️ 4. Oda — Geçmiş & Kayıt Şefi (`history-guard`)
 
 - **Fiziksel Oda Dosyası:** `js/chiefs/history-chief.js` + Gümrük: `js/chiefs/bridge-customs.js`
-- **Zorunlu Sınav Maddeleri:** `T7` (Geçmiş kayıt düzenlemede kanonik birim ve vücut ağırlığı tonajı), `T17` (Köprü Gümrüğü: bozuk/eksik birimleri otomatik onarma ve içi boş kaydı reddetme)
+- **Zorunlu Sınav Maddeleri:** `T7` (Geçmiş kayıt düzenlemede kanonik birim ve vücut ağırlığı tonajı), `T17` (Köprü Gümrüğü: bozuk/eksik birimleri otomatik onarma ve içi boş kaydı reddetme), `T56` (Geçmiş sekmesi üst `⋮` menüsü, beyaz özet rakamları, scrollbar gizli harf-duyarsız mor mekan filtresi, tek satır başlık+tarih, ara çizgisiz tek satır istatistik, mükerrer gün temizliği ve akıllı kardiyo metrikleri)
 
 ## Görev Kapsamı (`#historyTab`)
 1. Tamamlanan antrenmanların günlük, egzersiz bazlı set geçmişi ve tonaj özetlerini doğru birimlerle (`dk` / `sn` / `tk`) sunar.
@@ -23,3 +23,4 @@ description: Çelik Kodu Geçmiş sekmesini (#historyTab, js/chiefs/history-chie
 - **Kas Grupları Kompaktlığı (Yer Tasarrufu):** Modal içinde kas grupları 2 satırlık açık etiket yığını olarak değil, varsayılan kapalı kompakt `💪 X Kas ▼` butonu olarak sunulur; tıklandığında açılıp kapanarak dikey ekran alanından tasarruf sağlar.
 - **Hata Hafızası Sicili:** Kullanıcının geçmiş kayıtlarında yakaladığı her hata `scripts/tab-watchdog.js` sınavına kalıcı madde olarak eklenir.
 - **Aynı Gün Çoklu Antrenman & Bulut Birleşmesi (T40):** Aynı gün farklı saat dilimlerinde (`> 45 dk` arayla) yapılan 2., 3. ve 4. antrenmanlar (`log_` + onaylı `garmin_`) bulut birleştirmesi sırasında takvim günü bazlı olarak silinmez; tümü korunarak geçmişte ve haftalık analizde sayılır.
+- **Yalın Koyu Görsel Dil & Kompakt Tek Satır Kart Standardı (T56):** Üst başlıkta ayrı `CSV`/`Yedek`/`Yükle` butonları yerine tek sade `⋮` menüsü yer alır; 3 özet kutu rakamı net beyazdır. Mekan filtrelerinde yatay kaydırma çubuğu (`.hide-scrollbar`) gizlenir, `'Ev'`/`'EV'` gibi büyük/küçük harf farkları tek `'Ev'` filtresinde birleşir ve aktif seçim mor dolgu alır. Tüm tarihler saat olmadan tek tip `'19 Kas 2026'` biçiminde başlıkla aynı satırda sağda gösterilir; başlıklardaki `'Cuma: Cuma:'` tekrarları tekilleştirilir. Üst etiketler ve ara yatay çizgi kaldırılarak istatistikler tek satırda nokta ayırıcıyla (`7.023 kg · 27 Set (322 Tk) · 54 dk`, kardiyoda `123 bpm · 135 kcal · 21 dk`) gösterilir; antrenman notu en altta tek satır kesilmiş (`ellipsis`) silik gri italik metindir ve tüm sekme sıfır emojilidir.

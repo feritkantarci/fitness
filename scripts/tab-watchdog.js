@@ -955,8 +955,8 @@ function runAcademicMathSuite(moduleSources, dbText) {
     {
       id: 'T18',
       owner: 'analytics-guard',
-      title: 'Hata Hafızası Sicili: Tekil "🏆 Zirve Rekor" & Kardiyo Dakika Tekrar Hariçliği',
-      expected: 'Kart başına "🏆 Zirve Rekor" = 1 adet, tamamlanan seans tekrarında kardiyo dk = 0',
+      title: 'Hata Hafızası Sicili: Tekil "Zirve Rekor" & Kardiyo Dakika Tekrar Hariçliği',
+      expected: 'Kart başına "Zirve Rekor" = 1 adet, tamamlanan seans tekrarında kardiyo dk = 0',
       run: () => {
         ctx.__seedState({
           history: [
@@ -968,7 +968,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
         const res = vm.runInContext(`(() => {
           const box = document.createElement('div');
           renderCombinedCoachReport(box);
-          const peakCount = (String(box.innerHTML || '').match(/🏆 Zirve Rekor/g) || []).length;
+          const peakCount = (String(box.innerHTML || '').match(/Zirve Rekor/g) || []).length;
 
           activeWorkoutSession = {
             title: 'Hata Hafızası Testi',
@@ -1310,11 +1310,22 @@ function runAcademicMathSuite(moduleSources, dbText) {
           const pullWalk = (pullMerge.mergedLogs || []).find(l => l && l.id === 'garmin_tmd_nov14') || {};
           const pushWalk = (pushMerge.mergedLogs || []).find(l => l && l.id === 'garmin_tmd_nov14') || {};
 
-          // 3) Düzenleme sonrası saat + panel yayılımı (önce eski telemetri üzerinde panel fallback, sonra propagate)
+          // 3) Onay kapsülü hijyeni (puanlanmış walking bildirimi gizlenir) + pending kuvvet seansında saat başlığı yayılımı
           localStorage.setItem('celik_garmin_telemetry_v2_' + uid, JSON.stringify([Object.assign({}, staleWatchAct)]));
           gt.renderHistoryGarminSyncPanel();
-          const panelHtmlBeforePropagate = String(document.getElementById('garminHistorySyncContainer').innerHTML || '');
-          gt.propagateWorkoutLogTitleToWatch(editedWalkLog);
+          const walkPanelHtml = String(document.getElementById('garminHistorySyncContainer').innerHTML || '');
+
+          const pendingStrAct = {
+            id: 'tmd_str_pending',
+            date: new Date().toISOString(),
+            title: OLD_TITLE,
+            sportType: 'training',
+            subSportType: 'strength_training',
+            summary: { duration: 2100, durationTotal: 2200, calories: 210, heartrate: 128, heartrateMax: 152 },
+            rounds: [{ setType: 'active', exerciseCategory: 'chest', exerciseName: 'dumbbell_chest_press', repetitions: 10, weight: 20, duration: 40, heartrate: 125, heartrateMax: 138 }]
+          };
+          localStorage.setItem('celik_garmin_telemetry_v2_' + uid, JSON.stringify([pendingStrAct]));
+          gt.propagateWorkoutLogTitleToWatch({ id: 'garmin_tmd_str_pending', garminActivityId: 'tmd_str_pending', program: NEW_TITLE, title: NEW_TITLE, userEditedAt: EDITED_AT });
           gt.renderHistoryGarminSyncPanel();
           const propagatedWatch = JSON.parse(localStorage.getItem('celik_garmin_telemetry_v2_' + uid) || '[]')[0] || {};
           const panelHtml = String(document.getElementById('garminHistorySyncContainer').innerHTML || '');
@@ -1330,9 +1341,10 @@ function runAcademicMathSuite(moduleSources, dbText) {
             pullWon: pullWalk.program === NEW_TITLE && Number(pullWalk.userEditedAt) === EDITED_AT,
             pushCount: (pushMerge.mergedLogs || []).length,
             pushWon: pushWalk.program === NEW_TITLE && Number(pushWalk.userEditedAt) === EDITED_AT,
+            walkPanelHidden: walkPanelHtml === '',
             propagatedWatchTitle: propagatedWatch.title === NEW_TITLE,
-            panelHasNewTitle: panelHtml.includes('Kan Şekeri Yükselmesi Sonrası') && panelHtmlBeforePropagate.includes('Kan Şekeri Yükselmesi Sonrası'),
-            panelDropsOldTitle: !panelHtml.includes(OLD_TITLE) && !panelHtmlBeforePropagate.includes(OLD_TITLE)
+            panelHasNewTitle: panelHtml.includes('Kan Şekeri Yükselmesi Sonrası'),
+            panelDropsOldTitle: !panelHtml.includes(OLD_TITLE)
           };
         })()`, ctx);
         const ok = res.prematureCloudPushCount === 0
@@ -1342,12 +1354,13 @@ function runAcademicMathSuite(moduleSources, dbText) {
           && res.pullWon
           && res.pushCount === 2
           && res.pushWon
+          && res.walkPanelHidden
           && res.propagatedWatchTitle
           && res.panelHasNewTitle
           && res.panelDropsOldTitle;
         return {
           ok,
-          actual: `erkenPush=${res.prematureCloudPushCount}, eldenÇıkış=${res.handoffKeptTitle}/${res.handoffUpdatedWatchTitle}, pull=${res.pullWon}(${res.pullCount}), push=${res.pushWon}(${res.pushCount}), panel=${res.panelHasNewTitle}/eskiYok=${res.panelDropsOldTitle}`
+          actual: `erkenPush=${res.prematureCloudPushCount}, eldenÇıkış=${res.handoffKeptTitle}/${res.handoffUpdatedWatchTitle}, pull=${res.pullWon}(${res.pullCount}), push=${res.pushWon}(${res.pushCount}), walkPanelGizli=${res.walkPanelHidden}, panel=${res.panelHasNewTitle}/eskiYok=${res.panelDropsOldTitle}`
         };
       }
     },
@@ -2097,7 +2110,9 @@ function runAcademicMathSuite(moduleSources, dbText) {
             { id: 'db_bench_press', name: 'Dambıl Bench Press', category: 'push', muscle: 'Göğüs', targetSets: 3, targetReps: '8-12' },
             { id: 'db_row', name: 'Dambıl Row', category: 'pull', muscle: 'Sırt', targetSets: 3, targetReps: '8-12' }
           ];
+          window.generatedWorkoutViewMode = 'cards';
           const genHtml = buildWorkoutCardsCarouselHtml({ title: 'T38 Test', style: 'superset', scheme: { sets: 3, reps: '8-12', rest: 60 }, exercises: sampleExs }, 'generated');
+          window.generatedWorkoutViewMode = 'list';
 
           const uid = 'usr_exam';
           const todayDt = new Date();
@@ -2649,15 +2664,15 @@ function runAcademicMathSuite(moduleSources, dbText) {
       id: 'T44',
       owner: 'generator-guard',
       title: 'Üretici Parametre Kartları Koyu Tema Bütünlüğü',
-      expected: '.param-group/.param-box ve etiketleri açık tema beyaz yüzeylerine dönmez',
+      expected: '.param-group dış çerçevesi kaldırılmış düz başlık + tek katmanlı koyu .param-select ve #aiUnifiedWishInput yüzeyleri kullanılır',
       run: () => {
         const cssCode = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
-        const darkCardRule = cssCode.includes('.gen-collapsible-section .param-box,\n.gen-collapsible-section .param-group');
-        const darkCardSurface = cssCode.includes('background: rgba(24, 21, 48, 0.82) !important');
-        const lightLabelRule = cssCode.includes('color: #CBD5E1 !important');
-        const paramSelectDark = cssCode.includes('.param-select') && cssCode.includes('background: rgba(11, 10, 20, 0.8) !important');
-        const ok = darkCardRule && darkCardSurface && lightLabelRule && paramSelectDark;
-        return { ok, actual: JSON.stringify({ darkCardRule, darkCardSurface, lightLabelRule, paramSelectDark }) };
+        const flatParamGroupRule = cssCode.includes('#generatorTab .gen-collapsible-section .param-group,\n#generatorTab .ai-unified-wish-row {\n    background: transparent !important;\n    background-color: transparent !important;\n    border: none !important;');
+        const mutedLabelRule = cssCode.includes('#generatorTab .gen-collapsible-section .param-group label,\n#generatorTab .ai-unified-wish-label {\n    color: #94A3B8 !important;');
+        const singleDarkInputs = cssCode.includes('#generatorTab .param-select,\n#generatorTab select,\n#generatorTab input[type="text"],\n#generatorTab #aiUnifiedWishInput,\n#generatorTab .ai-unified-wish-input {\n    background: #121024 !important;');
+        const darkBoxRule = cssCode.includes('.gen-collapsible-section .param-box {') && cssCode.includes('background: rgba(24, 21, 48, 0.82) !important');
+        const ok = flatParamGroupRule && mutedLabelRule && singleDarkInputs && darkBoxRule;
+        return { ok, actual: JSON.stringify({ flatParamGroupRule, mutedLabelRule, singleDarkInputs, darkBoxRule }) };
       }
     },
     {
@@ -2779,6 +2794,644 @@ function runAcademicMathSuite(moduleSources, dbText) {
         })()`, ctx);
         const ok = res.hypTotal > 0 && res.hypCond === 0 && res.condTotal > 0 && res.condCount >= 1;
         return { ok, actual: JSON.stringify(res) };
+      }
+    },
+    {
+      id: 'T51',
+      owner: 'analytics-guard',
+      title: 'Analiz Tek Parça Koyu Sunum, Tekrar Temizliği ve Tek Aksiyon Standardı',
+      expected: 'tek parça koyu kabuk, odak kartında tek 3 / 8-18 Set çubuğu, hayalet başlık ve kutu boyaması yok, tek ana ekleme butonu',
+      run: () => {
+        const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+        const styleCss = fs.readFileSync(path.join(ROOT, 'css/style.css'), 'utf8');
+        const shellDarkOk = indexHtml.includes('<meta name="theme-color" content="#0B0A14">') &&
+          indexHtml.includes('<meta name="color-scheme" content="dark">') &&
+          styleCss.includes('.modern-app-bar') &&
+          styleCss.includes('.top-fc-score-strip') &&
+          styleCss.includes('#analyticsTab > .generator-card');
+
+        const todayIso = vm.runInContext(`toIsoDateKeyLocal(new Date())`, ctx);
+        ctx.__seedState({
+          history: [{
+            id: 'h_t51',
+            date: todayIso,
+            timestamp: Date.now(),
+            split: 'push',
+            program: 'Göğüs Test',
+            exercises: [{
+              id: 'db_bench_press',
+              name: 'Dumbbell Bench Press',
+              sets: [
+                { weight: 20, reps: 10, completed: true },
+                { weight: 20, reps: 10, completed: true },
+                { weight: 20, reps: 10, completed: true }
+              ]
+            }]
+          }]
+        });
+        const res = vm.runInContext(`(() => {
+          currentWeeklyMuscleSource = 'week_done';
+          currentSelectedAnatomyMuscle = 'chest';
+          currentWeeklyMuscleFilter = 'all';
+          const mBox = document.createElement('div');
+          renderMuscleAnalytics(mBox);
+          const mobBox = document.createElement('div');
+          renderMobilityAnalytics(mobBox);
+          return {
+            mHtml: mBox.innerHTML || '',
+            mobHtml: mobBox.innerHTML || ''
+          };
+        })()`, ctx);
+
+        const mHtml = res.mHtml;
+        const mobHtml = res.mobHtml;
+        const focusStart = mHtml.indexOf('id="anatomyFocusCard"');
+        const focusEndMarker = mHtml.indexOf('Tonaj & Bölge Özeti', Math.max(0, focusStart));
+        const focusEnd = focusEndMarker > focusStart ? focusEndMarker : mHtml.length;
+        const focusHtml = focusStart >= 0 ? mHtml.slice(focusStart, focusEnd) : '';
+
+        const focusForbidden = ['Az Çalıştı', 'Haftalık Tamamlanma', 'Haftalık hedefin altında kaldı', 'Şekildeki', 'Numaralı Alt Kaslar', 'HANGİ ALT BÖLGELER ÇALIŞTI'];
+        const missingFocusTokens = focusForbidden.filter(t => focusHtml.includes(t));
+        const quickAddMatches = focusHtml.match(/openQuickAddToDayModal/g) || [];
+        const compactSetMatch = focusHtml.match(/(\d+(?:\.\d+)?\s*\/\s*\d+-\d+\s*Set)/);
+        const focusOk = focusStart >= 0 &&
+          focusHtml.includes('3 / 8-18 Set') &&
+          missingFocusTokens.length === 0 &&
+          quickAddMatches.length === 1;
+
+        const combined = mHtml + '\n' + mobHtml;
+        const globalForbidden = ['Şekildeki', 'Numaralı Alt Kaslar', 'ALT KAS AYRIMLI', 'HANGİ ALT BÖLGELER ÇALIŞTI', 'HANGİ YÖNLER ÇALIŞTI', 'Hangi Yön Açıldı', '#132E24', '#271C19', '#2A1421'];
+        const foundGlobalForbidden = globalForbidden.filter(t => combined.includes(t));
+
+        const ok = shellDarkOk && focusOk && foundGlobalForbidden.length === 0;
+        return {
+          ok,
+          actual: JSON.stringify({
+            shellDarkOk,
+            focusStartFound: focusStart >= 0,
+            compactSetShown: compactSetMatch ? compactSetMatch[1] : null,
+            missingFocusTokens,
+            quickAddCount: quickAddMatches.length,
+            foundGlobalForbidden
+          })
+        };
+      }
+    },
+    {
+      id: 'T52',
+      owner: 'analytics-guard',
+      title: 'Analiz Sıfır Emoji, İçi Boş Bilgi İkonu, Hizalı Tonaj/Bölge, Düz Satır & Kardiyak Efor',
+      expected: 'tüm alt ekranlarda sıfır emoji, analytics-info-btn ikonu, ortalı İTİŞ/ÇEKİŞ, #8B5CF6 oranlı çubuk, düz satır rekor (gün+ay, saatsiz), sade Kardiyak Efor kartı',
+      run: () => {
+        const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+        const stripStart = indexHtml.indexOf('id="topFitnessCardioScoreStrip"');
+        const stripEnd = indexHtml.indexOf('<!-- NAVIGATION TABS', Math.max(0, stripStart));
+        const stripHtml = stripStart >= 0 && stripEnd > stripStart ? indexHtml.slice(stripStart, stripEnd) : '';
+        const stripEmojiFree = stripHtml.length > 0 && !/\p{Extended_Pictographic}/u.test(stripHtml);
+
+        const todayIso = vm.runInContext(`toIsoDateKeyLocal(new Date())`, ctx);
+        ctx.__seedState({
+          history: [{
+            id: 'h_t52',
+            date: todayIso,
+            dateFormatted: '16 Kas 2026 20:24',
+            timestamp: Date.now(),
+            split: 'upper_push',
+            program: 'Üst Vücut Test',
+            exercises: [
+              {
+                id: 'db_bench_press',
+                name: 'Dumbbell Bench Press',
+                maxWeight: 32.5,
+                exerciseVolume: 975,
+                sets: [
+                  { weight: 32.5, reps: 10, completed: true },
+                  { weight: 32.5, reps: 10, completed: true },
+                  { weight: 32.5, reps: 10, completed: true }
+                ]
+              },
+              {
+                id: 'db_biceps_curl',
+                name: 'Dambıl Biceps Curl',
+                maxWeight: 12,
+                exerciseVolume: 360,
+                sets: [
+                  { weight: 12, reps: 10, completed: true },
+                  { weight: 12, reps: 10, completed: true },
+                  { weight: 12, reps: 10, completed: true }
+                ]
+              }
+            ]
+          }],
+          scale: [{
+            id: 'sc_t52',
+            date: todayIso,
+            weight: 82.4,
+            bodyFat: 15.2,
+            muscleMass: 38.5
+          }]
+        });
+
+        const res = vm.runInContext(`(() => {
+          localStorage.setItem('celik_garmin_enabled_usr_exam', 'true');
+          currentWeeklyMuscleSource = 'week_done';
+          currentSelectedAnatomyMuscle = 'chest';
+          currentWeeklyMuscleFilter = 'all';
+          currentAnalyticsPeriodDays = 30;
+          const muscleBox = document.createElement('div');
+          const mobBox = document.createElement('div');
+          const scaleBox = document.createElement('div');
+          const coachBox = document.createElement('div');
+          const scoreBox = document.createElement('div');
+          const garminBox = document.getElementById('garminAnalyticsCoachContainer');
+          renderMuscleAnalytics(muscleBox);
+          renderMobilityAnalytics(mobBox);
+          renderScaleAnalytics(scaleBox);
+          renderCombinedCoachReport(coachBox);
+          renderFitnessCardioScoreAnalytics(scoreBox);
+          if (window.GarminTredictChief && typeof window.GarminTredictChief.renderAnalyticsGarminCoachPanel === 'function') {
+            window.GarminTredictChief.renderAnalyticsGarminCoachPanel();
+          }
+          return {
+            mHtml: muscleBox.innerHTML || '',
+            mobHtml: mobBox.innerHTML || '',
+            scaleHtml: scaleBox.innerHTML || '',
+            coachHtml: coachBox.innerHTML || '',
+            scoreHtml: scoreBox.innerHTML || '',
+            garminHtml: (garminBox && garminBox.innerHTML) || ''
+          };
+        })()`, ctx);
+
+        const allViews = [res.mHtml, res.mobHtml, res.scaleHtml, res.coachHtml, res.scoreHtml, res.garminHtml].join('\n');
+        const emojiMatches = allViews.match(/\p{Extended_Pictographic}/gu) || [];
+        const allViewsEmojiFree = emojiMatches.length === 0;
+
+        const hasInfoBtn = res.mHtml.includes('class="analytics-info-btn"');
+        const noWhiteLegacyInfo = !res.mHtml.includes('wk-ex-i-btn');
+        const pushPullCentered = /justify-content:center;[^"]*">[\s\S]{0,80}İTİŞ \/ ÇEKİŞ/.test(res.mHtml);
+        const topPillarBar90 = res.mHtml.includes('width:90%; background:#8B5CF6;');
+        const verMatch = indexHtml.match(/id="appVersionBadge"[^>]*>v(\d+)</);
+        const activeVer = verMatch ? Number(verMatch[1]) : 0;
+        const verTag = `v=${activeVer}`;
+        const cacheBustOk = activeVer >= 337 &&
+          indexHtml.includes(`css/style.css?${verTag}`) &&
+          indexHtml.includes(`js/chiefs/analytics-chief.js?${verTag}`) &&
+          indexHtml.includes(`js/chiefs/generator-chief.js?${verTag}`) &&
+          indexHtml.includes(`js/garmin-tredict-bridge.js?${verTag}`);
+        const singleBarAccent = !res.mHtml.includes('background:#10b981') &&
+          !res.mHtml.includes('background:#0284C7') &&
+          !res.mHtml.includes('background:#D97706') &&
+          !res.mHtml.includes('background:#E11D48');
+        const noYellowPrStripe = !res.mHtml.includes('border-left:3px solid #FCD34D');
+        const prDateShortOk = res.mHtml.includes('16 Kas') && !res.mHtml.includes('20:24');
+
+        const garminCleanOk = res.garminHtml.includes('Kardiyak Efor') &&
+          res.garminHtml.includes('Göster') &&
+          !res.garminHtml.includes('7. Şef') &&
+          !res.garminHtml.includes('fr945') &&
+          !res.garminHtml.includes('#0C4A6E') &&
+          !res.garminHtml.includes('#6D28D9');
+
+        const ok = stripEmojiFree &&
+          allViewsEmojiFree &&
+          hasInfoBtn &&
+          noWhiteLegacyInfo &&
+          pushPullCentered &&
+          topPillarBar90 &&
+          cacheBustOk &&
+          singleBarAccent &&
+          noYellowPrStripe &&
+          prDateShortOk &&
+          garminCleanOk;
+
+        return {
+          ok,
+          actual: JSON.stringify({
+            stripEmojiFree,
+            emojiCount: emojiMatches.length,
+            hasInfoBtn,
+            noWhiteLegacyInfo,
+            pushPullCentered,
+            topPillarBar90,
+            cacheBustOk,
+            singleBarAccent,
+            noYellowPrStripe,
+            prDateShortOk,
+            garminCleanOk
+          })
+        };
+      }
+    },
+    {
+      id: 'T53',
+      owner: 'generator-guard',
+      title: 'Üretici Sekmesi Tam Koyu Kabuk, Yetim Numarasız Başlık, Kutu İçi Kutu İptali & Sıfır Emoji',
+      expected: 'AI İLE HAZIRLA/alt yazı/2-3 daireleri/emojiler/balon SVG kaldırılmış, EKİPMANLAR & ANTRENMAN AYARLARI düz başlık, koyu not girişi ve ortalı alt hint mevcuttur',
+      run: () => {
+        const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+        const cssCode = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
+        const genHtml = indexHtml.slice(indexHtml.indexOf('id="generatorTab"'), indexHtml.indexOf('id="activeWorkoutTab"'));
+
+        const heroHeaderClean = genHtml.includes('Programını AI ile oluştur') &&
+          !genHtml.includes('AI İLE HAZIRLA') &&
+          !genHtml.includes('ai-prep-subtitle');
+        const noOrphanStepBadges = !/gen-step-badge">[23]</.test(genHtml) &&
+          cssCode.includes('#generatorTab .gen-step-badge {\n    display: none !important;') &&
+          genHtml.includes('<span>EKİPMANLAR</span>') &&
+          genHtml.includes('<span>ANTRENMAN AYARLARI</span>');
+        const noWishSvgIcon = /<label for="aiUnifiedWishInput" class="ai-unified-wish-label">AI ÖZEL NOTU<\/label>/.test(genHtml);
+        const htmlEmojis = genHtml.match(/\p{Extended_Pictographic}/gu) || [];
+
+        const ctx = createAppVmSandbox(moduleSources, dbText);
+        ctx.updateSelectedEquipLabel();
+        ctx.updateSelectedParamLabel();
+        const equipLabel = ctx.document.getElementById('selectedEquipLabel').innerText;
+        const paramLabel = ctx.document.getElementById('selectedParamLabel').innerText;
+        const vmEmojis = `${equipLabel}\n${paramLabel}`.match(/\p{Extended_Pictographic}/gu) || [];
+
+        const darkWishCss = cssCode.includes('#generatorTab #aiUnifiedWishInput,\n#generatorTab .ai-unified-wish-input {\n    background: #121024 !important;') &&
+          cssCode.includes('#mainAppWrapper,\n.app-container,\n.tab-content,\n#generatorTab {\n    background: transparent !important;');
+        const manualCleanAndCenteredHint = !genHtml.includes('🛠️') &&
+          /<div class="ai-primary-cta-col"[\s\S]*id="btnUnifiedAiGenerate"[\s\S]*id="aiQuickPreviewHint">Onaylamadan takvime eklenmez<\/div>/.test(genHtml) &&
+          cssCode.includes('#generatorTab #aiQuickPreviewHint,\n#generatorTab .ai-prep-hint {\n    width: 100% !important;\n    text-align: center !important;');
+
+        const ok = heroHeaderClean &&
+          noOrphanStepBadges &&
+          noWishSvgIcon &&
+          htmlEmojis.length === 0 &&
+          vmEmojis.length === 0 &&
+          darkWishCss &&
+          manualCleanAndCenteredHint;
+
+        return {
+          ok,
+          actual: JSON.stringify({
+            heroHeaderClean,
+            noOrphanStepBadges,
+            noWishSvgIcon,
+            htmlEmojiCount: htmlEmojis.length,
+            vmEmojiCount: vmEmojis.length,
+            darkWishCss,
+            manualCleanAndCenteredHint
+          })
+        };
+      }
+    },
+    {
+      id: 'T54',
+      owner: 'generator-guard',
+      title: 'Üretici Sonrası 3 Pencere (Planlama Kontrolü, Kart & Liste) Yalın Standart',
+      expected: 'varsayılan Liste modu + sayaç/çubuk gizli, 1. pencerede çerçevesiz tek satır not & .is-selected vurgu, Kart ve Liste modlarında sıfır emoji + sade metin + tek Değiştir butonu',
+      run: () => {
+        const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+        const cssCode = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
+        const ctx = createAppVmSandbox(moduleSources, dbText);
+
+        const defaultIsList = ctx.window.generatedWorkoutViewMode === 'list';
+        const sampleW = {
+          title: 'Üst Vücut Dengeli',
+          style: 'superset',
+          duration: 45,
+          scheme: { sets: 3, reps: '8-12', rest: 60 },
+          exercises: [
+            { id: 'db_bench_press', name: 'Dumbbell Bench Press', blockLabel: '1A', blockType: 'superset', supersetRole: 'A', muscle: 'Göğüs', primaryMuscles: ['chest'], targetSets: 3, targetReps: '8-12', customRest: 60 },
+            { id: 'db_bent_row', name: 'Dumbbell Row', blockLabel: '1B', blockType: 'superset', supersetRole: 'B', muscle: 'Sırt', primaryMuscles: ['back'], targetSets: 3, targetReps: '8-12', customRest: 60 }
+          ],
+          finisher: { name: 'Kettlebell Swing', desc: '4 dk bitiş', exId: 'kb_swing' }
+        };
+
+        const listShellHtml = ctx.buildWorkoutCardsCarouselHtml(sampleW, 'generated');
+        const listHidesStoryAndCounter = defaultIsList &&
+          listShellHtml.includes('id="wkListView"') &&
+          !listShellHtml.includes('id="wkStoryBarsWrap"') &&
+          !listShellHtml.includes('id="wkCarouselCounter"');
+
+        const precheckBlock = indexHtml.slice(indexHtml.indexOf('id="aiQuickPrecheckModal"'), indexHtml.indexOf('id="exerciseDetailModal"'));
+        const precheckClean = !precheckBlock.includes('#38BDF8') &&
+          !precheckBlock.includes('rgba(16,185,129') &&
+          !cssCode.includes('button[data-val]:not([style*="linear-gradient"])') &&
+          cssCode.includes('#aiQuickPrecheckModal .modal-box button[data-val].is-selected');
+
+        ctx.window.generatedWorkoutViewMode = 'cards';
+        const cardsHtml = ctx.buildWorkoutCardsCarouselHtml(sampleW, 'generated');
+        const cardEmojis = cardsHtml.match(/\p{Extended_Pictographic}/gu) || [];
+        const cardTrackStart = cardsHtml.indexOf('id="wkCarouselTrack"');
+        const cardTrackHtml = cardTrackStart >= 0 ? cardsHtml.slice(cardTrackStart, cardsHtml.indexOf('class="wk-carousel-dock"')) : '';
+        const cardsClean = cardEmojis.length === 0 &&
+          !cardsHtml.includes('class="wk-card-chip"') &&
+          cardsHtml.includes('class="wk-card-submeta"') &&
+          />\s*Değiştir\s*</.test(cardsHtml) &&
+          !cardsHtml.includes('Alternatif') &&
+          !cardsHtml.includes('Rastgele') &&
+          !cardTrackHtml.includes('wk-i-badge') &&
+          cssCode.includes('#generatorTab .wk-carousel-wrap .wk-card-media-box');
+
+        const timelineHtml = ctx.buildTimelineStationsHtml(sampleW.exercises, sampleW.scheme, {}, 'generated');
+        const listEmojis = timelineHtml.match(/\p{Extended_Pictographic}/gu) || [];
+        const listClean = listEmojis.length === 0 &&
+          !timelineHtml.includes('#F1F5F9') &&
+          !timelineHtml.includes('#FF5A36') &&
+          !timelineHtml.includes('timeline-rest-pill') &&
+          timelineHtml.includes('timeline-rest-text') &&
+          timelineHtml.includes('wk-ex-expand-hint') &&
+          timelineHtml.includes('class="wk-ex-row-title"') &&
+          cssCode.includes('.wk-ex-row-clean .wk-ex-row-title {\n    color: #FFFFFF !important;') &&
+          !cssCode.includes('.tab-content [style*="color:#F8FAFC"]:not(.btn-gold)') &&
+          timelineHtml.includes('<svg') &&
+          !timelineHtml.includes('wk-i-badge');
+
+        const ok = listHidesStoryAndCounter && precheckClean && cardsClean && listClean;
+        return {
+          ok,
+          actual: JSON.stringify({
+            defaultIsList,
+            listHidesStoryAndCounter,
+            precheckClean,
+            cardEmojiCount: cardEmojis.length,
+            cardsClean,
+            listEmojiCount: listEmojis.length,
+            listClean
+          })
+        };
+      }
+    },
+    {
+      id: 'T55',
+      owner: 'workout-guard',
+      title: 'Antrenman Sekmesi, Üst Başlık ve Takvim/Stüdyo Yalın Koyu Standart',
+      expected: 'Beyaz Çelik Kodu başlığı + mor/kehribar üst barlar, alt çizgisiz mor dinlenme bağlantıları, tam kart tıklamalı Stüdyo + Anlık Seans + küçük aşağı ok ikonu',
+      run: () => {
+        const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+        const cssCode = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
+        const localCtx = createAppVmSandbox(moduleSources, dbText);
+
+        const brandAndBarsOk = cssCode.includes('-webkit-text-fill-color: #FFFFFF !important') &&
+          !/webkit-text-fill-color:\s*#0F172A/i.test(cssCode) &&
+          cssCode.includes('#8B5CF6') &&
+          cssCode.includes('#F59E0B');
+
+        const restLinkStart = cssCode.indexOf('.stitch-rest-link-btn {');
+        const restLinkBlock = restLinkStart >= 0 ? cssCode.slice(restLinkStart, cssCode.indexOf('}', restLinkStart) + 1) : '';
+        const restLinkCleanCss = restLinkBlock.includes('text-decoration: none !important') &&
+          !restLinkBlock.includes('text-decoration: underline');
+
+        const flatCalCssOk = cssCode.includes('#embeddedCalendarSection .stitch-day-strip') &&
+          cssCode.includes('#embeddedCalendarSection .stitch-selected-day-card') &&
+          cssCode.includes('border-top: 1px solid rgba(255, 255, 255, 0.06) !important') &&
+          cssCode.includes('#studioSectionInWorkout #btnQuickStudioLaunch') &&
+          cssCode.includes('#studioSectionInWorkout .studio-accordion-chevron') &&
+          restLinkCleanCss;
+
+        const calSectionStart = indexHtml.indexOf('id="embeddedCalendarSection"');
+        const studioStart = indexHtml.indexOf('id="studioSectionInWorkout"');
+        const libStart = indexHtml.indexOf('id="libraryTab"');
+        const calSlice = indexHtml.slice(calSectionStart, studioStart);
+        const studioSlice = indexHtml.slice(studioStart, libStart);
+
+        const htmlCleanOk = !calSlice.includes('openCalendarToolsModal') &&
+          calSlice.includes('id="calJumpTodayBtn"') &&
+          studioSlice.includes('id="btnQuickStudioLaunch"') &&
+          studioSlice.includes('id="studioCardShell"') &&
+          studioSlice.includes('onclick="toggleStudioAccordion()"') &&
+          studioSlice.includes('+ Anlık Seans') &&
+          studioSlice.includes('<svg') &&
+          studioSlice.includes('class="studio-accordion-chevron"') &&
+          !studioSlice.includes('btnToggleStudioAccordion') &&
+          !studioSlice.includes('⚡') &&
+          !studioSlice.includes('▼') &&
+          !studioSlice.includes('▲');
+
+        localCtx.__seedState();
+        const vmRes = vm.runInContext(`(() => {
+          const uid = 'usr_exam';
+          const today = new Date();
+          const todayYMD = formatDateYMD(today);
+          const sched = getWeeklySchedule(uid);
+          for (let i = 0; i < 7; i++) {
+            sched[i] = { id: 'rest_' + i, title: 'Dinlenme', rest: true, type: 'rest', exercises: [] };
+          }
+          saveWeeklySchedule(sched, uid);
+
+          calendarScreenState.viewMode = 'weekly';
+          calendarScreenState.anchorDate = new Date(today);
+          calendarScreenState.selectedDayYMD = todayYMD;
+          renderCalendarScreen();
+
+          const calHtml = String((document.getElementById('calendarMainContainer') && document.getElementById('calendarMainContainer').innerHTML) || '');
+          const todayBtnEl = document.getElementById('calJumpTodayBtn');
+          const hiddenOnToday = Boolean(todayBtnEl && todayBtnEl.style.display === 'none');
+          const restActionable = !calHtml.includes('BUGÜN') &&
+            calHtml.includes('Dinlenme ve Toparlanma Günü') &&
+            calHtml.includes('Yine de çalışmak ister misin?') &&
+            calHtml.includes('Program Üret') &&
+            calHtml.includes('Seans Ekle');
+
+          const otherDate = new Date(today);
+          const dow = otherDate.getDay();
+          otherDate.setDate(otherDate.getDate() + (dow === 1 ? 1 : -1));
+          const otherYMD = formatDateYMD(otherDate);
+          selectCalendarStripDay(otherYMD);
+          const shownAway = Boolean(todayBtnEl && todayBtnEl.style.display === 'inline-flex');
+
+          jumpCalendarToToday();
+          const hiddenAfterJump = Boolean(todayBtnEl && todayBtnEl.style.display === 'none');
+
+          setCalendarViewMode('monthly');
+          const monthHtml = String((document.getElementById('calendarMainContainer') && document.getElementById('calendarMainContainer').innerHTML) || '');
+          const monthClean = !monthHtml.includes('BUGÜN') && !/[\u{1F300}-\u{1FAFF}]/u.test(monthHtml);
+
+          const sBody = document.getElementById('studioAccordionBody');
+          const sArrow = document.getElementById('studioAccordionArrow');
+          toggleStudioAccordion(true);
+          const studioOpened = Boolean(sBody && sBody.style.display === 'block' && sArrow && sArrow.dataset && sArrow.dataset.open === '1');
+          toggleStudioAccordion(false);
+          const studioClosed = Boolean(sBody && sBody.style.display === 'none' && sArrow && sArrow.dataset && sArrow.dataset.open === '0');
+
+          return { hiddenOnToday, restActionable, shownAway, hiddenAfterJump, monthClean, studioOpened, studioClosed };
+        })()`, localCtx);
+
+        const ok = Boolean(
+          brandAndBarsOk &&
+          flatCalCssOk &&
+          htmlCleanOk &&
+          vmRes.hiddenOnToday &&
+          vmRes.restActionable &&
+          vmRes.shownAway &&
+          vmRes.hiddenAfterJump &&
+          vmRes.monthClean &&
+          vmRes.studioOpened &&
+          vmRes.studioClosed
+        );
+        return {
+          ok,
+          actual: JSON.stringify({ brandAndBarsOk, flatCalCssOk, htmlCleanOk, ...vmRes })
+        };
+      }
+    },
+    {
+      id: 'T56',
+      owner: 'history-guard',
+      title: 'Geçmiş Sekmesi Kompakt Tek Satır Kartlar, Harf-Duyarsız Mekan & Başlık Tekilleştirme',
+      expected: 'Tek satır başlık+tarih, ara çizgisiz/etiketsiz tek satır istatistik (7.023 kg · 27 Set (322 Tk) · 54 dk / 123 bpm · 135 kcal · 21 dk), Ev+EV tekilleştirme, Cuma: Cuma: teke indirme',
+      run: () => {
+        const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+        const cssCode = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
+        const localCtx = createAppVmSandbox(moduleSources, dbText);
+
+        const histStart = indexHtml.indexOf('id="historyTab"');
+        const analyticsStart = indexHtml.indexOf('id="analyticsTab"');
+        const histSlice = indexHtml.slice(histStart, analyticsStart);
+
+        const htmlMenuOk = histSlice.includes('id="btnHistoryTopMenu"') &&
+          histSlice.includes('id="historyTopDropdownMenu"') &&
+          histSlice.includes('exportCSV()') &&
+          histSlice.includes('exportData()') &&
+          histSlice.includes('importData(event)') &&
+          !histSlice.includes('>CSV<');
+
+        const cssHistOk = cssCode.includes('.hide-scrollbar::-webkit-scrollbar') &&
+          cssCode.includes('#historyTab .history-loc-chip.is-active') &&
+          cssCode.includes('#historyTab .log-card-title') &&
+          cssCode.includes('#historyTab .log-stats-inline') &&
+          cssCode.includes('#statTotalWorkouts,\n#statWeekWorkouts,\n#statStreak {\n    color: #FFFFFF !important;\n}');
+
+        localCtx.__seedState();
+        const vmRes = vm.runInContext(`(() => {
+          const uid = 'usr_exam';
+          localStorage.setItem('celik_garmin_enabled_' + uid, 'true');
+          localStorage.removeItem('celik_garmin_telemetry_v2_' + uid);
+          localStorage.removeItem('celik_garmin_approved_activities_v1_' + uid);
+          localStorage.removeItem('celik_garmin_dismissed_activities_v1_' + uid);
+
+          const walkLog = {
+            id: 'log_h_walk',
+            isCardioActivity: true,
+            date: '2026-11-14',
+            program: '🏃 Sabah Yürüyüşü',
+            locationType: 'ev',
+            locationName: 'Ev',
+            duration: 21,
+            healthSummary: { heartrateAvg: 123, calories: 135 },
+            exercises: [{ id: 'cond_walking', name: 'Tempo Yürüyüş', sets: [{ setNo: 1, weight: 0, reps: 21, completed: true }] }]
+          };
+          const homeUpperLog = {
+            id: 'log_h_ev_upper',
+            date: '2026-11-16',
+            program: 'Ev Güç Seansı',
+            locationType: 'ev',
+            locationName: 'EV',
+            duration: 30,
+            totalVolumeKg: 1200,
+            totalSetsCompleted: 9,
+            totalRepsCompleted: 90,
+            exercises: [{ id: 'db_goblet_squat', name: 'Dambıl Goblet Squat', sets: [{ setNo: 1, weight: 20, reps: 10, completed: true }] }]
+          };
+          const strengthLog = {
+            id: 'log_h_str',
+            date: '2026-11-19',
+            dateFormatted: '19 Kas 2026 20:24',
+            program: '⚔️ Cuma: Cuma: Tüm Vücut',
+            locationType: 'salon',
+            locationName: 'Spor Salonu',
+            duration: 54,
+            notes: '📝 Harika pompa yakalandı',
+            totalVolumeKg: 7023,
+            totalSetsCompleted: 27,
+            totalRepsCompleted: 322,
+            exercises: [{ id: 'db_bench_press', name: 'Dambıl Bench Press', sets: [{ setNo: 1, weight: 20, reps: 12, completed: true }] }]
+          };
+          localStorage.setItem('celik_kodu_history_' + uid, JSON.stringify([strengthLog, homeUpperLog, walkLog]));
+
+          renderHistory();
+          const containerEl = document.getElementById('logHistoryContainer');
+          const html = String((containerEl && containerEl.innerHTML) || '');
+          const emojis = html.match(/\\p{Extended_Pictographic}/gu) || [];
+          const datesClean = html.includes('14 Kas 2026') &&
+            html.includes('16 Kas 2026') &&
+            html.includes('19 Kas 2026') &&
+            !html.includes('2026-11-14') &&
+            !html.includes('20:24');
+
+          const titlesDeduped = html.includes('Cuma: Tüm Vücut') && !html.includes('Cuma: Cuma:');
+
+          const labelsRemoved = !html.includes('Toplam Tonaj') &&
+            !html.includes('Set / Tekrar') &&
+            !html.includes('Ort. Nabız') &&
+            !html.includes('Kalori') &&
+            !html.includes('log-stats-grid') &&
+            !html.includes('log-stats-bar') &&
+            !html.includes('log-notes-box');
+
+          const inlineMetricsOk = html.includes('7.023 kg · 27 Set (322 Tk) · 54 dk') &&
+            html.includes('123 bpm · 135 kcal · 21 dk') &&
+            html.includes('class="log-stats-inline') &&
+            html.includes('class="log-note-inline"');
+
+          const locMerged = html.includes('Ev (2)') && !html.includes('EV (');
+
+          filterHistoryByLocation('Ev');
+          const filteredHtml = String((containerEl && containerEl.innerHTML) || '');
+          const filterActiveOk = /class="history-loc-chip is-active"[^>]*>\\s*Ev \\(2\\)/.test(filteredHtml) &&
+            filteredHtml.includes('Sabah Yürüyüşü') &&
+            filteredHtml.includes('Ev Güç Seansı') &&
+            !filteredHtml.includes('Cuma: Tüm Vücut');
+
+          const syncBox = document.getElementById('garminHistorySyncContainer');
+          const syncHiddenWhenEmpty = Boolean(syncBox && syncBox.style.display === 'none' && syncBox.innerHTML === '');
+
+          const pendingAct = {
+            id: 't56_pending_str',
+            date: new Date().toISOString(),
+            title: '⌚ Cuma: Cuma: Güç Seansı',
+            sportType: 'training',
+            subSportType: 'strength_training',
+            summary: { duration: 1800, calories: 190, heartrate: 132, heartrateMax: 158 },
+            rounds: [{ setType: 'active', exerciseCategory: 'chest', exerciseName: 'dumbbell_chest_press', repetitions: 10, weight: 22.5, duration: 40, heartrate: 130, heartrateMax: 145 }]
+          };
+          localStorage.setItem('celik_garmin_telemetry_v2_' + uid, JSON.stringify([pendingAct]));
+          window.GarminTredictChief.renderHistoryGarminSyncPanel();
+          const syncHtml = String((syncBox && syncBox.innerHTML) || '');
+          const syncEmojis = syncHtml.match(/\\p{Extended_Pictographic}/gu) || [];
+          const syncClean = Boolean(syncBox && syncBox.style.display === 'block') &&
+            syncEmojis.length === 0 &&
+            !syncHtml.includes('injectMockGarminStrengthActivity') &&
+            !syncHtml.includes('#F59E0B') &&
+            !syncHtml.includes('#38BDF8') &&
+            syncHtml.includes('Cuma: Güç Seansı') &&
+            !syncHtml.includes('Cuma: Cuma:') &&
+            syncHtml.includes('Onayla') &&
+            syncHtml.includes('<svg');
+
+          return {
+            emojiCount: emojis.length,
+            datesClean,
+            titlesDeduped,
+            labelsRemoved,
+            inlineMetricsOk,
+            locMerged,
+            filterActiveOk,
+            syncHiddenWhenEmpty,
+            syncClean
+          };
+        })()`, localCtx);
+
+        const ok = Boolean(
+          htmlMenuOk &&
+          cssHistOk &&
+          vmRes.emojiCount === 0 &&
+          vmRes.datesClean &&
+          vmRes.titlesDeduped &&
+          vmRes.labelsRemoved &&
+          vmRes.inlineMetricsOk &&
+          vmRes.locMerged &&
+          vmRes.filterActiveOk &&
+          vmRes.syncHiddenWhenEmpty &&
+          vmRes.syncClean
+        );
+        return {
+          ok,
+          actual: JSON.stringify({ htmlMenuOk, cssHistOk, ...vmRes })
+        };
       }
     }
   ];

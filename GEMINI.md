@@ -1,212 +1,90 @@
-# ÇELİK KODU (FITNESS PWA) - LOCAL-FIRST & KATI CANLIYA ALMA YASAĞI
+# ÇELİK KODU (FITNESS PWA) - YEREL ÖNCELİKLİ & KALICI MİMARİ KURALLAR
 
-Bu kural İSTİSNASIZDIR ve tüm görevlerde en üst önceliğe sahiptir:
-
----
-
-## 1. KESİN VE KATİ KURAL: ASLA KULLANICI İZNİ OLMADAN CANLIYA ALMA
-* **Her Şey Lokalde:** Tüm kod düzenlemeleri, stil güncellemeleri, hata düzeltmeleri ve testler YALNIZCA YEREL DİSKTE (lokalde) yapılır ve lokalde bırakılır.
-* **Otomatik `git push` Kesinlikle Yasaktır:** Kullanıcı açıkça ve doğrudan "canlıya al", "deploy et", "push yap" veya "yayınla" talimatı vermedikçe remote depoya ASLA `git push` çalıştırılamaz.
-* **Görev Bitiş Kriteri:** Bir görevin tamamlanması için canlıya çıkış ŞART DEĞİLDİR; yerel dosyaların doğru şekilde güncellenmesi, sözdizimi testinin geçmesi ve kullanıcıya lokal durumun bildirilmesi yeterlidir.
-
----
+## 1. KESİN KURAL: ASLA KULLANICI İZNİ OLMADAN CANLIYA ALMA
+* **Her Şey Lokalde:** Tüm kod, stil, hata düzeltmesi ve testler YALNIZCA yerel diskte yapılır ve lokalde bırakılır.
+* **Otomatik `git push` Yasaktır:** Kullanıcı açıkça "canlıya al / deploy et / push yap / yayınla" demedikçe remote depoya `git push` ve onaysız canlı dağıtım yapılamaz.
+* **Görev Bitiş Kriteri:** Yerel dosyaların güncellenmesi, doğrulamaların geçmesi ve lokal durumun kullanıcıya bildirilmesi yeterlidir.
 
 ## 2. Canlıya Çıkış Protokolü (YALNIZCA KULLANICI AÇIKÇA İSTEDİĞİNDE)
+1. **Sürüm Numarasını Eşitle:**
+   - `index.html`: `<div class="badge-brand">... • vXX</div>`, `<span class="app-version-badge" id="appVersionBadge">vXX</span>` ve tüm `<link href="css/style.css?v=XX">` / `<script src="js/...?v=XX">` önbellek etiketleri (lokal görsel/betik önizlemelerinde de güncellenir).
+   - `sw.js`: `const CACHE_NAME = 'celik-kodu-cache-vXX';`
+   - `js/app.js` / `index.html`: `navigator.serviceWorker.register('./sw.js?v=XX')`
+2. **7 Şef Bekçisi & Sözdizimi Kapısı:** Değişen dosyalarda (`js/chiefs/*.js`, `js/garmin-tredict-bridge.js`, `js/app.js`, `index.html`, `sw.js`) sözdizimi/referans hatası olmadığını doğrula; `npm run verify` (`node scripts/tab-watchdog.js`) çalıştırarak 7 şefin tamamının tüm (`51+`) senaryodan `0` kırık `recId` ve `ScrollWarn:0` ile geçtiğini teyit et (`.git/hooks/pre-push` hatada push'u reddeder).
+3. **Kullanıcı Onaylı Push & Doğrulama:** `git add <dosyalar>`, `git commit -m "feat/fix: <mesaj> (vXX)"`, `git push origin main` sonrası canlı sürüm numarasını bildir.
 
-Kullanıcı "canlıya al / push et" dediğinde şu adımlar uygulanır:
+## 3. Havuz Mimarisi: Değişmez Ana Havuz (SSOT) ve Kişisel Görünürlük
+* **Ana Havuz Dokunulmazlığı:** `EXERCISES_DB`, `academic-engine` ve `STATIC_FALLBACK_CATALOG` sistemin tek doğruluk kaynağıdır; ekipman eksikliği veya kullanıcı tercihi nedeniyle hareketler ana havuzdan ASLA silinmez.
+* **Kişisel Gizleme & Geri Alma:** Kullanıcı bir hareketi gizlediğinde yalnızca `localStorage` tercihlerinde devre dışı kalır ve aktif listelerden (Lab, Seçici, Kütüphane, Rutin) filtrelenir; "Gizlenen Egzersizler" alanından tek tıkla geri açılabilir.
 
-### Adım 1: Sürüm Numarasını (Version Bump) 4 Noktada Eşitle
-1. `index.html` Giriş Ekranı Rozeti: `<div class="badge-brand">... • vXX</div>`
-2. `index.html` Üst Bar Rozeti: `<span class="app-version-badge" id="appVersionBadge">vXX</span>`
-3. `sw.js` Service Worker Önbellek Adı: `const CACHE_NAME = 'celik-kodu-cache-vXX';`
-4. `index.html` Service Worker Kayıt Parametresi: `navigator.serviceWorker.register('./sw.js?v=XX')`
+## 4. Anatomik Analiz & Kullanıcı Diyagramı Mimarisi
+* **Yalın Kas Kartı & Başlık Hijyeni:** Kas başlıklarının yanında emoji veya statik açıklama (`Ön, Yan, Arka Deltoid`) yazılmaz; kart üstünde yalnızca emojisiz sade başlık, tek ilerleme çubuğu ve sağında `X / Min-Max Set` gösterilir (tekrar cümleleri ve gereksiz durum rozeti eklenmez).
+* **Düz Satırlı Alt Bölge Listesi:** Kutu içinde kutu veya 3 sütunlu renkli grid tablosu (`📐 ... ANATOMİK ALT BÖLGE DAĞILIMI`) açılmaz; alt bölgeler ince yatay çizgilerle ayrılan sade bilgi satırları halinde listelenir. Çalışan/planda/boşta durumu kutu boyamadan veya kalın sol şerit çizmeden küçük renkli nokta ya da metin rengiyle verilir; ekleme aksiyonu yalnızca kart altındaki tek ana aksiyon butonundadır. Görseli olmayan hayalet başlıklar (`Şekildeki 1-2-3...`) yazılmaz.
+* **SVG Alt Bölge Geometrisi, Sayaç & TR/EN Eşleştirme Yasası:**
+  - **TR/EN Normalizasyonu (`normSearchText`):** Çıplak `.toLowerCase()`/`.toLocaleLowerCase('tr-TR')` yerine `s.replace(/[İIı]/g, 'i').toLowerCase().replace(/\u0307/g, '')` kullanılır; kısa dizgiler (`'lat'`) kelime sınırı olmadan eşleştirilmez.
+  - **Birincil vs İkincil İzolasyon:** `getExerciseCompartmentsForMuscle` önce hareket adı ve `primary` kası kontrol eder; `secondary` yalnızca birincil eşleşme yoksa yedek kullanılır.
+  - **Ana + Alt Kas Sayaç & Şablon Senkronu:** Üst durum butonları (`İyi Çalışan`, `Az / Planda`, `Çalışmayan`) 10 ana kas ile 31 alt kas bölgesini birlikte sayar, tıklanınca listeler ve Şablon (`schedule_full`) görünümünde alt kasları da aktif (`earnedSets > 0`) renklendirir.
+  - **SVG `<clipPath>` & Pin & `recId`:** Çoklu SVG alt yolları aynı poligon yönünde (CW) tutulur, `zones` dilimleri çakışmaz ve tüm `pins` noktalarının hem `<clipPath>` hem `zone` içinde kaldığı ile tüm `recId` kimliklerinin `EXERCISES_DB`'de bulunduğu `node -e` testiyle doğrulanır.
 
-### Adım 2: 7 Şef Bekçisi, Köprü Gümrüğü ve Sözdizimi Kapısı (Zorunlu)
-* Değiştirilen dosyalarda (`js/chiefs/*.js`, `js/garmin-tredict-bridge.js`, `js/app.js`, `index.html`, `sw.js`) sözdizimi ve referans hatası olmadığını doğrula.
-* `npm run verify` (`node scripts/tab-watchdog.js`) komutunu çalıştır: 7 şefin tamamının hem `Ekran Kontrolü` hem de `18/18 Matematik & Gümrük Sınavı` denetiminden sıfır hatayla (`0` kırık `recId`, `0` kaydırma uyarısı) geçtiğini teyit et.
-* `.git/hooks/pre-push` kilidi bu sınavı otomatik koşturur; herhangi bir şef hata verirse `git push` otomatik olarak reddedilir.
+## 5. Mobil Arayüz Hijyeni, Kompakt Akordiyon & Sıfır Kaydırma Sıçraması
+* **Varsayılan Kapalı İkincil Bloklar:** "Koç Tavsiyesi / Önerilen Egzersizler", "Kardiyak Efor" detayı ve "Hangi Seans & Hareketten Geldi?" lineage blokları varsayılan olarak kapalıdır; emojili butonlar yerine sade metin bağlantısıyla (`Göster` / `Gizle`) açılıp kapanır.
+* **Zero Scroll-Jump & Viewport Anchoring:**
+  1. `renderGeneratedWorkout`, `renderPendingWeeklyPlanPreview`, `renderActiveWorkout`, `renderCustomRoutine` içinde koşulsuz `scrollIntoView()` veya `window.scrollTo({ top: 0 })` YASAKTIR (yalnızca `options.scrollToTop === true` iken).
+  2. `innerHTML` yenileme öncesi `savedScrollY = window.scrollY` (`savedScrollTop = container.scrollTop`) alınıp sonra `behavior: 'instant'` ile geri yüklenir.
+  3. Akordiyon/çekmece açılışında satırın `anchorOffsetTop = row.getBoundingClientRect().top` değeri alınıp çizim sonrası `window.scrollBy({ top: newRow.getBoundingClientRect().top - anchorOffsetTop, behavior: 'instant' })` ile göz hizası sabitlenir.
+  4. `selectExerciseFromPicker` ve `swapSingleExercise` sonrası `expanded*Index` kapatılmaz ve sayfa kaydırılmaz.
+  5. `.modal-overlay` ve `.modal-box` üzerinde `overscroll-behavior: contain` kullanılır; açılışta yalnızca modalın iç `scrollTop = 0` sıfırlanır.
 
-### Adım 3: Kullanıcı Onaylı Git Commit ve Push
-* `git add <dosyalar>`
-* `git commit -m "feat/fix: <açıklayıcı mesaj> (vXX)"`
-* `git push origin main` komutunu YALNIZCA bu talimat geldiğinde çalıştır.
+## 6. Hafif & Kanıta Dayalı Hata Ayıklama
+* Varsayımla rastgele kod değiştirilmez; konsol, DOM veya veri akışı kanıtı olmadan müdahale yapılmaz. Her değişiklik sonrası `node -e` / `node --check` ile sözdizimi ve çevre modül bütünlüğü doğrulanır.
 
-### Adım 4: Kullanıcıya Canlı Doğrulama Bilgisi Ver
-* Canlıya çıkan sürüm numarasını belirt.
+## 7. İki Aşamalı Kod İnceleme & Öz-Teşhis
+* **2 Aşamalı Filtre:** Teslim öncesi (1) Şartname tam mı, (2) Mevcut butonlar, önbellek, yerel veri ve görsel hiyerarşi sağlam mı kontrolleri yapılır.
+* **Döngü Kırıcı:** Bir hata 2 denemede çözülmezse 3. spekülatif deneme YASAKTIR; transkript taranır, hatalı varsayım açıklanır ve kullanıcıdan net kanıt istenir.
+* **Hata Hafızası (`Bug-Memory`):** Kullanıcının yakaladığı her gerçek hata ilgili şefin `SKILL.md` dosyasına kural ve `scripts/tab-watchdog.js` içine kalıcı sınav maddesi olarak eklenir.
 
----
+## 8. Görsel Üretim Aracı Seçim Protokolü
+* **Hareketli Egzersiz Görseli İstisnası:** Uygulamadaki egzersiz GIF/animasyonları için Canva (statik poster/4 kutulu şema) önerilmez ve sorulmaz; doğrudan `exercise-visual-pipeline` ile beyaz stüdyo zeminli, turuncu aktif kas vurgulu hareketli görsel üretilir.
+* **Statik Tasarım Talepleri:** Afiş/kapak/şablon istendiğinde araç belirtilmemişse emoji kullanmadan şu 2 seçenek sorulur: **1. Canva MCP** (şablon, afiş, düzenlenebilir tasarım), **2. AI Görsel Üretici (`image-generator`)** (illüstrasyon).
 
-## 3. Havuz Mimarisi: Değişmez Ana Havuz (Master Pool) ve Kişisel Görünürlük Yasası
-* **Ana Havuz Dokunulmazlığı (Master Immutability):**
-  Platformdaki ana egzersiz havuzu (`EXERCISES_DB`, `academic-engine`, `STATIC_FALLBACK_CATALOG`), tüm bilimsel parametreleri, form rehberleri ve anatomik etki modelleriyle sistemin **değişmez tek doğruluk kaynağıdır (SSOT)**.
-  Kullanıcının kendi salonunda bir makine/ekipman olmaması veya bir hareketi yapmak istememesi durumunda hareket **kaynak koddan ya da ana kütüphaneden ASLA silinmez**.
-* **Kullanıcı Önü Filtreleme (Kişisel Havuz Gizleme / Exclusion):**
-  Kullanıcı herhangi bir hareketi "Havuzumdan Kaldır / Gizle" dediğinde, bu hareket yalnızca kullanıcının yerel tercihlerinde (`localStorage`) devre dışı bırakılır ve kullanıcının önüne düşen aktif listelerden (Lab listesi, Egzersiz Seçici, Kütüphane, Rutin Oluşturucu vb.) anında filtrelenip gizlenir.
-* **Geri Alınabilirlik (Restore) & Şeffaf Yönetim:**
-  Kullanıcı istediği zaman "Gizlenen Egzersizler" görünümünden veya hareket detayından gizlediği hareketleri görebilmeli ve tek tıkla ("Havuza Geri Ekle / Aktif Et") aktif havuzuna geri döndürebilmelidir.
+## 9. Görsel Kontrast (WCAG Okunabilirlik)
+* Açık zeminlerde (`#FFFFFF`, `#F8FAFC`, `#F1F5F9`, `#DCFCE7`, `#FEF3C7`) asla beyaz/açık gri/pastel metin kullanılmaz; birincil metin `#0F172A`, ikincil `#334155`/`#475569`, rozetler koyu doygun (`#15803D`, `#B45309`, `#0369A1`, `#6B21A8`, `#B91C1C`, min 4.5:1) olur. `#FFFFFF` metin yalnızca koyu/doygun dolgularda kullanılır. `innerHTML` şablonları, aktif filtreler ve `applyTheme()` CSS değişkenleri gerçek arka planla doğrulanır.
 
----
+## 10. Onay & `/learn` Karar Akışı
+* Arayüzde "Proceed" butonu yokken kullanıcıdan "Proceed'e bas" ASLA istenmez; `/learn` ve onay adımlarında `ask_question` ile kalıcı uygulama onayı sorulur.
 
-## 4. Anatomik Analiz & Kullanıcı Diyagramı Mimarisi (Kişiselleştirilmiş Alt Baş Takibi)
-* **Başlık Hijyeni (Statik Metin Yasağı):**
-  Kas kartlarının ana başlıklarının yanında statik, genelgeçer açıklama metinleri (`Ön, Yan, Arka Deltoid` vb.) ASLA yazılmaz. Başlıklar sadece `⚔️ Omuz`, `🏹 Sırt & Kanat`, `🛡️ Göğüs` gibi sade ve vurucu tutulur.
-* **2 Katmanlı Anatomik Alt Bölge Grid Tablosu:**
-  Kullanıcının belirlediği el şeması uyarınca, her kas grubu için kümülatif set çubuğunun altında 2 katmanlı dinamik bir tablo yer alır:
-  1. Üst Hücre: `📐 [KAS GRUBU] — ANATOMİK ALT BÖLGE DAĞILIMI`
-  2. Alt Grid (3 Sütun): Kas grubunun anatomik alt başları (Örn: Omuz -> Ön Deltoit | Yan Deltoit | Arka Deltoit; Sırt -> Latissimus | Rhomboid | Trapez).
-* **Alt Baş Durum & Aksiyon Mantığı:**
-  - **Çalışan Baş:** `✅ X Set` rozetiyle ve o başı vuran hareketlerin isimleriyle yeşil/aktif gösterilir.
-  - **Plandaki Baş:** Haftanın kalan günlerinde varsa `🟡 Planda (X Hrk)` sarı rozetle belirtilir.
-  - **Boşta / Atlanan Baş:** Hiç set almamış baş anında `⚠️ 0 Set (Boşta!)` kırmızı uyarısıyla tespit edilir ve doğrudan o başı hedefleyen tek tıkla güne ekleme butonu (`➕ [Egzersiz] Ekle`) içerir.
-* **SVG Alt Bölge Geometrisi, Sayaç Senkronu ve TR/EN Metin Eşleştirme Yasası:**
-  - **TR/EN Harf Normalizasyonu (`normSearchText`):** Türkçe (`İ`, `ı`) ve İngilizce (`I`, `i`) terimlerin birlikte arandığı fonksiyonlarda çıplak `.toLowerCase()` veya `.toLocaleLowerCase('tr-TR')` yerine `s.replace(/[İIı]/g, 'i').toLowerCase().replace(/\u0307/g, '')` kullanılır; kısa alt dizgiler (`'lat'` vs `'Lateral Shuffle'`) kelime sınırı olmadan eşleştirilmez.
-  - **Birincil vs İkincil Alt Kas İzolasyonu:** Alt kas bölmeleri (`getExerciseCompartmentsForMuscle`) belirlenirken önce hareket adı ve birincil (`primary`) kas metni kontrol edilir; ikincil (`secondary`) kas metni yalnızca birincil eşleşme yoksa yedek olarak kullanılır.
-  - **Ana + Alt Kas Sayaç ve Şablon Senkronu:** Üst durum butonları (`İyi Çalışan`, `Az / Planda`, `Çalışmayan`) hem 10 ana kas grubunu hem 31 alt kas bölgesini sayar, tıklanınca listeler ve **Şablon (`schedule_full`)** görünümünde alt kasları da aktif (`earnedSets > 0`) olarak renklendirir.
-  - **SVG `<clipPath>` & Pin Doğrulaması:** Çoklu SVG alt yolları aynı poligon yönünde (CW) tutulur, alt bölge (`zones`) dilimleri birbiriyle çakıştırılmaz ve tüm numaralı rozetlerin (`pins`) hem `<clipPath>` hem kendi `zone` alanı içinde kaldığı `node -e` (`point-in-polygon`) testiyle doğrulanır.
-  - **Referans Bütünlüğü (`recId`):** Tavsiye ve hızlı ekleme butonlarındaki tüm `recId` kimliklerinin `EXERCISES_DB` içinde mevcut olduğu her değişiklik sonrası `node -e` ile doğrulanır.
+## 11. Kısa Metin, Kullanıcı Dili & Mobil Nizamiyet
+* **Sıfır Kod/Teknik Terim:** Açıkça sorulmadıkça sohbette dosya/fonksiyon/değişken adı, CSS/hex kodu veya teknik terim yazılmaz; günlük net Türkçe kullanılır ve tek satırlı maddeler kurulur. Sohbet sonuna İngilizce alt başlık (`Modern Web Guidance` vb.) konmaz.
+* **Mikro-Metin & ADHD Dostu Akış:** Kart, rozet ve `<select>` metinleri 2–5 kelime tutulur (örn. `"Orta Süperset"`, `"3 Gün Tüm Vücut"`). Bilinen veriler tekrar sorulmaz; seçenek butonları 1–2 kelimelik ve emojisizdir; ek girdi sabit blok yerine ekrana sığan pop-up ile alınır.
+* **Not Defteri Yasağı:** Ekrana "Sıradaki Adım..." gibi sarı/turuncu yönerge veya açıklama banner'ı eklenmez; yalnızca kart içi kompakt set çipleri ve butonlar kullanılır.
+* **Mobil Nizamiyet & Bilgi İkonları:**
+  - Başlıklar ve üst bar isimleri tek satır (`white-space: nowrap`) ve parantezsiz (`(Full Body)`, `(Admin)` yok) tutulur.
+  - İkincil detaylar ana ekrana açılmaz; büyük beyaz daire buton yerine başlık yanında küçük (`14–15px`), gri (`#94A3B8`), içi boş çizgisel **`i`** ikonuyla açılıp sağ üstten **`✕`** ile kapanan sade modalda gösterilir.
+  - Açılır çekmecelerde iç içe kenarlıklı kutu açılmaz; üst bar sağ aksiyonları `34px` hizalı, sürüm numarası `ÜRETİCİ • vXX` şeklinde entegredir.
 
----
+## 12. Tekil Yama Yasağı & Bütüncül Mimari
+* Tek bir kas/ekran/gün örneğinden gelen bildirimlerde özel yama yazılmaz; çözüm 10 ana kas, 31 alt bölge, tüm şablonlar ve tüm sekmeleri kapsayacak biçimde evrensel tasarlanır.
 
-## 5. Mobil Arayüz Hijyeni, Kompakt Akordiyon & Kaydırma Sabitleme (Zero Scroll-Jump) Standardı
-* **Ekranı Dikeyde Boğmama Kuralı:**
-  Mobil cihazlarda ve PWA arayüzünde çok sayıda buton ve detay içeren ikincil bloklar (özellikle "Koç Tavsiyesi / Önerilen Egzersizler" ve "Hangi Seans & Hareketten Geldi?" lineage detayları) **varsayılan olarak AÇIK BIRAKILMAZ**.
-* **Varsayılan Kapalı (Collapsible) Tasarım:**
-  Bu bloklar varsayılan olarak kapalı tutulur. Kullanıcı kart üzerinde yalnızca temiz ve kompakt bir toggle butonu görür (`💡 Koç Tavsiyesi (X Öneri) ▼ Göster`). Kullanıcı istediğinde tek dokunuşla açıp kapatabilir. Böylece haftalık analiz ekranı şişmez, son derece akıcı ve okunabilir kalır.
-* **Sıfır Ekran Sıçraması ve Kaydırma Sabitleme Yasası (Zero Scroll-Jump & Viewport Anchoring):**
-  1. **Render Fonksiyonlarında Koşulsuz Kaydırma Yasağı:** `renderGeneratedWorkout`, `renderPendingWeeklyPlanPreview`, `renderActiveWorkout`, `renderCustomRoutine` gibi yeniden çizim fonksiyonlarının içinde koşulsuz `scrollIntoView()` veya `window.scrollTo({ top: 0 })` ASLA çağrılamaz. Başa kaydırma yalnızca yeni bir program ilk kez üretildiğinde (`options.scrollToTop === true`) açıkça tetiklenebilir.
-  2. **`innerHTML` Güncellemelerinde Konum Koruma:** Liste veya kart kapsayıcıları `innerHTML` ile yeniden çizilirken işlem öncesinde `const savedScrollY = window.scrollY` (ve iç kaydırılabilir kutularda `savedScrollTop = container.scrollTop`) kaydedilmeli, çizim sonrasında `window.scrollTo({ top: savedScrollY, behavior: 'instant' })` ile mevcut konum korunmalıdır.
-  3. **Akordiyon / Görsel Çekmece Sabitleme (Viewport Delta Anchoring):** Liste içinde bir hareketin görsel/detay çekmecesi açılırken veya kapatılırken (özellikle üstteki açık bir çekmece kapanıp alttaki açıldığında), tıklanan satırın işlem öncesi `anchorOffsetTop = row.getBoundingClientRect().top` değeri alınmalı ve render sonrası `window.scrollBy({ top: newRow.getBoundingClientRect().top - anchorOffsetTop, behavior: 'instant' })` ile tıklanan satır kullanıcının göz hizasında milimetrik sabitlenmelidir.
-  4. **Alternatif Seçimi ve Yerinde Değişimde Durum Koruma:** Bir hareketin yerine alternatif seçildiğinde (`selectExerciseFromPicker`) veya rastgele değiştirildiğinde (`swapSingleExercise`), açık olan detay çekmecesi (`expanded*Index`) kapatılmaz ve sayfa yukarı kaydırılmaz; yeni hareket aynı satırda açık olarak gösterilir.
-  5. **Modal Kaydırma İzolasyonu:** Modal pencerelerde (`html`/`body` overflow'unu bozmak yerine) `.modal-overlay` ve `.modal-box` üzerinde `overscroll-behavior: contain` kullanılır; modal açıldığında yalnızca modalın kendi iç `scrollTop = 0` değeri sıfırlanır.
+## 13. Çok Kullanıcılı Mobil Mimari & Sıfır Bilgisayar Bağımlılığı
+* Tüm özellikler, veri eşitleme ve dış entegrasyonlar (Garmin/Tredict, AI) geliştirici/kullanıcı bilgisayarına (`127.0.0.1`, yerel script/token) bağlı OLMADAN her sporcunun kendi izole hesabıyla mobilde 7/24 bağımsız çalışır. Dış servisten gerçek onay alınmadan "aktarıldı" gösterilmez.
 
----
+## 14. Varsayımsız Danışma, Şef Tanımlama & Veri Sağlaması
+* İşleyiş, puanlama, şef yetkisi veya uç durum yorumlarını (piramit set, kilo düşürme, süreli hareket vb.) değiştiren kararlarda tüm ihtimaller sonuçlarıyla birlikte sade Türkçe ile `ask_question` üzerinden kullanıcıya danışılır.
+* Veri işleyen/hesaplayan görevlerde gerçekçi ve ters köşe verilerle **beklenen sonuç = ekrandaki veri** uçtan uca doğrulanmadan görev kapatılmaz.
 
-## 6. Hafif & Kanıta Dayalı Hata Ayıklama (Token Tasarrufu & Sıfır Regresyon)
-* **Spekülasyon & Tahmin Yasağı:**
-  Hatalarda veya beklenmeyen davranışlarda varsayımlarla rastgele kod değiştirilmez. Konsol çıktısı, DOM durumu veya veri akışındaki somut kanıt tespit edilmeden müdahale yapılamaz.
-* **Hafif Doğrulama & Canlı Bütünlük:**
-  Her değişiklik sonrası `node -e` ile sözdizimi doğrulanır ve yalnızca hedeflenen özelliğin değil, çevre bileşenlerin de bozulmadığı teyit edilir. Ağır çoklu ajan süreçleri yerine doğrudan ve hızlı doğrulama esastır.
+## 15. Konum Şeffaflığı & Kod / Hafıza Ayrımı
+* Soyut kelimeler ("merkez kasa") yerine gerçek konumlar (*Google Firebase bulut veritabanı*, *GitHub Pages*, *Vercel bulut köprüsü*, *telefonun yerel önbelleği*) sade Türkçe ile söylenir.
+* Değişmez katalog (`EXERCISES_DB`, `app_system/master_catalog`) ve sporcu hafızası Firebase'de, dış köprüler bulut API'sinde, Android/iOS/Web ise çevrimdışı önbellek yedekli ince arayüz kabuğunda tutulur.
 
----
+## 16. Çok Boyutlu Antrenman Kararı
+* Hareket seçimi ve program üretiminde tek kritere göre katı eleme yapılmaz; **1. Çeşitlilik, 2. Biyomekanik Verimlilik, 3. Eklem Güvenliği, 4. İstasyon/Süperset Akışı** birlikte tartılır ve yan etkiler açıkça belirtilir.
 
-## 7. İki Aşamalı Kod İnceleme & Öz-Teşhis (Superpowers Adaptasyonu)
-* **2 Aşamalı İnceleme Filtresi:** Kod teslim edilmeden ve canlıya basılmadan önce 2 filtre zorunludur:
-  1. *Şartname Doğrulaması:* Kullanıcının istediği tüm isterler ve fonksiyonlar eksiksiz tamamlandı mı?
-  2. *Bütünlük & Regresyon Kontrolü:* Yapılan değişiklik mevcut butonları, PWA önbelleğini, yerel veri saklamayı veya görsel hiyerarşiyi bozdu mu?
-* **Ajan Öz-Teşhisi (Döngü Kırıcı):**
-  Bir hata 2 denemede çözülemezse spekülatif 3. deneme YASAKTIR. Ajan derhal durur, oturum transkriptini tarar, peşin kabul ettiği hatalı varsayımı (assumption) açıkça masaya yatırır ve kullanıcıdan tek bir net kanıt ister.
-* **Kalıcı Hata Hafızası Sicili (Bug-Memory Regression Yasası):**
-  Kullanıcının yakaladığı her gerçek hata veya tutarsızlık yalnızca kodda düzeltilip geçilmez; ilgili kısım şefinin `SKILL.md` kılavuzuna kural olarak işlenir ve `scripts/tab-watchdog.js` içine numaralı kalıcı sınav maddesi (`T18+`) olarak eklenir. Böylece aynı hata gelecekteki hiçbir güncellemede bir daha tekrarlanamaz.
+## 17. Mimari Öncelik & Modüller Arası Etki Senkronizasyonu
+* Akış veya veri yolu değişmeden önce ilgili `.agents/skills/*/SKILL.md` ve `GEMINI.md` okunur; etki haritası çıkarılır, bağlı modüller, background kancaları, `SKILL.md` ve `scripts/tab-watchdog.js` aynı görev içinde eşzamanlı güncellenir.
 
----
-
-## 8. Görsel & Grafik Üretim Aracı Seçim Protokolü (Canva vs AI Görsel Üretici)
-* **Uygulama İçi Hareketli Egzersiz Görseli İstisnası (Sıfır Afiş / Sıfır Canva Sorusu):**
-  - Uygulamadaki herhangi bir egzersizin hareketli görseli (GIF / animasyon) incelenecek, yenilenecek veya sıfırdan üretilecekse **Canva (statik poster / 4 kutulu şema) ASLA önerilmez, kullanılmaz ve araç seçimi sorulmaz**.
-  - Doğrudan `exercise-visual-pipeline` protokolü devreye alınarak diğer egzersizlerle birebir aynı beyaz stüdyo zeminli ve turuncu aktif kas vurgulu hareketli görsel üretilir.
-* **Statik Tasarım Taleplerinde Kullanıcı İradesine Saygı:** Yalnızca statik afiş, sosyal medya görseli, antrenman şablonu, rozet veya kapak istendiğinde:
-  - Kullanıcı özel olarak bir araç belirtmişse doğrudan o araç çalıştırılır.
-  - Araç **belirtilmemişse**, varsayımla hareket edilmez; kullanıcıya şu seçeneklerle sorulur:
-    1. **🎨 Canva MCP:** Şablon, düzenlenebilir tasarım, tipografi, sporcu kartları ve afişler.
-    2. **🤖 AI Görsel Üretici (`image-generator`):** Sanatsal, gerçekçi veya stilize yapay zeka illüstrasyonları.
-
----
-
-## 9. Görsel Kontrast & Arka Plan / Metin Renk Uyumu (WCAG Okunabilirlik Kuralı)
-* **Açık Zeminde Açık Metin / Koyu Zeminde Koyu Metin Yasağı:**
-  - Beyaz veya açık yüzeyler (`#FFFFFF`, `#F8FAFC`, `#F1F5F9`, `#DCFCE7`, `#FEF3C7` vb.) üzerinde ASLA beyaz, açık gri veya soluk pastel metin (`#FFFFFF`, `#F3F6FA`, `#F8FAFC`, `#CBD5E1`, `#B6F059`, `#E5B85B`, `#fde047`, `#e9d5ff`, `#a7f3d0`) kullanılamaz.
-  - Açık zeminlerde birincil metinler için `#0F172A`, ikincil metinler için `#334155` / `#475569`, durum rozetleri için koyu doygun tonlar (`#15803D`, `#B45309`, `#0369A1`, `#6B21A8`, `#B91C1C`) zorunludur (minimum **4.5:1**, hedef **7:1+** kontrast).
-* **Yalnızca Koyu/Doygun Dolguda Beyaz Metin:**
-  - `#FFFFFF` metin rengi yalnızca koyu veya yüksek doygunluklu arka plan dolgularında (`#0F172A`, `#9333EA`, `#EF4444`, `#16A34A` vb.) kullanılabilir.
-* **Dinamik Tema Değişkeni & Inline Stil Denetimi:**
-  - JS içinde üretilen HTML şablonlarında (`innerHTML`), aktif filtre butonlarında ve `applyTheme()` gibi CSS değişkeni (`--gold` vb.) güncelleyen fonksiyonlarda metin rengi her zaman üzerinde bulunduğu kartın/butonun gerçek arka plan rengiyle birlikte doğrulanmalıdır.
-
----
-
-## 10. Onay & `/learn` Karar Akışı (Olmayan Butona Yönlendirme Yasağı)
-* Arayüzde "Proceed" butonu bulunmadığı durumlarda kullanıcıdan "Proceed butonuna basması" ASLA istenmez.
-* `/learn` önerileri veya onay gerektiren adımlarda `ask_question` aracıyla (etkileşimli seçenek kutusuyla) veya doğrudan soru sorularak **işlemin kalıcı olarak uygulanıp uygulanmayacağı** kullanıcıya sorulur.
-
----
-
-## 11. Kısa Metin, Göz Yormayan Mikro-Metin ve Kullanıcı Dili Yasası (Sohbet ve Arayüz)
-* **Sıfır Kod ve Teknik Terim Yasası (Kullanıcı Dili):**
-  - Kullanıcı kod yazmayı bilmediği için, açıkça sormadıkça sohbet yanıtlarında dosya adları, fonksiyon/değişken isimleri, kod parçacıkları veya teknik terimler ASLA kullanılmaz.
-  - Tüm açıklamalar bir kullanıcının tek bakışta anlayacağı günlük, sade ve net Türkçe ile yazılır.
-* **Uzun Cümle Yasağı:** Hem sohbet yanıtlarında hem uygulama arayüzünde (`index.html`, `js/app.js` içindeki kartlar, rozetler, `<select>` kutuları ve alt açıklamalar) göz yorgunluğu ve kalabalık yaratan uzun cümleler kullanılmaz.
-* **Mikro-Metin Standardı:** Başlıklar, rozetler ve seçenekler 2–5 kelimelik sade ifadelerle tutulur (örn. `"⚖️ Orta Süperset"`, `"3 Gün Tüm Vücut"`).
-* **Tek Satırlık Yanıtlar:** Sohbet cevaplarında her adım/madde tek satırda net olarak yazılır.
-* **ADHD Dostu Yalın Üretim, Tavsiye ve Pop-up Tasarım Yasası:**
-  - **Yalınlık & İşlevsellik Filtresi:** Yeni bir özellik, soru akışı veya tavsiye tasarlanırken yalnızca sonucu doğrudan değiştiren en az sayıda adım kullanılır; sistemin geçmiş veriden zaten bildiği bilgiler kullanıcıya tekrar sorulmaz.
-  - **Sıfır İkon Kalabalığı:** Seçenekli soru kutularında ve hızlı karar ekranlarında dikkat dağıtan emoji/ikonlar kullanılmaz; yalnızca net, 1–2 kelimelik yüksek kontrastlı butonlar kullanılır.
-  - **Ana Ekranı Kalabalıklaştırmayan Pop-up Akışı:** Kullanıcıdan işlem öncesi ek bilgi alınması gerektiğinde ana ekranda sürekli yer kaplayan sabit bloklar yerine, pencereye tam oturan, kaydırma gerektirmeyen ve varsayılanları seçili gelen yalın pop-up ekranı tercih edilir.
-* **Sıfır Açıklama Banner'ı ve Not Defteri Yasağı ("Bu Bir Defter Değil"):**
-  - Antrenman, sayaç ve operasyon ekranlarına sarı, turuncu veya renkli arka planlı yönerge kutuları, "Sıradaki Adım...", "Şimdi şunu yapın..." gibi anlatım ve not banner'ları ASLA eklenemez.
-  - Uygulama bir not defteri değil, saf ve akıcı bir aksiyon arayüzüdür.
-  - Geçiş durumları ve yönlendirmeler yalnızca kart içi kompakt set çipleri ve butonlarla yönetilir; ekranda yer kaplayan açıklama blokları kesinlikle yasaktır.
-* **Mobil Nizamiyet, "i" Bilgi Modalları ve Sıfır İç İçe Çerçeve Standardı:**
-  - **Tek Satır Öz Başlıklar:** Antrenman başlıkları, üst bar marka adı ve kullanıcı isimleri asla iki satıra kırılmaz (`white-space: nowrap`); parantez içi gereksiz ekler (`(Full Body)`, `(Admin)` vb.) ve başlığı sıkıştıran süre/set/tekrar rozet yığınları kaldırılarak 2–3 kelimelik net başlıklar kullanılır.
-  - **İkincil Bilgileri `"i"` Düğmesi ve Modal Pencereye Taşıma:** Koç özeti, dinamik ısınma ve hareketlerin ekipman/kas/altın kural/bildir gibi ikincil detayları ana ekranda açık bırakılmaz; yan yana kompakt **`i`** butonları veya satır içi küçük **`i`** ikonuyla tetiklenen ve sağ üstten **`✕`** ile kapanan sade modal pencerelerde gösterilir.
-  - **İç İçe Çerçeve Yasağı (Flush Drawer):** Açılır hareket/istasyon detay çekmecelerinde kart içinde ikinci bir kenarlıklı kutu oluşturulmaz; çekmece dış karta sıfır boşlukla tam oturur ve medya sekmeleri sağdan taşmadan tek satıra sığar.
-  - **Kompakt Aksiyon Barı ve Nizami Üst Bar:** Tam genişlikli alt alta buton yığınları yerine 2 satırlık kompakt ızgara kullanılır; üst bardaki tüm sağ aksiyonlar eşit yükseklikte (`34px`) hizalanır ve sürüm numarası (`vXX`) ortada kopuk durmak yerine alt başlığın yanına (`ÜRETİCİ • vXX`) entegre edilir.
-  - **Sohbette Sıfır İngilizce Alt Başlık:** Sohbet yanıtlarının sonuna hiçbir zaman İngilizce teknik özet veya kontrol başlıkları (`Modern Web Guidance` vb.) eklenmez.
-
----
-
-## 12. Tekil Yama Yasağı & Bütüncül (Global) Mimari Düşünce Yasası
-* **Spesifik/Tekil Çözüm Yasağı:** Kullanıcı belirli bir örnek üzerinden (ör. sadece omuz, tek bir hareket veya tek bir gün) hata ya da geliştirme bildirdiğinde, çözüm ASLA yalnızca o örneğe özel (spesifik yama) olarak yazılamaz.
-* **Evrensel ve Sistem Genelinde Tasarım:** Her düzeltme ve geliştirme, programın genel yapısını ve tüm benzer bileşenlerini (10 ana kas grubu, 31 alt bölge, tüm antrenman şablonları ve tüm sekmeler) kapsayacak şekilde evrensel olarak kurgulanır.
-* **Bütüncül Mimari Etki Denetimi:** Değişiklik yapılmadan önce programın genel yapısına etkisi uçtan uca hesaplanır; tekil istisnalar yerine sistemin tamamını yöneten genel mekanizmalar kurulur.
-
----
-
-## 13. Herkese Açık, Çok Kullanıcılı Mobil Mimari ve Sıfır Bilgisayar Bağımlılığı Yasası
-* **%100 Mobil-Öncelikli ve Sıfır Bilgisayar Bağımlılığı:** Bu uygulama bilgisayar başında değil, tüm kullanıcılar tarafından doğrudan kendi cep telefonlarında kullanılır. Kod geliştirmesi yerelde test edilse de (Madde 1), uygulamanın çalışma zamanındaki **hiçbir özelliği, veri eşitlemesi, bildirimi veya dış servis entegrasyonu (Garmin/Tredict, AI vb.) geliştiricinin ya da kullanıcının bilgisayarının açık olmasına (`127.0.0.1`, yerel köprü scripti, bilgisayar arka plan servisi, yerel `gcloud` veya yerel `.token` dosyası) ASLA bağımlı kurgulanamaz**.
-* **Herkese Açık Çok Kullanıcılı (Multi-Tenant) İzolasyon:** Uygulama tek bir yöneticiye özel değildir; herkese açık çok kullanıcılı bir platformdur. Tüm özellikler, veritabanı kuralları, bulut eşitleme mühürleri ve dış servis bağlantıları her sporcunun kendi telefonundan, kendi izole hesabıyla ve kendi kişisel kimlik/anahtar bilgileriyle diğer kullanıcılardan tamamen bağımsız 7/24 çalışacak şekilde tasarlanır.
-* **7/24 Bulut Geçişi ve Dürüst Teslimat Doğrulaması:** Mobil tarayıcıdan doğrudan çağrılamayan dış servisler kişisel bilgisayar rölesi yerine 7/24 aktif bulut uç noktaları üzerinden çalıştırılır; karşı servisten gerçek kabul onayı alınmadan kullanıcıya *"aktarıldı"* bildirimi ASLA gösterilmez.
-
----
-
-## 14. Varsayımsız Danışma, Kısım Şefi Tanımlama ve Veri Sağlaması Yasası
-* **İşleyiş ve Hesap Kararlarında Önce Danışma Zorunluluğu:**
-  - Antrenman akışını, kısım şefi yetkilerini, set/tekrar/süre değerlendirmesini veya puanlama/analiz hesaplarını değiştiren hiçbir noktada model kendi kafasından kural uyduramaz; kod içi teknik detaylara girmeden sade Türkçe ile önce kullanıcıya danışır.
-* **Kısım Şefi ve Yeni Özelliklerde Görev Sorma Kuralı:**
-  - Bir alana kısım şefi, bekçi veya yeni değerlendirme modülü ekleneceği zaman yalnızca isim/tabela konulmaz; bu şefin neleri kontrol edeceği, hangi uç durumları nasıl yorumlayacağı ve kırmızı çizgileri kullanıcıya sorularak birlikte belirlenir.
-* **Çoklu İhtimalleri Sunma Zorunluluğu:**
-  - Piramit set, kilo düşürme, düşük tekrar, süreli hareket veya veri eşitleme gibi birden fazla yorum ihtimali olan her noktada tüm ihtimaller sonuçlarıyla birlikte kullanıcıya sorulur (`ask_question` veya net seçeneklerle).
-* **Veri ve Hesap İşlerinde "Talep = Ortaya Çıkan Veri" Sağlaması:**
-  - Veri işleyen, kaydeden veya hesaplayan her görev sonunda yalnızca görsel/buton kontrolüyle *"Sorunsuz"* denilemez; sıfırdan gerçekçi ve ters köşe sporcu verileri girilerek **beklenen hesap ile ekranda ortaya çıkan verinin birebir örtüştüğü** kanıtlanmadan görev kapatılmaz (yalnızca saf görsel/stil dokunuşları bu kapsamın dışındadır).
-
----
-
-## 15. Profesyonel Mimari Rehberlik, Gerçek Konum Şeffaflığı ve Kod/Hafıza Ayrımı Yasası
-* **Soyut/Uydurma Terim Yasağı (Gerçek Konum Şeffaflığı):**
-  - Sohbette kod/dosya adı yazılmaz; ancak verinin veya servisin gerçekte **nerede** durduğu (örn. *Google Firebase bulut veritabanı*, *GitHub Pages statik sunucusu*, *Vercel bulut köprü sunucusu*, *telefonun yerel önbelleği*) ASLA *"merkez kasa"* gibi uydurma/muğlak kelimelerle örtülmez. Gerçek servis adı ve görevi sade Türkçe ile açıkça ifade edilir.
-* **Ürün Sahibi Kullanıcıya Profesyonel Mimari Liderlik:**
-  - Kullanıcı *"kod ayrı, hafıza ayrı olsun"* veya *"tüm cihazlar aynı yerden çeksin"* gibi yapısal bir hedef söylediğinde, yalnızca anlık yama yapılmaz; profesyonel mimari katmanları (**1. İnce Arayüz Kabuğu [Android/iOS/Web]**, **2. Merkez Bulut Hafızası [Google Firebase `app_system/master_catalog` + kullanıcı belgeleri]**, **3. 7/24 Merkez Bulut Köprüsü [API Sunucusu]**) net seçenekler ve gerçek kısıtlarla anlatılarak profesyonel yönlendirme yapılır.
-* **Kod (Arayüz) ve Hafıza (Merkez Bulut) Ayrımı Standardı:**
-  - Değişmez ana katalog (`EXERCISES_DB`, animasyon haritaları, form rehberleri) ile sporcu hafızası Google Firebase merkez bulutunda yaşar; saat ve yapay zeka dış köprüleri merkez API sunucusunda çalışır; Android, iOS ve Web yalnızca bu merkezden beslenen arayüz katmanı olarak tasarlanır (çevrimdışı önbellek yedekli).
-
----
-
-## 16. Çok Boyutlu Antrenman Kararı & Tek Pencereden Bakmama Yasası
-* **Tek Boyutlu Katı Eleme Yasağı:**
-  - Hareket seçimi, ekipman önceliği veya program üretimi kurgulanırken yalnızca tek bir kritere (ör. sadece ekipman kademesi veya sadece kas grubu) göre katı eleme yapılamaz.
-* **4 Boyutlu Ortak Tartı Zorunluluğu:**
-  - Her algoritma ve kural değişikliğinde **1. Çeşitlilik**, **2. Biyomekanik Verimlilik**, **3. Eklem Güvenliği** ve **4. İstasyon/Süperset Akışı** birlikte değerlendirilir; önerilen kuralın olası yan etkileri gizlenmeden açıkça analiz edilir.
-
----
-
-## 17. Mimari Öncelik & Modüller Arası Etki Senkronizasyonu Yasası
-* **Önce Mimariyi Oku & Etki Haritasını Çıkar:**
-  - İşleyişi, buton akışını, veri yolunu veya entegrasyonları değiştiren her talepte tek satır kod düzenlemeden önce ilgili Kısım Şefi kılavuzları (`.agents/skills/*/SKILL.md`) ve proje kuralları (`GEMINI.md`) okunur; değişikliğin etkileyeceği tüm bağlı modüller ve arka plan dinleyicileri tespit edilir.
-* **Eşzamanlı Mimari, Kod ve Sınav Revizyonu:**
-  - Mimari bir kural değiştiğinde yalnızca görünen ekran değil; etkilenen tüm bağlı modüller, ilgili Kısım Şefi kılavuzu ve kalıcı doğrulama sınavı (`scripts/tab-watchdog.js`) aynı görev içinde eşzamanlı güncellenir; bu adım kullanıcının hatırlatmasına bırakılmaz.
-* **Çapraz Modül Bağımlılık Denetimi:**
-  - Bir özelliğin kaldırılması veya değiştirilmesi durumunda başka ekranlarda, arka plan kancalarında veya dış servis köprülerinde kalan tetikleyiciler tamamen temizlenmeden görev tamamlandı sayılmaz.
-
-
-
-
-
-
+## 18. Yalın Koyu Görsel Dil Standardı (Tüm Ekranlar ve Yeni Özellikler)
+1. **Tek Parça Koyu Zemin & Renk Diyeti:** Sayfa zemini (`#0B0A14`), üst/alt barlar, özet şeritleri ve kartlar (`#181530`, iç alan `#121024`, ince `rgba(167,139,250,0.18)` kenarlık) tek parça koyu temada birleşir. Yeşil/sarı/kırmızı kutu dolguları ve kalın renkli sol şeritler (`border-left`) yasaktır; durum yalnızca başlık yanındaki küçük renkli nokta (`7–9px`) veya metin rengiyle gösterilir.
+2. **Tek Vurgu Rengi & `%90` Oranlı Çubuklar:** Dağılım ve karşılaştırma çubuklarında çok renkli neon palet yerine tek vurgu rengi (`#8B5CF6`) kullanılır; en yüksek kalem çubuğun `%90`'ını dolduracak şekilde (`* 90`) diğer kalemlerle oranlanır.
+3. **Sıfır Telefon Emojisi & Küçük İçi Boş Bilgi İkonu:** Kart, başlık, özet kutusu, rozet, `title` ipucu ve butonlarda renkli telefon emojileri kesinlikle kullanılmaz; ikon gerekirse yalnızca tek renk ince çizgi (`stroke="currentColor"`, `fill="none"`) SVG kullanılır veya hiç ikon konulmaz. Bilgi (`i`) ikonları büyük beyaz daire yerine başlığın yanında küçük (`14–15px`), gri (`#94A3B8`) ve içi boş çizgi simgedir.
+4. **Kutu İçinde Kutu Yasağı & İnce Çizgili Düz Satırlar:** Kart içinde alt bölgeler, hareketlilik satırları, kişisel rekorlar, ölçüler veya açılır çekmeceler için ikinci bir çerçeveli kutu dizisi açılmaz; öğeler ince yatay çizgilerle (`1px solid rgba(255,255,255,0.06)`) ayrılan düz satırlar olarak dizilir.
+5. **Sade Tipografi, Tekrar Temizliği & Tek Aksiyon:** Aynı hedef/veri kart içinde tekrarlanmaz; karşılığı olmayan hayalet görsel referansları (`Şekildeki 1-2-3...` vb.) ve sistem/cihaz kodları (`7. Şef`, model kodu vb.) yazılmaz; özet/rekor tarihlerinde saat (`20:24`) gizlenip yalnızca gün ve ay yazılır; eşdeğer KPI kutuları tam ortalı tek hizada tutulur; ikincil açılır alanlar sade metin bağlantısıyla (`Göster` / `Gizle`), ana işlem ise kart altındaki tek butonla sunulur.

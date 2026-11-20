@@ -2393,21 +2393,21 @@
     const avgTut = totalActiveSets ? Math.round(totalTutSec / totalActiveSets) : 38;
     const workRestRatio = totalRestSec > 0 ? (totalTutSec / totalRestSec).toFixed(2) : '0.65';
 
-    let restAdvice = '⚖️ Dinlenme süresi ideal (60 sn koru)';
+    let restAdvice = 'Dinlenme süresi ideal (60 sn koru)';
     let restDeltaSec = 0;
     if (avgHrr < 16) {
-      restAdvice = '🛡️ Set arası nabız düşüşü yavaş (+15 sn dinlenme eklendi)';
+      restAdvice = 'Set arası nabız düşüşü yavaş (+15 sn dinlenme eklendi)';
       restDeltaSec = 15;
     } else if (avgHrr >= 24) {
-      restAdvice = '🔥 Kardiyak toparlanma çok hızlı (-10 sn yoğunluk artışı uygun)';
+      restAdvice = 'Kardiyak toparlanma çok hızlı (-10 sn yoğunluk artışı uygun)';
       restDeltaSec = -10;
     }
 
-    let loadAdvice = '📈 Nabız maliyeti dengeli: Hedef tekrar tamamlandıysa +2.5 kg artış uygun';
+    let loadAdvice = 'Nabız maliyeti dengeli: Hedef tekrar tamamlandıysa +2.5 kg artış uygun';
     if (peakHr >= 168) {
-      loadAdvice = '⚠️ Zirve nabız yüksek (' + peakHr + ' bpm): Ağırlığı sabit tut, form ve nefese odaklan';
+      loadAdvice = 'Zirve nabız yüksek (' + peakHr + ' bpm): Ağırlığı sabit tut, form ve nefese odaklan';
     } else if (avgHr <= 126) {
-      loadAdvice = '🚀 Düşük kardiyak maliyet (' + avgHr + ' bpm): Ağırlık veya +2 tekrar artışı önerilir';
+      loadAdvice = 'Düşük kardiyak maliyet (' + avgHr + ' bpm): Ağırlık veya +2 tekrar artışı önerilir';
     }
 
     return {
@@ -3446,9 +3446,7 @@
       if (!act || !act.id) return false;
       if (isGarminActivityDismissed(act.id)) return false;
       const isCardio = isStandaloneCardioActivity(act);
-      if (isCardio) {
-        return !isWatchActivityStaleForApproval(act, activities, 7);
-      }
+      if (isCardio) return false;
       if (isGarminActivityApproved(act.id)) return false;
       // T25 + T40: Geçmişte kaydı olan veya aynı saat diliminde uygulamada tamamlanmış seans onaya düşmez
       if (isActivityAlreadyInHistory(act)) return false;
@@ -3461,52 +3459,38 @@
       return groupCount > 0;
     });
 
+    if (pendingActivities.length === 0) {
+      container.innerHTML = '';
+      container.style.display = 'none';
+      return;
+    }
+
+    container.style.display = 'block';
+    const trashSvg = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>';
+    const cleanText = (v) => (typeof window !== 'undefined' && typeof window.cleanHistorySessionTitle === 'function')
+      ? window.cleanHistorySessionTitle(v)
+      : String(v || '').replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, '').replace(/\s+/g, ' ').trim();
+
     const cardsHtml = pendingActivities.map(act => {
       const manifest = findManifestForActivity(act);
       const editedEntry = editedTitleMap.get(String(act.id || ''));
-      const displayTitle = (editedEntry && editedEntry.title)
+      const rawDisplayTitle = (editedEntry && editedEntry.title)
         ? editedEntry.title
         : ((manifest && manifest.title && (!act.title || act.title === 'Güç' || act.title === 'Garmin Antrenmanı'))
           ? manifest.title
           : act.title);
+      const displayTitle = cleanText(rawDisplayTitle) || 'Antrenman Seansı';
       const groups = analyzeActivityGroups(act);
-      const unresolved = groups.filter(g => !g.isResolved);
-      const resolved = groups.filter(g => g.isResolved);
-      const dateStr = toLocalIsoDateString(act.date);
+      const dateStr = (typeof window !== 'undefined' && typeof window.formatHistoryDateShortTR === 'function')
+        ? window.formatHistoryDateShortTR(act.date)
+        : toLocalIsoDateString(act.date);
       const avgHr = act.summary?.heartrate || 120;
       const maxHr = act.summary?.heartrateMax || 148;
       const cal = act.summary?.calories || 0;
-      const isCardio = isStandaloneCardioActivity(act);
-      const isApproved = isGarminActivityApproved(act.id);
       const encAct = encodeURIComponent(act.id);
 
-      // ── KARDİYO (YÜRÜYÜŞ / KOŞU): YALIN TEK SATIRLIK BİLDİRİM ──
-      if (isCardio) {
-        return `
-          <div style="background:#181530;border:1px solid rgba(167, 139, 250, 0.25);border-left:4px solid #38BDF8;border-radius:10px;padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;box-shadow:0 2px 6px rgba(0,0,0,0.25);">
-            <div style="min-width:0;">
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                <span style="font-size:13px;font-weight:700;color:#FFFFFF;">🏃 ${escHtml(displayTitle)}</span>
-                <span style="background:#0C4A6E;border:1px solid #38BDF8;color:#BAE6FD;font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;">Kardiyo (Doğrudan Puanlandı)</span>
-              </div>
-              <div style="font-size:11.5px;color:#E2E8F0;margin-top:2px;">
-                📅 ${escHtml(dateStr)} • ❤️ Ort. ${avgHr} / Zirve ${maxHr} bpm • 🔥 ${cal} kcal
-              </div>
-            </div>
-            <button type="button" onclick="window.dismissGarminStrengthActivity(decodeURIComponent('${encAct}'))" title="Bildirimi Kaldır" style="background:#2C2550;border:1px solid rgba(167, 139, 250, 0.35);color:#F3E8FF;border-radius:6px;padding:4px 8px;font-size:11.5px;font-weight:700;cursor:pointer;flex-shrink:0;">
-              Sil
-            </button>
-          </div>
-        `;
-      }
-
-      // ── FİTNESS / KUVVET: YALIN ONAY KAPSÜLÜ ──
-      const allOptions = (typeof EXERCISES_DB !== 'undefined' ? EXERCISES_DB : []).map(ex =>
-        `<option value="${escHtml(ex.id)}">${escHtml(ex.name)}</option>`
-      ).join('');
-
-      const renderGroup = (g, isUnres = false) => {
-        const originalLabel = g.originalName || (g.matchedEx ? g.matchedEx.name : (g.rawCategory || 'Orijinal Hareket'));
+      const renderGroup = (g) => {
+        const originalLabel = cleanText(g.originalName || (g.matchedEx ? g.matchedEx.name : (g.rawCategory || 'Orijinal Hareket')));
         const avgReps = Math.round(g.sets.reduce((s, x) => s + x.repetitions, 0) / g.sets.length);
         const encGrp = encodeURIComponent(g.groupId);
 
@@ -3518,53 +3502,49 @@
         const summaryText = `${weightSummary} × ~${avgReps} tkr`;
 
         return `
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#121024;border:1px solid rgba(167, 139, 250, 0.25);border-radius:10px;margin-top:6px;gap:8px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid rgba(255, 255, 255, 0.06);gap:8px;">
             <div style="min-width:0;flex:1;">
-              <div style="font-size:13.5px;font-weight:800;color:#FFFFFF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                🏋️ ${escHtml(originalLabel)}
+              <div style="font-size:13px;font-weight:700;color:#FFFFFF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                ${escHtml(originalLabel)}
               </div>
-              <div style="font-size:11.5px;color:#E2E8F0;margin-top:2px;">
+              <div style="font-size:11.5px;color:#94A3B8;margin-top:2px;">
                 ${g.sets.length} Set • ${summaryText}
               </div>
             </div>
-            <button type="button" onclick="window.openGarminExerciseEditModal(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'))" title="Bu Hareketi Düzenle" style="background:#2C2550;border:1px solid rgba(167, 139, 250, 0.4);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:#F3E8FF;cursor:pointer;display:inline-flex;align-items:center;gap:4px;flex-shrink:0;">
-              ✏️ Düzenle
+            <button type="button" onclick="window.openGarminExerciseEditModal(decodeURIComponent('${encAct}'), decodeURIComponent('${encGrp}'))" title="Bu Hareketi Düzenle" style="background:transparent;border:none;padding:4px 6px;font-size:12px;font-weight:700;color:#C4B5FD;cursor:pointer;flex-shrink:0;">
+              Düzenle
             </button>
           </div>
         `;
       };
 
-      const groupBlocks = groups.map(g => renderGroup(g, !g.isResolved)).join('');
+      const groupBlocks = groups.map(g => renderGroup(g)).join('');
       const totalSets = groups.reduce((n, g) => n + g.sets.length, 0);
       const safeActKey = String(act.id || '').replace(/[^a-zA-Z0-9_]/g, '_');
 
       return `
-        <div style="background:#181530;border:1.5px solid #F59E0B;border-radius:12px;padding:12px 14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <div style="padding:12px 0;border-top:1px solid rgba(255, 255, 255, 0.06);">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
             <div style="min-width:0;flex:1;">
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                <span style="font-size:13.5px;font-weight:800;color:#FFFFFF;">⌚ ${escHtml(displayTitle)}</span>
-                <span style="background:#451A03;border:1px solid #D97706;color:#FDE68A;font-size:11px;font-weight:800;padding:2px 6px;border-radius:6px;">⏳ Onay Bekliyor</span>
-              </div>
-              <div style="font-size:11.5px;color:#E2E8F0;margin-top:2px;">
-                📅 ${escHtml(dateStr)} • ❤️ Ort. ${avgHr} / Zirve ${maxHr} bpm • 🔥 ${cal} kcal • 🏋️ ${totalSets} Set (${groups.length} Hareket)
+              <div style="font-size:13.5px;font-weight:800;color:#FFFFFF;line-height:1.3;">${escHtml(displayTitle)}</div>
+              <div style="font-size:11.5px;color:#94A3B8;margin-top:3px;">
+                ${escHtml(dateStr)} • Ort. ${avgHr} / Zirve ${maxHr} bpm • ${cal} kcal • ${totalSets} Set (${groups.length} Hareket)
               </div>
             </div>
-            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-              <button type="button" onclick="window.approveGarminStrengthActivity(decodeURIComponent('${encAct}'))" style="background:#15803D;color:#FFFFFF;border:1px solid #22C55E;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;">
-                ✓ Onayla
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+              <button type="button" onclick="window.approveGarminStrengthActivity(decodeURIComponent('${encAct}'))" style="background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);background-color:#6D28D9;color:#FFFFFF;border:1px solid rgba(167, 139, 250, 0.4);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;">
+                Onayla
               </button>
-              <button type="button" onclick="window.dismissGarminStrengthActivity(decodeURIComponent('${encAct}'))" title="Saat Kaydını Sil" style="background:#7F1D1D;color:#FECACA;border:1px solid #EF4444;border-radius:6px;padding:6px 9px;font-size:12px;font-weight:700;cursor:pointer;">
-                ✕ Sil
+              <button type="button" onclick="window.dismissGarminStrengthActivity(decodeURIComponent('${encAct}'))" title="Saat Kaydını Sil" aria-label="Saat Kaydını Sil" style="background:transparent;color:#94A3B8;border:none;padding:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
+                ${trashSvg}
               </button>
             </div>
           </div>
 
           <!-- Talep Halinde Açılır Detay & Düzenleme Çekmecesi (Varsayılan Kapalı) -->
-          <div style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(167, 139, 250, 0.25);">
-            <button type="button" onclick="const d = document.getElementById('details_${safeActKey}'); const isHid = d.style.display==='none'; d.style.display = isHid ? 'block' : 'none'; this.querySelector('.arrow').textContent = isHid ? '▲ Kapat' : '▼ İncele / Düzenle';" style="background:none;border:none;color:#7DD3FC;font-size:12px;font-weight:700;cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:4px;">
-              <span>👁️ Hareket Detayları (${groups.length} Hareket)</span>
-              <span class="arrow" style="font-size:11px;background:#0C4A6E;border:1px solid #38BDF8;color:#BAE6FD;padding:2px 6px;border-radius:4px;">▼ İncele / Düzenle</span>
+          <div style="margin-top:8px;">
+            <button type="button" onclick="const d = document.getElementById('details_${safeActKey}'); const isHid = d.style.display==='none'; d.style.display = isHid ? 'block' : 'none'; this.textContent = isHid ? 'Gizle' : 'Hareket Detayları (${groups.length})';" style="background:none;border:none;color:#C4B5FD;font-size:12px;font-weight:700;cursor:pointer;padding:0;">
+              Hareket Detayları (${groups.length})
             </button>
           </div>
 
@@ -3575,24 +3555,18 @@
       `;
     }).join('');
 
-    // Üst Bar: Minimalist ve sade
     container.innerHTML = `
-      <div style="background:#121024;border:1px solid rgba(167, 139, 250, 0.25);border-radius:12px;padding:10px 14px;margin-bottom:12px;">
+      <div style="background:#121024;border:1px solid rgba(255, 255, 255, 0.07);border-radius:14px;padding:12px 14px;">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-          <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-size:13px;font-weight:800;color:#FFFFFF;">⌚ Saat Senkronizasyonu</span>
-            <span style="font-size:11px;font-weight:700;background:#0C4A6E;border:1px solid #38BDF8;color:#BAE6FD;padding:2px 7px;border-radius:10px;">${pendingActivities.length ? `${pendingActivities.length} Bildirim` : 'Güncel'}</span>
+          <div style="display:flex;align-items:baseline;gap:8px;">
+            <span style="font-size:13.5px;font-weight:800;color:#FFFFFF;">Saat Senkronizasyonu</span>
+            <span style="font-size:11.5px;font-weight:700;color:#94A3B8;">${pendingActivities.length} Bildirim</span>
           </div>
-          <div style="display:flex;align-items:center;gap:6px;">
-            <button type="button" onclick="window.injectMockGarminStrengthActivity()" style="background:none;border:none;color:#E2E8F0;font-size:11px;font-weight:600;cursor:pointer;padding:2px 4px;">
-              🧪 Test
-            </button>
-            <button type="button" onclick="window.syncGarminActivitiesFromTredict()" style="background:#2C2550;border:1px solid rgba(167, 139, 250, 0.35);border-radius:6px;padding:3px 8px;font-size:11.5px;font-weight:700;color:#F3E8FF;cursor:pointer;">
-              🔄 Eşitle (${metrics.activityCount})
-            </button>
-          </div>
+          <button type="button" onclick="window.syncGarminActivitiesFromTredict()" style="background:#181530;border:1px solid rgba(167, 139, 250, 0.28);border-radius:8px;padding:4px 10px;font-size:11.5px;font-weight:700;color:#CBD5E1;cursor:pointer;">
+            Eşitle (${metrics.activityCount})
+          </button>
         </div>
-        ${cardsHtml ? `<div style="margin-top:10px;">${cardsHtml}</div>` : ''}
+        <div style="margin-top:10px;">${cardsHtml}</div>
       </div>
     `;
   }
@@ -3612,7 +3586,6 @@
     if (!container) {
       container = document.createElement('div');
       container.id = 'garminAnalyticsCoachContainer';
-      container.style.marginBottom = '16px';
       const firstChild = analyticsTab.firstElementChild;
       if (firstChild && firstChild.nextSibling) {
         analyticsTab.insertBefore(container, firstChild.nextSibling);
@@ -3620,46 +3593,52 @@
         analyticsTab.prepend(container);
       }
     }
+    container.style.marginTop = '12px';
+    container.style.marginBottom = '12px';
 
     const m = computePhysiologicalMetrics();
     const auditSummary = auditAllLibraryExercises();
     const isExpanded = container.dataset.expanded === 'true';
 
     container.innerHTML = `
-      <div style="background:#121024;border:1px solid rgba(167, 139, 250, 0.25);border-radius:12px;padding:12px 16px;color:#FFFFFF;box-shadow:0 4px 12px rgba(0,0,0,0.25);">
-        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <strong style="font-size:14.5px;color:#FFFFFF;">⌚ 7. Şef: Garmin Sağlık &amp; Kardiyak Efor (Garmin fr945)</strong>
-            <span style="background:#0C4A6E;border:1px solid #38BDF8;color:#BAE6FD;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:700;">❤️ Ort. ${m.avgHr} bpm</span>
-            <span style="background:#14532D;border:1px solid #22C55E;color:#BBF7D0;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:700;">📉 HRR ${m.avgHrr} bpm/dk</span>
-            <span style="background:#2C2550;border:1px solid rgba(167, 139, 250, 0.35);color:#F3E8FF;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:700;">🚣🏃 Kürek • Koşu • Yürüyüş Aktif</span>
+      <div style="background:#181530;border:1px solid rgba(167, 139, 250, 0.18);border-radius:14px;padding:14px;color:#F8FAFC;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+          <div style="min-width:0;flex:1;">
+            <h3 style="font-size:15px;font-weight:800;color:#FFFFFF;margin:0;">Kardiyak Efor</h3>
+            <div class="tabular-nums" style="font-size:12px;color:#94A3B8;font-weight:600;margin-top:4px;line-height:1.4;">Ort. ${m.avgHr} bpm · Toparlanma ${m.avgHrr} bpm/dk · Kürek, Koşu, Yürüyüş</div>
           </div>
-          <button type="button" onclick="window.toggleGarminAnalyticsDrawer(this)" style="background:#6D28D9;color:#FFFFFF;border:none;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">
-            💡 Sağlık &amp; Efor Analizi ${isExpanded ? '▲ Gizle' : '▼ Göster'}
+          <button type="button" onclick="window.toggleGarminAnalyticsDrawer(this)" style="background:transparent;color:#A78BFA;border:none;padding:2px 0;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">
+            ${isExpanded ? 'Gizle' : 'Göster'}
           </button>
         </div>
-        <div id="garminAnalyticsDrawer" style="display:${isExpanded ? 'block' : 'none'};margin-top:12px;padding-top:12px;border-top:1px solid rgba(167, 139, 250, 0.22);">
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;">
-            <div style="background:#181530;border:1px solid rgba(167, 139, 250, 0.25);border-radius:8px;padding:10px;">
-              <div style="font-size:11.5px;color:#E2E8F0;font-weight:700;">KARDİYAK YÜK &amp; ZİRVE NABIZ</div>
-              <div style="font-size:16px;font-weight:800;color:#FFFFFF;margin-top:2px;">${m.avgHr} bpm / ${m.peakHr} bpm</div>
-              <div style="font-size:12px;color:#E2E8F0;margin-top:4px;">${escHtml(m.loadAdvice)}</div>
+        <div id="garminAnalyticsDrawer" style="display:${isExpanded ? 'block' : 'none'};margin-top:12px;border-top:1px solid rgba(255,255,255,0.08);">
+          <div style="padding:9px 2px;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;">
+              <span style="font-size:12.5px;font-weight:700;color:#F8FAFC;">Kardiyak Yük &amp; Zirve Nabız</span>
+              <span class="tabular-nums" style="font-size:12.5px;font-weight:800;color:#FFFFFF;">${m.avgHr} / ${m.peakHr} bpm</span>
             </div>
-            <div style="background:#181530;border:1px solid rgba(167, 139, 250, 0.25);border-radius:8px;padding:10px;">
-              <div style="font-size:11.5px;color:#E2E8F0;font-weight:700;">SET ARASI TOPARLANMA (HRR)</div>
-              <div style="font-size:16px;font-weight:800;color:#4ADE80;margin-top:2px;">-${m.avgHrr} bpm / dinlenme</div>
-              <div style="font-size:12px;color:#E2E8F0;margin-top:4px;">${escHtml(m.restAdvice)}</div>
+            <div style="font-size:11.5px;color:#94A3B8;margin-top:3px;">${escHtml(m.loadAdvice)}</div>
+          </div>
+          <div style="padding:9px 2px;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;">
+              <span style="font-size:12.5px;font-weight:700;color:#F8FAFC;">Set Arası Toparlanma</span>
+              <span class="tabular-nums" style="font-size:12.5px;font-weight:800;color:#4ADE80;">-${m.avgHrr} bpm / dk</span>
             </div>
-            <div style="background:#181530;border:1px solid rgba(167, 139, 250, 0.25);border-radius:8px;padding:10px;">
-              <div style="font-size:11.5px;color:#E2E8F0;font-weight:700;">KÜREK • KOŞU • YÜRÜYÜŞ EFORU (Garmin fr945)</div>
-              <div style="font-size:15px;font-weight:800;color:#7DD3FC;margin-top:2px;">🚣 38 spm • 🏃 136W (8:31/km) • 🚶 2.3 km</div>
-              <div style="font-size:12px;color:#E2E8F0;margin-top:4px;">Kondisyon kategorisinde hipertrofi setini şişirmeden doğrudan kardiyak efor ve nabız zonu olarak analiz edilir.</div>
+            <div style="font-size:11.5px;color:#94A3B8;margin-top:3px;">${escHtml(m.restAdvice)}</div>
+          </div>
+          <div style="padding:9px 2px;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;">
+              <span style="font-size:12.5px;font-weight:700;color:#F8FAFC;">Kürek, Koşu &amp; Yürüyüş Eforu</span>
+              <span class="tabular-nums" style="font-size:12px;font-weight:700;color:#CBD5E1;">38 spm · 136W · 2.3 km</span>
             </div>
-            <div style="background:#181530;border:1px solid rgba(167, 139, 250, 0.25);border-radius:8px;padding:10px;">
-              <div style="font-size:11.5px;color:#E2E8F0;font-weight:700;">KÜTÜPHANE ↔ GARMIN KAS TEYİDİ</div>
-              <div style="font-size:16px;font-weight:800;color:#7DD3FC;margin-top:2px;">${auditSummary.exactCount} Tam • ${auditSummary.unmappedNotedCount} İsimsiz+Notlu</div>
-              <div style="font-size:12px;color:#E2E8F0;margin-top:4px;">Kürek (<code>indoor_row</code>), Yürüyüş (<code>walk</code>) ve Koşu (<code>run</code>) resmi Garmin FIT koduyla tam uyumludur.</div>
+            <div style="font-size:11.5px;color:#94A3B8;margin-top:3px;">Kondisyon kategorisinde hipertrofi setini şişirmeden doğrudan kardiyak efor ve nabız zonu olarak analiz edilir.</div>
+          </div>
+          <div style="padding:9px 2px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;">
+              <span style="font-size:12.5px;font-weight:700;color:#F8FAFC;">Kütüphane Eşleşmesi</span>
+              <span class="tabular-nums" style="font-size:12px;font-weight:700;color:#CBD5E1;">${auditSummary.exactCount} Tam · ${auditSummary.unmappedNotedCount} Notlu</span>
             </div>
+            <div style="font-size:11.5px;color:#94A3B8;margin-top:3px;">Kürek, Yürüyüş ve Koşu resmi saat kategorileriyle tam uyumludur.</div>
           </div>
         </div>
       </div>
@@ -3669,7 +3648,7 @@
   window.toggleGarminAnalyticsDrawer = function (btn) {
     const container = document.getElementById('garminAnalyticsCoachContainer');
     if (!container) return;
-    const row = btn.closest('div');
+    const row = container.firstElementChild || (btn && btn.closest('div'));
     const anchorTop = row ? row.getBoundingClientRect().top : 0;
     container.dataset.expanded = container.dataset.expanded === 'true' ? 'false' : 'true';
     renderAnalyticsGarminCoachPanel();
@@ -4143,6 +4122,7 @@
     syncWatchTitlesFromWorkoutLogs,
     propagateWorkoutLogTitleToWatch,
     renderHistoryGarminSyncPanel,
+    renderAnalyticsGarminCoachPanel,
     approveGarminStrengthActivity: (id) => window.approveGarminStrengthActivity(id),
     dismissGarminStrengthActivity: (id) => window.dismissGarminStrengthActivity(id),
     isGarminActivityApproved,
