@@ -7862,7 +7862,7 @@
 
         .gen-mobile-picker-bar:hover {
             border-color: #84CC16 !important;
-            background: #FFFFFF !important;
+            background: #181530 !important;
         }
 
         .picker-step-title {
@@ -12524,6 +12524,11 @@
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
+.gen-mobile-picker-bar:hover {
+    background: linear-gradient(145deg, #221D42 0%, #181530 100%) !important;
+    border-color: var(--athletiq-purple) !important;
+}
+
 .gen-mobile-picker-bar:active {
     transform: scale(0.98) !important;
     border-color: var(--athletiq-purple) !important;
@@ -12551,8 +12556,29 @@
     font-size: 13.5px !important;
 }
 
+.gen-mobile-picker-bar:hover .picker-step-title {
+    color: #CBD5E1 !important;
+}
+
+.gen-mobile-picker-bar:hover .picker-selected-val {
+    color: #FFFFFF !important;
+}
+
 .gen-mobile-picker-bar .picker-arrow {
     color: var(--athletiq-violet) !important;
+}
+
+/* Üretici Parametre Kartları - Açık Tema Artıkları Yok */
+.gen-collapsible-section .param-box,
+.gen-collapsible-section .param-group {
+    background: rgba(24, 21, 48, 0.82) !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.22) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18) !important;
+}
+
+.gen-collapsible-section .param-group label,
+.gen-collapsible-section .param-label {
+    color: #CBD5E1 !important;
 }
 
 /* Manuel Oluştur Butonunu Koyu Temaya Uyarla */

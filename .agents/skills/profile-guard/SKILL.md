@@ -16,6 +16,8 @@ description: Çelik Kodu Profil sekmesini (#profileTab, js/chiefs/profile-chief.
 ## Kırmızı Çizgiler ve Kurallar
 - **Kimlik & Anahtar İzolasyonu:** Parolalar Web Crypto ile tuzlanmış olarak saklanır; `password`, `passwordHash`, `salt` ve kullanıcının üçüncü taraf API anahtarları dışa aktarımlara veya paylaşımlı bulut koleksiyonlarına asla sızdırılmaz.
 - **Tema & WCAG Okunabilirlik:** Açık temalarda beyaz/soluk pastel metin yasağı korunur; tüm metin ve rozetler minimum 4.5:1 kontrastı sağlar (`kontrastİhlali === 0`).
+- **Hover Metin Koruması (T43):** Üretici seçim çubukları açık ve koyu yüzeylerde hover sırasında okunabilir metin rengi korumalıdır; beyaz/soluk metin koyu olmayan zeminde kullanılamaz.
+- **Parametre Zemin Bütünlüğü (T44):** Üretici model, hedef ve süre kartları genel koyu temadan kopuk beyaz kartlara dönüşmez.
 - **Güvenlik Başlıkları & İçerik Koruması:** Dinamik HTML şablonlarında güvenli öznitelik kaçışı (`encodeURIComponent` / `dataset` / `textContent`) ve sıkı CSP uygulanır.
 - **Hata Hafızası Sicili:** Kullanıcının profil, yedekleme veya tema kontrastında yakaladığı her hata `scripts/tab-watchdog.js` sınavına kalıcı madde olarak eklenir.
 - **Sıfır `undefined` Bulut Yazımı (T24 — 16 Kas 2026 hatası):** Firestore `set()` tek bir `undefined` alanda TÜM yazımı reddeder ve kayıtlar sessizce "Kuyrukta" kalır. `mergeWorkoutLogCollections` içinde `a || b` ile üretilen alanlar `dropUndefinedKeys` ile temizlenir, `fbDb.settings({ ignoreUndefinedProperties: true })` açık tutulur ve `syncWorkoutLogsToCloud` yazımdan önce JSON temizliği yapar. (Belirti: telefonda yapılan antrenman başka cihazda/bulutta görünmez.)

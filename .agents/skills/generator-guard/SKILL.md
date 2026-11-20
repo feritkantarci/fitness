@@ -28,4 +28,6 @@ description: Çelik Kodu Üretici sekmesini (#generatorTab, js/chiefs/generator-
 - **Sıfır Ekran Sıçraması:** Hareket değişiminde veya detay çekmecesi açılırken sayfa başa kaydırılmaz (`Zero Scroll-Jump`).
 - **Master Havuz & Gizlilik Uyumu:** Gizlenmiş egzersizler kura/program üretimine girmez; önerilen `recId` ve alternatifler `EXERCISES_DB` içinde doğrulanır.
 - **3 Modlu Hedef Tutarlılığı (`normalizeExerciseTargetByMetricMode`):** Süreli izometrik (`time_sec`), kardiyo dakikalı (`cardio_min`) ve tekrarlı (`reps`) egzersizlere hem üreticide hem Kişisel Stüdyo ve Alternatif Seçici'de kendi birimlerine uygun hedefler verilir (izometrik harekete `8-12` tekrardan `8 sn` atanmaz).
+- **Seçim Çubuğu Hover Kontrastı (T43):** `.gen-mobile-picker-bar` üzerindeki seçim etiketi ve değer metni üstüne gelindiğinde koyu zeminde beyaz/açık gri kontrastını korumalıdır; hover durumunda açık/açık gri metinli okunmaz yüzey bırakılamaz.
+- **Parametre Kartları Koyu Renk Bütünlüğü (T44):** Üretici açılır alanındaki `.param-group` ve `.param-box` yüzeyleri açık tema beyaz yüzeylerine dönmez; koyu mor yüzey, açık etiket ve koyu seçim kutusu korunur.
 - **Hata Hafızası Sicili:** Kullanıcının Üretici akışında yakaladığı her hata `scripts/tab-watchdog.js` sınavına kalıcı madde olarak eklenir.

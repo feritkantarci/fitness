@@ -2625,6 +2625,39 @@ function runAcademicMathSuite(moduleSources, dbText) {
         const ok = noExternalCalHtml && noAutoCalendarHook && manualBtnInWorkout && liveBarEmpty;
         return { ok, actual: JSON.stringify({ noExternalCalHtml, noAutoCalendarHook, manualBtnInWorkout, liveBarEmpty }) };
       }
+    },
+    {
+      id: 'T43',
+      owner: 'generator-guard',
+      title: 'Üretici Seçim Çubuğu Hover Kontrastı',
+      expected: 'gen-mobile-picker-bar hover yüzeyi koyu kalır; seçim etiketi/açıklaması beyaz/açık gri yüksek kontrast kurallarına uyar',
+      run: () => {
+        const cssCode = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
+        const hoverTitleRule = cssCode.includes('.gen-mobile-picker-bar:hover .picker-step-title');
+        const hoverValueRule = cssCode.includes('.gen-mobile-picker-bar:hover .picker-selected-val');
+        const hoverTitleContrast = cssCode.includes('color: #CBD5E1 !important');
+        const hoverValueContrast = cssCode.includes('.gen-mobile-picker-bar:hover .picker-selected-val') &&
+          cssCode.includes('color: #FFFFFF !important');
+        const darkHoverExists = cssCode.includes('background: linear-gradient(145deg, #221D42 0%, #181530 100%) !important');
+        const noWhiteHover = !cssCode.includes('.gen-mobile-picker-bar:hover {\n            border-color: #84CC16 !important;\n            background: #FFFFFF !important;\n        }');
+        const ok = hoverTitleRule && hoverValueRule && hoverTitleContrast && hoverValueContrast && darkHoverExists && noWhiteHover;
+        return { ok, actual: JSON.stringify({ hoverTitleRule, hoverValueRule, hoverTitleContrast, hoverValueContrast, darkHoverExists, noWhiteHover }) };
+      }
+    },
+    {
+      id: 'T44',
+      owner: 'generator-guard',
+      title: 'Üretici Parametre Kartları Koyu Tema Bütünlüğü',
+      expected: '.param-group/.param-box ve etiketleri açık tema beyaz yüzeylerine dönmez',
+      run: () => {
+        const cssCode = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
+        const darkCardRule = cssCode.includes('.gen-collapsible-section .param-box,\n.gen-collapsible-section .param-group');
+        const darkCardSurface = cssCode.includes('background: rgba(24, 21, 48, 0.82) !important');
+        const lightLabelRule = cssCode.includes('color: #CBD5E1 !important');
+        const paramSelectDark = cssCode.includes('.param-select') && cssCode.includes('background: rgba(11, 10, 20, 0.8) !important');
+        const ok = darkCardRule && darkCardSurface && lightLabelRule && paramSelectDark;
+        return { ok, actual: JSON.stringify({ darkCardRule, darkCardSurface, lightLabelRule, paramSelectDark }) };
+      }
     }
   ];
 
