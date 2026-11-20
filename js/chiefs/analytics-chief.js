@@ -3151,11 +3151,14 @@
                     "lengthened": false
           },
           "bw_butt_kicks": {
-                    "primary": null,
-                    "pFactor": 0,
-                    "sec": {},
-                    "type": "CONDITIONING",
-                    "sfr": "N/A",
+                    "primary": "Arka Bacak",
+                    "pFactor": 0.35,
+                    "sec": {
+                              "Kalf": 0.3,
+                              "Glute": 0.15
+                    },
+                    "type": "BALLISTIC_POWER",
+                    "sfr": "MODERATE",
                     "lengthened": false
           },
           "bw_skater_jumps": {

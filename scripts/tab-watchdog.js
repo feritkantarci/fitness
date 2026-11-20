@@ -2751,6 +2751,35 @@ function runAcademicMathSuite(moduleSources, dbText) {
         const ok = hasHelper && bothTogglesCallHelper;
         return { ok, actual: JSON.stringify({ hasHelper, bothTogglesCallHelper }) };
       }
+    },
+    {
+      id: 'T50',
+      owner: 'generator-guard',
+      title: 'Kondisyon Öncelik Ayrımı (Normalde 2. Plan, Kondisyonda 1. Sıra)',
+      expected: 'hipertrofide conditioning=0; emom_conditioningde conditioning>=1',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          selectedEquipments = ['dumbbell', 'bodyweight'];
+          selectedSplits = ['full_body'];
+          const styleEl = document.getElementById('paramStyle');
+          const goalEl = document.getElementById('paramGoal');
+          if (styleEl) styleEl.value = 'superset';
+          if (goalEl) goalEl.value = 'hypertrophy';
+          handleGenerateWorkout('superset', '');
+          const hypExs = (currentGeneratedWorkout && currentGeneratedWorkout.exercises) || [];
+          const hypCond = hypExs.filter(e => e.category === 'conditioning').length;
+
+          if (styleEl) styleEl.value = 'emom_conditioning';
+          if (goalEl) goalEl.value = 'endurance';
+          handleGenerateWorkout('emom_conditioning', '');
+          const condExs = (currentGeneratedWorkout && currentGeneratedWorkout.exercises) || [];
+          const condCount = condExs.filter(e => e.category === 'conditioning').length;
+          return { hypTotal: hypExs.length, hypCond, condTotal: condExs.length, condCount };
+        })()`, ctx);
+        const ok = res.hypTotal > 0 && res.hypCond === 0 && res.condTotal > 0 && res.condCount >= 1;
+        return { ok, actual: JSON.stringify(res) };
+      }
     }
   ];
 

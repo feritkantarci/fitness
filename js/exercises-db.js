@@ -6814,6 +6814,7 @@
     "equipment": "bodyweight",
     "id": "bw_butt_kicks",
     "isComplex": false,
+    "isTimeBased": true,
     "mechanic": "compound",
     "muscle": "Diz Büken Arka Bacak, Üst Baldır, Alt Baldır",
     "name": "Topuk Kalçaya Koşu (Butt Kicks)",
@@ -6855,11 +6856,12 @@
     "fitCategory": "cardio",
     "fitName": "jump_rope_jog",
     "fitNote": "Butt Kicks",
+    "trackingType": "time",
     "garminPrimaryMuscles": [
+      "HAMSTRINGS",
       "CALVES"
     ],
     "garminSecondaryMuscles": [
-      "HAMSTRINGS",
       "GLUTES"
     ],
     "garminMatchType": "exact_verified"

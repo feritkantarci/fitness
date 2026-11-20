@@ -6254,24 +6254,47 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     if (complexPreferred.length > 0) finalPool = complexPreferred;
                 }
 
-                if (style === 'emom_conditioning' && Array.isArray(finalPool)) {
+                const isConditioningMovementExercise = (ex) => {
+                    if (!ex) return false;
+                    const effCat = getEffectiveExerciseCategory(ex);
+                    return effCat === 'conditioning' || ex.category === 'conditioning' || effCat === 'cardio' || ex.category === 'cardio';
+                };
+                const hasConditioningNeed = style === 'emom_conditioning'
+                    || goal === 'endurance'
+                    || /kondisyon|kardiyo|cardio|hiit|yağ yak|nabız|metabolik|dayanıklılık/.test(String(customWish || '').toLocaleLowerCase('tr-TR'));
+
+                if (hasConditioningNeed && Array.isArray(finalPool)) {
                     const isoExcludeRegex = /curl|extension|fly|raise|kickback|shrug|calf|wrist|face_pull|pullover|concentration|preacher|hammer/i;
-                    const isCondCandidate = (e) => !isoExcludeRegex.test(e.id || '') && !isoExcludeRegex.test(e.name || '') && (
-                        e.equipment === 'bodyweight' || e.category === 'cardio' || e.isComplex ||
-                        /burpee|swing|thruster|snatch|clean|man_maker|manmaker|jump|mountain|jack|rope|row|carry|walk|skater|thrust|lunge|squat|pushup|push_up|plank|twist|bear|step|cardio|conditioning/i.test((e.id || '') + ' ' + (e.name || ''))
-                    );
-                    let condPreferred = finalPool.filter(isCondCandidate);
-                    if (condPreferred.length === 0 && typeof EXERCISES_DB !== 'undefined') {
-                        condPreferred = EXERCISES_DB.filter(e => isCandidateBiochemicallyCompatible(e, true) && slotPoolGuard(e) && isCondCandidate(e));
+                    const isCondCandidate = (e) => isConditioningMovementExercise(e) || (!isoExcludeRegex.test(e.id || '') && !isoExcludeRegex.test(e.name || '') && (
+                        e.equipment === 'bodyweight' || e.isComplex ||
+                        /burpee|swing|thruster|snatch|clean|man_maker|manmaker|jump|mountain|jack|rope|row|carry|walk|skater|thrust|lunge|squat|pushup|push_up|plank|twist|bear|step|cardio|conditioning|butt_kick|high_knee/i.test((e.id || '') + ' ' + (e.name || ''))
+                    ));
+                    let pureCond = finalPool.filter(isConditioningMovementExercise);
+                    if (pureCond.length === 0 && typeof EXERCISES_DB !== 'undefined') {
+                        pureCond = EXERCISES_DB.filter(e => isCandidateBiochemicallyCompatible(e, true) && slotPoolGuard(e) && isConditioningMovementExercise(e));
                     }
-                    if (condPreferred.length > 0) finalPool = condPreferred;
-                } else if ((style === 'emom_strength' || goal === 'strength') && Array.isArray(finalPool)) {
-                    const compOnly = finalPool.filter(e => e.mechanic === 'compound' || e.isComplex);
-                    if (compOnly.length > 0) finalPool = compOnly;
-                    if (style === 'emom_strength') {
-                        const strRegex = /squat|deadlift|rdl|bench|press|row|pullup|chinup|pulldown|clean|thruster/i;
-                        const strPreferred = finalPool.filter(e => strRegex.test(e.id || '') || strRegex.test(e.name || ''));
-                        if (strPreferred.length > 0) finalPool = strPreferred;
+                    if (pureCond.length > 0) {
+                        finalPool = pureCond;
+                    } else {
+                        let condPreferred = finalPool.filter(isCondCandidate);
+                        if (condPreferred.length === 0 && typeof EXERCISES_DB !== 'undefined') {
+                            condPreferred = EXERCISES_DB.filter(e => isCandidateBiochemicallyCompatible(e, true) && slotPoolGuard(e) && isCondCandidate(e));
+                        }
+                        if (condPreferred.length > 0) finalPool = condPreferred;
+                    }
+                } else {
+                    if (Array.isArray(finalPool) && finalPool.length > 0) {
+                        const nonCondPool = finalPool.filter(e => !isConditioningMovementExercise(e));
+                        if (nonCondPool.length > 0) finalPool = nonCondPool;
+                    }
+                    if ((style === 'emom_strength' || goal === 'strength') && Array.isArray(finalPool)) {
+                        const compOnly = finalPool.filter(e => e.mechanic === 'compound' || e.isComplex);
+                        if (compOnly.length > 0) finalPool = compOnly;
+                        if (style === 'emom_strength') {
+                            const strRegex = /squat|deadlift|rdl|bench|press|row|pullup|chinup|pulldown|clean|thruster/i;
+                            const strPreferred = finalPool.filter(e => strRegex.test(e.id || '') || strRegex.test(e.name || ''));
+                            if (strPreferred.length > 0) finalPool = strPreferred;
+                        }
                     }
                 }
 
@@ -6298,6 +6321,10 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         preferWeeklyFreshExercises(applyDoctrineModeFilter(basePool, filterMode, requireCompound)),
                         hasAdjacentDaySubMuscleRule
                     );
+                    if (!hasConditioningNeed) {
+                        const nonCondMode = modeBase.filter(e => !isConditioningMovementExercise(e));
+                        if (nonCondMode.length > 0) modeBase = nonCondMode;
+                    }
                     if (goal === 'strength' || style === 'emom_strength') {
                         const modeComp = modeBase.filter(e => e.mechanic === 'compound' || e.isComplex);
                         if (modeComp.length > 0) modeBase = modeComp;
@@ -6318,6 +6345,10 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         })),
                         hasAdjacentDaySubMuscleRule
                     );
+                    if (!hasConditioningNeed) {
+                        const nonCondFb = fallbackPool.filter(e => !isConditioningMovementExercise(e));
+                        if (nonCondFb.length > 0) fallbackPool = nonCondFb;
+                    }
                     if (goal === 'strength' || style === 'emom_strength') {
                         const fbComp = fallbackPool.filter(e => e.mechanic === 'compound' || e.isComplex);
                         if (fbComp.length > 0) fallbackPool = fbComp;
