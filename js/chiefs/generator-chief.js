@@ -2217,26 +2217,47 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
         }
         window.selectWeeklyPreviewDay = selectWeeklyPreviewDay;
 
+        function centerOpenedExerciseAnimation(container, exIdx) {
+            if (!container || exIdx === null || exIdx === undefined) return;
+            const listView = container.querySelector('.wk-list-view');
+            const rows = listView ? listView.querySelectorAll('.wk-ex-item-wrap') : null;
+            const row = rows && rows[exIdx] ? rows[exIdx] : null;
+            const stage = row ? row.querySelector('.pos-animation-stage') : null;
+            if (!listView || !stage) return;
+            const listRect = listView.getBoundingClientRect();
+            const stageRect = stage.getBoundingClientRect();
+            const targetTop = stageRect.top - listRect.top - ((listRect.height - stageRect.height) / 2);
+            listView.scrollTop += targetTop;
+        }
+
         function toggleWeeklyPreviewExDetail(exIdx) {
             const idx = Number(exIdx);
             const container = document.getElementById('generatedWorkoutOutput');
-            const oldRows = container ? container.querySelectorAll('.wk-ex-item-wrap') : null;
+            const oldListView = container ? container.querySelector('.wk-list-view') : null;
+            const oldRows = oldListView ? oldListView.querySelectorAll('.wk-ex-item-wrap') : null;
             const anchorOffsetTop = (oldRows && oldRows[idx]) ? oldRows[idx].getBoundingClientRect().top : null;
-            if (window.expandedWeeklyExIndex === idx) {
+            const savedScrollTop = oldListView ? oldListView.scrollTop : null;
+            const wasExpanded = window.expandedWeeklyExIndex === idx;
+            if (wasExpanded) {
                 window.expandedWeeklyExIndex = null;
             } else {
                 window.expandedWeeklyExIndex = idx;
             }
             renderPendingWeeklyPlanPreview({ preserveScroll: true });
-            if (anchorOffsetTop !== null && container) {
-                const newRows = container.querySelectorAll('.wk-ex-item-wrap');
+            const newListView = container ? container.querySelector('.wk-list-view') : null;
+            if (newListView && savedScrollTop !== null) {
+                newListView.scrollTop = savedScrollTop;
+            }
+            if (anchorOffsetTop !== null && newListView) {
+                const newRows = newListView.querySelectorAll('.wk-ex-item-wrap');
                 if (newRows[idx]) {
                     const delta = newRows[idx].getBoundingClientRect().top - anchorOffsetTop;
                     if (Math.abs(delta) > 1) {
-                        window.scrollBy({ top: delta, left: 0, behavior: 'instant' });
+                        newListView.scrollTop += delta;
                     }
                 }
             }
+            if (!wasExpanded) centerOpenedExerciseAnimation(container, idx);
         }
         window.toggleWeeklyPreviewExDetail = toggleWeeklyPreviewExDetail;
 
@@ -7164,23 +7185,31 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
         function toggleGeneratedExDetail(exIdx) {
             const idx = Number(exIdx);
             const container = document.getElementById('generatedWorkoutOutput');
-            const oldRows = container ? container.querySelectorAll('.wk-ex-item-wrap') : null;
+            const oldListView = container ? container.querySelector('.wk-list-view') : null;
+            const oldRows = oldListView ? oldListView.querySelectorAll('.wk-ex-item-wrap') : null;
             const anchorOffsetTop = (oldRows && oldRows[idx]) ? oldRows[idx].getBoundingClientRect().top : null;
-            if (window.expandedGeneratedExIndex === idx) {
+            const savedScrollTop = oldListView ? oldListView.scrollTop : null;
+            const wasExpanded = window.expandedGeneratedExIndex === idx;
+            if (wasExpanded) {
                 window.expandedGeneratedExIndex = null;
             } else {
                 window.expandedGeneratedExIndex = idx;
             }
             renderGeneratedWorkout({ preserveScroll: true });
-            if (anchorOffsetTop !== null && container) {
-                const newRows = container.querySelectorAll('.wk-ex-item-wrap');
+            const newListView = container ? container.querySelector('.wk-list-view') : null;
+            if (newListView && savedScrollTop !== null) {
+                newListView.scrollTop = savedScrollTop;
+            }
+            if (anchorOffsetTop !== null && newListView) {
+                const newRows = newListView.querySelectorAll('.wk-ex-item-wrap');
                 if (newRows[idx]) {
                     const delta = newRows[idx].getBoundingClientRect().top - anchorOffsetTop;
                     if (Math.abs(delta) > 1) {
-                        window.scrollBy({ top: delta, left: 0, behavior: 'instant' });
+                        newListView.scrollTop += delta;
                     }
                 }
             }
+            if (!wasExpanded) centerOpenedExerciseAnimation(container, idx);
         }
         window.toggleGeneratedExDetail = toggleGeneratedExDetail;
 
@@ -7350,6 +7379,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             const videoEl = document.getElementById('lightboxVideo');
             const titleEl = document.getElementById('lightboxTitle');
             const zoomText = document.getElementById('lightboxZoomText');
+            const lightboxBody = document.getElementById('lightboxBody');
             if (!modal) return;
 
             const isVideo = /\.(mp4|webm)(?:[?#].*)?$/i.test(src);
@@ -7360,12 +7390,14 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     videoEl.style.display = 'block';
                     videoEl.play().catch(() => {});
                 }
+                if (lightboxBody) lightboxBody.classList.add('is-video');
                 if (zoomText) zoomText.textContent = 'Canlı Döngü';
             } else {
                 if (videoEl) {
                     videoEl.pause();
                     videoEl.style.display = 'none';
                 }
+                if (lightboxBody) lightboxBody.classList.remove('is-video');
                 if (img) {
                     img.src = src;
                     img.style.display = 'block';
@@ -7377,6 +7409,10 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             if (titleEl) titleEl.textContent = title || 'Egzersiz Formu';
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
+            if (lightboxBody) {
+                lightboxBody.scrollTop = 0;
+                lightboxBody.scrollLeft = 0;
+            }
         }
 
         function closeImageLightbox(event) {
@@ -7388,11 +7424,13 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 modal.classList.remove('active');
                 const img = document.getElementById('lightboxImg');
                 const videoEl = document.getElementById('lightboxVideo');
+                const lightboxBody = document.getElementById('lightboxBody');
                 if (img) img.classList.remove('zoomed');
                 if (videoEl) {
                     videoEl.pause();
                     videoEl.src = '';
                 }
+                if (lightboxBody) lightboxBody.classList.remove('is-video');
             }
             document.body.style.overflow = '';
         }
@@ -7875,9 +7913,9 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                                             </button>
                                         ` : ''}
                                     </div>
-                                    <div style="cursor:pointer; display:flex; justify-content:center; align-items:center; min-height:200px; max-height:280px;" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(openGymMedia.clip)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Canlı Animasyon')}'))">
-                                        <video src="${openGymMedia.clip}" poster="${openGymMedia.still}" autoplay loop muted playsinline style="width:100%; max-height:260px; object-fit:contain; display:block;" onerror="this.style.display='none'; const st=document.getElementById('still_fallback_${collapseId}'); if(st) st.style.display='block';"></video>
-                                        <img id="still_fallback_${collapseId}" src="${openGymMedia.still}" alt="${escapeHTML(ex.name)}" style="display:none; width:100%; max-height:260px; object-fit:contain;">
+                                    <div class="pos-animation-stage" style="cursor:pointer;" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(openGymMedia.clip)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Canlı Animasyon')}'))">
+                                        <video class="pos-animation-video" src="${openGymMedia.clip}" poster="${openGymMedia.still}" autoplay loop muted playsinline onerror="this.style.display='none'; const st=document.getElementById('still_fallback_${collapseId}'); if(st) st.style.display='block';"></video>
+                                        <img id="still_fallback_${collapseId}" src="${openGymMedia.still}" alt="${escapeHTML(ex.name)}" style="display:none; width:auto; max-width:100%; height:auto; max-height:260px; object-fit:contain; margin:auto;">
                                     </div>
                                     <div style="font-size:11px; color:#0369A1; font-weight:700; padding:6px 10px; background:#F1F5F9; display:flex; justify-content:space-between; align-items:center; border-top:1px solid #CBD5E1;">
                                         <span>⚡ OpenGym Doğrulanmış Animasyon</span>

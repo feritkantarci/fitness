@@ -491,8 +491,8 @@ function runAcademicMathSuite(moduleSources, dbText) {
     {
       id: 'T6',
       owner: 'library-guard',
-      title: '3-Mod DB Denetimi (3 Cardio/7 Time/146 Rep) & Miras Hollow Body',
-      expected: 'cardio=3, time=7, reps=146; Hollow 12→10→8 normal_fatigue(sn), 40→20 early_drop',
+      title: '3-Mod DB Denetimi (3 Cardio/8 Time/145 Rep) & Miras Hollow Body',
+      expected: 'cardio=3, time=8, reps=145; Hollow 12→10→8 normal_fatigue(sn), 40→20 early_drop',
       run: () => {
         ctx.__seedState();
         const counts = vm.runInContext(`(() => {
@@ -522,7 +522,8 @@ function runAcademicMathSuite(moduleSources, dbText) {
             ]
           }]
         }]).items[0];
-        const ok = counts.cardio_min === 3 && counts.time_sec === 7 && counts.reps === 146
+        const ok = counts.cardio_min === 3 && counts.time_sec === 8 && counts.reps === 145
+          && eng.getExerciseMetricMode({ id: 'bw_butt_kicks', name: 'Topuk Kalçaya Koşu (Butt Kicks)' }) === 'time_sec'
           && hMode === 'time_sec'
           && Boolean(h1 && h1.category === 'normal_fatigue' && String(h1.setChainText).includes('sn') && !String(h1.adviceText).includes('kiloya'))
           && Boolean(h2 && h2.category === 'early_drop' && String(h2.badgeText).includes('Süre Düşüşü'));
@@ -2689,6 +2690,66 @@ function runAcademicMathSuite(moduleSources, dbText) {
         const readableGuideText = cssCode.includes('.wk-ex-detail-drawer .pos-step-desc {\n    color: #CBD5E1 !important');
         const ok = darkGuideShell && darkGuideHeader && darkGuideTabs && inlinePanelOverride && readableGuideText;
         return { ok, actual: JSON.stringify({ darkGuideShell, darkGuideHeader, darkGuideTabs, inlinePanelOverride, readableGuideText }) };
+      }
+    },
+    {
+      id: 'T47',
+      owner: 'generator-guard',
+      title: 'İç Liste Akordiyonu Sıfır Kayma',
+      expected: 'üretilen program ve haftalık önizlemede açılır satır iç liste kaydırmasını korur',
+      run: () => {
+        const generatorCode = fs.readFileSync(path.join(ROOT, 'js', 'chiefs', 'generator-chief.js'), 'utf8');
+        const generatedToggle = generatorCode.match(/function toggleGeneratedExDetail\(exIdx\) \{([\s\S]*?)\n        \}/);
+        const weeklyToggle = generatorCode.match(/function toggleWeeklyPreviewExDetail\(exIdx\) \{([\s\S]*?)\n        \}/);
+        const generatedInnerScroll = Boolean(generatedToggle && generatedToggle[1].includes("querySelector('.wk-list-view')")
+          && generatedToggle[1].includes('newListView.scrollTop = savedScrollTop')
+          && generatedToggle[1].includes('newListView.scrollTop += delta')
+          && !generatedToggle[1].includes('window.scrollBy'));
+        const weeklyInnerScroll = Boolean(weeklyToggle && weeklyToggle[1].includes("querySelector('.wk-list-view')")
+          && weeklyToggle[1].includes('newListView.scrollTop = savedScrollTop')
+          && weeklyToggle[1].includes('newListView.scrollTop += delta')
+          && !weeklyToggle[1].includes('window.scrollBy'));
+        const ok = generatedInnerScroll && weeklyInnerScroll;
+        return { ok, actual: JSON.stringify({ generatedInnerScroll, weeklyInnerScroll }) };
+      }
+    },
+    {
+      id: 'T48',
+      owner: 'generator-guard',
+      title: 'Video Penceresi Ekran Ortası',
+      expected: 'video tam ekran penceresinde ortalanır ve pencere kaydırması sıfırlanır',
+      run: () => {
+        const generatorCode = fs.readFileSync(path.join(ROOT, 'js', 'chiefs', 'generator-chief.js'), 'utf8');
+        const cssText = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
+        const openFn = generatorCode.match(/function openImageLightbox\(src, title\) \{([\s\S]*?)\n        \}/);
+        const centeredBody = cssText.includes('.lightbox-body.is-video') &&
+          cssText.includes('justify-content: center') &&
+          cssText.includes('#lightboxVideo');
+        const centeredInlineAnimation = cssText.includes('.pos-animation-stage') &&
+          cssText.includes('place-items: center') &&
+          cssText.includes('.pos-animation-stage .pos-animation-video') &&
+          generatorCode.includes('class="pos-animation-stage"') &&
+          generatorCode.includes('class="pos-animation-video"');
+        const resetScroll = Boolean(openFn && openFn[1].includes('lightboxBody.scrollTop = 0') &&
+          openFn[1].includes('lightboxBody.scrollLeft = 0') &&
+          openFn[1].includes("classList.add('is-video')"));
+        const ok = centeredBody && centeredInlineAnimation && resetScroll;
+        return { ok, actual: JSON.stringify({ centeredBody, centeredInlineAnimation, resetScroll }) };
+      }
+    },
+    {
+      id: 'T49',
+      owner: 'generator-guard',
+      title: 'Açılışta Video Görünürlük Merkezi',
+      expected: 'hareket açılırken animasyon kutusu iç liste içinde merkeze taşınır',
+      run: () => {
+        const generatorCode = fs.readFileSync(path.join(ROOT, 'js', 'chiefs', 'generator-chief.js'), 'utf8');
+        const hasHelper = generatorCode.includes('function centerOpenedExerciseAnimation') &&
+          generatorCode.includes("querySelector('.pos-animation-stage')") &&
+          generatorCode.includes('listView.scrollTop += targetTop');
+        const bothTogglesCallHelper = (generatorCode.match(/centerOpenedExerciseAnimation\(container, idx\)/g) || []).length >= 2;
+        const ok = hasHelper && bothTogglesCallHelper;
+        return { ok, actual: JSON.stringify({ hasHelper, bothTogglesCallHelper }) };
       }
     }
   ];

@@ -31,4 +31,7 @@ description: Çelik Kodu Üretici sekmesini (#generatorTab, js/chiefs/generator-
 - **Seçim Çubuğu Hover Kontrastı (T43):** `.gen-mobile-picker-bar` üzerindeki seçim etiketi ve değer metni üstüne gelindiğinde koyu zeminde beyaz/açık gri kontrastını korumalıdır; hover durumunda açık/açık gri metinli okunmaz yüzey bırakılamaz.
 - **Parametre Kartları Koyu Renk Bütünlüğü (T44):** Üretici açılır alanındaki `.param-group` ve `.param-box` yüzeyleri açık tema beyaz yüzeylerine dönmez; koyu mor yüzey, açık etiket ve koyu seçim kutusu korunur.
 - **Ekipman Etiketi Koyu Tema Bütünlüğü (T45):** Üretici ekipman seçimleri koyu mor arka planla uyumlu kalır; seçili, seçilmemiş ve hover durumları açık ve ayırt edilebilir metin kontrastı kullanır.
+- **İç Liste Akordiyonu Sıfır Kayma (T47):** Üretilen program ve haftalık önizlemede hareket detayı açılıp kapanırken iç `.wk-list-view.scrollTop` korunur; tıklanan satırın görünür konumu iç liste üzerinden sabitlenir, sayfa dış kaydırması değiştirilmez.
+- **Video Penceresi Ekran Ortası (T48):** Canlı animasyon tam ekran penceresinde video yatay/dikey olarak ortalanır; pencere içindeki kaydırma sıfırlanır.
+- **Açılışta Video Görünürlük Merkezi (T49):** Hareket satırı açıldığında animasyon kutusu iç `.wk-list-view` içinde dikey olarak merkeze taşınır; kullanıcının sayfayı elle kaydırmasına gerek kalmaz.
 - **Hata Hafızası Sicili:** Kullanıcının Üretici akışında yakaladığı her hata `scripts/tab-watchdog.js` sınavına kalıcı madde olarak eklenir.
