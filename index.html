@@ -54,7 +54,7 @@
                     <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                 </svg>
             </div>
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v334</div>
+            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v335</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -253,7 +253,7 @@
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
                             <span class="modern-brand-subdot" aria-hidden="true">•</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v334</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v335</span>
                         </div>
                     </div>
                 </div>
@@ -625,7 +625,7 @@
                             </div>
                             <div class="ai-unified-wish-row">
                                 <label for="aiUnifiedWishInput" class="ai-unified-wish-label"><svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2.5 3.5A1.5 1.5 0 0 1 4 2h8a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 12 11H6.5L3.8 13.5V11H4a1.5 1.5 0 0 1-1.5-1.5v-6Z"/><path d="M5.5 5.5h5M5.5 8h3.5"/></svg> AI ÖZEL NOTU / ODAK &amp; HASSASİYET (İSTEĞE BAĞLI)</label>
-                                <input type="text" id="aiUnifiedWishInput" class="ai-unified-wish-input" placeholder="Örn: Omuz ve sırt odaklı olsun, diz yormasın...">
+                                <input type="text" id="aiUnifiedWishInput" name="ai_wish_note" class="ai-unified-wish-input" placeholder="Örn: Omuz ve sırt odaklı olsun, diz yormasın..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true">
                             </div>
                         </div>
                     </div>
@@ -788,7 +788,7 @@
                                 <div style="display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:end;">
                                     <div>
                                         <label for="customWorkoutTitleInput" style="display:block; font-size:11px; font-weight:800; color:#64748B; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">PROGRAM ADI</label>
-                                        <input type="text" id="customWorkoutTitleInput" class="form-input" style="font-weight:800; padding:8px 11px; font-size:14px; color:#0F172A; background:#FFFFFF;" placeholder="Program adını yazın..." value="Özel Programım" oninput="renderCustomRoutineEquipmentSummary()">
+                                        <input type="text" id="customWorkoutTitleInput" name="custom_workout_title" class="form-input" style="font-weight:800; padding:8px 11px; font-size:14px; color:#0F172A; background:#FFFFFF;" placeholder="Program adını yazın..." value="Özel Programım" autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true" oninput="renderCustomRoutineEquipmentSummary()">
                                     </div>
                                     <div>
                                         <label for="customWorkoutRestSelect" style="display:block; font-size:11px; font-weight:800; color:#64748B; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">DİNLENME</label>
@@ -860,7 +860,7 @@
                                     <div id="studioRegionChips" style="display:flex; flex-wrap:wrap; gap:5px;">
                                         <!-- Populated dynamically -->
                                     </div>
-                                    <input type="text" id="studioSearchInput" class="form-input" style="width:190px; flex:1; min-width:150px; padding:7px 10px; font-size:12.5px; background:#F8FAFC;" placeholder="Hareket ara..." oninput="renderStudioExerciseCatalog()">
+                                    <input type="text" id="studioSearchInput" name="studio_ex_search" class="form-input" style="width:190px; flex:1; min-width:150px; padding:7px 10px; font-size:12.5px; background:#F8FAFC;" placeholder="Hareket ara..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true" oninput="renderStudioExerciseCatalog()">
                                 </div>
                                 <!-- DİNAMİK ALT KAS GRUBU ÇİPLERİ -->
                                 <div id="studioSubRegionChips" style="display:none; flex-wrap:wrap; gap:4px; margin-bottom:10px; padding:6px 8px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px;">
@@ -1606,7 +1606,7 @@
                     <span>🏷️ Antrenman İsmi / Program Başlığı</span>
                     <span style="font-size:11px; color:var(--text-secondary); font-weight:normal;">(Hatırlamak için özelleştirin)</span>
                 </label>
-                <input type="text" id="logProgramName" class="form-input" placeholder="Örn: Pazartesi Ağır Çelik, Rodium Bacak Günü...">
+                <input type="text" id="logProgramName" name="log_program_name" class="form-input" placeholder="Örn: Pazartesi Ağır Çelik, Rodium Bacak Günü..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true">
             </div>
 
             <!-- MEKAN & SALON LOKASYONU -->
@@ -1639,7 +1639,7 @@
 
                 <div id="gymCustomGroup" style="margin-top: 10px;">
                     <label id="gymCustomLabel" style="font-size:11px; color:var(--text-secondary); font-weight:700; margin-bottom:4px; display:block;">Salon / Konum Detayı</label>
-                    <input type="text" id="logLocationName" class="form-input" value="Rodium" placeholder="Salon veya konum adını giriniz...">
+                    <input type="text" id="logLocationName" name="log_location_name" class="form-input" value="Rodium" placeholder="Salon veya konum adını giriniz..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true">
                 </div>
             </div>
 
@@ -1781,7 +1781,7 @@
             <div class="edit-log-top-grid">
                 <div>
                     <label for="editLogProgramInput" class="edit-log-field-label">Başlık</label>
-                    <input type="text" id="editLogProgramInput" class="form-input edit-log-input" maxlength="140" placeholder="Antrenman adı">
+                    <input type="text" id="editLogProgramInput" name="edit_log_program" class="form-input edit-log-input" maxlength="140" placeholder="Antrenman adı" autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true">
                 </div>
                 <div>
                     <label for="editLogDurationInput" class="edit-log-field-label">Süre (Dk)</label>
@@ -1821,7 +1821,7 @@
                     </div>
                     <div>
                         <label for="editLogLocationNameInput" class="edit-log-field-label">Salon / Konum</label>
-                        <input type="text" id="editLogLocationNameInput" class="form-input edit-log-input" maxlength="50" placeholder="Örn: Rodium">
+                        <input type="text" id="editLogLocationNameInput" name="edit_log_location" class="form-input edit-log-input" maxlength="50" placeholder="Örn: Rodium" autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true">
                     </div>
                 </div>
                 <div style="margin-top:8px;">
@@ -1837,7 +1837,7 @@
             <div class="edit-log-add-ex-block">
                 <button type="button" class="edit-log-secondary-btn" id="editLogAddExToggleBtn" onclick="toggleEditLogAddExerciseDrawer()">+ Hareket Ekle</button>
                 <div id="editLogAddExDrawer" style="display:none; margin-top:8px;">
-                    <input type="text" id="editLogAddExSearchInput" class="form-input edit-log-input" placeholder="Hareket ara..." oninput="renderEditLogAddExerciseResults()">
+                    <input type="text" id="editLogAddExSearchInput" name="edit_log_ex_search" class="form-input edit-log-input" placeholder="Hareket ara..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true" oninput="renderEditLogAddExerciseResults()">
                     <div id="editLogAddExResults" class="edit-log-picker-list"></div>
                 </div>
             </div>
@@ -1991,7 +1991,7 @@
 
             <div class="form-group">
                 <label class="form-label">Notlar & Koşullar</label>
-                <input type="text" id="scaleNotes" class="form-input" placeholder="Örn: Sabah aç karna, tuvalet sonrası...">
+                <input type="text" id="scaleNotes" name="scale_notes" class="form-input" placeholder="Örn: Sabah aç karna, tuvalet sonrası..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true">
             </div>
 
             <button class="btn btn-gold" style="width:100%; padding:13px; font-weight:900;" onclick="saveScaleEntry()">
@@ -2053,7 +2053,7 @@
 
             <div class="form-group">
                 <label class="form-label">Ölçüm Notu</label>
-                <input type="text" id="measureNotes" class="form-input" placeholder="Örn: Sabah aç karna, soğuk ölçüm...">
+                <input type="text" id="measureNotes" name="measure_notes" class="form-input" placeholder="Örn: Sabah aç karna, soğuk ölçüm..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true">
             </div>
 
             <button class="btn btn-gold" style="width:100%; padding:13px; font-weight:900;" onclick="saveMeasurementsEntry()">
@@ -2217,7 +2217,7 @@
                     </div>
                     <div>
                         <label class="form-label" style="font-size:10.5px; margin-bottom:3px;">Özel İstek, Zayıf Bölge veya Sakatlık Durumu (Opsiyonel)</label>
-                        <input type="text" id="aiModalUserWishInput" class="form-input" placeholder="Örn: Geçen hafta sırt ve kol az çalıştım, dizimde hassasiyet var..." style="font-size:12px; padding:8px 10px;">
+                        <input type="text" id="aiModalUserWishInput" name="ai_modal_wish" class="form-input" placeholder="Örn: Geçen hafta sırt ve kol az çalıştım, dizimde hassasiyet var..." style="font-size:12px; padding:8px 10px;" autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true">
                     </div>
                 </div>
             </div>
@@ -2440,7 +2440,7 @@
                         </div>
                         <!-- CUSTOM USER QUERY -->
                         <div style="display:flex; gap:6px; align-items:center;">
-                            <input type="text" id="geminiCustomQueryInput" class="form-input" style="font-size:11.5px; padding:7px 10px;" placeholder="✍️ Özel durumunu yaz (örn: bel ağrısı, 15 kg dambıl)..." onkeydown="if(event.key === 'Enter') submitGeminiCustomQuery()">
+                            <input type="text" id="geminiCustomQueryInput" name="gemini_custom_query" class="form-input" style="font-size:11.5px; padding:7px 10px;" placeholder="✍️ Özel durumunu yaz (örn: bel ağrısı, 15 kg dambıl)..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true" onkeydown="if(event.key === 'Enter') submitGeminiCustomQuery()">
                             <button type="button" class="btn btn-gold" id="btnSubmitGeminiQuery" style="font-size:11.5px; padding:7px 12px; font-weight:800; white-space:nowrap; background:#9333ea; border-color:#a855f7; color:#fff;" onclick="submitGeminiCustomQuery()">
                                 🚀 Sor
                             </button>
@@ -2462,7 +2462,7 @@
             <!-- TAB 4: DİĞER (GENİŞLETİLMİŞ KATALOG VE SERBEST ARAMA) -->
             <div id="pickerSubPanelCatalog" style="display:none; margin-bottom:8px;">
                 <div style="margin-bottom:6px;">
-                    <input type="text" id="pickerSearchInput" class="form-input" placeholder="🔍 Egzersiz adı, kas veya ipucu ara..." oninput="handlePickerSearchInput()">
+                    <input type="text" id="pickerSearchInput" name="picker_ex_search" class="form-input" placeholder="🔍 Egzersiz adı, kas veya ipucu ara..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true" oninput="handlePickerSearchInput()">
                 </div>
                 <div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:4px;" id="pickerCategoryPills">
                     <button class="btn-quick-equip" id="pill_cat_all" onclick="setPickerCategory('all')">Tüm Kategoriler</button>
@@ -2676,7 +2676,7 @@
                 <label for="interSetSearchInput" style="font-size:11.5px; font-weight:800; color:#0F172A; display:block; margin-bottom:5px;">
                     🔍 Tüm Egzersiz Havuzundan Ara & Seç:
                 </label>
-                <input type="text" id="interSetSearchInput" class="form-input" style="padding:9px 12px; font-size:12.5px;" placeholder="Hareket adı veya bölge yazın (Örn: Plank, Squat, Lunge, Şınav)..." oninput="filterInterSetPoolSearch()">
+                <input type="text" id="interSetSearchInput" name="interset_ex_search" class="form-input" style="padding:9px 12px; font-size:12.5px;" placeholder="Hareket adı veya bölge yazın (Örn: Plank, Squat, Lunge, Şınav)..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true" oninput="filterInterSetPoolSearch()">
                 <div id="interSetSearchResults" style="max-height:155px; overflow-y:auto; margin-top:6px; display:none; border:1px solid #CBD5E1; border-radius:10px; padding:6px; background:#F8FAFC;">
                 </div>
             </div>
@@ -2761,7 +2761,7 @@
 
             <!-- Arama Kutusu -->
             <div style="margin-bottom:10px;">
-                <input type="text" id="quickWorkoutSearchInput" class="form-input" style="padding:10px 14px; font-size:14px; font-weight:800; border-radius:12px; background:#F8FAFC; border:1.5px solid #CBD5E1; color:#0F172A; width:100%;" placeholder="🔍 Egzersiz adı veya kas grubu yazın..." oninput="onQuickWorkoutSearch(this.value)">
+                <input type="text" id="quickWorkoutSearchInput" name="quick_workout_search" class="form-input" style="padding:10px 14px; font-size:14px; font-weight:800; border-radius:12px; background:#F8FAFC; border:1.5px solid #CBD5E1; color:#0F172A; width:100%;" placeholder="🔍 Egzersiz adı veya kas grubu yazın..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true" oninput="onQuickWorkoutSearch(this.value)">
             </div>
 
             <!-- Kategori Hapları -->
