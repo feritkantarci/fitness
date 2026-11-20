@@ -3026,6 +3026,8 @@
       if (data && data.ok && Array.isArray(data.activities) && data.activities.length > 0) {
         mergeFetchedWatchActivities(data.activities);
         syncedLive = true;
+        const uid = getActiveUidSafe();
+        if (uid) _silentSyncLastAt['activities:' + uid] = Date.now();
       }
     } catch (err) {
       notifyGarminDeliveryIssue(err, true);
@@ -3944,43 +3946,74 @@
     return map;
   }
 
+  const _silentSyncInFlight = {};
+  const _silentSyncLastAt = {};
+  const SILENT_SYNC_COOLDOWN_MS = 15000;
+
+  /**
+   * Aynı kullanıcı için arka plan saat eşitleme isteklerini tekilleştirir
+   * ve kısa süreli soğuma (15 sn) uygulayarak mükerrer ağ çağrılarını engeller.
+   */
+  function runDedupedSilentSync(syncType, taskFn) {
+    const uid = getActiveUidSafe();
+    if (!uid) return Promise.resolve(false);
+    const key = `${syncType}:${uid}`;
+    if (_silentSyncInFlight[key]) return _silentSyncInFlight[key];
+    if (Date.now() - (_silentSyncLastAt[key] || 0) < SILENT_SYNC_COOLDOWN_MS) {
+      return Promise.resolve(false);
+    }
+    const promise = (async () => {
+      try {
+        const ok = await taskFn(uid);
+        if (ok) _silentSyncLastAt[key] = Date.now();
+        return ok;
+      } finally {
+        delete _silentSyncInFlight[key];
+      }
+    })();
+    _silentSyncInFlight[key] = promise;
+    return promise;
+  }
+
   async function syncGarminWellnessStepsSilent() {
     if (!isGarminEnabledForCurrentUser() || !hasGarminCredentialsConfigured()) return false;
-    try {
-      const res = await fetchGarminBridge('/api/tredict/wellness?days=21', { silentBackground: true });
-      const data = await res.json();
-      if (data && data.ok && Array.isArray(data.daily) && data.daily.length > 0) {
-        const current = getStoredWellnessStepsMap();
-        data.daily.forEach(d => {
-          if (d && d.date) {
-            current[d.date] = {
-              date: d.date,
-              steps: Number(d.steps || 0),
-              floorsClimbed: Number(d.floorsClimbed || 0),
-              restingHR: d.restingHR ? Number(d.restingHR) : (current[d.date]?.restingHR || null),
-              sleepScore: d.sleepScore ? Number(d.sleepScore) : (current[d.date]?.sleepScore || null),
-              syncedAt: '00:01_auto'
-            };
+    return runDedupedSilentSync('wellness', async () => {
+      try {
+        const res = await fetchGarminBridge('/api/tredict/wellness?days=21', { silentBackground: true });
+        const data = await res.json();
+        if (data && data.ok && Array.isArray(data.daily) && data.daily.length > 0) {
+          const current = getStoredWellnessStepsMap();
+          data.daily.forEach(d => {
+            if (d && d.date) {
+              current[d.date] = {
+                date: d.date,
+                steps: Number(d.steps || 0),
+                floorsClimbed: Number(d.floorsClimbed || 0),
+                restingHR: d.restingHR ? Number(d.restingHR) : (current[d.date]?.restingHR || null),
+                sleepScore: d.sleepScore ? Number(d.sleepScore) : (current[d.date]?.sleepScore || null),
+                syncedAt: '00:01_auto'
+              };
+            }
+          });
+          localStorage.setItem(getScopedGarminKey(WELLNESS_STEPS_KEY), JSON.stringify(current));
+          const uid = getActiveUidSafe();
+          if (uid && typeof window !== 'undefined' && typeof window.scheduleUserStateCloudSync === 'function') {
+            try { window.scheduleUserStateCloudSync(uid); } catch {}
           }
-        });
-        localStorage.setItem(getScopedGarminKey(WELLNESS_STEPS_KEY), JSON.stringify(current));
-        const uid = getActiveUidSafe();
-        if (uid && typeof window !== 'undefined' && typeof window.scheduleUserStateCloudSync === 'function') {
-          try { window.scheduleUserStateCloudSync(uid); } catch {}
-        }
-        if (typeof window.refreshTopFitnessCardioScoreBars === 'function') {
-          window.refreshTopFitnessCardioScoreBars();
-        }
-        if (typeof window.renderAnalytics === 'function') {
-          const tab = document.getElementById('analyticsTab');
-          if (tab && tab.classList.contains('active')) {
-            window.renderAnalytics();
+          if (typeof window.refreshTopFitnessCardioScoreBars === 'function') {
+            window.refreshTopFitnessCardioScoreBars();
           }
+          if (typeof window.renderAnalytics === 'function') {
+            const tab = document.getElementById('analyticsTab');
+            if (tab && tab.classList.contains('active')) {
+              window.renderAnalytics();
+            }
+          }
+          return true;
         }
-        return true;
-      }
-    } catch {}
-    return false;
+      } catch {}
+      return false;
+    });
   }
 
   let midnightStepTimerId = null;
@@ -4138,23 +4171,24 @@
 
   async function syncGarminActivitiesSilent() {
     if (!isGarminEnabledForCurrentUser() || !hasGarminCredentialsConfigured()) return false;
-    try {
-      const res = await fetchGarminBridge('/api/tredict/activities?days=14', { silentBackground: true });
-      const data = await res.json();
-      if (data && data.ok && Array.isArray(data.activities) && data.activities.length > 0) {
-        const uid = getActiveUidSafe();
-        const telemetryChanged = mergeFetchedWatchActivities(data.activities);
-        pruneStaleGarminStorage(uid);
-        handoffCompletedActivitiesToTabChiefs();
-        renderHistoryGarminSyncPanel();
-        renderAnalyticsGarminCoachPanel();
-        if (uid && telemetryChanged && typeof window !== 'undefined' && typeof window.scheduleUserStateCloudSync === 'function') {
-          try { window.scheduleUserStateCloudSync(uid); } catch {}
+    return runDedupedSilentSync('activities', async (uid) => {
+      try {
+        const res = await fetchGarminBridge('/api/tredict/activities?days=14', { silentBackground: true });
+        const data = await res.json();
+        if (data && data.ok && Array.isArray(data.activities) && data.activities.length > 0) {
+          const telemetryChanged = mergeFetchedWatchActivities(data.activities);
+          pruneStaleGarminStorage(uid);
+          handoffCompletedActivitiesToTabChiefs();
+          renderHistoryGarminSyncPanel();
+          renderAnalyticsGarminCoachPanel();
+          if (uid && telemetryChanged && typeof window !== 'undefined' && typeof window.scheduleUserStateCloudSync === 'function') {
+            try { window.scheduleUserStateCloudSync(uid); } catch {}
+          }
+          return true;
         }
-        return true;
-      }
-    } catch {}
-    return false;
+      } catch {}
+      return false;
+    });
   }
 
   function initGarminTredictBridge() {
