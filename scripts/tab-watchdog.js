@@ -2658,6 +2658,38 @@ function runAcademicMathSuite(moduleSources, dbText) {
         const ok = darkCardRule && darkCardSurface && lightLabelRule && paramSelectDark;
         return { ok, actual: JSON.stringify({ darkCardRule, darkCardSurface, lightLabelRule, paramSelectDark }) };
       }
+    },
+    {
+      id: 'T45',
+      owner: 'generator-guard',
+      title: 'Üretici Ekipman Etiketleri Koyu Tema Bütünlüğü',
+      expected: 'ekipman etiketleri ve seçili durumu koyu mor temaya uyumlu, metinleri okunaklı',
+      run: () => {
+        const cssCode = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
+        const chipRule = cssCode.includes('#generatorTab #equipChipsWrap .equip-chip');
+        const darkSurface = cssCode.includes('background: #181530 !important');
+        const selectedRule = cssCode.includes('#generatorTab #equipChipsWrap .equip-chip.selected');
+        const selectedContrast = cssCode.includes('color: #F3E8FF !important');
+        const ok = chipRule && darkSurface && selectedRule && selectedContrast;
+        return { ok, actual: JSON.stringify({ chipRule, darkSurface, selectedRule, selectedContrast }) };
+      }
+    },
+    {
+      id: 'T46',
+      owner: 'workout-guard',
+      title: 'Hareket Rehberi Koyu Tema Bütünlüğü',
+      expected: 'rehber kabuğu, sekmeler ve gömülü açık gri paneller koyu tema ile okunaklı kalır',
+      run: () => {
+        const cssCode = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
+        const darkGuideShell = cssCode.includes('.wk-ex-detail-drawer .pos-guide-content {\n    background: #100E22 !important');
+        const darkGuideHeader = cssCode.includes('.wk-ex-detail-drawer .pos-guide-header {\n    background: #121024 !important');
+        const darkGuideTabs = cssCode.includes('.wk-ex-detail-drawer .guide-toggle-tabs {\n    background: #121024 !important');
+        const inlinePanelOverride = cssCode.includes('.wk-ex-detail-drawer .pos-guide-content [style*="background:#F8FAFC"]')
+          && cssCode.includes('background: #181530 !important');
+        const readableGuideText = cssCode.includes('.wk-ex-detail-drawer .pos-step-desc {\n    color: #CBD5E1 !important');
+        const ok = darkGuideShell && darkGuideHeader && darkGuideTabs && inlinePanelOverride && readableGuideText;
+        return { ok, actual: JSON.stringify({ darkGuideShell, darkGuideHeader, darkGuideTabs, inlinePanelOverride, readableGuideText }) };
+      }
     }
   ];
 

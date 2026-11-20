@@ -14767,3 +14767,103 @@ div[style*="linear-gradient"][style*="F43F5E"] div {
     color: #FECACA !important;
 }
 
+/* Üretici ekipman seçimi: koyu mor yüzey ve net seçim durumu */
+#generatorTab #equipChipsWrap .equip-chip {
+    background: #181530 !important;
+    border-color: rgba(167, 139, 250, 0.28) !important;
+    color: #CBD5E1 !important;
+    box-shadow: none !important;
+}
+
+#generatorTab #equipChipsWrap .equip-chip:hover {
+    background: #221D42 !important;
+    border-color: rgba(167, 139, 250, 0.65) !important;
+    color: #FFFFFF !important;
+}
+
+#generatorTab #equipChipsWrap .equip-chip.selected {
+    background: rgba(109, 40, 217, 0.32) !important;
+    border-color: #A78BFA !important;
+    color: #F3E8FF !important;
+    box-shadow: 0 3px 12px rgba(109, 40, 217, 0.24) !important;
+}
+
+#generatorTab #equipChipsWrap .equip-chip.selected .equip-check-icon {
+    color: #DDD6FE !important;
+}
+
+/* Hareket rehberi: eğitim görselleri dışındaki arayüz katmanları koyu tema */
+.wk-ex-detail-drawer .pos-guide-wrapper {
+    border-color: rgba(167, 139, 250, 0.24) !important;
+    background: #100E22 !important;
+}
+
+.wk-ex-detail-drawer .pos-guide-header {
+    background: #121024 !important;
+    border-bottom-color: rgba(167, 139, 250, 0.2) !important;
+}
+
+.wk-ex-detail-drawer .pos-guide-content {
+    background: #100E22 !important;
+    color: #F8FAFC !important;
+}
+
+.wk-ex-detail-drawer .guide-toggle-tabs {
+    background: #121024 !important;
+    border: 1px solid rgba(167, 139, 250, 0.16) !important;
+}
+
+.wk-ex-detail-drawer .guide-toggle-tabs .btn-guide-tab {
+    color: #CBD5E1 !important;
+}
+
+.wk-ex-detail-drawer .guide-toggle-tabs .btn-guide-tab.active {
+    background: rgba(139, 92, 246, 0.2) !important;
+    border-color: rgba(167, 139, 250, 0.4) !important;
+    color: #DDD6FE !important;
+}
+
+.wk-ex-detail-drawer .pos-diagram-toolbar .btn-diagram-tool {
+    background: #181530 !important;
+    border-color: rgba(167, 139, 250, 0.28) !important;
+    color: #E2E8F0 !important;
+}
+
+.wk-ex-detail-drawer .pos-diagram-toolbar .btn-diagram-tool:hover {
+    background: #221D42 !important;
+    border-color: #A78BFA !important;
+    color: #FFFFFF !important;
+}
+
+.wk-ex-detail-drawer .pos-guide-content [style*="background:#F8FAFC"],
+.wk-ex-detail-drawer .pos-guide-content [style*="background: #F8FAFC"] {
+    background: #181530 !important;
+    border-color: rgba(167, 139, 250, 0.2) !important;
+    color: #CBD5E1 !important;
+}
+
+.wk-ex-detail-drawer .pos-guide-content [style*="background:#F1F5F9"],
+.wk-ex-detail-drawer .pos-guide-content [style*="background: #F1F5F9"] {
+    background: #181530 !important;
+    border-color: rgba(167, 139, 250, 0.2) !important;
+    color: #CBD5E1 !important;
+}
+
+.wk-ex-detail-drawer .pos-extra-info-body > div:first-child > div:first-child {
+    color: #CBD5E1 !important;
+}
+
+.wk-ex-detail-drawer .pos-extra-info-body [style*="color:#92400E"],
+.wk-ex-detail-drawer .pos-extra-info-body [style*="color: #92400E"] {
+    color: #FDE68A !important;
+}
+
+.wk-ex-detail-drawer .pos-guide-content [style*="color:#0369A1"],
+.wk-ex-detail-drawer .pos-guide-content [style*="color: #0369A1"] {
+    color: #7DD3FC !important;
+}
+
+.wk-ex-detail-drawer .pos-step-desc {
+    color: #CBD5E1 !important;
+}
+
