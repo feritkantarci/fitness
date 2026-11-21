@@ -738,7 +738,7 @@
             const safeModule = maskFn(ev.module || '');
             const safeAction = maskFn(ev.action || '');
             const safeUser = maskFn(ev.userName || ev.uid || 'Sporcu');
-            const safeVer = maskFn(ev.appVersion || 'v347');
+            const safeVer = maskFn(ev.appVersion || 'v349');
 
             return `
                 <div style="background:#121024; border:1px solid ${isErr ? 'rgba(248,113,113,0.45)' : 'rgba(251,191,36,0.35)'}; border-radius:10px; padding:10px 12px;">
@@ -823,8 +823,8 @@
         ];
         target.forEach((ev, idx) => {
             const tm = ev.at ? new Date(ev.at).toISOString() : '';
-            lines.push(`${idx + 1}. [${gateNames[ev.gate] || ev.gate}] (${ev.severity === 'error' ? 'ARIZA' : 'ONARIM'}${ev.repeatCount > 1 ? ' ×' + ev.repeatCount : ''}) [${maskFn(ev.appVersion || 'v347')}]`);
-            lines.push(`   Sporcu: ${maskFn(ev.userName || ev.uid || 'Sporcu')} | Sürüm: ${maskFn(ev.appVersion || 'v347')} | Modül: ${maskFn(ev.module)} | İşlem: ${maskFn(ev.action)}`);
+            lines.push(`${idx + 1}. [${gateNames[ev.gate] || ev.gate}] (${ev.severity === 'error' ? 'ARIZA' : 'ONARIM'}${ev.repeatCount > 1 ? ' ×' + ev.repeatCount : ''}) [${maskFn(ev.appVersion || 'v349')}]`);
+            lines.push(`   Sporcu: ${maskFn(ev.userName || ev.uid || 'Sporcu')} | Sürüm: ${maskFn(ev.appVersion || 'v349')} | Modül: ${maskFn(ev.module)} | İşlem: ${maskFn(ev.action)}`);
             if (ev.inputSummary) lines.push(`   Girdi: ${maskFn(ev.inputSummary)}`);
             lines.push(`   Sonuç: ${maskFn(ev.outcome)} | Zaman: ${tm}`);
         });

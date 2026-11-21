@@ -6,7 +6,7 @@ description: Çelik Kodu PWA içindeki Saat & Takvim Köprüsü Şefi (Garmin & 
 # ⌚ Çelik Kodu — 7. Oda: Garmin & Tredict Şefi (`garmin-tredict-guard`)
 
 - **Fiziksel Oda Dosyası:** `js/garmin-tredict-bridge.js`
-- **Zorunlu Sınav Maddeleri:** `T16` (Garmin kas doğrulaması, Garmin'de olmayan hareketi isimsiz+notlu gönderme ve saatten dönüşte orijinal hareket kimliği + yalnızca sağlık verisi birleştirmesi), `T22` (7 günlük tekil kanonik takvim birleştirmesi, tekil debounce zamanlayıcısı, kullanıcı bazlı eşzamanlı istek kilidi ve sıfır mükerrer antrenman garantisi), `T56` (Saat Senkronizasyonu kartının onay bekleyen kayıt yoksa gizlenmesi, Test butonsuz/emojisiz/çerçevesiz düz satırlar, mor Onayla ve gri çöp kutusu simgesi)
+- **Zorunlu Sınav Maddeleri:** `T16` (Garmin kas doğrulaması, Garmin'de olmayan hareketi isimsiz+notlu gönderme ve saatten dönüşte orijinal hareket kimliği + yalnızca sağlık verisi birleştirmesi), `T22` (7 günlük tekil kanonik takvim birleştirmesi, tekil debounce zamanlayıcısı, kullanıcı bazlı eşzamanlı istek kilidi ve sıfır mükerrer antrenman garantisi), `T56` (Saat Senkronizasyonu kartının onay bekleyen kayıt yoksa gizlenmesi, Test butonsuz/emojisiz/çerçevesiz düz satırlar, mor Onayla ve gri çöp kutusu simgesi), `T58`/`T59` (Saat devir tesliminde kanonik set hacmi ve izometrik süre metriği hesabı + 7 günden eski ham saat telemetrisi/manifest önbelleği budama)
 
 Bu şef, **Çelik Kodu PWA** ile **Garmin Forerunner 945 / Tredict** arasındaki tüm veri trafiğinin tek sorumlusudur. Uygulamanın kendi bilimsel egzersiz ve kas mimarisini Garmin'in eksik veya hatalı tahminlerinden korur ve ürettiği geçmiş kayıtlarını `window.CelikBridgeCustoms` gümrüğünden geçirerek teslim eder.
 

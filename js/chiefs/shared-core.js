@@ -3921,3 +3921,256 @@
             return null;
         }
 
+        function normalizeExerciseTargetSpec(ex, fallbackSets = 3, fallbackReps = '8-12') {
+            if (!ex) {
+                return {
+                    sets: Number(fallbackSets) || 3,
+                    reps: String(fallbackReps || '8-12'),
+                    metricMode: 'reps',
+                    isCardioMinutes: false,
+                    isTimeBased: false,
+                    isBodyweight: false,
+                    repsCorrected: false,
+                    setsCorrected: false
+                };
+            }
+            const exMode = getExerciseMetricMode(ex);
+            const isCardio = exMode === 'cardio_min';
+            const isTime = exMode === 'time_sec';
+            const isBw = isExerciseBodyweight(ex);
+            const rawSets = Number(ex.targetSets || ex.sets || fallbackSets) || 3;
+            let sets = rawSets;
+            let setsCorrected = false;
+            const hasRawReps = ex.targetReps !== undefined && ex.targetReps !== null && String(ex.targetReps).trim() !== '';
+            let reps = String(hasRawReps ? ex.targetReps : (ex.reps || fallbackReps || '8-12')).trim();
+            let repsCorrected = false;
+
+            if (isCardio) {
+                const defMin = resolveDefaultExerciseSetTarget(ex, '') || 20;
+                if (ex.targetSets !== undefined && Number(ex.targetSets) !== 1) {
+                    setsCorrected = true;
+                }
+                sets = 1;
+                const numM = parseFloat(reps);
+                const hasMinUnit = /\b(dk|dak|min)\b/i.test(reps);
+                const hasInvalidForCardio = /^\d+\s*[-–—]\s*\d+$/.test(reps) || /\b(sn|saniye|sec|tk|tekrar|rep)\b/i.test(reps);
+                if (!reps || hasInvalidForCardio || !hasMinUnit || isNaN(numM) || numM < 3) {
+                    reps = `${defMin} dk`;
+                    repsCorrected = true;
+                }
+            } else if (isTime) {
+                const defSec = resolveDefaultExerciseSetTarget(ex, '') || 30;
+                const numS = parseFloat(reps);
+                const hasSecUnit = /\b(sn|saniye|sec)\b/i.test(reps);
+                const hasInvalidForTime = /\b(dk|dak|min|maks|max|tk|tekrar|rep)\b/i.test(reps) || /^\d+\s*[-–—]\s*\d+$/.test(reps);
+                if (!reps || hasInvalidForTime) {
+                    reps = `${defSec} sn`;
+                    repsCorrected = true;
+                } else if (!hasSecUnit) {
+                    if (/^\d+(?:\.\d+)?$/.test(reps) && !isNaN(numS) && numS >= 15) {
+                        reps = `${Math.round(numS)} sn`;
+                    } else {
+                        reps = `${defSec} sn`;
+                    }
+                    repsCorrected = true;
+                }
+            } else {
+                if (/\b(sn|saniye|sec|dk|dak|min)\b/i.test(reps)) {
+                    reps = (fallbackReps && !/\b(sn|saniye|sec|dk|dak|min)\b/i.test(String(fallbackReps))) ? String(fallbackReps) : '8-12';
+                    repsCorrected = true;
+                }
+            }
+
+            return {
+                sets,
+                reps,
+                metricMode: exMode,
+                isCardioMinutes: isCardio,
+                isTimeBased: isTime,
+                isBodyweight: isBw,
+                repsCorrected,
+                setsCorrected
+            };
+        }
+        window.normalizeExerciseTargetSpec = normalizeExerciseTargetSpec;
+
+        /** Hareketin kart/liste/önizleme gösterimi için kanonik set, hedef metin ve dinlenme bilgisi üretir. */
+        function resolveExerciseDisplayTarget(ex, fallbackScheme = null) {
+            const fbSets = (fallbackScheme && Number(fallbackScheme.sets)) || 3;
+            const fbReps = (fallbackScheme && fallbackScheme.reps) || '8-12';
+            const fbRest = (fallbackScheme && Number(fallbackScheme.rest)) || 60;
+            const norm = normalizeExerciseTargetSpec(ex, fbSets, fbReps);
+            const repsStr = String(norm.reps || fbReps || '8-12');
+            const repsSuffix = /sn|dk|metre|tur|ad[ıi]m|tekrar/i.test(repsStr) ? '' : ' Tekrar';
+            const rest = (ex && ex.customRest !== undefined && ex.customRest !== null) ? ex.customRest : fbRest;
+            return {
+                sets: norm.sets,
+                reps: repsStr,
+                repsLabel: `${repsStr}${repsSuffix}`,
+                rest,
+                metricMode: norm.metricMode,
+                isTimeBased: norm.isTimeBased,
+                isCardioMinutes: norm.isCardioMinutes,
+                isBodyweight: norm.isBodyweight
+            };
+        }
+        window.resolveExerciseDisplayTarget = resolveExerciseDisplayTarget;
+
+        function recalculateWorkoutLogMetrics(rawLog) {
+            if (!rawLog || typeof rawLog !== 'object' || !Array.isArray(rawLog.exercises)) {
+                return { log: rawLog, changed: false, unitCorruptionFixed: false, bodyweightVolumeUpdated: false };
+            }
+            let changed = false;
+            let unitCorruptionFixed = false;
+            let bodyweightVolumeUpdated = false;
+            let totalVolumeKg = 0;
+            let totalRepsCompleted = 0;
+            let totalIsometricSecsCompleted = 0;
+            let totalSetsCompleted = 0;
+            let hasExplicitSetArray = false;
+
+            for (const ex of rawLog.exercises) {
+                if (!ex || typeof ex !== 'object') continue;
+                const canonicalEx = resolveCanonicalDbExercise(ex);
+                const mode = getExerciseMetricMode(canonicalEx);
+                const isCardio = mode === 'cardio_min';
+                const isTime = mode === 'time_sec';
+                const isBw = isExerciseBodyweight(canonicalEx);
+
+                if (ex.metricMode !== mode) { ex.metricMode = mode; changed = true; }
+                if (ex.isCardioMinutes !== isCardio) { ex.isCardioMinutes = isCardio; changed = true; }
+                if (ex.isTimeBased !== isTime) { ex.isTimeBased = isTime; changed = true; }
+                if (ex.isBodyweight !== isBw) { ex.isBodyweight = isBw; changed = true; }
+
+                if (Array.isArray(ex.sets)) {
+                    hasExplicitSetArray = true;
+                    let exVol = 0;
+                    let exCompletedSets = 0;
+                    for (const st of ex.sets) {
+                        if (!st || typeof st !== 'object') continue;
+                        const isDone = st.completed !== false;
+                        if (isCardio) {
+                            if ((Number(st.weight) || 0) > 0 || (Number(st.volume) || 0) > 0) {
+                                unitCorruptionFixed = true;
+                                changed = true;
+                            }
+                            st.weight = 0;
+                            st.volume = 0;
+                            if (st.isCardioMinutes !== true) { st.isCardioMinutes = true; changed = true; }
+                            if (st.isTimeBased !== false) { st.isTimeBased = false; changed = true; }
+                            if (st.isBodyweight !== isBw) { st.isBodyweight = isBw; changed = true; }
+                            if (isDone) {
+                                exCompletedSets++;
+                                totalSetsCompleted++;
+                            }
+                        } else if (isDone) {
+                            exCompletedSets++;
+                            totalSetsCompleted++;
+                            const w = Math.max(0, Number(st.weight) || 0);
+                            const r = Math.max(0, parseInt(st.reps, 10) || 0);
+                            const prevStVol = Number(st.volume);
+                            const setVol = Math.round(calculateExerciseSetVolume(canonicalEx, w, r) * 10) / 10;
+
+                            if (!isNaN(prevStVol) && Math.abs(prevStVol - setVol) > 0.6) {
+                                if (isBw && prevStVol > 0) {
+                                    bodyweightVolumeUpdated = true;
+                                    changed = true;
+                                } else if (isBw && prevStVol === 0 && r > 0) {
+                                    unitCorruptionFixed = true;
+                                    changed = true;
+                                } else if (!isBw) {
+                                    unitCorruptionFixed = true;
+                                    changed = true;
+                                }
+                            } else if ((st.volume === undefined || st.volume === null) && setVol > 0) {
+                                if (isBw) bodyweightVolumeUpdated = true;
+                                changed = true;
+                            }
+
+                            st.volume = setVol;
+                            if (st.isBodyweight !== isBw) { st.isBodyweight = isBw; changed = true; }
+                            if (st.isTimeBased !== isTime) { st.isTimeBased = isTime; changed = true; }
+                            if (st.isCardioMinutes !== false) { st.isCardioMinutes = false; changed = true; }
+
+                            exVol += setVol;
+                            totalVolumeKg += setVol;
+                            if (isTime) {
+                                totalIsometricSecsCompleted += r;
+                            } else {
+                                totalRepsCompleted += r;
+                            }
+                        } else {
+                            if ((Number(st.volume) || 0) !== 0) {
+                                st.volume = 0;
+                                changed = true;
+                            }
+                        }
+                    }
+                    const nextExVol = Math.round(exVol * 10) / 10;
+                    const prevExVol = Number(ex.exerciseVolume);
+                    if (isNaN(prevExVol) || Math.abs(prevExVol - nextExVol) > 0.6) {
+                        ex.exerciseVolume = nextExVol;
+                        changed = true;
+                    }
+                    if (ex.completedSetsCount !== exCompletedSets) {
+                        ex.completedSetsCount = exCompletedSets;
+                        changed = true;
+                    }
+                    if (isCardio) {
+                        if ((Number(ex.maxWeight) || 0) > 0 || (Number(ex.weight) || 0) > 0) {
+                            unitCorruptionFixed = true;
+                            changed = true;
+                        }
+                        ex.maxWeight = 0;
+                        if (ex.weight !== undefined) ex.weight = 0;
+                    }
+                } else {
+                    if (isCardio) {
+                        if ((Number(ex.exerciseVolume) || 0) > 0 || (Number(ex.maxWeight) || 0) > 0 || (Number(ex.weight) || 0) > 0) {
+                            unitCorruptionFixed = true;
+                            ex.exerciseVolume = 0;
+                            ex.maxWeight = 0;
+                            if (ex.weight !== undefined) ex.weight = 0;
+                            changed = true;
+                        }
+                    } else if (Number(ex.exerciseVolume) > 0) {
+                        totalVolumeKg += Number(ex.exerciseVolume);
+                    }
+                }
+            }
+
+            if (hasExplicitSetArray) {
+                const nextTotalVol = Math.round(totalVolumeKg * 10) / 10;
+                const prevTotalVol = Number(rawLog.totalVolumeKg);
+                const prevReps = rawLog.totalRepsCompleted;
+                const prevIso = rawLog.totalIsometricSecsCompleted;
+
+                if (prevReps !== undefined && prevReps !== totalRepsCompleted) {
+                    unitCorruptionFixed = true;
+                    changed = true;
+                }
+                if (rawLog.totalRepsCompleted !== totalRepsCompleted) {
+                    rawLog.totalRepsCompleted = totalRepsCompleted;
+                    changed = true;
+                }
+                if (prevIso !== totalIsometricSecsCompleted) {
+                    rawLog.totalIsometricSecsCompleted = totalIsometricSecsCompleted;
+                    changed = true;
+                }
+                if (isNaN(prevTotalVol) || Math.round(prevTotalVol) !== Math.round(nextTotalVol)) {
+                    if (!isNaN(prevTotalVol) && !bodyweightVolumeUpdated) {
+                        unitCorruptionFixed = true;
+                    }
+                    rawLog.totalVolumeKg = nextTotalVol;
+                    changed = true;
+                }
+                if (rawLog.totalSetsCompleted === undefined || rawLog.totalSetsCompleted === null) {
+                    rawLog.totalSetsCompleted = totalSetsCompleted;
+                    changed = true;
+                }
+            }
+
+            return { log: rawLog, changed, unitCorruptionFixed, bodyweightVolumeUpdated };
+        }
+        window.recalculateWorkoutLogMetrics = recalculateWorkoutLogMetrics;
+

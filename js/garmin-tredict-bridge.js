@@ -2186,13 +2186,40 @@
         }
 
         // 2) Uygulamada o gün kayıt yoksa (yalnızca saat kullanıldıysa) geçmiş kaydı oluştur
+        const getGroupCanonicalEx = (g) => {
+          const base = g.matchedEx || { id: g.originalId || 'custom', name: g.originalName || 'Hareket' };
+          return (typeof window.resolveCanonicalDbExercise === 'function')
+            ? window.resolveCanonicalDbExercise(base)
+            : base;
+        };
         const calcVol = resolvedGroups.reduce((sum, g) => {
-          const repsSum = g.sets.reduce((s, x) => s + Number(x.repetitions || 0), 0);
-          return sum + repsSum * Number(g.weight || 0);
+          const cEx = getGroupCanonicalEx(g);
+          const mode = (typeof window.getExerciseMetricMode === 'function') ? window.getExerciseMetricMode(cEx) : 'reps';
+          if (mode === 'cardio_min') return sum;
+          const gw = Number(g.weight || 0);
+          return sum + g.sets.reduce((s, x) => {
+            const w = Number(x.weight ?? gw);
+            const r = Number(x.repetitions || 0);
+            const v = (typeof window.calculateExerciseSetVolume === 'function')
+              ? window.calculateExerciseSetVolume(cEx, w, r)
+              : (w * r);
+            return s + v;
+          }, 0);
         }, 0);
-        const totalVolKg = Math.round((Number(act.summary?.volume) || calcVol || 0) * 10) / 10;
+        const totalVolKg = isCardioAct ? 0 : Math.round((calcVol || Number(act.summary?.volume) || 0) * 10) / 10;
         const totalSetsCount = Number(act.summary?.exerciseSetCount) || resolvedGroups.reduce((s, g) => s + g.sets.length, 0);
-        const totalRepsCount = resolvedGroups.reduce((sum, g) => sum + g.sets.reduce((s, x) => s + Number(x.repetitions || 0), 0), 0);
+        const totalRepsCount = isCardioAct ? 0 : resolvedGroups.reduce((sum, g) => {
+          const cEx = getGroupCanonicalEx(g);
+          const mode = (typeof window.getExerciseMetricMode === 'function') ? window.getExerciseMetricMode(cEx) : 'reps';
+          if (mode === 'cardio_min' || mode === 'time_sec') return sum;
+          return sum + g.sets.reduce((s, x) => s + Number(x.repetitions || 0), 0);
+        }, 0);
+        const totalIsoSecsCount = isCardioAct ? 0 : resolvedGroups.reduce((sum, g) => {
+          const cEx = getGroupCanonicalEx(g);
+          const mode = (typeof window.getExerciseMetricMode === 'function') ? window.getExerciseMetricMode(cEx) : 'reps';
+          if (mode !== 'time_sec') return sum;
+          return sum + g.sets.reduce((s, x) => s + Number(x.repetitions || 0), 0);
+        }, 0);
 
         const actTs = act.date ? new Date(act.date).getTime() : Date.now();
         const actTitleLow = String(act.title || '').toLowerCase().trim();
@@ -2222,6 +2249,7 @@
             totalVolumeKg: totalVolKg,
             totalSetsCompleted: totalSetsCount,
             totalRepsCompleted: totalRepsCount,
+            totalIsometricSecsCompleted: totalIsoSecsCount,
             healthSummary: healthSummaryObj,
             exercises: []
           };
@@ -2266,17 +2294,29 @@
         }
 
         resolvedGroups.forEach(grp => {
-          const avgReps = Math.round(grp.sets.reduce((s, x) => s + (x.repetitions || 10), 0) / grp.sets.length);
-          const wVal = Number(grp.weight || 0);
+          const cEx = getGroupCanonicalEx(grp);
+          const mode = (typeof window.getExerciseMetricMode === 'function') ? window.getExerciseMetricMode(cEx) : 'reps';
+          const isCardioEx = mode === 'cardio_min';
+          const isTimeEx = mode === 'time_sec';
+          const isBwEx = (typeof window.isExerciseBodyweight === 'function') ? window.isExerciseBodyweight(cEx) : Boolean(cEx?.equipment === 'bodyweight');
+          const defMetric = isCardioEx ? 20 : (isTimeEx ? 30 : 10);
+          const avgReps = Math.round(grp.sets.reduce((s, x) => s + (x.repetitions || defMetric), 0) / Math.max(1, grp.sets.length));
+          const wVal = isCardioEx ? 0 : Number(grp.weight || 0);
           const setsArray = grp.sets.map((s, sIdx) => {
-            const rVal = Number(s.repetitions || avgReps || 10);
-            const swVal = Number(s.weight ?? wVal);
+            const rVal = Number(s.repetitions || avgReps || defMetric);
+            const swVal = isCardioEx ? 0 : Number(s.weight ?? wVal);
+            const sVol = (typeof window.calculateExerciseSetVolume === 'function')
+              ? Math.round(window.calculateExerciseSetVolume(cEx, swVal, rVal) * 10) / 10
+              : (isCardioEx ? 0 : swVal * rVal);
             return {
               setNo: sIdx + 1,
               weight: swVal,
               reps: rVal,
+              isBodyweight: isBwEx,
+              isTimeBased: isTimeEx,
+              isCardioMinutes: isCardioEx,
               completed: true,
-              volume: swVal * rVal
+              volume: sVol
             };
           });
           const exId = grp.matchedEx ? grp.matchedEx.id : (grp.originalId || 'custom');
@@ -2286,6 +2326,10 @@
             groupId: grp.groupId,
             id: exId,
             name: exName,
+            metricMode: mode,
+            isBodyweight: isBwEx,
+            isTimeBased: isTimeEx,
+            isCardioMinutes: isCardioEx,
             primaryMuscles: grp.primaryMuscles || [],
             secondaryMuscles: grp.secondaryMuscles || [],
             sets: setsArray,
@@ -2293,8 +2337,8 @@
             weight: wVal,
             completedSets: setsArray.length,
             completedSetsCount: setsArray.length,
-            maxWeight: wVal,
-            exerciseVolume: setsArray.reduce((sum, st) => sum + Number(st.volume || 0), 0),
+            maxWeight: isCardioEx ? 0 : wVal,
+            exerciseVolume: Math.round(setsArray.reduce((sum, st) => sum + Number(st.volume || 0), 0) * 10) / 10,
             healthTelemetry: grp.healthTelemetry
           };
           if (!existingEx) {
@@ -2305,6 +2349,9 @@
             changed = true;
           }
         });
+        if (changed && Array.isArray(existingLog.exercises) && existingLog.exercises.length > 0 && typeof window.recalculateWorkoutLogMetrics === 'function') {
+          window.recalculateWorkoutLogMetrics(existingLog);
+        }
       });
 
       if (changed) {
@@ -2672,14 +2719,21 @@
         ? EXERCISES_DB.find(x => x.id === (item.id || item.exerciseId) || x.name === item.name)
         : null;
       const exName = (exObj && exObj.name) || item.name || item.id || 'Hareket';
-      const setsCount = Math.max(1, Number(item.sets || 3));
-      const repsVal = parseSingleRepCount(item.reps, 10);
+      const exMode = (typeof window !== 'undefined' && typeof window.getExerciseMetricMode === 'function')
+        ? window.getExerciseMetricMode(exObj || item)
+        : (exObj && exObj.isTimeBased ? 'time_sec' : (exObj && exObj.isCardioMinutes ? 'cardio_min' : 'reps'));
+      const setsCount = exMode === 'cardio_min' ? 1 : Math.max(1, Number(item.sets || 3));
+      const repsVal = parseSingleRepCount(item.reps, exMode === 'time_sec' ? 30 : (exMode === 'cardio_min' ? 20 : 10));
       const weightVal = Number(item.weight || item.targetWeight || 12);
       const restSec = Math.max(15, Number(item.rest || item.restSec || 60));
-      const activeSec = Math.max(25, repsVal * 4);
-      const loadSuffix = (weightVal > 0 && (!exObj || exObj.equipment !== 'bodyweight'))
-        ? `${repsVal}x${weightVal}kg`
-        : `${repsVal} Tekrar`;
+      const activeSec = exMode === 'time_sec'
+        ? Math.max(15, repsVal)
+        : (exMode === 'cardio_min' ? Math.max(60, repsVal * 60) : Math.max(25, repsVal * 4));
+      const loadSuffix = exMode === 'time_sec'
+        ? `${repsVal} sn`
+        : (exMode === 'cardio_min'
+          ? `${repsVal} dk`
+          : ((weightVal > 0 && (!exObj || exObj.equipment !== 'bodyweight')) ? `${repsVal}x${weightVal}kg` : `${repsVal} Tekrar`));
 
       blocks.push(
         `${exName}\n` +

@@ -162,20 +162,52 @@
                     const repl = db.find(e => e.id !== cur.id && !isExcluded(e.id) && e.category === cur.category)
                         || db.find(e => e.id !== cur.id && !isExcluded(e.id));
                     if (repl) {
-                        cur = Object.assign({}, repl, { targetSets: cur.targetSets || 3, targetReps: cur.targetReps || '8-12' });
+                        const normRepl = typeof globalScope.normalizeExerciseTargetSpec === 'function'
+                            ? globalScope.normalizeExerciseTargetSpec(repl, cur.targetSets || 3, cur.targetReps || '8-12')
+                            : { sets: cur.targetSets || 3, reps: cur.targetReps || '8-12', metricMode: 'reps', isCardioMinutes: false, isTimeBased: false };
+                        cur = Object.assign({}, repl, {
+                            targetSets: normRepl.sets,
+                            targetReps: normRepl.reps,
+                            metricMode: normRepl.metricMode,
+                            isCardioMinutes: normRepl.isCardioMinutes,
+                            isTimeBased: normRepl.isTimeBased
+                        });
                         fixes++;
                     }
                 }
                 const mode = typeof globalScope.getExerciseMetricMode === 'function' ? globalScope.getExerciseMetricMode(cur) : 'reps';
-                if (mode === 'time_sec') {
-                    const parsedSec = parseInt(String(cur.targetReps || '').replace(/[^0-9]/g, ''), 10);
-                    if (!parsedSec || parsedSec < 15) {
-                        cur = Object.assign({}, cur, { isTimeBased: true, targetReps: '30-45 sn' });
+                if (typeof globalScope.normalizeExerciseTargetSpec === 'function') {
+                    const norm = globalScope.normalizeExerciseTargetSpec(cur, cur.targetSets || 3, cur.targetReps || '8-12');
+                    if (norm.repsCorrected || norm.setsCorrected) {
+                        cur = Object.assign({}, cur, {
+                            targetSets: norm.sets,
+                            sets: mode === 'cardio_min' ? 1 : cur.sets,
+                            targetReps: norm.reps,
+                            metricMode: mode,
+                            isTimeBased: mode === 'time_sec',
+                            isCardioMinutes: mode === 'cardio_min'
+                        });
+                        fixes++;
+                    } else if (cur.metricMode !== mode || cur.isTimeBased !== (mode === 'time_sec') || cur.isCardioMinutes !== (mode === 'cardio_min')) {
+                        cur = Object.assign({}, cur, {
+                            metricMode: mode,
+                            isTimeBased: mode === 'time_sec',
+                            isCardioMinutes: mode === 'cardio_min'
+                        });
+                    }
+                } else if (mode === 'time_sec') {
+                    const rawR = String(cur.targetReps || '').trim();
+                    const numS = parseFloat(rawR);
+                    const badTime = !rawR || /^\d+\s*[-–—]\s*\d+$/.test(rawR) || /\b(dk|dak|min|maks|max|tk|tekrar|rep)\b/i.test(rawR) || (!/\b(sn|saniye|sec)\b/i.test(rawR) && (isNaN(numS) || numS < 15));
+                    if (badTime) {
+                        cur = Object.assign({}, cur, { isTimeBased: true, isCardioMinutes: false, targetReps: '30 sn' });
                         fixes++;
                     }
                 } else if (mode === 'cardio_min') {
-                    if (!cur.isCardioMinutes) {
-                        cur = Object.assign({}, cur, { isCardioMinutes: true, targetSets: 1 });
+                    const rawR = String(cur.targetReps || '').trim();
+                    const badMin = !rawR || !/\b(dk|dak|min)\b/i.test(rawR) || Number(cur.targetSets) !== 1;
+                    if (badMin) {
+                        cur = Object.assign({}, cur, { isCardioMinutes: true, isTimeBased: false, targetSets: 1, targetReps: /\b(dk|dak|min)\b/i.test(rawR) ? rawR : '20 dk' });
                         fixes++;
                     }
                 }
@@ -195,49 +227,55 @@
         return withLoopGuard('workout->history_analytics', () => {
             if (!sessionLog || typeof sessionLog !== 'object' || !Array.isArray(sessionLog.exercises)) return sessionLog;
             let fixes = 0;
-            let cleanTotalReps = 0;
-            let cleanTotalVol = 0;
+            if (typeof globalScope.recalculateWorkoutLogMetrics === 'function') {
+                const res = globalScope.recalculateWorkoutLogMetrics(sessionLog);
+                if (res && res.unitCorruptionFixed) fixes++;
+            } else {
+                let cleanTotalReps = 0;
+                let cleanTotalVol = 0;
 
-            for (const ex of sessionLog.exercises) {
-                if (!ex || typeof ex !== 'object') continue;
-                const mode = typeof globalScope.getExerciseMetricMode === 'function' ? globalScope.getExerciseMetricMode(ex) : 'reps';
-                if (mode === 'cardio_min') {
-                    if (!ex.isCardioMinutes) { ex.isCardioMinutes = true; fixes++; }
-                    for (const s of (ex.sets || [])) {
-                        if (Number(s.weight) > 0) { s.weight = 0; fixes++; }
-                    }
-                    ex.maxWeight = 0;
-                    ex.exerciseVolume = 0;
-                } else if (mode === 'time_sec') {
-                    if (!ex.isTimeBased) { ex.isTimeBased = true; fixes++; }
-                    for (const s of (ex.sets || [])) {
-                        if (s.completed) {
-                            const vol = typeof globalScope.calculateExerciseSetVolume === 'function'
-                                ? globalScope.calculateExerciseSetVolume(ex, s.weight, s.reps)
-                                : 0;
-                            cleanTotalVol += vol;
+                for (const ex of sessionLog.exercises) {
+                    if (!ex || typeof ex !== 'object') continue;
+                    const mode = typeof globalScope.getExerciseMetricMode === 'function' ? globalScope.getExerciseMetricMode(ex) : 'reps';
+                    if (mode === 'cardio_min') {
+                        if (!ex.isCardioMinutes || ex.isTimeBased) {
+                            ex.isCardioMinutes = true;
+                            ex.isTimeBased = false;
+                            fixes++;
                         }
-                    }
-                } else {
-                    for (const s of (ex.sets || [])) {
-                        if (s.completed) {
-                            cleanTotalReps += Number(s.reps) || 0;
-                            const vol = typeof globalScope.calculateExerciseSetVolume === 'function'
-                                ? globalScope.calculateExerciseSetVolume(ex, s.weight, s.reps)
-                                : (Number(s.weight) || 0) * (Number(s.reps) || 0);
-                            cleanTotalVol += vol;
+                        for (const s of (ex.sets || [])) {
+                            if (Number(s.weight) > 0) { s.weight = 0; fixes++; }
+                        }
+                        ex.maxWeight = 0;
+                        ex.exerciseVolume = 0;
+                    } else if (mode === 'time_sec') {
+                        if (!ex.isTimeBased) { ex.isTimeBased = true; fixes++; }
+                        for (const s of (ex.sets || [])) {
+                            if (s && s.completed !== false && typeof globalScope.calculateExerciseSetVolume === 'function') {
+                                cleanTotalVol += globalScope.calculateExerciseSetVolume(ex, s.weight, s.reps);
+                            }
+                        }
+                    } else {
+                        for (const s of (ex.sets || [])) {
+                            if (s && s.completed !== false) {
+                                cleanTotalReps += Number(s.reps) || 0;
+                                const vol = typeof globalScope.calculateExerciseSetVolume === 'function'
+                                    ? globalScope.calculateExerciseSetVolume(ex, s.weight, s.reps)
+                                    : (Number(s.weight) || 0) * (Number(s.reps) || 0);
+                                cleanTotalVol += vol;
+                            }
                         }
                     }
                 }
-            }
 
-            if (sessionLog.totalRepsCompleted !== undefined && sessionLog.totalRepsCompleted !== cleanTotalReps) {
-                sessionLog.totalRepsCompleted = cleanTotalReps;
-                fixes++;
-            }
-            if (sessionLog.totalVolumeKg !== undefined && Math.round(Number(sessionLog.totalVolumeKg) || 0) !== Math.round(cleanTotalVol)) {
-                sessionLog.totalVolumeKg = Math.round(cleanTotalVol * 10) / 10;
-                fixes++;
+                if (sessionLog.totalRepsCompleted !== undefined && sessionLog.totalRepsCompleted !== cleanTotalReps) {
+                    sessionLog.totalRepsCompleted = cleanTotalReps;
+                    fixes++;
+                }
+                if (sessionLog.totalVolumeKg !== undefined && Math.round(Number(sessionLog.totalVolumeKg) || 0) !== Math.round(cleanTotalVol)) {
+                    sessionLog.totalVolumeKg = Math.round(cleanTotalVol * 10) / 10;
+                    fixes++;
+                }
             }
 
             if (fixes > 0) {
@@ -264,7 +302,16 @@
                 globalScope.currentGeneratedWorkout.exercises = globalScope.currentGeneratedWorkout.exercises.map(ex => {
                     if (ex && ex.id === excludedId) {
                         fixedDraft++;
-                        return Object.assign({}, replacement, { targetSets: ex.targetSets || 3, targetReps: ex.targetReps || '8-12' });
+                        const normRepl = typeof globalScope.normalizeExerciseTargetSpec === 'function'
+                            ? globalScope.normalizeExerciseTargetSpec(replacement, ex.targetSets || 3, ex.targetReps || '8-12')
+                            : { sets: ex.targetSets || 3, reps: ex.targetReps || '8-12', metricMode: 'reps', isCardioMinutes: false, isTimeBased: false };
+                        return Object.assign({}, replacement, {
+                            targetSets: normRepl.sets,
+                            targetReps: normRepl.reps,
+                            metricMode: normRepl.metricMode,
+                            isCardioMinutes: normRepl.isCardioMinutes,
+                            isTimeBased: normRepl.isTimeBased
+                        });
                     }
                     return ex;
                 });
@@ -308,8 +355,16 @@
         return withLoopGuard('history->analytics_memory', () => {
             if (!Array.isArray(logs)) return [];
             let fixes = 0;
+            const hasCanonicalRecalc = typeof globalScope.recalculateWorkoutLogMetrics === 'function';
             const out = logs.map(log => {
                 if (!log || typeof log !== 'object' || !Array.isArray(log.exercises)) return log;
+                if (hasCanonicalRecalc) {
+                    const res = globalScope.recalculateWorkoutLogMetrics(log);
+                    if (res && res.unitCorruptionFixed) {
+                        fixes++;
+                    }
+                    return res && res.log ? res.log : log;
+                }
                 const prevVol = Number(log.totalVolumeKg);
                 const prevReps = log.totalRepsCompleted;
                 let cleanVol = 0;
@@ -322,13 +377,13 @@
                         }
                     } else if (mode === 'time_sec') {
                         for (const s of (ex.sets || [])) {
-                            if (s.completed && typeof globalScope.calculateExerciseSetVolume === 'function') {
+                            if (s && s.completed !== false && typeof globalScope.calculateExerciseSetVolume === 'function') {
                                 cleanVol += globalScope.calculateExerciseSetVolume(ex, s.weight, s.reps);
                             }
                         }
                     } else {
                         for (const s of (ex.sets || [])) {
-                            if (s.completed) {
+                            if (s && s.completed !== false) {
                                 cleanReps += Number(s.reps) || 0;
                                 cleanVol += typeof globalScope.calculateExerciseSetVolume === 'function'
                                     ? globalScope.calculateExerciseSetVolume(ex, s.weight, s.reps)

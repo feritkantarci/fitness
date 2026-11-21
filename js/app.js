@@ -52,7 +52,7 @@ window.CELIK_CHIEF_ROOMS = Object.freeze({
             } else if ('serviceWorker' in navigator && navigator.serviceWorker) {
                 window.addEventListener('load', () => {
                     try {
-                        navigator.serviceWorker.register('./sw.js?v=347')
+                        navigator.serviceWorker.register('./sw.js?v=349')
                             .then(reg => {
                                 if (reg.update) reg.update().catch(() => {});
                                 document.addEventListener('visibilitychange', () => {
@@ -92,6 +92,12 @@ window.CELIK_CHIEF_ROOMS = Object.freeze({
                     localStorage.setItem('celik_kodu_calendar_zeroed_v4', 'true');
                 }
                 applyWednesdayHammerCurlPatch();
+                if (typeof window.pruneStaleWatchTelemetryAndDrafts === 'function') {
+                    window.pruneStaleWatchTelemetryAndDrafts(session.userId);
+                }
+                if (typeof window.refreshWorkoutLogsForCurrentBodyweight === 'function') {
+                    window.refreshWorkoutLogsForCurrentBodyweight(session.userId, { syncToCloud: false, skipRender: true });
+                }
                 updateProfileGeminiStatusUI();
                 renderAiHybridHeroBanner();
                 updateSelectedSplitLabel();

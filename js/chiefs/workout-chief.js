@@ -732,13 +732,23 @@
                 return;
             }
 
-            // Normalise string ID exercises to full exercise objects if needed
-            activeWorkoutSession.exercises = activeWorkoutSession.exercises.filter(Boolean).map(ex => {
-                if (typeof ex === 'string') {
-                    const dbEx = EXERCISES_DB.find(e => e.id === ex);
-                    return dbEx || { id: ex, name: ex, equipment: 'bodyweight' };
+            // Normalise string ID exercises to full exercise objects and canonical metric targets
+            const sSchemeSets = (activeWorkoutSession.scheme && activeWorkoutSession.scheme.sets) || 3;
+            const sSchemeReps = (activeWorkoutSession.scheme && activeWorkoutSession.scheme.reps) || '8-12';
+            activeWorkoutSession.exercises = activeWorkoutSession.exercises.filter(Boolean).map(rawEx => {
+                const baseObj = (typeof rawEx === 'string')
+                    ? (EXERCISES_DB.find(e => e.id === rawEx) || { id: rawEx, name: rawEx, equipment: 'bodyweight' })
+                    : Object.assign({}, rawEx);
+                if (typeof normalizeExerciseTargetSpec === 'function') {
+                    const norm = normalizeExerciseTargetSpec(baseObj, baseObj.targetSets || baseObj.sets || sSchemeSets, baseObj.targetReps || baseObj.reps || sSchemeReps);
+                    baseObj.targetSets = norm.sets;
+                    baseObj.targetReps = norm.reps;
+                    baseObj.metricMode = norm.metricMode;
+                    baseObj.isCardioMinutes = norm.isCardioMinutes;
+                    baseObj.isTimeBased = norm.isTimeBased;
+                    baseObj.isBodyweight = norm.isBodyweight;
                 }
-                return ex;
+                return baseObj;
             });
 
             activeWorkoutSession.exercises.forEach(ex => {
@@ -1490,12 +1500,22 @@
             if (typeof EXERCISES_DB === 'undefined') return;
             const dbEx = EXERCISES_DB.find(e => e.id === exId);
             if (!dbEx) return;
+            const normT = (typeof normalizeExerciseTargetSpec === 'function')
+                ? normalizeExerciseTargetSpec(dbEx, 3, '8-12')
+                : { sets: 3, reps: '8-12', metricMode: 'reps', isCardioMinutes: false, isTimeBased: false };
+            const normalizedEx = Object.assign({}, dbEx, {
+                targetSets: normT.sets,
+                targetReps: normT.reps,
+                metricMode: normT.metricMode,
+                isCardioMinutes: normT.isCardioMinutes,
+                isTimeBased: normT.isTimeBased
+            });
 
             currentGeneratedWorkout = {
                 id: 'quick_' + Date.now(),
                 title: dbEx.name + ' (Hızlı Seans)',
-                scheme: { sets: 3, reps: '8-12', rest: 60 },
-                exercises: [dbEx]
+                scheme: { sets: normT.sets, reps: normT.reps, rest: 60 },
+                exercises: [normalizedEx]
             };
             startActiveWorkoutFromGenerated();
         }
@@ -1504,7 +1524,20 @@
             closeQuickWorkoutModal();
             if (quickWorkoutSelectedIds.size === 0 || typeof EXERCISES_DB === 'undefined') return;
 
-            const list = Array.from(quickWorkoutSelectedIds).map(id => EXERCISES_DB.find(e => e.id === id)).filter(Boolean);
+            const list = Array.from(quickWorkoutSelectedIds).map(id => {
+                const dbEx = EXERCISES_DB.find(e => e.id === id);
+                if (!dbEx) return null;
+                const normT = (typeof normalizeExerciseTargetSpec === 'function')
+                    ? normalizeExerciseTargetSpec(dbEx, 3, '8-12')
+                    : { sets: 3, reps: '8-12', metricMode: 'reps', isCardioMinutes: false, isTimeBased: false };
+                return Object.assign({}, dbEx, {
+                    targetSets: normT.sets,
+                    targetReps: normT.reps,
+                    metricMode: normT.metricMode,
+                    isCardioMinutes: normT.isCardioMinutes,
+                    isTimeBased: normT.isTimeBased
+                });
+            }).filter(Boolean);
             if (list.length === 0) return;
 
             currentGeneratedWorkout = {
@@ -1799,7 +1832,9 @@
                 nextStepTag = `SIRADAKİ SET (${nextIncomplete.setNo} / ${sets.length})`;
                 nextStepTitle = `Set ${nextIncomplete.setNo} • ${escapeHTML(cardEx.name)}`;
                 const muscleName = getTurkishMuscleBadge(cardEx.muscle || cardEx.primaryMuscle);
-                nextStepMeta = `${nextIncomplete.weight ? nextIncomplete.weight + ' kg × ' : ''}${nextIncomplete.reps || 10} tekrar • ${muscleName}`;
+                const nextUnitLbl = isTime ? 'sn' : (isCardio ? 'dk' : 'tekrar');
+                const nextDefVal = isTime ? 30 : (isCardio ? 20 : 10);
+                nextStepMeta = `${(!isCardio && nextIncomplete.weight) ? nextIncomplete.weight + ' kg × ' : ''}${nextIncomplete.reps || nextDefVal} ${nextUnitLbl} • ${muscleName}`;
                 nextStepMedia = getDaylightExerciseMedia(cardEx);
                 nextStepCtaLabel = `Set ${nextIncomplete.setNo}'e Başla ➔`;
                 nextStepCtaAction = `dismissDaylightRest()`;
@@ -2167,7 +2202,13 @@
                         const lastPerf = getLastExercisePerformance(ex.id) || getLastExercisePerformance(ex.name);
                         const isFormOpen = !!workoutFormGuideOpenState[ex.id];
                         const exRestSecs = (ex.customRest !== undefined && ex.customRest !== null) ? ex.customRest : ((s.scheme && s.scheme.rest) || 45);
-                        const targetMetricStr = isTime ? (String(s.scheme.reps).includes('sn') ? s.scheme.reps : `${s.scheme.reps || 30} sn`) : `${s.scheme.reps}`;
+                        const dispTarget = (typeof resolveExerciseDisplayTarget === 'function')
+                            ? resolveExerciseDisplayTarget(ex, s.scheme)
+                            : (() => {
+                                const fbR = ex.targetReps || (s.scheme && s.scheme.reps) || (isTime ? '30 sn' : (isExerciseCardioMinutes(ex) ? '20 dk' : '8-12'));
+                                return { repsLabel: /sn|dk|metre|tur|ad[ıi]m|tekrar/i.test(String(fbR)) ? String(fbR) : `${fbR} Tekrar` };
+                            })();
+                        const targetMetricStr = dispTarget.repsLabel;
                         const blockHdrHtml = ex.blockHeader ? `
                             <div class="block-header" style="${ex.blockType === 'superset' ? 'border-left:3px solid #f59e0b; background:rgba(245,158,11,0.08); color:#B45309;' : 'border-left:3px solid #38bdf8; background:rgba(56,189,248,0.08); color:#0369A1;'} padding:6px 10px; border-radius:6px; margin-bottom:8px;">
                                 ${escapeHTML(ex.blockHeader)}
@@ -3460,7 +3501,7 @@
                     if (st.interSet && st.interSet.completed) {
                         const isExtraTime = st.interSet.metricType === 'time';
                         const extraVal = parseInt(st.interSet.value, 10) || 0;
-                        const extraVol = calculateExerciseSetVolume({ id: st.interSet.id, equipment: st.interSet.equipment || 'bodyweight' }, 0, extraVal);
+                        const extraVol = calculateExerciseSetVolume({ id: st.interSet.id, name: st.interSet.name, equipment: st.interSet.equipment || 'bodyweight', isTimeBased: isExtraTime }, 0, extraVal);
                         totalCompletedSets++;
                         exCompletedSets++;
                         if (isExtraTime) {
@@ -3645,7 +3686,7 @@
                         const extra = st.interSet;
                         const isExtraTime = extra.metricType === 'time';
                         const extraVal = parseInt(extra.value, 10) || 0;
-                        const extraVol = calculateExerciseSetVolume({ id: extra.id, equipment: extra.equipment || 'bodyweight' }, 0, extraVal);
+                        const extraVol = calculateExerciseSetVolume({ id: extra.id, name: extra.name, equipment: extra.equipment || 'bodyweight', isTimeBased: isExtraTime }, 0, extraVal);
                         totalCompletedSets++;
                         if (isExtraTime) {
                             totalIsometricSeconds += extraVal;
@@ -4481,10 +4522,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
         function getWorkoutDetailsForPlan(plan) {
             if (!plan || plan.rest) return null;
 
-            const normalizeExerciseItem = (e) => {
+            const normalizeExerciseItem = (e, fallbackScheme = null) => {
                 if (!e) return null;
                 if (typeof e === 'string') {
-                    e = { name: e, sets: 3, reps: '8-12' };
+                    e = { name: e, sets: (fallbackScheme && fallbackScheme.sets) || 3, reps: (fallbackScheme && fallbackScheme.reps) || '8-12' };
                 }
                 const exId = e.id || e.exId;
                 let dbEx = EXERCISES_DB.find(x => x.id === exId);
@@ -4492,12 +4533,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     dbEx = findBestExerciseMatch(e.name || exId);
                 }
                 const resolvedId = (dbEx ? dbEx.id : exId) || ('ai_' + (e.name || 'ex').toLowerCase().replace(/[^a-z0-9]+/g, '_'));
-                return Object.assign({}, dbEx || e, {
+                const fbSets = (fallbackScheme && fallbackScheme.sets) || 3;
+                const fbReps = (fallbackScheme && fallbackScheme.reps) || '8-12';
+                const merged = Object.assign({}, dbEx || e, {
                     id: resolvedId,
                     name: (dbEx ? dbEx.name : e.name) || 'Egzersiz',
                     originalAiName: e.originalAiName || e.name,
-                    targetSets: e.targetSets || e.sets || 3,
-                    targetReps: e.targetReps || e.reps || '8-12',
+                    targetSets: e.targetSets || e.sets || fbSets,
+                    targetReps: e.targetReps || e.reps || fbReps,
                     note: e.note || e.cue || '',
                     cue: e.note || e.cue || (dbEx ? dbEx.cue : ''),
                     isAiConsecutiveBalanced: Boolean(e.isAiConsecutiveBalanced),
@@ -4505,13 +4548,23 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     aiRevisionNote: e.aiRevisionNote || null,
                     logs: e.logs || []
                 });
+                if (typeof normalizeExerciseTargetSpec === 'function') {
+                    const norm = normalizeExerciseTargetSpec(merged, fbSets, fbReps);
+                    merged.targetSets = norm.sets;
+                    merged.targetReps = norm.reps;
+                    merged.metricMode = norm.metricMode;
+                    merged.isCardioMinutes = norm.isCardioMinutes;
+                    merged.isTimeBased = norm.isTimeBased;
+                    merged.isBodyweight = norm.isBodyweight;
+                }
+                return merged;
             };
 
             const normalizeWorkout = (w) => {
                 if (!w) return null;
                 const clone = Object.assign({}, w);
                 if (Array.isArray(clone.exercises)) {
-                    clone.exercises = clone.exercises.map(normalizeExerciseItem).filter(Boolean);
+                    clone.exercises = clone.exercises.map(item => normalizeExerciseItem(item, clone.scheme)).filter(Boolean);
                 }
                 return clone;
             };
@@ -4630,7 +4683,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             };
 
             const buildOfficial = (off) => {
-                const exercises = off.exerciseIds.map(id => EXERCISES_DB.find(e => e.id === id)).filter(Boolean);
+                const rawList = off.exerciseIds.map(id => EXERCISES_DB.find(e => e.id === id)).filter(Boolean);
+                const exercises = rawList.map(ex => normalizeExerciseItem(ex, off.scheme));
                 return {
                     id: off.id,
                     title: off.title,
@@ -4651,7 +4705,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (typeof customRoutineState !== 'undefined' && Array.isArray(customRoutineState.exercises) && customRoutineState.exercises.length > 0) {
                 const studioList = customRoutineState.exercises.map(item => {
                     const ex = EXERCISES_DB.find(e => e.id === item.exId);
-                    return ex ? Object.assign({}, ex, { targetSets: item.sets, targetReps: item.reps }) : null;
+                    return ex ? normalizeExerciseItem(Object.assign({}, ex, { targetSets: item.sets, targetReps: item.reps })) : null;
                 }).filter(Boolean);
                 if (studioList.length > 0 && (planId.startsWith('custom_') || plan.type === 'custom' || plan.type === 'custom_saved')) {
                     return {
@@ -4816,6 +4870,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 const exName = escapeHTML(ex.name || 'Egzersiz');
                                 const targetParam = encodeURIComponent(ex.id || ex.name || '');
                                 const setsList = ex.sets || [];
+                                const isCardioEx = typeof isExerciseCardioMinutes === 'function' && isExerciseCardioMinutes(ex);
+                                const isTimeEx = typeof isExerciseTimeBased === 'function' && isExerciseTimeBased(ex);
                                 return `
                                     <div class="log-exercise-item" style="background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:12px; padding:10px 12px; margin-bottom:8px; box-shadow:0 2px 8px rgba(15,23,42,0.04);">
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px;">
@@ -4830,15 +4886,27 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                             </button>
                                         </div>
                                         <div class="log-sets-summary" style="display:flex; flex-wrap:wrap; gap:4px;">
-                                            ${setsList.map(st => st.completed ? `
-                                                <span class="log-set-pill completed" style="background:rgba(34, 197, 94, 0.12); border:1px solid rgba(34, 197, 94, 0.4); color:#15803D; border-radius:5px; padding:3px 7px; font-size:11px; font-weight:700;">
-                                                    S${st.setNo}: <strong style="color:#15803D;">${st.weight || 0}kg</strong> x ${st.reps || 0} ✓
-                                                </span>
-                                            ` : `
+                                            ${setsList.map(st => {
+                                                if (!st.completed) {
+                                                    return `
                                                 <span class="log-set-pill" style="opacity:0.6; border:1px dashed #ef4444; color:#dc2626; border-radius:5px; padding:3px 7px; font-size:11px; text-decoration:line-through; font-weight:600;">
                                                     S${st.setNo}: Atlandı
                                                 </span>
-                                            `).join('')}
+                                                    `;
+                                                }
+                                                const wVal = Number(st.weight) || 0;
+                                                const rVal = st.reps || 0;
+                                                const setText = isCardioEx
+                                                    ? `S${st.setNo}: ${rVal} dk ✓`
+                                                    : (isTimeEx
+                                                        ? `S${st.setNo}: ${wVal > 0 ? `<strong style="color:#15803D;">${wVal}kg</strong> x ` : ''}${rVal} sn ✓`
+                                                        : `S${st.setNo}: <strong style="color:#15803D;">${st.weight || 0}kg</strong> x ${rVal} ✓`);
+                                                return `
+                                                <span class="log-set-pill completed" style="background:rgba(34, 197, 94, 0.12); border:1px solid rgba(34, 197, 94, 0.4); color:#15803D; border-radius:5px; padding:3px 7px; font-size:11px; font-weight:700;">
+                                                    ${setText}
+                                                </span>
+                                                `;
+                                            }).join('')}
                                         </div>
                                     </div>
                                 `;
@@ -6193,8 +6261,11 @@ KURALLAR:
                 listEl.innerHTML = exercises.map((ex, idx) => {
                     const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) || {};
                     const thumb = guide.form || ex.diagram || '';
-                    const sets = ex.targetSets || (workout.scheme ? workout.scheme.sets : 3);
-                    const reps = ex.targetReps || (workout.scheme ? workout.scheme.reps : '8-12');
+                    const disp = (typeof resolveExerciseDisplayTarget === 'function')
+                        ? resolveExerciseDisplayTarget(ex, workout.scheme)
+                        : { sets: ex.targetSets || (workout.scheme ? workout.scheme.sets : 3), reps: ex.targetReps || (workout.scheme ? workout.scheme.reps : '8-12') };
+                    const sets = disp.sets;
+                    const reps = disp.reps;
 
                     return `
                         <div style="display:flex; justify-content:space-between; align-items:center; background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:10px; padding:8px 10px;">
@@ -6269,12 +6340,17 @@ KURALLAR:
             customRoutineState = {
                 title: cleanTitle,
                 rest: (prog.scheme && prog.scheme.rest) || prog.rest || 60,
-                exercises: (prog.exercises || []).map(ex => ({
-                    exId: ex.id || ex.exId,
-                    sets: ex.targetSets || ex.sets || (prog.scheme ? prog.scheme.sets : 3),
-                    reps: String(ex.targetReps || ex.reps || (prog.scheme ? prog.scheme.reps : '8-12')).replace(/\s+/g, ''),
-                    weight: ''
-                })).filter(item => Boolean(item.exId)),
+                exercises: (prog.exercises || []).map(ex => {
+                    const disp = (typeof resolveExerciseDisplayTarget === 'function')
+                        ? resolveExerciseDisplayTarget(ex, prog.scheme)
+                        : { sets: ex.targetSets || ex.sets || (prog.scheme ? prog.scheme.sets : 3), reps: ex.targetReps || ex.reps || (prog.scheme ? prog.scheme.reps : '8-12'), metricMode: 'reps' };
+                    return {
+                        exId: ex.id || ex.exId,
+                        sets: disp.sets,
+                        reps: disp.metricMode === 'reps' ? String(disp.reps).replace(/\s+/g, '') : String(disp.reps),
+                        weight: ''
+                    };
+                }).filter(item => Boolean(item.exId)),
                 editingDayIdx: null,
                 editingProgramId: progId,
                 isEditingExisting: true
@@ -7408,10 +7484,11 @@ KURALLAR:
             if (exercises.length > 0) {
                 desc += `EGZERSİZ PLANI & HEDEFLER:\n`;
                 exercises.forEach((ex, idx) => {
-                    const sets = ex.targetSets || (workoutDetails.scheme ? workoutDetails.scheme.sets : 3);
-                    const reps = ex.targetReps || (workoutDetails.scheme ? workoutDetails.scheme.reps : '8-12');
+                    const disp = (typeof resolveExerciseDisplayTarget === 'function')
+                        ? resolveExerciseDisplayTarget(ex, workoutDetails.scheme)
+                        : { sets: ex.targetSets || (workoutDetails.scheme ? workoutDetails.scheme.sets : 3), reps: ex.targetReps || (workoutDetails.scheme ? workoutDetails.scheme.reps : '8-12') };
                     const anatomy = typeof getExerciseAnatomy === 'function' ? getExerciseAnatomy(ex) : null;
-                    desc += `${idx + 1}. ${ex.name || 'Egzersiz'} — ${sets} Set x ${reps}`;
+                    desc += `${idx + 1}. ${ex.name || 'Egzersiz'} — ${disp.sets} Set x ${disp.reps}`;
                     if (anatomy && anatomy.primary) desc += ` (${anatomy.primary})`;
                     desc += `\n`;
                 });
@@ -8922,10 +8999,18 @@ KURALLAR:
                         ? `${escapeHTML(exObj.blockLabel)} • ${exObj.blockType === 'superset' ? 'SÜPERSET' : 'DÜZ SET'}`
                         : `${idx + 1}. İSTASYON`;
                     const muscleBadge = getTurkishMuscleBadge(exObj.muscle || (exObj.primaryMuscles && exObj.primaryMuscles[0]) || 'Hedef Kas');
-                    const setsCnt = exObj.targetSets || (planDetails && planDetails.scheme && planDetails.scheme.sets) || 3;
-                    const repsStr = String(exObj.targetReps || (planDetails && planDetails.scheme && planDetails.scheme.reps) || '8-12');
-                    const repsSuffix = /sn|dk|metre|tur|ad[ıi]m|tekrar/i.test(repsStr) ? '' : ' Tekrar';
-                    const restVal = exObj.customRest || (planDetails && planDetails.scheme && planDetails.scheme.rest) || 60;
+                    const dispTarget = (typeof resolveExerciseDisplayTarget === 'function')
+                        ? resolveExerciseDisplayTarget(exObj, planDetails && planDetails.scheme)
+                        : (() => {
+                            const rs = String(exObj.targetReps || (planDetails && planDetails.scheme && planDetails.scheme.reps) || '8-12');
+                            return {
+                                sets: exObj.targetSets || (planDetails && planDetails.scheme && planDetails.scheme.sets) || 3,
+                                repsLabel: `${rs}${/sn|dk|metre|tur|ad[ıi]m|tekrar/i.test(rs) ? '' : ' Tekrar'}`,
+                                rest: exObj.customRest || (planDetails && planDetails.scheme && planDetails.scheme.rest) || 60
+                            };
+                        })();
+                    const setsCnt = dispTarget.sets;
+                    const restVal = dispTarget.rest;
                     const targetW = (typeof getExerciseRememberedWeight === 'function' && exObj.id) ? getExerciseRememberedWeight(exObj) : '';
 
                     return `
@@ -8939,7 +9024,7 @@ KURALLAR:
                                     <h3 class="wk-card-exercise-name">${escapeHTML(exObj.name || 'Hareket')}</h3>
                                 </div>
                                 <div class="wk-card-submeta">
-                                    <span>${setsCnt} Set × ${escapeHTML(repsStr)}${repsSuffix}</span>
+                                    <span>${setsCnt} Set × ${escapeHTML(dispTarget.repsLabel)}</span>
                                     <span>•</span>
                                     <span>${restVal} sn dinlenme</span>
                                     ${targetW ? `<span>•</span><span style="color:#E9D5FF;">Son: ${targetW} kg</span>` : ''}

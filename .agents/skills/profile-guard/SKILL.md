@@ -6,7 +6,7 @@ description: Çelik Kodu Profil sekmesini (#profileTab, js/chiefs/profile-chief.
 # 🛡️ 6. Oda — Profil & Güvenlik Şefi (`profile-guard`)
 
 - **Fiziksel Oda Dosyası:** `js/chiefs/profile-chief.js` + Gümrük Sızıntı Kalkanı: `js/chiefs/bridge-customs.js`
-- **Zorunlu Sınav Maddeleri:** `T15` (Parola/salt/Gemini API anahtarı sızıntı engeli + açık zeminde beyaz/pastel metin kontrast denetimi), `T24` (Bulut birleşmesinde sıfır `undefined` alan), `T41` (4 Kapılı Kara Kutu K1–K4, gizli anahtar maskeleme, sporcu başına 50 kayıt tamponu & Yönetici Sistem İzleme sekmesi), `T58` (Güvenlik kuralları, sıfır marka/kişisel isim/emoji hijyeni, `sw.js` `v347` izolasyonu, `#loginScreen` WCAG kontrastı ve boş kullanıcı listesiyle demo modu)
+- **Zorunlu Sınav Maddeleri:** `T15` (Parola/salt/Gemini API anahtarı sızıntı engeli + açık zeminde beyaz/pastel metin kontrast denetimi), `T24` (Bulut birleşmesinde sıfır `undefined` alan), `T41` (4 Kapılı Kara Kutu K1–K4, gizli anahtar maskeleme, sporcu başına 50 kayıt tamponu & Yönetici Sistem İzleme sekmesi), `T58`/`T59` (7 günü geçen bayat taslak ve ham saat önbelleğini yerel+buluttan temizleme, onarılan taze taslakları buluta geri yazma ve bulut senkronunda kanonik geçmiş birimi doğrulama), `T61` (Güvenlik kuralları, sıfır marka/kişisel isim/emoji hijyeni, `sw.js` `v349` izolasyonu, `#loginScreen` WCAG kontrastı ve boş kullanıcı listesiyle demo modu)
 
 ## Görev Kapsamı (`#profileTab`)
 1. Kullanıcı oturumu, çok kullanıcılı (`uid`) yerel/bulut veri ayrımı ve profil ayarlarını yönetir.
