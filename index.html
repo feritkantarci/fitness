@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=345">
+    <link rel="stylesheet" href="css/style.css?v=346">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH */
         html, body { background-color: #0B0A14; color: #F8FAFC; color-scheme: dark; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -260,7 +260,7 @@
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" style="display:none;">v345</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" style="display:none;">v346</span>
                         </div>
                     </div>
                 </div>
@@ -291,8 +291,12 @@
                     <div id="headerPopupMenu" class="header-popup-menu" style="display:none;">
                         <div class="header-popup-status-row">
                             <span class="header-popup-status-label">Sistem Durumu</span>
-                            <span class="cloud-sync-badge" id="headerCloudSyncBadge" title="Firebase Bulut Veritabanı">Bulut Aktif</span>
+                            <span class="cloud-sync-badge" id="headerCloudSyncBadge" onclick="if(this.classList.contains('auth-required') && typeof reauthToLoginScreenPreservingLocalData === 'function'){ closeHeaderPopupMenu(); reauthToLoginScreenPreservingLocalData(); }" title="Firebase Bulut Veritabanı">Bulut Aktif</span>
                         </div>
+                        <button type="button" class="header-popup-item" id="headerReauthCloudBtn" style="display:none; color:#FDE68A;" onclick="closeHeaderPopupMenu(); if(typeof reauthToLoginScreenPreservingLocalData === 'function'){ reauthToLoginScreenPreservingLocalData(); }">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                            <span>Bulut Oturumunu Yenile</span>
+                        </button>
                         <button type="button" class="header-popup-item" onclick="closeHeaderPopupMenu(); openBugReportsPoolModal();">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                             <span>Geri Bildirimler</span>
@@ -1095,6 +1099,15 @@
                         </div>
                         <button class="btn btn-outline" style="font-size:12px; padding:6px 12px; color:#FCA5A5; border-color:rgba(248,113,113,0.45);" onclick="handleAuthLogout()">
                             Oturumu Kapat
+                        </button>
+                    </div>
+
+                    <div id="profileCloudAuthBanner" style="display:none; justify-content:space-between; align-items:center; gap:10px; background:rgba(245, 158, 11, 0.12); border:1px solid rgba(245, 158, 11, 0.36); border-radius:12px; padding:11px 14px; margin-bottom:14px;">
+                        <div style="font-size:12px; color:#FDE68A; font-weight:600; line-height:1.4;">
+                            Bulut eşitlemesini ve yetki doğrulamasını açmak için tekrar giriş yapın. Yerel verileriniz korunur.
+                        </div>
+                        <button type="button" onclick="if(typeof reauthToLoginScreenPreservingLocalData === 'function'){ reauthToLoginScreenPreservingLocalData(); }" style="background:#7C3AED; color:#FFFFFF; border:none; border-radius:8px; padding:7px 12px; font-size:11.5px; font-weight:800; white-space:nowrap; cursor:pointer;">
+                            Tekrar Giriş Yap
                         </button>
                     </div>
 
@@ -2686,17 +2699,17 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE (7 BAĞIMSIZ ŞEF ODASI + ORKESTRA) ==================== -->
-    <script src="js/exercises-db.js?v=345"></script>
-    <script src="js/chiefs/shared-core.js?v=345"></script>
-    <script src="js/chiefs/bridge-customs.js?v=345"></script>
-    <script src="js/chiefs/liaison-subchiefs.js?v=345"></script>
-    <script src="js/chiefs/profile-chief.js?v=345"></script>
-    <script src="js/chiefs/library-chief.js?v=345"></script>
-    <script src="js/chiefs/history-chief.js?v=345"></script>
-    <script src="js/chiefs/analytics-chief.js?v=345"></script>
-    <script src="js/chiefs/generator-chief.js?v=345"></script>
-    <script src="js/chiefs/workout-chief.js?v=345"></script>
-    <script src="js/app.js?v=345"></script>
+    <script src="js/exercises-db.js?v=346"></script>
+    <script src="js/chiefs/shared-core.js?v=346"></script>
+    <script src="js/chiefs/bridge-customs.js?v=346"></script>
+    <script src="js/chiefs/liaison-subchiefs.js?v=346"></script>
+    <script src="js/chiefs/profile-chief.js?v=346"></script>
+    <script src="js/chiefs/library-chief.js?v=346"></script>
+    <script src="js/chiefs/history-chief.js?v=346"></script>
+    <script src="js/chiefs/analytics-chief.js?v=346"></script>
+    <script src="js/chiefs/generator-chief.js?v=346"></script>
+    <script src="js/chiefs/workout-chief.js?v=346"></script>
+    <script src="js/app.js?v=346"></script>
     <script>
         function getNotifStorageKey() {
             const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';
@@ -2889,6 +2902,6 @@
             </div>
         </div>
     </div>
-    <script src="js/garmin-tredict-bridge.js?v=345" defer></script>
+    <script src="js/garmin-tredict-bridge.js?v=346" defer></script>
 </body>
 </html>

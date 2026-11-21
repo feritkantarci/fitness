@@ -14961,6 +14961,7 @@ html, body {
     border: 1px solid rgba(167, 139, 250, 0.28) !important;
     color: #F8FAFC !important;
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65) !important;
+    min-width: 272px !important;
 }
 
 .header-popup-status-row {
@@ -14970,6 +14971,48 @@ html, body {
 .header-popup-status-label,
 .header-popup-item svg {
     color: #CBD5E1 !important;
+}
+
+.cloud-sync-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 4px 9px !important;
+    border-radius: 8px !important;
+    background: rgba(16, 185, 129, 0.14) !important;
+    border: 1px solid rgba(16, 185, 129, 0.35) !important;
+    color: #6EE7B7 !important;
+    letter-spacing: 0.01em !important;
+}
+
+.cloud-sync-badge .cloud-sync-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+}
+
+.cloud-sync-badge.syncing {
+    background: rgba(245, 158, 11, 0.14) !important;
+    border-color: rgba(245, 158, 11, 0.35) !important;
+    color: #FDE68A !important;
+}
+
+.cloud-sync-badge.offline {
+    background: #121024 !important;
+    border-color: rgba(148, 163, 184, 0.35) !important;
+    color: #CBD5E1 !important;
+}
+
+.cloud-sync-badge.auth-required {
+    background: rgba(245, 158, 11, 0.16) !important;
+    border-color: rgba(245, 158, 11, 0.45) !important;
+    color: #FDE68A !important;
+    cursor: pointer !important;
 }
 
 .header-popup-item {

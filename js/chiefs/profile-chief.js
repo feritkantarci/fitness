@@ -33,21 +33,68 @@
             }
         }
 
+        let _firebaseInitialAuthResolved = false;
+        let _bootCloudSyncTriggered = false;
+        let _cloudSyncLastIssue = null;
+
         function updateCloudSyncBadge(status, text) {
+            const esc = (typeof escapeHTML === 'function')
+                ? escapeHTML
+                : (v) => String(v || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
             const badges = document.querySelectorAll('.cloud-sync-badge');
             badges.forEach(badge => {
                 badge.className = 'cloud-sync-badge ' + (status || '');
                 if (status === 'synced') {
-                    badge.innerHTML = `🟢 ${text || 'Bulut Aktif'}`;
-                    badge.title = "Firebase Firestore canlı ve eşitlenmiş durumda";
+                    badge.innerHTML = `<span class="cloud-sync-dot" aria-hidden="true"></span><span>${esc(text || 'Bulut Aktif')}</span>`;
+                    badge.title = "Firebase bulut veritabanı canlı ve eşitlenmiş durumda";
                 } else if (status === 'syncing') {
-                    badge.innerHTML = `🔄 ${text || 'Eşitleniyor...'}`;
+                    badge.innerHTML = `<span class="cloud-sync-dot" aria-hidden="true"></span><span>${esc(text || 'Eşitleniyor...')}</span>`;
                     badge.title = "Veriler Firebase bulutuna aktarılıyor...";
+                } else if (status === 'auth-required') {
+                    badge.innerHTML = `<span class="cloud-sync-dot" aria-hidden="true"></span><span>${esc(text || 'Bulut Girişi Gerekli')}</span>`;
+                    badge.title = "Bulut eşitlemesini yenilemek için dokunup şifrenizle giriş yapın";
                 } else {
-                    badge.innerHTML = `☁️ ${text || 'Yerel Önbellek'}`;
-                    badge.title = "Çevrimdışı mod: Veriler cihazda güvende, internet olunca eşitlenecek";
+                    badge.innerHTML = `<span class="cloud-sync-dot" aria-hidden="true"></span><span>${esc(text || 'Yerel Önbellek')}</span>`;
+                    badge.title = "Çevrimdışı mod: Veriler cihazda güvende, internet gelince eşitlenecek";
                 }
             });
+            if (typeof document !== 'undefined') {
+                const reauthBtn = document.getElementById('headerReauthCloudBtn');
+                if (reauthBtn) reauthBtn.style.display = (status === 'auth-required') ? 'flex' : 'none';
+                const profileBanner = document.getElementById('profileCloudAuthBanner');
+                if (profileBanner) profileBanner.style.display = (status === 'auth-required') ? 'flex' : 'none';
+            }
+        }
+
+        function reauthToLoginScreenPreservingLocalData() {
+            const prevSess = typeof getSession === 'function' ? getSession() : null;
+            const prefillIdent = (prevSess && (prevSess.username || prevSess.name)) ? String(prevSess.username || prevSess.name) : '';
+            if (typeof fbAuth !== 'undefined' && fbAuth) {
+                try { fbAuth.signOut().catch(() => {}); } catch {}
+            }
+            if (typeof setSession === 'function') {
+                setSession(null);
+            }
+            if (typeof switchAuthScreenTab === 'function') {
+                switchAuthScreenTab('login');
+            }
+            if (typeof document !== 'undefined') {
+                const uEl = document.getElementById('loginUsername');
+                const pEl = document.getElementById('loginPassword');
+                const errEl = document.getElementById('loginErrorMsg');
+                if (uEl && prefillIdent) uEl.value = prefillIdent;
+                if (errEl) {
+                    errEl.innerText = 'Bulut senkronizasyonunu açmak için şifrenizi girin (yerel verileriniz korunur).';
+                    errEl.style.display = 'block';
+                    errEl.style.background = 'rgba(245, 158, 11, 0.14)';
+                    errEl.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+                    errEl.style.color = '#FDE68A';
+                }
+                if (pEl) setTimeout(() => { try { pEl.focus(); } catch {} }, 60);
+            }
+        }
+        if (typeof window !== 'undefined') {
+            window.reauthToLoginScreenPreservingLocalData = reauthToLoginScreenPreservingLocalData;
         }
 
         // ==================== MERKEZ KASA MÜHÜRLEME KODEĞİ (SAFE UTF-8 + BASE64) ====================
@@ -532,6 +579,20 @@
             let attemptLabel = 'İlkYazım';
             let usedSeal = firstSeal;
             let lastPayload = buildPayloadFn(firstSeal);
+            const allowedKeysMap = {
+                workout_logs: new Set(['logs', 'updatedAt', 'clientUpdatedAt', 'lastUpdatedBy', 'syncSeal']),
+                scale_logs: new Set(['logs', 'updatedAt', 'clientUpdatedAt', 'syncSeal']),
+                measurement_logs: new Set(['logs', 'updatedAt', 'clientUpdatedAt', 'syncSeal']),
+                user_state: new Set([
+                    'weeklySchedule', 'nextWeeklySchedule', 'dateSchedule', 'rememberedWeights',
+                    'excludedExercises', 'excludedExercisesUpdatedAt', 'customPrograms',
+                    'deletedCustomProgramIds', 'deletedWorkoutLogIds', 'mobilityTests',
+                    'selectedEquipments', 'customGyms', 'aiDoctrine', 'aiCoachSummary',
+                    'lastGeneratedWorkout', 'activeWorkoutDraft', 'garminManifests',
+                    'updatedAt', 'clientUpdatedAt', 'syncSeal'
+                ]),
+                system_telemetry: new Set(['uid', 'userName', 'events', 'openErrorCount', 'openWarnCount', 'clientUpdatedAt', 'updatedAt', 'syncSeal'])
+            };
             try {
                 await docRef.set(lastPayload, { merge: true });
                 if (!IS_LOCAL_DEV && !isTelCol) clearResolvedCloudErrors(colName, uid);
@@ -543,15 +604,28 @@
                         const snap = (typeof fetchCloudDocPreferServer === 'function')
                             ? await fetchCloudDocPreferServer(docRef)
                             : await docRef.get();
-                        const remoteSeal = snap && snap.exists ? adoptCloudSyncSealIfPresent(colName, uid, snap.data()) : '';
-                        if (remoteSeal && remoteSeal !== firstSeal) {
-                            attemptLabel = 'MühürYenileme';
-                            usedSeal = remoteSeal;
-                            lastPayload = buildPayloadFn(remoteSeal);
-                            await docRef.set(lastPayload, { merge: true });
+                        const snapData = (snap && snap.exists && typeof snap.data === 'function') ? (snap.data() || {}) : null;
+                        const remoteSeal = snapData ? adoptCloudSyncSealIfPresent(colName, uid, snapData) : '';
+                        const allowedSet = allowedKeysMap[colName];
+                        const extraLegacyKeys = (snapData && allowedSet)
+                            ? Object.keys(snapData).filter(k => !allowedSet.has(k))
+                            : [];
+                        const hasFieldDelete = typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore.FieldValue && typeof firebase.firestore.FieldValue.delete === 'function';
+
+                        if ((remoteSeal && remoteSeal !== firstSeal) || (extraLegacyKeys.length > 0 && hasFieldDelete)) {
+                            attemptLabel = extraLegacyKeys.length > 0 ? 'ŞemaVeMühürOnarımı' : 'MühürYenileme';
+                            usedSeal = remoteSeal || firstSeal;
+                            lastPayload = buildPayloadFn(usedSeal);
+                            const healPayload = Object.assign({}, lastPayload);
+                            if (extraLegacyKeys.length > 0 && hasFieldDelete) {
+                                extraLegacyKeys.forEach(k => {
+                                    healPayload[k] = firebase.firestore.FieldValue.delete();
+                                });
+                            }
+                            await docRef.set(healPayload, { merge: true });
                             if (!IS_LOCAL_DEV && !isTelCol) {
                                 clearResolvedCloudErrors(colName, uid);
-                                recordCloudGateTelemetry('warn', `${colName} Mühür Onarımı`, uid, 'Bulut mühür uyuşmazlığı otomatik onarıldı', uid);
+                                recordCloudGateTelemetry('warn', `${colName} Mühür Onarımı`, uid, extraLegacyKeys.length > 0 ? 'Eski şema alanları ve mühür onarıldı' : 'Bulut mühür uyuşmazlığı otomatik onarıldı', uid);
                             }
                             return true;
                         }
@@ -559,6 +633,8 @@
                         err = healErr;
                     }
                 }
+                const finalIsPerm = Boolean(isPermErr || (err && (err.code === 'permission-denied' || /permission|insufficient/i.test(String(err.message || '')))));
+                if (err && typeof err === 'object') err._k4IsPerm = finalIsPerm;
                 if (!IS_LOCAL_DEV && !isTelCol) {
                     const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
                     const diagSummary = diagnoseCloudPayloadPreFlight(colName, lastPayload, usedSeal);
@@ -706,6 +782,7 @@
 
         async function flushPendingCloudOutbox() {
             if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || !navigator.onLine) return;
+            if (!isDemoGuestSession() && fbAuth && _firebaseInitialAuthResolved && !fbAuth.currentUser) return;
             const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
             if (!uid) return;
             try {
@@ -720,6 +797,47 @@
                     await syncSystemTelemetryToCloud(uid);
                 }
             } catch {}
+        }
+
+        async function waitForFirebaseAuthReady(authInstance, timeoutMs = 2500) {
+            if (!authInstance) {
+                _firebaseInitialAuthResolved = true;
+                return null;
+            }
+            if (_firebaseInitialAuthResolved) return authInstance.currentUser || null;
+            if (typeof authInstance.authStateReady === 'function') {
+                try {
+                    await Promise.race([
+                        authInstance.authStateReady(),
+                        new Promise(resolve => setTimeout(resolve, timeoutMs))
+                    ]);
+                    _firebaseInitialAuthResolved = true;
+                    return authInstance.currentUser || null;
+                } catch {}
+            }
+            return await new Promise((resolve) => {
+                let settled = false;
+                let unsub = null;
+                const done = (user) => {
+                    if (settled) return;
+                    settled = true;
+                    _firebaseInitialAuthResolved = true;
+                    if (typeof unsub === 'function') {
+                        try { unsub(); } catch {}
+                    }
+                    resolve(user || null);
+                };
+                const timer = setTimeout(() => done(authInstance.currentUser || null), timeoutMs);
+                try {
+                    unsub = authInstance.onAuthStateChanged((u) => {
+                        clearTimeout(timer);
+                        done(u || null);
+                    });
+                } catch {
+                    clearTimeout(timer);
+                    done(authInstance.currentUser || null);
+                }
+            });
         }
 
         let lastForegroundCloudRefreshAt = 0;
@@ -786,24 +904,31 @@
                             fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
                         }
                         fbAuth.onAuthStateChanged(async fbUser => {
+                            _firebaseInitialAuthResolved = true;
+                            const curSess = typeof getSession === 'function' ? getSession() : null;
                             if (fbUser) {
                                 if (typeof syncUserRoleDocument === 'function') {
                                     const activeU = typeof getActiveUser === 'function' ? getActiveUser() : null;
-                                    syncUserRoleDocument(fbUser, activeU).catch(() => {});
+                                    try { await syncUserRoleDocument(fbUser, activeU); } catch {}
                                 }
-                                if (navigator.onLine) {
-                                    flushPendingCloudOutbox();
-                                }
-                                const curSess = typeof getSession === 'function' ? getSession() : null;
-                                if (curSess && curSess.role === 'admin' && typeof isVerifiedAdminSession === 'function' && isVerifiedAdminSession(curSess)) {
+                                if (curSess && typeof syncAppViewState === 'function') {
+                                    syncAppViewState();
+                                } else if (curSess && curSess.role === 'admin' && typeof isVerifiedAdminSession === 'function' && isVerifiedAdminSession(curSess)) {
                                     await ensureAdminPortalLoadedAndMounted(curSess);
                                     if (typeof updateAdminPendingBadges === 'function') updateAdminPendingBadges();
                                 } else {
                                     unmountAdminPortalFromDOM();
                                 }
+                                if (_bootCloudSyncTriggered && navigator.onLine !== false && curSess && !isDemoGuestSession(curSess)) {
+                                    flushPendingCloudOutbox().then(() => syncAllFromCloud()).catch(() => {});
+                                }
                             } else {
                                 if (!IS_LOCAL_DEV) {
                                     unmountAdminPortalFromDOM();
+                                    if (curSess && !isDemoGuestSession(curSess)) {
+                                        if (typeof syncAppViewState === 'function') syncAppViewState();
+                                        updateCloudSyncBadge('auth-required', 'Bulut Girişi Gerekli');
+                                    }
                                 }
                             }
                         });
@@ -827,11 +952,29 @@
                 });
 
                 isFirebaseReady = true;
-                updateCloudSyncBadge('synced', 'Bulut Aktif');
+                updateCloudSyncBadge('syncing', 'Bağlanıyor...');
                 console.log("🔥 Firebase Firestore başarıyla bağlandı!");
 
-                // İlk bulut veri senkronizasyonunu başlat
-                flushPendingCloudOutbox().then(() => syncAllFromCloud());
+                // İlk bulut veri senkronizasyonunu Firebase Auth durumu netleştikten sonra başlat
+                (async () => {
+                    try {
+                        if (fbAuth) {
+                            await waitForFirebaseAuthReady(fbAuth, 2500);
+                        } else {
+                            _firebaseInitialAuthResolved = true;
+                        }
+                        if (fbAuth && fbAuth.currentUser && typeof syncUserRoleDocument === 'function') {
+                            const activeU = typeof getActiveUser === 'function' ? getActiveUser() : null;
+                            try { await syncUserRoleDocument(fbAuth.currentUser, activeU); } catch {}
+                        }
+                        if (typeof getSession === 'function' && getSession() && typeof syncAppViewState === 'function') {
+                            syncAppViewState();
+                        }
+                        _bootCloudSyncTriggered = true;
+                        await flushPendingCloudOutbox();
+                        await syncAllFromCloud();
+                    } catch {}
+                })();
 
             } catch (err) {
                 if (typeof window !== 'undefined') window._initialWorkoutLogsCloudSyncDone = true;
@@ -884,11 +1027,24 @@
                 return;
             }
             if (!isFirebaseReady || !fbDb) return;
+            _cloudSyncLastIssue = null;
             updateCloudSyncBadge('syncing', 'Eşitleniyor...');
 
             try {
-                // 1. AI anahtarı ve aktif kullanıcının antrenman geçmişini öncelikli paralel eşitle
+                if (!IS_LOCAL_DEV && typeof fbAuth !== 'undefined' && fbAuth && !_firebaseInitialAuthResolved) {
+                    await waitForFirebaseAuthReady(fbAuth, 2500);
+                }
+
+                // 1. Genel sistem ayarlarını ve kullanıcı listesini çek
                 const uid = getActiveUserId();
+                const isCloudUserSignedIn = Boolean(IS_LOCAL_DEV || !fbAuth || fbAuth.currentUser);
+                if (!isCloudUserSignedIn && uid) {
+                    await Promise.all([syncAiConfigFromCloud(), syncUsersFromCloud()]);
+                    if (typeof window !== 'undefined') window._initialWorkoutLogsCloudSyncDone = true;
+                    updateCloudSyncBadge('auth-required', 'Bulut Girişi Gerekli');
+                    return;
+                }
+
                 const priorityTasks = [syncAiConfigFromCloud()];
                 if (uid) priorityTasks.push(syncUserWorkoutLogsFromCloud(uid, { forceServer: true }));
                 await Promise.all(priorityTasks);
@@ -903,10 +1059,29 @@
                     await syncUserStateFromCloud(uid);
                 }
 
-                updateCloudSyncBadge('synced', 'Bulut Aktif');
+                const hasPendingWorkout = Boolean(uid && localStorage.getItem(`celik_kodu_pending_workout_sync_${uid}`) === '1');
+                if (_cloudSyncLastIssue === 'auth-required') {
+                    updateCloudSyncBadge('auth-required', 'Bulut Girişi Gerekli');
+                } else if (_cloudSyncLastIssue === 'permission-denied') {
+                    updateCloudSyncBadge('auth-required', 'Bulut Yetki Hatası');
+                } else if (_cloudSyncLastIssue === 'offline' || navigator.onLine === false) {
+                    updateCloudSyncBadge('offline', 'Kuyrukta (İnternet Bekleniyor)');
+                } else if (_cloudSyncLastIssue || hasPendingWorkout) {
+                    updateCloudSyncBadge('offline', 'Eşitleme Bekliyor');
+                } else {
+                    updateCloudSyncBadge('synced', 'Bulut Aktif');
+                }
             } catch (e) {
-                console.warn("Bulut eşitleme gecikti (çevrimdışı olabilir):", e);
-                updateCloudSyncBadge('offline', 'Çevrimdışı');
+                console.warn("Bulut eşitleme gecikti:", e);
+                const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+                const authMissing = Boolean(!IS_LOCAL_DEV && typeof fbAuth !== 'undefined' && fbAuth && !fbAuth.currentUser);
+                if (authMissing) {
+                    updateCloudSyncBadge('auth-required', 'Bulut Girişi Gerekli');
+                } else if (offline) {
+                    updateCloudSyncBadge('offline', 'Kuyrukta (İnternet Bekleniyor)');
+                } else {
+                    updateCloudSyncBadge('offline', 'Çevrimdışı');
+                }
             }
         }
 
@@ -1012,7 +1187,7 @@
                         return finalUsers;
                     }
                 } else {
-                    if (localUsers.length > 0) {
+                    if (localUsers.length > 0 && (!fbAuth || fbAuth.currentUser)) {
                         await syncUsersToCloud(localUsers);
                     }
                 }
@@ -1161,7 +1336,8 @@
                 updateCloudSyncBadge('synced', 'Bulut Aktif');
             } catch (err) {
                 console.warn("Kullanıcılar buluta yüklenemedi:", err);
-                updateCloudSyncBadge('offline', 'Kayıt Yerelde');
+                const authMissing = Boolean(!IS_LOCAL_DEV && typeof fbAuth !== 'undefined' && fbAuth && !fbAuth.currentUser);
+                updateCloudSyncBadge(authMissing ? 'auth-required' : 'offline', authMissing ? 'Bulut Girişi Gerekli' : 'Kayıt Yerelde');
             }
         }
 
@@ -1349,6 +1525,7 @@
                 }
 
                 let cloudLogs = [];
+                let cloudFetchOk = Array.isArray(opts.snapshotLogs);
                 if (Array.isArray(opts.snapshotLogs)) {
                     cloudLogs = opts.snapshotLogs;
                     if (opts.snapshotData) adoptCloudSyncSealIfPresent('workout_logs', uid, opts.snapshotData);
@@ -1358,6 +1535,7 @@
                             const docRef = fbDb.collection('workout_logs').doc(uid);
                             const doc = await fetchCloudDocPreferServer(docRef);
                             workoutLogsLastFetchAt[uid] = Date.now();
+                            cloudFetchOk = true;
                             if (doc && doc.exists) {
                                 const data = doc.data();
                                 adoptCloudSyncSealIfPresent('workout_logs', uid, data);
@@ -1368,7 +1546,14 @@
                         }
                     } catch (err) {
                         console.warn("Antrenmanlar buluttan doğrudan çekilemedi:", err);
-                        if (!IS_LOCAL_DEV && (typeof navigator === 'undefined' || navigator.onLine !== false)) {
+                        const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+                        const authMissing = Boolean(!IS_LOCAL_DEV && typeof fbAuth !== 'undefined' && fbAuth && !fbAuth.currentUser);
+                        const isPerm = Boolean(err && (err.code === 'permission-denied' || /permission|insufficient/i.test(String(err.message || ''))));
+                        if (authMissing) _cloudSyncLastIssue = 'auth-required';
+                        else if (isPerm) _cloudSyncLastIssue = 'permission-denied';
+                        else if (offline) _cloudSyncLastIssue = 'offline';
+                        else _cloudSyncLastIssue = 'error';
+                        if (!IS_LOCAL_DEV && !offline) {
                             recordCloudGateTelemetry('error', 'Antrenman Bulut Okuma', uid, String((err && err.message) || err || 'Bulut okuma hatası'), uid);
                         }
                     }
@@ -1400,8 +1585,8 @@
                     }
                     applyWednesdayHammerCurlPatch();
 
-                    if (!IS_LOCAL_DEV && (mergedLogs.length !== cloudLogs.length || hasLocalEditNewerThanCloud || filteredCloudDeletion)) {
-                        syncWorkoutLogsToCloud(mergedLogs, uid);
+                    if (!IS_LOCAL_DEV && cloudFetchOk && (mergedLogs.length !== cloudLogs.length || hasLocalEditNewerThanCloud || filteredCloudDeletion)) {
+                        await syncWorkoutLogsToCloud(mergedLogs, uid);
                     }
                 }
             } finally {
@@ -1451,20 +1636,38 @@
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     }));
                     localStorage.removeItem(`celik_kodu_pending_workout_sync_${uid}`);
+                    _cloudSyncLastIssue = null;
                     updateCloudSyncBadge('synced', 'Bulut Aktif');
                 } else {
-                    throw new Error('Firebase offline or unavailable');
+                    const offlineErr = new Error('Firebase offline or unavailable');
+                    offlineErr.code = 'unavailable';
+                    throw offlineErr;
                 }
             } catch (err) {
                 try {
                     localStorage.setItem(`celik_kodu_pending_workout_sync_${uid}`, '1');
                 } catch {}
+                const offline = (typeof navigator !== 'undefined' && navigator.onLine === false) ||
+                    (err && (err.code === 'unavailable' || /offline|network|failed to get/i.test(String(err.message || ''))));
+                const authMissing = Boolean(!IS_LOCAL_DEV && typeof fbAuth !== 'undefined' && fbAuth && !fbAuth.currentUser);
+                const isPermErr = Boolean(err && (err._k4IsPerm || err.code === 'permission-denied' || /permission|insufficient/i.test(String(err.message || ''))));
                 if (!IS_LOCAL_DEV && !(err && err._k4Recorded)) {
-                    const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
                     recordCloudGateTelemetry(offline ? 'warn' : 'error', 'Antrenman Bulut Yazımı', uid, offline ? 'Çevrimdışı kuyruğa alındı' : String((err && err.message) || err || 'Bulut yazım hatası'), uid);
                 }
-                console.warn("Antrenmanlar çevrimdışı kuyruğa alındı (internet gelince eşitlenecek):", err);
-                updateCloudSyncBadge('offline', 'Kuyrukta (İnternet Bekleniyor)');
+                console.warn("Antrenmanlar bulut eşitleme kuyruğuna alındı:", err);
+                if (offline) {
+                    _cloudSyncLastIssue = 'offline';
+                    updateCloudSyncBadge('offline', 'Kuyrukta (İnternet Bekleniyor)');
+                } else if (authMissing) {
+                    _cloudSyncLastIssue = 'auth-required';
+                    updateCloudSyncBadge('auth-required', 'Bulut Girişi Gerekli');
+                } else if (isPermErr) {
+                    _cloudSyncLastIssue = 'permission-denied';
+                    updateCloudSyncBadge('auth-required', 'Bulut Yetki Hatası');
+                } else {
+                    _cloudSyncLastIssue = 'error';
+                    updateCloudSyncBadge('offline', 'Eşitleme Bekliyor');
+                }
             }
         }
         if (typeof window !== 'undefined') {
@@ -3192,7 +3395,7 @@
                 if (session.isDemoGuest) {
                     updateCloudSyncBadge('synced', 'Demo Modu');
                 } else {
-                    syncAllFromCloud();
+                    flushPendingCloudOutbox().then(() => syncAllFromCloud()).catch(() => {});
                 }
             } else {
                 unmountAdminPortalFromDOM();
@@ -3326,7 +3529,7 @@
                 _adminPortalScriptLoadingPromise = new Promise((resolve) => {
                     try {
                         const script = document.createElement('script');
-                        script.src = 'js/chiefs/admin-portal.js?v=345';
+                        script.src = 'js/chiefs/admin-portal.js?v=346';
                         script.async = false;
                         script.onload = () => resolve(true);
                         script.onerror = () => {
@@ -3743,7 +3946,12 @@
             const usernameInput = document.getElementById('loginUsername');
             const passwordInput = document.getElementById('loginPassword');
             const errorBox = document.getElementById('loginErrorMsg');
-            if (errorBox) errorBox.style.display = 'none';
+            if (errorBox) {
+                errorBox.style.display = 'none';
+                errorBox.style.background = '';
+                errorBox.style.borderColor = '';
+                errorBox.style.color = '';
+            }
 
             const hasFbAdmin = Boolean(
                 matched && matched.role === 'admin' &&
@@ -4438,7 +4646,7 @@
 
                     if (fbVerified) {
                         if (fbAuth && fbAuth.currentUser) {
-                            syncUserRoleDocument(fbAuth.currentUser, u).catch(() => {});
+                            try { await syncUserRoleDocument(fbAuth.currentUser, u); } catch {}
                         }
                         const evalRes = evaluatePasswordSecurity(pass, u);
                         const freshSalt = generateSecureSalt();
@@ -4462,8 +4670,7 @@
                         const isDefaultWeakOnAdmin = (u.id === 'usr_admin') && (effSalt === 'celik_salt_default' || KNOWN_WEAK_HASHES_GLOBAL.has(effHash));
                         const allowLocalFallback = !isDefaultWeakOnAdmin && (
                             fbNetworkUnavailable ||
-                            IS_LOCAL_DEV ||
-                            ((vaultCred && Number(vaultCred.passwordUpdatedAt || 0)) > Number(u.passwordUpdatedAt || 0))
+                            IS_LOCAL_DEV
                         );
                         if (allowLocalFallback) {
                             const enteredHash = await sha256Hex(effSalt + pass);
@@ -4705,6 +4912,8 @@
             const roleBadge = document.getElementById('headerUserRoleBadge');
             if (roleBadge && isAdmin) {
                 roleBadge.innerText = pendingCount > 0 ? `YÖNETİCİ (${pendingCount} ONAY)` : 'YÖNETİCİ';
+                roleBadge.className = 'auth-role-tag role-admin';
+                roleBadge.style.display = 'inline-block';
             }
 
             const telEvents = (isAdmin && typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAllLocalEventsAcrossUsers === 'function')
