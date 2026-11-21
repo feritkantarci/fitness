@@ -378,8 +378,8 @@
                 }
 
                 let cloudPayload = null;
-                if (isFirebaseReady && fbDb) {
-                    const catSnap = await fbDb.collection('app_system').doc('master_catalog').get();
+                if (isFirebaseReady && fbDb && !isFirestoreQuotaCircuitOpen()) {
+                    const catSnap = await fetchCloudDocPreferServer(fbDb.collection('app_system').doc('master_catalog')).catch(() => null);
                     if (catSnap && catSnap.exists) {
                         cloudPayload = catSnap.data();
                     }
@@ -532,7 +532,7 @@
             try {
                 const ver = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAppVersion === 'function')
                     ? window.CelikKaraKutu.getAppVersion()
-                    : 'v351';
+                    : 'v352';
                 const keys = payload && typeof payload === 'object' ? Object.keys(payload) : [];
                 const undefKeys = [];
                 const overLimit = [];
@@ -918,7 +918,7 @@
                                 await refreshVerifiedAdminClaim(fbUser);
                                 if (typeof syncUserRoleDocument === 'function') {
                                     const activeU = typeof getActiveUser === 'function' ? getActiveUser() : null;
-                                    try { await syncUserRoleDocument(fbUser, activeU); } catch {}
+                                    try { syncUserRoleDocument(fbUser, activeU).catch(() => {}); } catch {}
                                 }
                                 if (curSess && typeof syncAppViewState === 'function') {
                                     syncAppViewState();
@@ -976,7 +976,7 @@
                         if (fbAuth && fbAuth.currentUser) {
                             await refreshVerifiedAdminClaim(fbAuth.currentUser);
                             const activeU = typeof getActiveUser === 'function' ? getActiveUser() : null;
-                            try { await syncUserRoleDocument(fbAuth.currentUser, activeU); } catch {}
+                            try { syncUserRoleDocument(fbAuth.currentUser, activeU).catch(() => {}); } catch {}
                         } else {
                             await refreshVerifiedAdminClaim(null);
                         }
@@ -1026,7 +1026,14 @@
                 throw qErr;
             }
             try {
-                return await withAuthTimeout(docRef.get(), 3500, null);
+                const res = await withAuthTimeout(docRef.get(), 2200, '__FIRESTORE_TIMEOUT__');
+                if (res === '__FIRESTORE_TIMEOUT__') {
+                    const tErr = new Error('Firestore quota/backoff timeout');
+                    tErr.code = 'resource-exhausted';
+                    tripFirestoreQuotaCircuitIfNeeded(tErr);
+                    throw tErr;
+                }
+                return res;
             } catch (e) {
                 tripFirestoreQuotaCircuitIfNeeded(e);
                 throw e;
@@ -1147,7 +1154,7 @@
         }
 
         async function syncOwnUserProfileFromCloud(fbUserOverride) {
-            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb) return null;
+            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || isFirestoreQuotaCircuitOpen()) return null;
             const fbUser = fbUserOverride || (typeof fbAuth !== 'undefined' && fbAuth ? fbAuth.currentUser : null);
             if (!fbUser || !fbUser.uid) return null;
             try {
@@ -1158,7 +1165,7 @@
                     if (profSnap && profSnap.exists) cloudProfile = profSnap.data() || null;
                 } catch {}
                 try {
-                    const roleSnap = await fbDb.collection('user_roles').doc(fbUser.uid).get();
+                    const roleSnap = await fetchCloudDocPreferServer(fbDb.collection('user_roles').doc(fbUser.uid));
                     if (roleSnap && roleSnap.exists) cloudRoleDoc = roleSnap.data() || null;
                 } catch {}
                 if (!cloudProfile && !cloudRoleDoc) return null;
@@ -1197,12 +1204,12 @@
         }
 
         async function syncOwnUserProfileToCloud(userObj, fbUserOverride) {
-            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb) return false;
+            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || isFirestoreQuotaCircuitOpen()) return false;
             const fbUser = fbUserOverride || (typeof fbAuth !== 'undefined' && fbAuth ? fbAuth.currentUser : null);
             if (!fbUser || !fbUser.uid || !userObj) return false;
             try {
                 const docRef = fbDb.collection('user_profiles').doc(fbUser.uid);
-                const existingSnap = await docRef.get();
+                const existingSnap = await fetchCloudDocPreferServer(docRef);
                 const existingData = (existingSnap && existingSnap.exists && typeof existingSnap.data === 'function') ? (existingSnap.data() || {}) : null;
                 const isAdmin = typeof isVerifiedAdminSession === 'function' && isVerifiedAdminSession();
                 if (!existingData && !isAdmin) {
@@ -1212,9 +1219,10 @@
                     ? { id: existingData.id, role: existingData.role, status: existingData.status }
                     : {};
                 const payload = buildUserProfileDocPayload(userObj, fbUser.uid, preservedOverrides);
-                await docRef.set(payload, { merge: true });
+                await withAuthTimeout(docRef.set(payload, { merge: true }), 2200, null);
                 return true;
             } catch (err) {
+                tripFirestoreQuotaCircuitIfNeeded(err);
                 console.warn('Kullanıcı profili buluta yazılamadı:', err);
                 return false;
             }
@@ -1225,7 +1233,11 @@
                 updateCloudSyncBadge('synced', 'Demo Modu');
                 return;
             }
-            if (!isFirebaseReady || !fbDb || isFirestoreQuotaCircuitOpen()) return;
+            if (!isFirebaseReady || !fbDb) return;
+            if (isFirestoreQuotaCircuitOpen()) {
+                updateCloudSyncBadge('offline', 'Bulut Kotası Doldu (Yerel Aktif)');
+                return;
+            }
             _cloudSyncLastIssue = null;
             updateCloudSyncBadge('syncing', 'Eşitleniyor...');
 
@@ -1266,19 +1278,21 @@
                     if (typeof ensureAdminPortalLoadedAndMounted === 'function') {
                         await ensureAdminPortalLoadedAndMounted();
                     }
-                    if (typeof window !== 'undefined' && typeof window.syncAllUsersForAdmin === 'function') {
-                        await window.syncAllUsersForAdmin();
+                    if (!isFirestoreQuotaCircuitOpen() && typeof window !== 'undefined' && typeof window.syncAllUsersForAdmin === 'function') {
+                        await withAuthTimeout(window.syncAllUsersForAdmin(), 2500, null);
                     }
                 }
 
                 // 3. Kalan aktif kullanıcı verilerini eşitle
-                if (uid) {
+                if (uid && !isFirestoreQuotaCircuitOpen()) {
                     await syncUserMeasurementsFromCloud(uid);
                     await syncUserStateFromCloud(uid);
                 }
 
                 const hasPendingWorkout = Boolean(uid && localStorage.getItem(`celik_kodu_pending_workout_sync_${uid}`) === '1');
-                if (_cloudSyncLastIssue === 'auth-required') {
+                if (isFirestoreQuotaCircuitOpen()) {
+                    updateCloudSyncBadge('offline', 'Bulut Kotası Doldu (Yerel Aktif)');
+                } else if (_cloudSyncLastIssue === 'auth-required') {
                     updateCloudSyncBadge('auth-required', 'Bulut Girişi Gerekli');
                 } else if (_cloudSyncLastIssue === 'permission-denied') {
                     updateCloudSyncBadge('auth-required', 'Bulut Yetki Hatası');
@@ -1293,7 +1307,9 @@
                 console.warn("Bulut eşitleme gecikti:", e);
                 const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
                 const authMissing = Boolean(!IS_LOCAL_DEV && typeof fbAuth !== 'undefined' && fbAuth && !fbAuth.currentUser);
-                if (authMissing) {
+                if (isFirestoreQuotaCircuitOpen()) {
+                    updateCloudSyncBadge('offline', 'Bulut Kotası Doldu (Yerel Aktif)');
+                } else if (authMissing) {
                     updateCloudSyncBadge('auth-required', 'Bulut Girişi Gerekli');
                 } else if (offline) {
                     updateCloudSyncBadge('offline', 'Kuyrukta (İnternet Bekleniyor)');
@@ -1304,11 +1320,11 @@
         }
 
         async function syncAiConfigFromCloud() {
-            if (!isFirebaseReady || !fbDb) return;
+            if (!isFirebaseReady || !fbDb || isFirestoreQuotaCircuitOpen()) return;
             if (!IS_LOCAL_DEV && (!fbAuth || !fbAuth.currentUser)) return;
             try {
                 const docRef = fbDb.collection('app_system').doc('ai_config');
-                const docSnap = await docRef.get();
+                const docSnap = await fetchCloudDocPreferServer(docRef);
 
                 if (docSnap && docSnap.exists) {
                     const data = docSnap.data() || {};
@@ -1877,13 +1893,13 @@
         let scaleLogsLiveUnsub = null;
 
         async function syncUserScaleLogsFromCloud(uid) {
-            if (!isFirebaseReady || !fbDb || !uid) return;
+            if (!isFirebaseReady || !fbDb || !uid || isFirestoreQuotaCircuitOpen()) return;
             try {
                 const docRef = fbDb.collection('scale_logs').doc(uid);
-                const doc = await docRef.get();
+                const doc = await fetchCloudDocPreferServer(docRef);
                 const localLogs = getScaleLogs();
 
-                if (doc.exists) {
+                if (doc && doc.exists) {
                     const data = doc.data();
                     adoptCloudSyncSealIfPresent('scale_logs', uid, data);
                     if (data && Array.isArray(data.logs)) {
@@ -1895,7 +1911,7 @@
                         return;
                     }
                 }
-                if (!IS_LOCAL_DEV && localLogs.length > 0) {
+                if (!IS_LOCAL_DEV && localLogs.length > 0 && !isFirestoreQuotaCircuitOpen()) {
                     await writeAthleteDocWithSealHeal('scale_logs', uid, (seal) => ({
                         logs: localLogs,
                         clientUpdatedAt: Date.now(),
@@ -1907,7 +1923,7 @@
         }
 
         async function syncScaleLogsToCloud(logs, uid) {
-            if (IS_LOCAL_DEV) return;
+            if (IS_LOCAL_DEV || isFirestoreQuotaCircuitOpen()) return;
             if (!isFirebaseReady || !fbDb || !uid) return;
             try {
                 await writeAthleteDocWithSealHeal('scale_logs', uid, (seal) => ({
@@ -1925,13 +1941,13 @@
         }
 
         async function syncUserMeasurementsFromCloud(uid) {
-            if (!isFirebaseReady || !fbDb || !uid) return;
+            if (!isFirebaseReady || !fbDb || !uid || isFirestoreQuotaCircuitOpen()) return;
             try {
                 const docRef = fbDb.collection('measurement_logs').doc(uid);
-                const doc = await docRef.get();
+                const doc = await fetchCloudDocPreferServer(docRef);
                 const localLogs = getMeasurementsLogs();
 
-                if (doc.exists) {
+                if (doc && doc.exists) {
                     const data = doc.data();
                     adoptCloudSyncSealIfPresent('measurement_logs', uid, data);
                     if (data && Array.isArray(data.logs)) {
@@ -3801,7 +3817,7 @@
                 _adminPortalScriptLoadingPromise = new Promise((resolve) => {
                     try {
                         const script = document.createElement('script');
-                        script.src = 'js/chiefs/admin-portal.js?v=351';
+                        script.src = 'js/chiefs/admin-portal.js?v=352';
                         script.async = false;
                         script.onload = () => resolve(true);
                         script.onerror = () => {
@@ -3824,13 +3840,13 @@
         }
 
         async function syncUserRoleDocument(fbUser, appUser) {
-            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || !fbUser || !fbUser.uid) return false;
+            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || !fbUser || !fbUser.uid || isFirestoreQuotaCircuitOpen()) return false;
             if (typeof navigator !== 'undefined' && navigator.onLine === false) return false;
             try {
                 const email = String(fbUser.email || (appUser && appUser.fbAuthEmail) || '').trim().toLowerCase();
                 let isClaimAdmin = false;
                 try {
-                    const tok = await fbUser.getIdTokenResult();
+                    const tok = await withAuthTimeout(fbUser.getIdTokenResult(), 2500, null);
                     if (tok && tok.claims && (tok.claims.role === 'admin' || tok.claims.admin === true)) {
                         isClaimAdmin = true;
                     }
@@ -3838,9 +3854,10 @@
                 const roleRef = fbDb.collection('user_roles').doc(fbUser.uid);
                 let existingData = null;
                 try {
-                    const snap = await roleRef.get();
+                    const snap = await fetchCloudDocPreferServer(roleRef);
                     if (snap && snap.exists) existingData = snap.data() || null;
                 } catch {}
+                if (isFirestoreQuotaCircuitOpen()) return false;
                 if (existingData && !isClaimAdmin) {
                     return true;
                 }
@@ -3849,14 +3866,15 @@
                 const resolvedAppUid = (appUser && appUser.id)
                     ? String(appUser.id)
                     : ((existingData && existingData.appUid) || ('usr_' + cleanFbUid));
-                await roleRef.set({
+                await withAuthTimeout(roleRef.set({
                     role: resolvedRole,
                     appUid: resolvedAppUid,
                     email,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
+                }, { merge: true }), 2200, null);
                 return true;
             } catch (e) {
+                tripFirestoreQuotaCircuitIfNeeded(e);
                 return false;
             }
         }
