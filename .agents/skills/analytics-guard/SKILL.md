@@ -1,6 +1,6 @@
 ---
 name: analytics-guard
-description: Çelik Kodu Analiz sekmesini (#analyticsTab, js/chiefs/analytics-chief.js) yöneten Kısım Şefi becerisi. Kas Haritası (10 ana / 31 alt kas), Set Dayanıklılığı, Güç Gelişimi, Haftalık Fitness/Kardiyo Puanları ve Tartı/Ölçü/Koç Telemetrisini kapsar.
+description: Çelik Kodu Analiz sekmesini (#analyticsTab, js/chiefs/analytics-chief.js) yöneten Kısım Şefi becerisi. Kas Haritası (10 ana / 31 alt kas), Set Dayanıklılığı, Güç Gelişimi, Haftalık Fitness/Kardiyo Puanları ve Tartı/Ölçü/Koç Performans Özetini kapsar.
 ---
 
 # 📊 5. Oda — Analiz & Bilimsel Metrik Şefi (`analytics-guard`)
@@ -13,10 +13,10 @@ description: Çelik Kodu Analiz sekmesini (#analyticsTab, js/chiefs/analytics-ch
 2. **Set Dayanıklılığı (`analyzeIntraSessionFatigueAndDropOff`):** Seans içi set akışını değerlendirir.
 3. **Güç Gelişimi (`analyzeExerciseProgressionHistory`):** Seanslar arası güç ve tekrar gelişimini izler.
 4. **Haftalık Puanlar (`calculateWeeklyFitnessAndCardioScores`):** Fitness ve Kardiyo skorlarını hesaplar.
-5. **Tartı, Ölçü & Telemetri (`getUserActiveBodyweightKg`):** Güncel vücut ağırlığı ve mezura takibini Köprü Gümrüğü (`sanitizeScaleLogs`, `sanitizeMeasurementLogs`) güvencesiyle yönetir.
+5. **Tartı, Ölçü & Kilo Takibi (`getUserActiveBodyweightKg`):** Güncel vücut ağırlığı ve mezura takibini Köprü Gümrüğü (`sanitizeScaleLogs`, `sanitizeMeasurementLogs`) güvencesiyle yönetir.
 
 ## Bağlayıcı Akademik Kurallar ve Hata Hafızası Sicili
-1. **Tartı Birincil Kaynağı (`T11`):** Aktif vücut ağırlığında tek birincil kaynak tarih sırasıyla en güncel tartı kaydıdır (`getScaleLogs()` `[0]`, `> 30 kg`); 30 gün sınırı yüzünden güncel kilo veya AI koç telemetrisi asla sıfırlanmaz/düşmez.
+1. **Tartı Birincil Kaynağı (`T11`):** Aktif vücut ağırlığında tek birincil kaynak tarih sırasıyla en güncel tartı kaydıdır (`getScaleLogs()` `[0]`, `> 30 kg`); 30 gün sınırı yüzünden güncel kilo veya AI koç hazırlık verisi asla sıfırlanmaz/düşmez.
 2. **Eski Kayıt Kanonik Onarımı (`T6`):** `id`/`name` üzerinden `EXERCISES_DB` ile birleştirilerek eksik `isTimeBased`, `isBodyweight` ve `cardio_min` bayrakları onarılır (`Hollow Body` her zaman `sn`).
 3. **Artan Piramit Setler (`T1`):** Kilo artışı (`7.5×12 ➔ 10×12 ➔ 12.5×10`) Epley `e1RM = yük × (1 + tekrar/30)` formülüyle değerlendirilir; güç arttıysa `📈 Piramit Güç Artışı` olarak ödüllendirilir, düşüş sayılmaz.
 4. **Isınma + Ağır Top-Set + Back-Off & Drop-Set (`T2`, `T3`):** İnceleme en ağır çalışma setine kilitlenir (`35×10 ➔ 35×7` düşüşünü yakalar). Kontrollü kilo düşürmeli drop-setlerde (`45×12 ➔ 40×12 ➔ 35×12`) şiddetli tekrar çöküşü yoksa `🔻 Kontrollü Kilo Düşürme` verilir; asla `"Tam Dayanıklılık (Sıfır Kayıp)"` yazılmaz.

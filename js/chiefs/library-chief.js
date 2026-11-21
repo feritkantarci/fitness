@@ -231,13 +231,13 @@
                 list.splice(idx, 1);
                 isNowExcluded = false;
                 if (typeof showToast === 'function') {
-                    showToast(`✅ "${exName}" geri alındı.`);
+                    showToast(`"${exName}" geri alındı.`);
                 }
             } else {
                 list.push(exId);
                 isNowExcluded = true;
                 if (typeof showToast === 'function') {
-                    showToast(`👁️ "${exName}" gizlendi.`);
+                    showToast(`"${exName}" gizlendi.`);
                 }
             }
 
@@ -281,13 +281,13 @@
             if (!btn) return;
             const isExcluded = isExerciseExcludedByUser(exId);
             if (isExcluded) {
-                btn.innerHTML = '🔄 Geri Al';
+                btn.innerHTML = 'Geri Al';
                 btn.style.color = '#15803D';
                 btn.style.borderColor = '#10b981';
                 btn.style.background = 'rgba(16, 185, 129, 0.15)';
                 btn.title = 'Aktif havuzunuza geri ekleyin';
             } else {
-                btn.innerHTML = '👁️ Gizle';
+                btn.innerHTML = 'Gizle';
                 btn.style.color = '#DC2626';
                 btn.style.borderColor = 'rgba(239, 68, 68, 0.4)';
                 btn.style.background = 'rgba(239, 68, 68, 0.1)';
@@ -334,9 +334,9 @@
             upsertUserCustomProgram(programToSave, uid);
             if (typeof renderLibrary === 'function') renderLibrary();
             if (typeof showToast === 'function') {
-                showToast("✅ Program kütüphaneye kaydedildi!");
+                showToast("Program kütüphaneye kaydedildi.");
             } else {
-                alert("✅ Program başarıyla kütüphanenize kaydedildi!");
+                alert("Program başarıyla kütüphanenize kaydedildi.");
             }
         }
 
@@ -563,7 +563,7 @@
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                             <div style="display:flex; align-items:center; gap:9px; min-width:0; flex:1; cursor:pointer;" onclick="toggleLibExerciseForm('${ex.id}')">
                                 <div style="width:40px; height:40px; border-radius:8px; background:#FFFFFF; color:#0F172A; overflow:hidden; flex-shrink:0; border:1px solid rgba(167, 139, 250, 0.25); display:flex; align-items:center; justify-content:center;">
-                                    ${thumbImg ? `<img src="${thumbImg}" width="40" height="40" decoding="async" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}" loading="lazy">` : '🏋️'}
+                                    ${thumbImg ? `<img src="${thumbImg}" width="40" height="40" decoding="async" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}" loading="lazy">` : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12"/></svg>`}
                                 </div>
                                 <div style="min-width:0; flex:1;">
                                     <div style="font-size:13px; font-weight:800; color:#FFFFFF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
@@ -752,9 +752,8 @@
                 if (filtered.length === 0) {
                     emptyEl.style.display = 'block';
                     emptyEl.innerHTML = `
-                        <div style="font-size:28px; margin-bottom:8px;">${showExcluded ? '✨' : '🔍'}</div>
                         <div style="font-size:13.5px; font-weight:800; color:#FFFFFF; margin-bottom:4px;">${showExcluded ? 'Kişisel Havuzunuzdan Gizlenmiş Egzersiz Yok' : 'Aramanıza Uygun Egzersiz Bulunamadı'}</div>
-                        <div style="font-size:12px; color:#CBD5E1; margin-bottom:12px;">${showExcluded ? 'Bir hareketi istemediğinizde "👁️‍🗨️ Gizle" butonuna basarak bu listeye alabilirsiniz.' : 'Filtreleri veya arama kelimesini değiştirerek tekrar deneyebilirsiniz.'}</div>
+                        <div style="font-size:12px; color:#CBD5E1; margin-bottom:12px;">${showExcluded ? 'Bir hareketi istemediğinizde "Gizle" butonuna basarak bu listeye alabilirsiniz.' : 'Filtreleri veya arama kelimesini değiştirerek tekrar deneyebilirsiniz.'}</div>
                         ${!showExcluded ? `<button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px; background:#181530; color:#F3E8FF; border:1px solid rgba(167, 139, 250, 0.35);" onclick="document.getElementById('libExSearchInput').value=''; document.getElementById('libExMuscleFilter').value='all'; document.getElementById('libExEquipFilter').value='all'; renderLibraryExerciseCatalog();">Filtreleri Sıfırla</button>` : ''}
                     `;
                 } else {
@@ -829,13 +828,13 @@
             let html = `
                 <div style="display:flex; flex-direction:column; gap:8px;">
                     <div class="add-to-prog-card" style="padding:10px 12px;" onclick="closeAddToProgramOptionsModal(); openQuickAddToDayModal(decodeURIComponent('${encodeURIComponent(ex.id)}'));">
-                        <div style="font-size:20px; flex-shrink:0;">📅</div>
+                        <div style="width:20px; height:20px; color:#6D28D9; flex-shrink:0; display:flex; align-items:center; justify-content:center;">${CANVA_ICONS.calendar}</div>
                         <div style="flex:1; font-size:13px; font-weight:800; color:#0F172A;">Haftalık Güne Planla</div>
                         <div style="font-size:12px; color:#C2410C; font-weight:800;">Güne Ata ➔</div>
                     </div>
 
                     <div class="add-to-prog-card" style="padding:10px 12px; cursor:default;">
-                        <div style="font-size:20px; flex-shrink:0;">🛠️</div>
+                        <div style="width:20px; height:20px; color:#6D28D9; flex-shrink:0; display:flex; align-items:center; justify-content:center;">${CANVA_ICONS.sliders}</div>
                         <div style="flex:1;">
                             <div style="font-size:13px; font-weight:800; color:#0F172A; margin-bottom:6px;">Program Atölyesine Ekle</div>
                             <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
@@ -864,7 +863,7 @@
             if (isWorkoutActive) {
                 html += `
                     <div class="add-to-prog-card active-workout-highlight" style="padding:10px 12px;" onclick="applyAddToActiveWorkout('${ex.id}')">
-                        <div style="font-size:20px; flex-shrink:0;">🏋️</div>
+                        <div style="width:20px; height:20px; color:#15803D; flex-shrink:0; display:flex; align-items:center; justify-content:center;">${CANVA_ICONS.play}</div>
                         <div style="flex:1; font-size:13px; font-weight:800; color:#0F172A;">Canlı Antrenmana Ekle</div>
                         <div style="font-size:12px; color:#15803D; font-weight:800;">Ekle ➔</div>
                     </div>
@@ -872,7 +871,7 @@
             } else {
                 html += `
                     <div class="add-to-prog-card" style="padding:10px 12px;" onclick="startQuickWorkoutWithExercise('${ex.id}')">
-                        <div style="font-size:20px; flex-shrink:0;">⚡</div>
+                        <div style="width:20px; height:20px; color:#0369A1; flex-shrink:0; display:flex; align-items:center; justify-content:center;">${CANVA_ICONS.bolt}</div>
                         <div style="flex:1; font-size:13px; font-weight:800; color:#0F172A;">Hızlı Seans Başlat</div>
                         <div style="font-size:12px; color:#0369A1; font-weight:800;">Başlat ➔</div>
                     </div>
@@ -912,7 +911,7 @@
             if (typeof renderCustomRoutine === 'function') renderCustomRoutine();
             if (typeof renderRegionStatus === 'function') renderRegionStatus();
             
-            showToast(`✅ "${ex.name}" Program Atölyesi taslağınıza eklendi! (Toplam ${customRoutineState.exercises.length} hareket)`);
+            showToast(`"${ex.name}" Program Atölyesi taslağınıza eklendi! (Toplam ${customRoutineState.exercises.length} hareket)`);
             playAlertSound();
         }
 
@@ -960,7 +959,7 @@
             closeAddToProgramOptionsModal();
             switchTab('activeWorkoutTab');
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            showToast(`✅ "${ex.name}" canlı antrenmanınıza eklendi!`);
+            showToast(`"${ex.name}" canlı antrenmanınıza eklendi!`);
             playAlertSound();
         }
 
@@ -1056,7 +1055,7 @@
             resetTimer(60);
             playAlertSound();
             requestWakeLock();
-            showToast(`🚀 "${ex.name}" ile canlı antrenman başladı!`);
+            showToast(`"${ex.name}" ile canlı antrenman başladı!`);
         }
 
         function renderSavedProgramsPane() {
@@ -1097,9 +1096,9 @@
 
             if (officialListEl) {
                 const templates = [
-                    { id: 'la_forja_day1', title: 'Çelik Kodu Gün 1', meta: '45 Dk • 6 Hareket • Omuz & Bacak Ön' },
-                    { id: 'la_forja_day2', title: 'Çelik Kodu Gün 2', meta: '45 Dk • 6 Hareket • Sırt & Balistik Güç' },
-                    { id: 'la_forja_day3', title: 'Çelik Kodu Gün 3', meta: '50 Dk • 5 Hareket • Kompleks & Merdiven' }
+                    { id: 'celik_kodu_day1', title: 'Çelik Kodu Gün 1', meta: '45 Dk • 6 Hareket • Omuz & Bacak Ön' },
+                    { id: 'celik_kodu_day2', title: 'Çelik Kodu Gün 2', meta: '45 Dk • 6 Hareket • Sırt & Balistik Güç' },
+                    { id: 'celik_kodu_day3', title: 'Çelik Kodu Gün 3', meta: '50 Dk • 5 Hareket • Kompleks & Merdiven' }
                 ];
                 officialListEl.innerHTML = templates.map(tpl => {
                     const encodedId = encodeURIComponent(tpl.id);
@@ -1177,24 +1176,24 @@
 
         function loadOfficialRoutine(routineId) {
             const routines = {
-                la_forja_day1: {
-                    title: '⚔️ Çelik Kodu Gün 1: Omuz & Bacak Ön Zırhı',
+                celik_kodu_day1: {
+                    title: 'Çelik Kodu Gün 1: Omuz & Bacak Ön Zırhı',
                     split: 'upper_push',
                     style: 'superset',
                     duration: 45,
                     scheme: { sets: 4, reps: '8 - 10', rest: 45 },
                     exerciseIds: ['db_overhead_press', 'db_goblet_squat', 'db_reverse_lunge', 'bw_pushup', 'kb_halo', 'bw_hollow_body']
                 },
-                la_forja_day2: {
-                    title: '⚔️ Çelik Kodu Gün 2: Sırt Çekiş & Balistik Güç',
+                celik_kodu_day2: {
+                    title: 'Çelik Kodu Gün 2: Sırt Çekiş & Balistik Güç',
                     split: 'upper_pull',
                     style: 'superset',
                     duration: 45,
                     scheme: { sets: 4, reps: '8 - 10', rest: 45 },
                     exerciseIds: ['db_saw_row', 'db_rdl', 'db_swing', 'bw_pullup', 'db_farmers_walk', 'db_russian_twist']
                 },
-                la_forja_day3: {
-                    title: '⚔️ Çelik Kodu Gün 3: Kompleks & Merdiven',
+                celik_kodu_day3: {
+                    title: 'Çelik Kodu Gün 3: Kompleks & Merdiven',
                     split: 'full_body',
                     style: 'superset',
                     duration: 50,
@@ -1203,7 +1202,9 @@
                 }
             };
 
-            const target = routines[routineId];
+            const resolvedId = (typeof normalizeLegacyBuiltinProgramId === 'function' ? normalizeLegacyBuiltinProgramId(routineId) : null)
+                || (typeof routineId === 'string' ? routineId.trim().replace(/^(?!celik_kodu_day)[a-z]+_[a-z]+_day([123])$/, 'celik_kodu_day$1') : routineId);
+            const target = routines[resolvedId];
             if (!target) return;
 
             const rawExercises = target.exerciseIds.map(id => EXERCISES_DB.find(e => e.id === id)).filter(Boolean);
@@ -1303,7 +1304,7 @@
             const anatomy = getExerciseAnatomy(ex);
             const subTitleEl = document.getElementById('exDetailModalSubtitle');
             if (subTitleEl) {
-                subTitleEl.innerHTML = `<span style="color:var(--gold); font-weight:800;">${CANVA_ICONS.crosshair} Ana: ${escapeHTML(anatomy.primary)}</span>${anatomy.secondary ? ` • <span style="color:var(--cyan); font-weight:700;">⚡ Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''} • <span style="color:var(--text-secondary);">${ex.equipment ? ex.equipment.toUpperCase() : ''}</span>`;
+                subTitleEl.innerHTML = `<span style="color:var(--gold); font-weight:800;">${CANVA_ICONS.crosshair} Ana: ${escapeHTML(anatomy.primary)}</span>${anatomy.secondary ? ` • <span style="color:var(--cyan); font-weight:700;">Destek: ${escapeHTML(anatomy.secondary)}</span>` : ''} • <span style="color:var(--text-secondary);">${ex.equipment ? ex.equipment.toUpperCase() : ''}</span>`;
             }
 
             const photoGuide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) ? exerciseGuideMap[ex.id] : null;
@@ -1326,7 +1327,7 @@
             let sMuscleLabels = '';
 
             if (spec.type === 'CONDITIONING' || spec.pFactor === 0) {
-                pMuscleLabels = `<span style="background:rgba(148,163,184,0.15); color:#94a3b8; border:1px solid rgba(148,163,184,0.3); padding:3px 8px; border-radius:12px; font-size:11px; font-weight:700;">⚡ Metabolik Kondisyon (0 Set Hipertrofi)</span>`;
+                pMuscleLabels = `<span style="background:rgba(148,163,184,0.15); color:#94a3b8; border:1px solid rgba(148,163,184,0.3); padding:3px 8px; border-radius:12px; font-size:11px; font-weight:700;">Metabolik Kondisyon (0 Set Hipertrofi)</span>`;
             } else {
                 pMuscleLabels = `<span style="background:rgba(245,158,11,0.2); color:var(--gold); border:1px solid rgba(245,158,11,0.4); padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800;">${spec.primary} (Ana Kas: +${spec.pFactor.toFixed(2)} Set)</span>`;
             }
@@ -1341,16 +1342,16 @@
             let stepsHtml = '';
             if (ex.positions && ex.positions.length > 0) {
                 const badgeStyles = {
-                    setup: { bg: 'rgba(56, 189, 248, 0.2)', border: 'var(--cyan)', text: 'var(--cyan)', icon: '🟢' },
-                    action: { bg: 'rgba(245, 158, 11, 0.2)', border: 'var(--gold)', text: 'var(--gold)', icon: '🟠' },
-                    finish: { bg: 'rgba(16, 185, 129, 0.2)', border: 'var(--green-success)', text: 'var(--green-success)', icon: '🏁' }
+                    setup: { bg: 'rgba(56, 189, 248, 0.2)', border: 'var(--cyan)', text: 'var(--cyan)', icon: '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:6px;vertical-align:middle;"></span>' },
+                    action: { bg: 'rgba(245, 158, 11, 0.2)', border: 'var(--gold)', text: 'var(--gold)', icon: '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:6px;vertical-align:middle;"></span>' },
+                    finish: { bg: 'rgba(16, 185, 129, 0.2)', border: 'var(--green-success)', text: 'var(--green-success)', icon: '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:6px;vertical-align:middle;"></span>' }
                 };
                 stepsHtml = ex.positions.map(p => {
                     const style = badgeStyles[p.badge] || badgeStyles.setup;
                     return `
                         <div class="pos-step-card" style="margin-bottom:8px;">
                             <div class="pos-step-header" style="background:${style.bg}; border-color:${style.border}; color:${style.text};">
-                                <span>${style.icon} ${escapeHTML(p.phase)}</span>
+                                <span>${style.icon}${escapeHTML(p.phase)}</span>
                             </div>
                             <div class="pos-step-desc">
                                 ${escapeHTML(p.desc)}
@@ -1371,18 +1372,18 @@
                 visualsHtml = `
                     <div style="background:#FFFFFF; border-radius:12px; overflow:hidden; border:1.5px solid #BAE6FD; margin-bottom:12px; box-shadow:0 4px 14px rgba(15,23,42,0.06);">
                         <div style="background:#F0F9FF; border-bottom:1px solid #BAE6FD; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:11.5px; font-weight:900; color:#0369A1; letter-spacing:0.5px;">⚡ OPENGYM CANLI HAREKET ANİMASYONU</span>
+                            <span style="font-size:11.5px; font-weight:900; color:#0369A1; letter-spacing:0.5px;">OPENGYM CANLI HAREKET ANİMASYONU</span>
                             <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:#0369A1; border-color:#38BDF8; background:#FFFFFF; font-weight:700;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(opengymEx.clip)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Canlı Animasyon')}'))">⛶ Tam Ekran Oynat</button>
                         </div>
                         <div style="text-align:center; padding:8px; cursor:pointer; background:#F8FAFC;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(opengymEx.clip)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Canlı Animasyon')}'))" title="Tam ekran oynatmak için dokunun">
                             <video src="${opengymEx.clip}" poster="${opengymEx.still}" autoplay loop muted playsinline style="max-width:100%; max-height:46vh; object-fit:contain; display:block; margin:0 auto; border-radius:6px;"></video>
-                            <div style="font-size:10.5px; color:#475569; margin-top:6px; font-weight:600;">🔍 Dokunarak tam ekranda canlı döngüde izleyebilirsiniz</div>
+                            <div style="font-size:10.5px; color:#475569; margin-top:6px; font-weight:600;">Dokunarak tam ekranda canlı döngüde izleyebilirsiniz</div>
                         </div>
                     </div>
                     ${photoSrc ? `
                         <div style="margin-bottom:12px; border-radius:8px; border:1px solid #E2E8F0; background:#F8FAFC; overflow:hidden;">
                             <div style="padding:6px 10px; background:#F1F5F9; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="const el=document.getElementById('ex_detail_legacy_photo'); if(el) el.style.display=el.style.display==='none'?'block':'none';">
-                                <span style="font-size:11px; font-weight:700; color:#334155;">${isSvgForm ? '📐 Vektörel Form Akışı' : '📸 Statik Fotoğraf & Form Kılavuzu'}</span>
+                                <span style="font-size:11px; font-weight:700; color:#334155;">${isSvgForm ? 'Vektörel Form Akışı' : 'Statik Fotoğraf & Form Kılavuzu'}</span>
                                 <span style="font-size:10px; color:#B45309; font-weight:800;">Gör ▼</span>
                             </div>
                             <div id="ex_detail_legacy_photo" style="display:none; padding:8px; text-align:center;">
@@ -1395,12 +1396,12 @@
                 visualsHtml = `
                     <div style="background:#FFFFFF; border-radius:12px; overflow:hidden; border:1.5px solid #FDE68A; margin-bottom:12px; box-shadow:0 4px 14px rgba(15,23,42,0.06);">
                         <div style="background:#FFFBEB; border-bottom:1px solid #FDE68A; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:11.5px; font-weight:900; color:#B45309; letter-spacing:0.5px;">${isSvgForm ? '📐 FORM VEKTÖR DİYAGRAMI' : '📸 GERÇEK FORM REHBERİ'}</span>
+                            <span style="font-size:11.5px; font-weight:900; color:#B45309; letter-spacing:0.5px;">${isSvgForm ? 'FORM VEKTÖR DİYAGRAMI' : 'GERÇEK FORM REHBERİ'}</span>
                             <button type="button" class="btn btn-outline" style="font-size:10px; padding:3px 9px; border-radius:4px; color:#0369A1; border-color:#38BDF8; background:#FFFFFF; font-weight:700;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(photoSrc)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - ' + (isSvgForm ? 'Form Diyagramı' : 'Form Rehberi'))}'))">⛶ Tam Ekran Büyüt</button>
                         </div>
                         <div style="text-align:center; padding:8px; cursor:pointer; background:#F8FAFC;" onclick="openImageLightbox(decodeURIComponent('${encodeURIComponent(photoSrc)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - ' + (isSvgForm ? 'Form Diyagramı' : 'Form Rehberi'))}'))" title="Büyütmek için dokunun">
                             <img src="${photoSrc}" style="max-width:100%; max-height:46vh; object-fit:contain; display:block; margin:0 auto; border-radius:6px;" alt="${escapeHTML(ex.name)} Form">
-                            <div style="font-size:10.5px; color:#475569; margin-top:6px; font-weight:600;">🔍 Dokunarak tam ekran inceleyebilirsiniz</div>
+                            <div style="font-size:10.5px; color:#475569; margin-top:6px; font-weight:600;">Dokunarak tam ekran inceleyebilirsiniz</div>
                         </div>
                     </div>
                 `;
@@ -1410,11 +1411,11 @@
                 formContainer.innerHTML = `
                     ${visualsHtml}
                     <div style="background:#F8FAFC; border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:10px;">
-                        <div style="font-size:11px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:6px;">🎯 Çalışan Alt Kas Grupları (Primer & Sekonder):</div>
+                        <div style="font-size:11px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:6px;">Çalışan Alt Kas Grupları (Primer & Sekonder):</div>
                         <div style="font-size:12px; line-height:1.5; margin-bottom:8px;">
-                            <div style="margin-bottom:4px;"><strong style="color:#15803D;">🎯 Primer (Ana) Kaslar:</strong> <span style="color:#0F172A; font-weight:700;">${escapeHTML(anatomy.primary || ex.muscle || '')}</span></div>
-                            ${anatomy.secondary ? `<div style="margin-bottom:4px;"><strong style="color:#0369A1;">⚡ Sekonder (Yardımcı) Kaslar:</strong> <span style="color:#334155; font-weight:600;">${escapeHTML(anatomy.secondary)}</span></div>` : ''}
-                            ${anatomy.proof ? `<div style="margin-top:6px; padding-top:6px; border-top:1px dashed var(--border); font-size:11.5px; color:#475569;"><strong>🔬 Neden Bu Kaslar?</strong> ${escapeHTML(anatomy.proof)}</div>` : ''}
+                            <div style="margin-bottom:4px;"><strong style="color:#15803D;">Primer (Ana) Kaslar:</strong> <span style="color:#0F172A; font-weight:700;">${escapeHTML(anatomy.primary || ex.muscle || '')}</span></div>
+                            ${anatomy.secondary ? `<div style="margin-bottom:4px;"><strong style="color:#0369A1;">Sekonder (Yardımcı) Kaslar:</strong> <span style="color:#334155; font-weight:600;">${escapeHTML(anatomy.secondary)}</span></div>` : ''}
+                            ${anatomy.proof ? `<div style="margin-top:6px; padding-top:6px; border-top:1px dashed var(--border); font-size:11.5px; color:#475569;"><strong>Neden Bu Kaslar?</strong> ${escapeHTML(anatomy.proof)}</div>` : ''}
                         </div>
                         <div style="display:flex; flex-wrap:wrap; gap:6px;">
                             ${pMuscleLabels}
@@ -1423,13 +1424,13 @@
                     </div>
                     ${stepsHtml ? `
                         <div style="margin-bottom:10px;">
-                            <div style="font-size:11px; font-weight:800; color:var(--cyan); text-transform:uppercase; margin-bottom:6px;">📋 Uygulama Aşamaları & Form Rehberi:</div>
+                            <div style="font-size:11px; font-weight:800; color:var(--cyan); text-transform:uppercase; margin-bottom:6px;">Uygulama Aşamaları & Form Rehberi:</div>
                             ${stepsHtml}
                         </div>
                     ` : ''}
                     ${ex.cue ? `
                         <div class="cue-box" style="margin-top:6px;">
-                            <span class="cue-icon">⚠️</span>
+                            <span class="cue-icon">!</span>
                             <span><strong>Kritik Form & Güvenlik Uyarısı:</strong> ${escapeHTML(ex.cue)}</span>
                         </div>
                     ` : ''}
@@ -1437,7 +1438,6 @@
             } else {
                 formContainer.innerHTML = `
                     <div style="padding:24px 16px; text-align:center; background:#F8FAFC; border-radius:8px; border:1px dashed var(--border);">
-                        <div style="font-size:24px; margin-bottom:6px;">🏋️</div>
                         <div style="font-weight:700; color:#0F172A; font-size:13.5px;">${escapeHTML(ex.name)}</div>
                         <div style="color:var(--text-secondary); font-size:11.5px; margin-top:4px;">Görsel form rehberi optimize ediliyor.</div>
                         <div style="margin-top:10px; display:flex; justify-content:center; gap:6px; flex-wrap:wrap;">
@@ -1449,7 +1449,7 @@
                                 ${stepsHtml}
                             </div>
                         ` : ''}
-                        ${ex.cue ? `<div class="cue-box" style="margin-top:12px; text-align:left;"><span class="cue-icon">⚠️</span><span><strong>Güvenlik Uyarısı:</strong> ${escapeHTML(ex.cue)}</span></div>` : ''}
+                        ${ex.cue ? `<div class="cue-box" style="margin-top:12px; text-align:left;"><span class="cue-icon">!</span><span><strong>Güvenlik Uyarısı:</strong> ${escapeHTML(ex.cue)}</span></div>` : ''}
                     </div>
                 `;
             }
@@ -1464,47 +1464,47 @@
                     <div style="background:#F8FAFC; border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:10px;">
                         <div style="font-size:12.5px; line-height:1.55; margin-bottom:10px;">
                             <div style="margin-bottom:6px; padding:8px 10px; background:#F0FDF4; border:1px solid #86EFAC; border-radius:6px;">
-                                <strong style="color:#15803D;">🎯 Primer (Ana Hedef) Kaslar:</strong><br>
+                                <strong style="color:#15803D;">Primer (Ana Hedef) Kaslar:</strong><br>
                                 <span style="color:#0F172A; font-weight:700;">${escapeHTML(anatomy.primary || ex.muscle || '')}</span>
                             </div>
                             ${anatomy.secondary ? `
                             <div style="margin-bottom:6px; padding:8px 10px; background:#F0F9FF; border:1px solid #7DD3FC; border-radius:6px;">
-                                <strong style="color:#0369A1;">⚡ Sekonder (Yardımcı & Sabitleyici) Kaslar:</strong><br>
+                                <strong style="color:#0369A1;">Sekonder (Yardımcı & Sabitleyici) Kaslar:</strong><br>
                                 <span style="color:#0F172A; font-weight:600;">${escapeHTML(anatomy.secondary)}</span>
                             </div>` : ''}
                             ${anatomy.proof ? `
                             <div style="padding:8px 10px; background:#F8FAFC; border-left:3px solid #0369A1; border-radius:4px; font-size:12px; color:#334155;">
-                                <strong>🔬 Biyomekanik Açıklama:</strong> ${escapeHTML(anatomy.proof)}
+                                <strong>Biyomekanik Açıklama:</strong> ${escapeHTML(anatomy.proof)}
                             </div>` : ''}
                         </div>
-                        <div style="font-size:12px; font-weight:800; color:#0F172A; margin-bottom:6px;">🎯 1 Çalışma Setinin Kaslara Dağılımı:</div>
+                        <div style="font-size:12px; font-weight:800; color:#0F172A; margin-bottom:6px;">1 Çalışma Setinin Kaslara Dağılımı:</div>
                         <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.6;">
                             • <strong>Ana Çalışan Kas:</strong> ${pMuscleLabels}<br>
                             • <strong>Yardımcı Kaslar:</strong> ${sMuscleLabels || '<span style="color:var(--text-secondary);">Yok (Sadece Tek Bölgeye Odaklanır)</span>'}<br>
-                            • <strong>Hareket Tipi:</strong> ${ex.mechanic === 'compound' ? '⚡ Birden Fazla Kası Çalıştıran (Genel Hareket)' : '🎯 Tek Bölgeye Odaklanan Hareket'}
+                            • <strong>Hareket Tipi:</strong> ${ex.mechanic === 'compound' ? 'Birden Fazla Kası Çalıştıran (Genel Hareket)' : 'Tek Bölgeye Odaklanan Hareket'}
                         </div>
                     </div>
                 `;
             } else {
                 anatomyContainer.innerHTML = `
                     <div style="padding:16px; background:#F8FAFC; border:1px solid var(--border); border-radius:8px; text-align:left;">
-                        <div style="font-size:13px; font-weight:800; color:#0F172A; margin-bottom:10px;">🧬 Çalışan Alt Kaslar & Biyomekanik Detay:</div>
+                        <div style="font-size:13px; font-weight:800; color:#0F172A; margin-bottom:10px;">Çalışan Alt Kaslar & Biyomekanik Detay:</div>
                         <div style="font-size:12.5px; line-height:1.55; margin-bottom:10px;">
                             <div style="margin-bottom:6px; padding:8px 10px; background:#F0FDF4; border:1px solid #86EFAC; border-radius:6px;">
-                                <strong style="color:#15803D;">🎯 Primer (Ana Hedef) Kaslar:</strong><br>
+                                <strong style="color:#15803D;">Primer (Ana Hedef) Kaslar:</strong><br>
                                 <span style="color:#0F172A; font-weight:700;">${escapeHTML(anatomy.primary || ex.muscle || '')}</span>
                             </div>
                             ${anatomy.secondary ? `
                             <div style="margin-bottom:6px; padding:8px 10px; background:#F0F9FF; border:1px solid #7DD3FC; border-radius:6px;">
-                                <strong style="color:#0369A1;">⚡ Sekonder (Yardımcı & Sabitleyici) Kaslar:</strong><br>
+                                <strong style="color:#0369A1;">Sekonder (Yardımcı & Sabitleyici) Kaslar:</strong><br>
                                 <span style="color:#0F172A; font-weight:600;">${escapeHTML(anatomy.secondary)}</span>
                             </div>` : ''}
                             ${anatomy.proof ? `
                             <div style="padding:8px 10px; background:#F8FAFC; border-left:3px solid #0369A1; border-radius:4px; font-size:12px; color:#334155;">
-                                <strong>🔬 Biyomekanik Açıklama:</strong> ${escapeHTML(anatomy.proof)}
+                                <strong>Biyomekanik Açıklama:</strong> ${escapeHTML(anatomy.proof)}
                             </div>` : ''}
                         </div>
-                        <div style="font-size:11.5px; font-weight:800; color:#475569; margin-bottom:6px;">📊 Haftalık Set Hesabına Katkısı:</div>
+                        <div style="font-size:11.5px; font-weight:800; color:#475569; margin-bottom:6px;">Haftalık Set Hesabına Katkısı:</div>
                         <div style="display:flex; gap:6px; flex-wrap:wrap;">
                             ${pMuscleLabels}
                             ${sMuscleLabels}
@@ -1517,7 +1517,7 @@
             const stepsContainer = document.getElementById('exDetailTabContentSteps');
             stepsContainer.innerHTML = stepsHtml + (ex.cue ? `
                 <div class="cue-box" style="margin-top:10px;">
-                    <span class="cue-icon">💡</span>
+                    <span class="cue-icon">•</span>
                     <span><strong>Altın Kural:</strong> ${escapeHTML(ex.cue)}</span>
                 </div>
             ` : '');
@@ -1530,7 +1530,7 @@
             if (isPickerActive) {
                 if (btnAlt) btnAlt.style.display = 'none';
                 if (btnAdd) {
-                    btnAdd.innerText = (pickerContext.mode === 'replace') ? '✓ Bu Alternatifi Seç' : '➕ Programa Ekle';
+                    btnAdd.innerText = (pickerContext.mode === 'replace') ? '✓ Bu Alternatifi Seç' : '+ Programa Ekle';
                     btnAdd.onclick = () => {
                         selectExerciseFromPicker(ex.id);
                         closeExerciseDetailModal();
@@ -1579,7 +1579,7 @@
                     };
                 }
                 if (btnAdd) {
-                    btnAdd.innerText = '➕ Programa Ekle';
+                    btnAdd.innerText = '+ Programa Ekle';
                     btnAdd.onclick = () => {
                         closeExerciseDetailModal();
                         openAddToProgramOptions(ex.id);

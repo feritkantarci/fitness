@@ -100,7 +100,7 @@
         // ==================== MERKEZ KASA MÜHÜRLEME KODEĞİ (SAFE UTF-8 + BASE64) ====================
         const SYSTEM_AI_VAULT_KEY = 'celik_kodu_sealed_ai_vault';
         const MASTER_CATALOG_META_KEY = 'celik_kodu_master_catalog_meta';
-        const VAULT_B64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+        const VAULT_B64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234' + '56789+/';
 
         function vaultUtf8ToBytes(str) {
             const s = String(str || '');
@@ -412,7 +412,7 @@
         }
 
         async function publishMasterCatalogToCloud(newVersion) {
-            if (typeof isCurrentUserAdmin === 'function' && !isCurrentUserAdmin()) return false;
+            if (typeof isVerifiedAdminSession === 'function' && !isVerifiedAdminSession()) return false;
             if (!isFirebaseReady || !fbDb) return false;
             const versionNum = Number(newVersion || (Number(window.CELIK_MASTER_CATALOG_META?.version || 293) + 1));
             const exercisesArr = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) ? EXERCISES_DB : [];
@@ -532,7 +532,7 @@
             try {
                 const ver = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAppVersion === 'function')
                     ? window.CelikKaraKutu.getAppVersion()
-                    : 'v326';
+                    : 'v347';
                 const keys = payload && typeof payload === 'object' ? Object.keys(payload) : [];
                 const undefKeys = [];
                 const overLimit = [];
@@ -714,7 +714,7 @@
 
         async function fetchAllCloudSystemTelemetryForAdmin() {
             const session = typeof getSession === 'function' ? getSession() : null;
-            if (!session || session.role !== 'admin') return false;
+            if (typeof isVerifiedAdminSession === 'function' ? !isVerifiedAdminSession(session) : (!session || session.role !== 'admin' || session.authVerified !== true)) return false;
             if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || (typeof navigator !== 'undefined' && navigator.onLine === false)) return false;
             if (typeof window === 'undefined' || !window.CelikKaraKutu) return false;
 
@@ -907,6 +907,7 @@
                             _firebaseInitialAuthResolved = true;
                             const curSess = typeof getSession === 'function' ? getSession() : null;
                             if (fbUser) {
+                                await refreshVerifiedAdminClaim(fbUser);
                                 if (typeof syncUserRoleDocument === 'function') {
                                     const activeU = typeof getActiveUser === 'function' ? getActiveUser() : null;
                                     try { await syncUserRoleDocument(fbUser, activeU); } catch {}
@@ -923,6 +924,7 @@
                                     flushPendingCloudOutbox().then(() => syncAllFromCloud()).catch(() => {});
                                 }
                             } else {
+                                await refreshVerifiedAdminClaim(null);
                                 if (!IS_LOCAL_DEV) {
                                     unmountAdminPortalFromDOM();
                                     if (curSess && !isDemoGuestSession(curSess)) {
@@ -953,7 +955,7 @@
 
                 isFirebaseReady = true;
                 updateCloudSyncBadge('syncing', 'Bağlanıyor...');
-                console.log("🔥 Firebase Firestore başarıyla bağlandı!");
+                console.log("Firebase Firestore başarıyla bağlandı.");
 
                 // İlk bulut veri senkronizasyonunu Firebase Auth durumu netleştikten sonra başlat
                 (async () => {
@@ -963,16 +965,34 @@
                         } else {
                             _firebaseInitialAuthResolved = true;
                         }
-                        if (fbAuth && fbAuth.currentUser && typeof syncUserRoleDocument === 'function') {
+                        if (fbAuth && fbAuth.currentUser) {
+                            await refreshVerifiedAdminClaim(fbAuth.currentUser);
                             const activeU = typeof getActiveUser === 'function' ? getActiveUser() : null;
                             try { await syncUserRoleDocument(fbAuth.currentUser, activeU); } catch {}
+                        } else {
+                            await refreshVerifiedAdminClaim(null);
                         }
                         if (typeof getSession === 'function' && getSession() && typeof syncAppViewState === 'function') {
                             syncAppViewState();
                         }
                         _bootCloudSyncTriggered = true;
-                        await flushPendingCloudOutbox();
-                        await syncAllFromCloud();
+                        if (fbAuth && fbAuth.currentUser) {
+                            await flushPendingCloudOutbox();
+                            await syncAllFromCloud();
+                        } else {
+                            if (typeof window !== 'undefined') window._initialWorkoutLogsCloudSyncDone = true;
+                            if (typeof syncMasterCatalogFromCloud === 'function') {
+                                try { await syncMasterCatalogFromCloud(0); } catch {}
+                            }
+                            const curSess = typeof getSession === 'function' ? getSession() : null;
+                            if (curSess && isDemoGuestSession(curSess)) {
+                                updateCloudSyncBadge('synced', 'Demo Modu');
+                            } else if (curSess) {
+                                updateCloudSyncBadge('auth-required', 'Bulut Girişi Gerekli');
+                            } else {
+                                updateCloudSyncBadge('offline', 'Bulut Hazır');
+                            }
+                        }
                     } catch {}
                 })();
 
@@ -1012,7 +1032,7 @@
             level: 'Orta Seviye',
             gender: 'Erkek',
             theme: 'purple',
-            avatar: '⚡'
+            avatar: 'SP'
         };
 
         function isDemoGuestSession(sessionOverride) {
@@ -1020,6 +1040,172 @@
             return Boolean(s && (s.isDemoGuest === true || s.userId === DEMO_GUEST_UID));
         }
         window.isDemoGuestSession = isDemoGuestSession;
+
+        function toUsernameDocId(rawUname) {
+            return normalizeAuthString(rawUname)
+                .replace(/ç/g, 'c')
+                .replace(/ğ/g, 'g')
+                .replace(/ı/g, 'i')
+                .replace(/ö/g, 'o')
+                .replace(/ş/g, 's')
+                .replace(/ü/g, 'u')
+                .replace(/[^a-z0-9._-]/g, '');
+        }
+
+        function sanitizeAvatarMonogram(av, fallback = 'SP') {
+            const clean = String(av || '').trim();
+            if (!clean || /\p{Extended_Pictographic}/u.test(clean)) return fallback;
+            return clean.slice(0, 4);
+        }
+
+        function buildUserProfileDocPayload(userObj, authUid, overrides = {}) {
+            const src = Object.assign({}, userObj || {}, overrides || {});
+            const cleanAuthUid = String(authUid || src.authUid || '').trim();
+            let cleanId = String(src.id || '').trim();
+            if (!/^usr_[a-zA-Z0-9_-]{1,64}$/.test(cleanId)) {
+                const safeSuffix = cleanAuthUid.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40) || String(Date.now());
+                cleanId = 'usr_' + safeSuffix;
+            }
+            const cleanRole = String(src.role || 'athlete').trim() === 'admin' ? 'admin' : 'athlete';
+            const rawStatus = String(src.status || 'pending').trim();
+            const cleanStatus = (rawStatus === 'approved' || rawStatus === 'active') ? 'approved' : 'pending';
+
+            const payload = {
+                id: cleanId,
+                authUid: cleanAuthUid,
+                username: String(src.username || '').trim().slice(0, 80),
+                fbAuthEmail: String(src.fbAuthEmail || src.email || `${cleanId}@auth.celikkodu.app`).trim().toLowerCase().slice(0, 254),
+                role: cleanRole,
+                status: cleanStatus,
+                name: String(src.name || 'Sporcu').trim().slice(0, 120) || 'Sporcu',
+                avatar: sanitizeAvatarMonogram(src.avatar, 'SP'),
+                theme: String(src.theme || (cleanRole === 'admin' ? 'gold' : 'cyan')).trim().slice(0, 32),
+                level: String(src.level || 'Orta Seviye').trim().slice(0, 64),
+                gender: String(src.gender || 'Erkek').trim().slice(0, 32),
+                mustChangePassword: Boolean(src.mustChangePassword),
+                createdAt: Number.isFinite(Number(src.createdAt)) && Number(src.createdAt) > 0 ? Number(src.createdAt) : Date.now(),
+                updatedAt: Number.isFinite(Number(src.updatedAt)) && Number(src.updatedAt) > 0 ? Number(src.updatedAt) : Date.now()
+            };
+            if (src.email) payload.email = String(src.email).trim().toLowerCase().slice(0, 254);
+            if (src.weights && typeof src.weights === 'object' && !Array.isArray(src.weights)) {
+                const wClean = {};
+                ['press', 'squat', 'row', 'rdl', 'swing', 'lunge'].forEach(k => {
+                    if (src.weights[k] !== undefined && src.weights[k] !== null) {
+                        wClean[k] = String(src.weights[k]).slice(0, 16);
+                    }
+                });
+                payload.weights = wClean;
+            }
+            if (src.passwordStrengthLevel) payload.passwordStrengthLevel = String(src.passwordStrengthLevel).slice(0, 64);
+            if (Number.isFinite(Number(src.passwordUpdatedAt)) && Number(src.passwordUpdatedAt) > 0) {
+                payload.passwordUpdatedAt = Number(src.passwordUpdatedAt);
+            }
+            if (Number.isFinite(Number(src.approvedAt)) && Number(src.approvedAt) > 0) {
+                payload.approvedAt = Number(src.approvedAt);
+            }
+            return payload;
+        }
+
+        function stripSecretsFromUserRecord(rawUser) {
+            if (!rawUser || typeof rawUser !== 'object') return null;
+            const clean = { ...rawUser };
+            delete clean.password;
+            delete clean.passwordHash;
+            delete clean.salt;
+            delete clean.geminiApiKey;
+            delete clean.tredictToken;
+            delete clean.intervalsToken;
+            if (clean.avatar) clean.avatar = sanitizeAvatarMonogram(clean.avatar, 'SP');
+            return clean;
+        }
+
+        function upsertLocalUserRecord(userObj) {
+            const clean = stripSecretsFromUserRecord(userObj);
+            if (!clean || !clean.id) return null;
+            const users = getAuthUsers();
+            const idx = users.findIndex(u => u && (u.id === clean.id || (clean.authUid && u.authUid === clean.authUid)));
+            if (idx === -1) {
+                users.push(clean);
+            } else {
+                users[idx] = stripSecretsFromUserRecord(Object.assign({}, users[idx], clean));
+            }
+            localStorage.setItem('celik_kodu_auth_users', JSON.stringify(users));
+            return idx === -1 ? clean : users[idx];
+        }
+
+        async function syncOwnUserProfileFromCloud(fbUserOverride) {
+            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb) return null;
+            const fbUser = fbUserOverride || (typeof fbAuth !== 'undefined' && fbAuth ? fbAuth.currentUser : null);
+            if (!fbUser || !fbUser.uid) return null;
+            try {
+                let cloudProfile = null;
+                let cloudRoleDoc = null;
+                try {
+                    const profSnap = await fetchCloudDocPreferServer(fbDb.collection('user_profiles').doc(fbUser.uid));
+                    if (profSnap && profSnap.exists) cloudProfile = profSnap.data() || null;
+                } catch {}
+                try {
+                    const roleSnap = await fbDb.collection('user_roles').doc(fbUser.uid).get();
+                    if (roleSnap && roleSnap.exists) cloudRoleDoc = roleSnap.data() || null;
+                } catch {}
+                if (!cloudProfile && !cloudRoleDoc) return null;
+
+                const cleanFbUid = String(fbUser.uid).replace(/[^a-zA-Z0-9_]/g, '').slice(0, 32);
+                const resolvedId = (cloudProfile && cloudProfile.id)
+                    || (cloudRoleDoc && cloudRoleDoc.appUid)
+                    || ('usr_' + cleanFbUid);
+                const isClaimAdmin = typeof isVerifiedAdminSession === 'function' && isVerifiedAdminSession();
+                const mergedUser = stripSecretsFromUserRecord(Object.assign(
+                    {},
+                    cloudProfile || {},
+                    {
+                        id: resolvedId,
+                        authUid: fbUser.uid,
+                        email: (cloudProfile && cloudProfile.email) || fbUser.email || '',
+                        fbAuthEmail: (cloudProfile && cloudProfile.fbAuthEmail) || fbUser.email || '',
+                        role: isClaimAdmin ? 'admin' : ((cloudProfile && cloudProfile.role) || (cloudRoleDoc && cloudRoleDoc.role) || 'athlete')
+                    }
+                ));
+                if (!mergedUser.status) mergedUser.status = 'approved';
+                const saved = upsertLocalUserRecord(mergedUser);
+                const curSess = typeof getSession === 'function' ? getSession() : null;
+                if (curSess && curSess.userId === resolvedId && saved) {
+                    if (saved.name && curSess.name !== saved.name) {
+                        curSess.name = saved.name;
+                        localStorage.setItem('celik_kodu_session', JSON.stringify(curSess));
+                    }
+                    if (typeof applyActiveUserProfile === 'function') applyActiveUserProfile();
+                }
+                return saved;
+            } catch (err) {
+                console.warn('Kullanıcı profili buluttan eşitlenemedi:', err);
+                return null;
+            }
+        }
+
+        async function syncOwnUserProfileToCloud(userObj, fbUserOverride) {
+            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb) return false;
+            const fbUser = fbUserOverride || (typeof fbAuth !== 'undefined' && fbAuth ? fbAuth.currentUser : null);
+            if (!fbUser || !fbUser.uid || !userObj) return false;
+            try {
+                const docRef = fbDb.collection('user_profiles').doc(fbUser.uid);
+                const existingSnap = await docRef.get();
+                const existingData = (existingSnap && existingSnap.exists && typeof existingSnap.data === 'function') ? (existingSnap.data() || {}) : null;
+                const isAdmin = typeof isVerifiedAdminSession === 'function' && isVerifiedAdminSession();
+                if (!existingData && !isAdmin) {
+                    return false;
+                }
+                const preservedOverrides = (existingData && !isAdmin)
+                    ? { id: existingData.id, role: existingData.role, status: existingData.status }
+                    : {};
+                const payload = buildUserProfileDocPayload(userObj, fbUser.uid, preservedOverrides);
+                await docRef.set(payload, { merge: true });
+                return true;
+            } catch (err) {
+                console.warn('Kullanıcı profili buluta yazılamadı:', err);
+                return false;
+            }
+        }
 
         async function syncAllFromCloud() {
             if (isDemoGuestSession()) {
@@ -1035,22 +1221,37 @@
                     await waitForFirebaseAuthReady(fbAuth, 2500);
                 }
 
-                // 1. Genel sistem ayarlarını ve kullanıcı listesini çek
+                // 1. Oturum açılmadan app_system/ai_config veya app_system/users kesinlikle okunmaz
                 const uid = getActiveUserId();
                 const isCloudUserSignedIn = Boolean(IS_LOCAL_DEV || !fbAuth || fbAuth.currentUser);
-                if (!isCloudUserSignedIn && uid) {
-                    await Promise.all([syncAiConfigFromCloud(), syncUsersFromCloud()]);
+                if (!isCloudUserSignedIn) {
                     if (typeof window !== 'undefined') window._initialWorkoutLogsCloudSyncDone = true;
-                    updateCloudSyncBadge('auth-required', 'Bulut Girişi Gerekli');
+                    if (typeof syncMasterCatalogFromCloud === 'function') {
+                        try { await syncMasterCatalogFromCloud(0); } catch {}
+                    }
+                    updateCloudSyncBadge(uid ? 'auth-required' : 'offline', uid ? 'Bulut Girişi Gerekli' : 'Bulut Hazır');
                     return;
                 }
 
-                const priorityTasks = [syncAiConfigFromCloud()];
+                const priorityTasks = [];
+                if (IS_LOCAL_DEV || (typeof fbAuth !== 'undefined' && fbAuth && fbAuth.currentUser)) {
+                    priorityTasks.push(syncAiConfigFromCloud());
+                }
                 if (uid) priorityTasks.push(syncUserWorkoutLogsFromCloud(uid, { forceServer: true }));
                 await Promise.all(priorityTasks);
 
-                // 2. Kullanıcıları eşitle
-                await syncUsersFromCloud();
+                // 2. Kişisel profili (user_profiles/{authUid}) eşitle; yöneticiyse tam listeyi yönetici portalından eşitle
+                if (typeof fbAuth !== 'undefined' && fbAuth && fbAuth.currentUser) {
+                    await syncOwnUserProfileFromCloud(fbAuth.currentUser);
+                }
+                if (typeof isVerifiedAdminSession === 'function' && isVerifiedAdminSession()) {
+                    if (typeof ensureAdminPortalLoadedAndMounted === 'function') {
+                        await ensureAdminPortalLoadedAndMounted();
+                    }
+                    if (typeof window !== 'undefined' && typeof window.syncAllUsersForAdmin === 'function') {
+                        await window.syncAllUsersForAdmin();
+                    }
+                }
 
                 // 3. Kalan aktif kullanıcı verilerini eşitle (otomatik direktif/program dinleme stabilite için kapalıdır)
                 if (uid) {
@@ -1087,6 +1288,7 @@
 
         async function syncAiConfigFromCloud() {
             if (!isFirebaseReady || !fbDb) return;
+            if (!IS_LOCAL_DEV && (!fbAuth || !fbAuth.currentUser)) return;
             try {
                 const docRef = fbDb.collection('app_system').doc('ai_config');
                 const docSnap = await docRef.get();
@@ -1116,83 +1318,6 @@
                 }
             } catch (err) {
                 console.warn("AI config buluttan eşitlenemedi:", err);
-            }
-        }
-
-        // KULLANICILAR BULUT EŞİTLEME
-        async function syncUsersFromCloud() {
-            if (!isFirebaseReady || !fbDb) return;
-            try {
-                const docRef = fbDb.collection('app_system').doc('users');
-                let doc;
-                try {
-                    doc = await docRef.get({ source: 'server' });
-                } catch (srvErr) {
-                    doc = await docRef.get();
-                }
-                const localUsers = getAuthUsers();
-
-                if (doc.exists) {
-                    const data = doc.data();
-                    if (data && Array.isArray(data.users) && data.users.length > 0) {
-                        const cloudIds = new Set(data.users.map(cu => cu.id));
-                        const cloudUnames = new Set(data.users.map(cu => normalizeAuthString(cu.username)).filter(Boolean));
-                        const mergedMap = new Map();
-
-                        // Yerelde olup bulutta aynı kullanıcı adıyla çakışmayanları koru
-                        localUsers.forEach(u => {
-                            const normU = normalizeAuthString(u.username);
-                            if (!cloudIds.has(u.id) && normU && cloudUnames.has(normU)) {
-                                return; // Buluttaki resmi hesap mükerrer yerel kaydı ezer
-                            }
-                            mergedMap.set(u.id, u);
-                        });
-
-                        data.users.forEach(rawCloudU => {
-                            if (!rawCloudU || !rawCloudU.id) return;
-                            if (rawCloudU.id === 'usr_1792524620913') return;
-                            const u = { ...rawCloudU };
-                            // Güvenlik & Stabilite: Buluttan gelebilecek eski/zayıf şifre kalıntılarını asla yerel doğrulayıcıya bulaştırma
-                            delete u.password;
-                            delete u.passwordHash;
-                            delete u.salt;
-                            delete u.geminiApiKey;
-
-                            const localU = mergedMap.get(u.id) || {};
-                            const isLocalNewer = (localU.updatedAt || 0) > (u.updatedAt || 0);
-                            const merged = isLocalNewer ? { ...u, ...localU } : { ...localU, ...u };
-                            // Bulutta onaylanmış (status !== 'pending') bir hesap varsa yerel pending durumunu ez
-                            if (u.status !== 'pending' && merged.status === 'pending') {
-                                merged.status = u.status || 'approved';
-                            }
-                            if (u.fbAuthEmail || localU.fbAuthEmail) {
-                                merged.fbAuthEmail = u.fbAuthEmail || localU.fbAuthEmail;
-                            }
-                            if (localU.passwordStrengthLevel && !merged.passwordStrengthLevel) {
-                                merged.passwordStrengthLevel = localU.passwordStrengthLevel;
-                            }
-                            const vaultCred = typeof getLocalUserCred === 'function' ? getLocalUserCred(u.id) : null;
-                            if (vaultCred && vaultCred.passwordHash) {
-                                merged.passwordStrengthLevel = vaultCred.passwordStrengthLevel || merged.passwordStrengthLevel || 'Güçlü';
-                                if (vaultCred.mustChangePassword === false) merged.mustChangePassword = false;
-                            }
-                            delete merged.password;
-                            delete merged.passwordHash;
-                            delete merged.salt;
-                            mergedMap.set(u.id, merged);
-                        });
-                        const finalUsers = Array.from(mergedMap.values());
-                        localStorage.setItem('celik_kodu_auth_users', JSON.stringify(finalUsers));
-                        if (typeof updateAdminPendingBadges === 'function') updateAdminPendingBadges();
-                        return finalUsers;
-                    }
-                } else {
-                    if (localUsers.length > 0 && (!fbAuth || fbAuth.currentUser)) {
-                        await syncUsersToCloud(localUsers);
-                    }
-                }
-            } catch (err) {
-                console.warn("Kullanıcılar buluttan çekilemedi:", err);
             }
         }
 
@@ -1306,40 +1431,6 @@
             }
         }
         window.hydrateLocalSnapshotIfDev = hydrateLocalSnapshotIfDev;
-
-        async function syncUsersToCloud(users) {
-            if (isDemoGuestSession()) return;
-            if (IS_LOCAL_DEV) {
-                updateCloudSyncBadge('synced', 'Yerel Test (İzole)');
-                return;
-            }
-            if (!isFirebaseReady || !fbDb) return;
-            try {
-                updateCloudSyncBadge('syncing', 'Kaydediliyor...');
-                // Güvenlik: Açık metin şifreler (password), passwordHash, salt ve üçüncü taraf özel API anahtarları (geminiApiKey) asla buluta yazılmaz.
-                // Kimlik doğrulama verileri istemci cihazda yerel (IndexedDB/localStorage) olarak izole edilir.
-                const sanitizedUsers = (users || []).map(u => {
-                    const copy = { ...u };
-                    delete copy.password;
-                    delete copy.passwordHash;
-                    delete copy.salt;
-                    delete copy.geminiApiKey;
-                    Object.keys(copy).forEach(k => {
-                        if (copy[k] === undefined) delete copy[k];
-                    });
-                    return copy;
-                });
-                await fbDb.collection('app_system').doc('users').set({
-                    users: sanitizedUsers,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
-                updateCloudSyncBadge('synced', 'Bulut Aktif');
-            } catch (err) {
-                console.warn("Kullanıcılar buluta yüklenemedi:", err);
-                const authMissing = Boolean(!IS_LOCAL_DEV && typeof fbAuth !== 'undefined' && fbAuth && !fbAuth.currentUser);
-                updateCloudSyncBadge(authMissing ? 'auth-required' : 'offline', authMissing ? 'Bulut Girişi Gerekli' : 'Kayıt Yerelde');
-            }
-        }
 
         async function fetchWorkoutLogsFromLocalBridge() {
             return [];
@@ -1506,23 +1597,6 @@
 
             try {
                 const localLogs = getUserLogsById(uid);
-
-                // Mükerrer yerel usr_ferit kayıtlarını da güvenle dahil et
-                if (uid === 'usr_admin') {
-                    try {
-                        const feritRaw = localStorage.getItem('celik_kodu_history_usr_ferit');
-                        if (feritRaw) {
-                            const feritLocal = JSON.parse(feritRaw);
-                            if (Array.isArray(feritLocal)) {
-                                feritLocal.forEach(fl => {
-                                    if (!localLogs.some(l => l.id === fl.id || (l.date === fl.date && l.totalSetsCompleted === fl.totalSetsCompleted))) {
-                                        localLogs.push(fl);
-                                    }
-                                });
-                            }
-                        }
-                    } catch(e) {}
-                }
 
                 let cloudLogs = [];
                 let cloudFetchOk = Array.isArray(opts.snapshotLogs);
@@ -1692,37 +1766,6 @@
                     if (!Array.isArray(logs) || logs.length === 0) continue;
 
                     let fileModified = false;
-                    const deletedSet = (typeof getDeletedWorkoutLogIds === 'function')
-                        ? new Set(getDeletedWorkoutLogIds(uid))
-                        : new Set();
-                    const nov9RecoveredLog = {"id":"log_1794246654598","date":"2026-11-09","dateFormatted":"9 Kas 2026 20:50","title":"Pazartesi: Tüm Vücut","program":"Pazartesi: Tüm Vücut","programName":"Pazartesi: Tüm Vücut","locationType":"salon","locationName":"Rodium","duration":59,"durationFormatted":"59:30","durationSecs":3570,"rpe":"RPE 8 (İdeal, cepte 2 tekrar kaldı)","notes":"","totalVolumeKg":5616.8,"totalSetsCompleted":27,"totalRepsCompleted":276,"totalIsometricSecsCompleted":20,"muscleGroups":["Kanatlar (Sırt Genişliği)","Orta Sırt & Kürek Kemiği Kasları","Arka Bacak (Kalçadan Eğilen Üst/Uzun Kısım)","Ana Kalça Kası","Orta Göğüs","Ön Bacak (Diz Üstü İç ve Dış Kısım)","Ana ve Yan Kalça","Ön Omuz","Yan Omuz","Ön Karın (Üst ve Alt Karın)","Derin İç Karın","Ön Kalça Kası","Triceps İç / Uzun Kısım","Triceps Dış Kısım","Ön Bacak & Ana Kalça Kası","Orta Göğüs & Ön Omuz","Derin İç Karın (Korse Kası)"],"exercises":[{"id":"db_rotational_gorilla_row","name":"Rotasyonel Gorilla Row","equipment":"dumbbell","category":"pull","muscle":"Kanatlar (Sırt Genişliği), Orta Sırt & Kürek Kemiği Kasları","cue":"Geniş sumo menteşesinde bir dambılı yere bastırırken diğerini gövdeyi döndürerek kaburgaya patlayıcı çek.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":10,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":120,"interSet":null,"heartrate":114,"heartrateMax":124,"durationSec":82,"watchStartTime":"2026-11-09T16:51:44.000Z","matchedBy":"sequence"},{"setNo":2,"weight":10,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":120,"interSet":null,"heartrate":122,"heartrateMax":131,"durationSec":25,"watchStartTime":"2026-11-09T16:53:17.000Z","matchedBy":"sequence"},{"setNo":3,"weight":10,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":120,"interSet":null,"heartrate":135,"heartrateMax":138,"durationSec":26,"watchStartTime":"2026-11-09T16:55:10.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":10,"maxReps":12,"exerciseVolume":360,"healthTelemetry":{"avgHeartrate":119,"peakHeartrate":131,"totalTimeUnderTensionSec":118}},{"id":"db_rdl","name":"Dambıl RDL","equipment":"dumbbell","category":"legs_hinge","muscle":"Arka Bacak (Kalçadan Eğilen Üst/Uzun Kısım), Ana Kalça Kası","cue":"Dizleri hafif kırık sabitle, kalçayı arkadaki duvara değdirir gibi geriye uzat, sırtı masa gibi düz tut.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":15,"reps":15,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":225,"interSet":null,"heartrate":119,"heartrateMax":126,"durationSec":57,"watchStartTime":"2026-11-09T16:57:54.000Z","matchedBy":"sequence"},{"setNo":2,"weight":17.5,"reps":15,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":263,"interSet":null,"heartrate":122,"heartrateMax":137,"durationSec":81,"watchStartTime":"2026-11-09T16:59:05.000Z","matchedBy":"sequence"},{"setNo":3,"weight":20,"reps":15,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":300,"interSet":null,"heartrate":129,"heartrateMax":129,"durationSec":2,"watchStartTime":"2026-11-09T17:01:00.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":20,"maxReps":15,"exerciseVolume":788,"healthTelemetry":{"avgHeartrate":131,"peakHeartrate":141,"totalTimeUnderTensionSec":252}},{"id":"db_bench_press","name":"Dambıl Bench Press","equipment":"dumbbell","category":"push","muscle":"Orta Göğüs","cue":"Dirsekleri gövdeye 45° açıda tut, dambılları yukarıda çarpmadan göğüs kaslarını sıkarak kilitle.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":35,"reps":9,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":315,"interSet":null,"heartrate":134,"heartrateMax":148,"durationSec":63,"watchStartTime":"2026-11-09T17:02:18.000Z","matchedBy":"sequence"},{"setNo":2,"weight":30,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":300,"interSet":null,"heartrate":142,"heartrateMax":144,"durationSec":66,"watchStartTime":"2026-11-09T17:03:32.000Z","matchedBy":"sequence"},{"setNo":3,"weight":30,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":300,"interSet":null,"heartrate":126,"heartrateMax":139,"durationSec":69,"watchStartTime":"2026-11-09T17:07:47.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":35,"maxReps":10,"exerciseVolume":915,"healthTelemetry":{"avgHeartrate":121,"peakHeartrate":137,"totalTimeUnderTensionSec":152}},{"id":"db_seesaw_lunge","name":"Dambıl Seesaw Lunge (Dinamik İleri-Geri Lunge)","equipment":"dumbbell","category":"legs_quad","muscle":"Ön Bacak (Diz Üstü İç ve Dış Kısım), Ana ve Yan Kalça","cue":"Öne lunge ile 90° çöküşten dönerken ayağı orta hatta yere basmadan sarkaç gibi kesintisiz geriye lunge fazına aktarın.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":7.5,"reps":6,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":45,"interSet":null,"heartrate":132,"heartrateMax":144,"durationSec":43,"watchStartTime":"2026-11-09T17:09:28.000Z","matchedBy":"sequence"},{"setNo":2,"weight":7.5,"reps":6,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":45,"interSet":null,"heartrate":132,"heartrateMax":147,"durationSec":111,"watchStartTime":"2026-11-09T17:14:10.000Z","matchedBy":"sequence"},{"setNo":3,"weight":2.5,"reps":6,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":15,"interSet":null,"heartrate":138,"heartrateMax":138,"durationSec":1,"watchStartTime":"2026-11-09T17:22:19.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":7.5,"maxReps":6,"exerciseVolume":105,"healthTelemetry":{"avgHeartrate":131,"peakHeartrate":138,"totalTimeUnderTensionSec":112}},{"id":"db_push_press","name":"Dambıl Push Press","equipment":"dumbbell","category":"push","muscle":"Ön Omuz, Yan Omuz","cue":"Dambıllar omuzdayken dizleri 20° hafifçe büküp yaylan, bacaklardan aldığın yaylanma gücüyle dambılları baş üstüne fırlat.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":7.5,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":90,"interSet":null,"heartrate":133,"heartrateMax":137,"durationSec":26,"watchStartTime":"2026-11-09T17:26:45.000Z","matchedBy":"sequence"},{"setNo":2,"weight":10,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":120,"interSet":{"id":"bw_burpee","name":"Burpee","muscle":"Ön Bacak & Ana Kalça Kası, Orta Göğüs & Ön Omuz","category":"conditioning","equipment":"bodyweight","metricType":"reps","value":10,"completed":true},"heartrate":131,"heartrateMax":131,"durationSec":2,"watchStartTime":"2026-11-09T17:27:31.000Z","matchedBy":"sequence"},{"setNo":3,"weight":12.5,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":125,"interSet":null,"heartrate":131,"heartrateMax":131,"durationSec":1,"watchStartTime":"2026-11-09T17:28:19.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":12.5,"maxReps":12,"exerciseVolume":335,"healthTelemetry":{"avgHeartrate":140,"peakHeartrate":148,"totalTimeUnderTensionSec":141}},{"id":"bw_mountain_climber","name":"Mountain Climber","equipment":"bodyweight","category":"core","muscle":"Ön Karın (Üst ve Alt Karın), Derin İç Karın, Ön Kalça Kası","cue":"Yüksek şınav pozisyonunda kalçayı kaldırmadan dizleri sırayla koşar adım göğse çek.","isBodyweight":true,"isTimeBased":false,"sets":[{"setNo":1,"weight":0,"reps":15,"isBodyweight":true,"isTimeBased":false,"completed":true,"volume":675,"interSet":null,"heartrate":122,"heartrateMax":127,"durationSec":24,"watchStartTime":"2026-11-09T17:30:02.000Z","matchedBy":"sequence"},{"setNo":2,"weight":0,"reps":15,"isBodyweight":true,"isTimeBased":false,"completed":true,"volume":675,"interSet":null,"heartrate":128,"heartrateMax":135,"durationSec":44,"watchStartTime":"2026-11-09T17:30:57.000Z","matchedBy":"sequence"},{"setNo":3,"weight":0,"reps":15,"isBodyweight":true,"isTimeBased":false,"completed":true,"volume":675,"interSet":null,"heartrate":137,"heartrateMax":137,"durationSec":1,"watchStartTime":"2026-11-09T17:31:55.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":0,"maxReps":15,"exerciseVolume":2025,"healthTelemetry":{"avgHeartrate":128,"peakHeartrate":142,"totalTimeUnderTensionSec":289}},{"id":"db_skullcrusher","name":"Dambıl Skullcrusher","equipment":"dumbbell","category":"push","muscle":"Triceps İç / Uzun Kısım, Triceps Dış Kısım","cue":"Düz sehpada dirsekleri omuz hizasında dikey sabitle, dambılları şakaklara indirip triceps ile uzat.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":7.5,"reps":8,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":60,"interSet":null,"heartrate":133,"heartrateMax":136,"durationSec":32,"watchStartTime":"2026-11-09T17:32:02.000Z","matchedBy":"sequence"},{"setNo":2,"weight":7.5,"reps":8,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":60,"interSet":{"id":"bw_plank","name":"Plank","muscle":"Derin İç Karın (Korse Kası), Ön Karın (Üst ve Alt Karın)","category":"core","equipment":"bodyweight","metricType":"time","value":20,"completed":true},"heartrate":121,"heartrateMax":135,"durationSec":37,"watchStartTime":"2026-11-09T17:34:20.000Z","matchedBy":"sequence"},{"setNo":3,"weight":7.5,"reps":6,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":45,"interSet":null,"heartrate":132,"heartrateMax":132,"durationSec":5,"watchStartTime":"2026-11-09T17:35:22.000Z","matchedBy":"sequence"}],"completedSetsCount":3,"maxWeight":7.5,"maxReps":8,"exerciseVolume":165,"healthTelemetry":{"avgHeartrate":131,"peakHeartrate":151,"totalTimeUnderTensionSec":393}},{"id":"db_lateral_raise","name":"Dambıl Lateral Raise","equipment":"dumbbell","category":"push","muscle":"Yan Omuz","cue":"Dirsekleri hafif kırık tut, kolları omuz hizasına kadar sürahi döker gibi kaldır.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":7.5,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":75,"interSet":null,"heartrate":130,"heartrateMax":133,"durationSec":37,"watchStartTime":"2026-11-09T17:35:36.000Z","matchedBy":"sequence"},{"setNo":2,"weight":7.5,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":75,"interSet":null,"heartrate":124,"heartrateMax":128,"durationSec":35,"watchStartTime":"2026-11-09T17:38:44.000Z","matchedBy":"sequence"},{"setNo":3,"weight":7.5,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":75,"interSet":null,"heartrate":118,"heartrateMax":122,"durationSec":34,"watchStartTime":"2026-11-09T17:41:01.000Z","matchedBy":"sequence"},{"setNo":4,"weight":5,"reps":7,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":35,"interSet":null,"heartrate":120,"heartrateMax":132,"durationSec":108,"watchStartTime":"2026-11-09T17:41:41.000Z","matchedBy":"sequence"}],"completedSetsCount":4,"maxWeight":7.5,"maxReps":10,"exerciseVolume":260,"healthTelemetry":{"avgHeartrate":131,"peakHeartrate":146,"totalTimeUnderTensionSec":670}},{"id":"bw_burpee","name":"Burpee (Set Arası)","equipment":"bodyweight","category":"conditioning","muscle":"Ön Bacak & Ana Kalça Kası, Orta Göğüs & Ön Omuz","cue":"Set arası aktif dinlenme / ilave hareket.","isBodyweight":true,"isTimeBased":false,"isInterSetExtra":true,"sets":[{"setNo":1,"weight":0,"reps":10,"isBodyweight":true,"isTimeBased":false,"completed":true,"volume":450,"heartrate":121,"heartrateMax":128,"durationSec":29,"watchStartTime":"2026-11-09T17:45:26.000Z","matchedBy":"sequence"}],"completedSetsCount":1,"maxWeight":0,"maxReps":10,"exerciseVolume":450,"healthTelemetry":{"avgHeartrate":136,"peakHeartrate":137,"totalTimeUnderTensionSec":20}},{"id":"bw_plank","name":"Plank (Set Arası)","equipment":"bodyweight","category":"core","muscle":"Derin İç Karın (Korse Kası), Ön Karın (Üst ve Alt Karın)","cue":"Set arası aktif dinlenme / ilave hareket.","isBodyweight":true,"isTimeBased":true,"isInterSetExtra":true,"sets":[{"setNo":1,"weight":0,"reps":20,"isBodyweight":true,"isTimeBased":true,"completed":true,"volume":214,"heartrate":116,"heartrateMax":134,"durationSec":41,"watchStartTime":"2026-11-09T17:47:22.000Z","matchedBy":"sequence"}],"completedSetsCount":1,"maxWeight":0,"maxReps":20,"exerciseVolume":214,"healthTelemetry":{"avgHeartrate":131,"peakHeartrate":131,"totalTimeUnderTensionSec":2}}],"timestamp":1794246654602,"garminActivityId":"sfWR98KCBGqhDxBKYXULr2","healthSummary":{"durationTotalSec":3581,"durationSetsSec":1142,"durationRestSec":2440,"calories":375,"heartrateAvg":127,"heartrateMax":151}};
-                    if (!deletedSet.has('log_1794246654598') && !deletedSet.has('sfWR98KCBGqhDxBKYXULr2') && !deletedSet.has('garmin_sfWR98KCBGqhDxBKYXULr2')) {
-                        const nov9Idx = logs.findIndex(l => l && (l.id === 'log_1794246654598' || String(l.date || '').slice(0, 10) === '2026-11-09'));
-                        if (nov9Idx === -1) {
-                            logs.unshift(nov9RecoveredLog);
-                            sortWorkoutLogsDesc(logs);
-                            fileModified = true;
-                            anyModified = true;
-                        } else if ((!logs[nov9Idx].healthSummary || !logs[nov9Idx].garminActivityId) && !logs[nov9Idx].userEditedAt) {
-                            logs[nov9Idx] = Object.assign({}, logs[nov9Idx], nov9RecoveredLog);
-                            fileModified = true;
-                            anyModified = true;
-                        }
-                    }
-                    const nov13RecoveredLog = {"id":"garmin_ezUmorGZxaWoPigQdmGbrX","garminActivityId":"ezUmorGZxaWoPigQdmGbrX","sourceChief":"garmin-tredict-guard","date":"2026-11-13","dateFormatted":"13 Kas 2026 19:26","timestamp":1794587163223,"program":"⚔️ Cuma: Cuma: Tüm Vücut","title":"⚔️ Cuma: Cuma: Tüm Vücut","locationType":"salon","locationName":"Garmin FR945","duration":44,"durationFormatted":"44:27","durationSecs":2667,"totalVolumeKg":5387.5,"totalSetsCompleted":25,"totalRepsCompleted":277,"totalIsometricSecsCompleted":0,"muscleGroups":["Arka Bacak","Arka Bacak & Kalça Bağı","Ana Kalça","Arka Kol Uzun Baş","Pazı İç Baş","Pazı Dış Baş","Üst Göğüs","Kanatlar","Yan Omuz","Dış Ön Bacak","İç Ön Bacak","Yan Karın","Derin İç Karın"],"exercises":[{"id":"db_rdl","name":"Dambıl RDL","equipment":"dumbbell","category":"legs_hinge","muscle":"Arka Bacak, Arka Bacak & Kalça Bağı, Ana Kalça","cue":"Dizleri hafif kırık sabitle, kalçayı arkadaki duvara değdirir gibi geriye uzat, sırtı masa gibi düz tut.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":15,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":180,"interSet":null,"heartrate":93,"heartrateMax":101,"durationSec":55,"watchStartTime":"2026-11-13T16:26:03.000Z","matchedBy":"planned_workout_step"},{"setNo":2,"weight":17.5,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":210,"interSet":null,"heartrate":97,"heartrateMax":106,"durationSec":53,"watchStartTime":"2026-11-13T16:27:43.000Z","matchedBy":"planned_workout_step"},{"setNo":3,"weight":17.5,"reps":15,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":262.5,"interSet":null,"heartrate":105,"heartrateMax":112,"durationSec":58,"watchStartTime":"2026-11-13T16:29:36.000Z","matchedBy":"planned_workout_step"}],"completedSetsCount":3,"maxWeight":17.5,"maxReps":15,"exerciseVolume":652.5,"healthTelemetry":{"avgHeartrate":98,"peakHeartrate":112,"totalTimeUnderTensionSec":166}},{"id":"db_triceps_overhead","name":"Dambıl Başüstü Triceps","equipment":"dumbbell","category":"push","muscle":"Arka Kol Uzun Baş","cue":"Dirsekleri başın iki yanında tavana bakacak şekilde sabit tut, sadece ön kolları büküp baş arkasından uzat.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":12.5,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":150,"interSet":null,"heartrate":91,"heartrateMax":107,"durationSec":48,"watchStartTime":"2026-11-13T16:31:44.000Z","matchedBy":"planned_workout_step"},{"setNo":2,"weight":12.5,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":150,"interSet":null,"heartrate":110,"heartrateMax":115,"durationSec":44,"watchStartTime":"2026-11-13T16:33:21.000Z","matchedBy":"planned_workout_step"},{"setNo":3,"weight":10,"reps":0,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":0,"interSet":null,"heartrate":122,"heartrateMax":122,"durationSec":8,"watchStartTime":"2026-11-13T16:35:05.000Z","matchedBy":"planned_workout_step"}],"completedSetsCount":3,"maxWeight":12.5,"maxReps":12,"exerciseVolume":300,"healthTelemetry":{"avgHeartrate":102,"peakHeartrate":122,"totalTimeUnderTensionSec":100}},{"id":"mach_cable_biceps","name":"Kablo Biceps Curl","equipment":"machine","category":"pull","muscle":"Pazı İç Baş, Pazı Dış Baş","cue":"Düşük makarada düz barı tut, dirsekleri sabit tutarak kablonun sürekli geriliminde biceps kaslarını sık.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":12,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":144,"interSet":null,"heartrate":116,"heartrateMax":119,"durationSec":31,"watchStartTime":"2026-11-13T16:35:28.000Z","matchedBy":"planned_workout_step"},{"setNo":2,"weight":20,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":240,"interSet":null,"heartrate":131,"heartrateMax":135,"durationSec":21,"watchStartTime":"2026-11-13T16:36:44.000Z","matchedBy":"planned_workout_step"},{"setNo":3,"weight":20,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":240,"interSet":null,"heartrate":114,"heartrateMax":122,"durationSec":26,"watchStartTime":"2026-11-13T16:37:44.000Z","matchedBy":"planned_workout_step"}],"completedSetsCount":3,"maxWeight":20,"maxReps":12,"exerciseVolume":624,"healthTelemetry":{"avgHeartrate":119,"peakHeartrate":135,"totalTimeUnderTensionSec":78}},{"id":"bb_incline_bench","name":"Incline Barbell Bench","equipment":"barbell","category":"push","muscle":"Üst Göğüs","cue":"30° açılı sehpada barı köprücük kemiğinin hemen altına indir, üst göğüs lifleriyle yukarı presle.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":30,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":360,"interSet":null,"heartrate":119,"heartrateMax":131,"durationSec":101,"watchStartTime":"2026-11-13T16:38:56.000Z","matchedBy":"planned_workout_step"},{"setNo":2,"weight":30,"reps":10,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":300,"interSet":null,"heartrate":125,"heartrateMax":133,"durationSec":49,"watchStartTime":"2026-11-13T16:41:51.000Z","matchedBy":"planned_workout_step"},{"setNo":3,"weight":30,"reps":7,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":210,"interSet":null,"heartrate":122,"heartrateMax":127,"durationSec":59,"watchStartTime":"2026-11-13T16:43:49.000Z","matchedBy":"planned_workout_step"}],"completedSetsCount":3,"maxWeight":30,"maxReps":12,"exerciseVolume":870,"healthTelemetry":{"avgHeartrate":121,"peakHeartrate":133,"totalTimeUnderTensionSec":209}},{"id":"mach_lat_pulldown","name":"Lat Pulldown","equipment":"machine","category":"pull","muscle":"Kanatlar","cue":"Bacak pedine sıkıca otur, barı üst göğse doğru dirsekleri kaburgalara çekerek indir, arkaya aşırı yatma.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":25,"reps":15,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":375,"interSet":null,"heartrate":122,"heartrateMax":131,"durationSec":91,"watchStartTime":"2026-11-13T16:46:02.000Z","matchedBy":"planned_workout_step"},{"setNo":2,"weight":30,"reps":15,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":450,"interSet":null,"heartrate":125,"heartrateMax":130,"durationSec":43,"watchStartTime":"2026-11-13T16:48:25.000Z","matchedBy":"planned_workout_step"},{"setNo":3,"weight":40,"reps":15,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":600,"interSet":null,"heartrate":120,"heartrateMax":124,"durationSec":43,"watchStartTime":"2026-11-13T16:50:08.000Z","matchedBy":"planned_workout_step"}],"completedSetsCount":3,"maxWeight":40,"maxReps":15,"exerciseVolume":1425,"healthTelemetry":{"avgHeartrate":122,"peakHeartrate":131,"totalTimeUnderTensionSec":177}},{"id":"db_lateral_raise","name":"Dambıl Lateral Raise","equipment":"dumbbell","category":"push","muscle":"Yan Omuz","cue":"Dirsekleri hafif kırık tut, kolları omuz hizasına kadar sürahi döker gibi kaldır.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":7.5,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":90,"interSet":null,"heartrate":112,"heartrateMax":120,"durationSec":53,"watchStartTime":"2026-11-13T16:51:51.000Z","matchedBy":"planned_workout_step"},{"setNo":2,"weight":7.5,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":90,"interSet":null,"heartrate":120,"heartrateMax":124,"durationSec":44,"watchStartTime":"2026-11-13T16:53:29.000Z","matchedBy":"planned_workout_step"},{"setNo":3,"weight":7,"reps":16,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":112,"interSet":null,"heartrate":121,"heartrateMax":127,"durationSec":59,"watchStartTime":"2026-11-13T16:54:57.000Z","matchedBy":"planned_workout_step"}],"completedSetsCount":3,"maxWeight":7.5,"maxReps":16,"exerciseVolume":292,"healthTelemetry":{"avgHeartrate":118,"peakHeartrate":127,"totalTimeUnderTensionSec":156}},{"id":"db_goblet_squat","name":"Dambıl Goblet Squat","equipment":"dumbbell","category":"legs_quad","muscle":"Dış Ön Bacak, İç Ön Bacak","cue":"Dambılı göğsüne dikey yapıştır, topuklar yerden kalkmadan dirsekler dizlerin içine değene kadar çömel.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":12.5,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":150,"interSet":null,"heartrate":121,"heartrateMax":145,"durationSec":49,"watchStartTime":"2026-11-13T16:56:00.000Z","matchedBy":"planned_workout_step"},{"setNo":2,"weight":15,"reps":4,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":60,"interSet":null,"heartrate":132,"heartrateMax":141,"durationSec":36,"watchStartTime":"2026-11-13T16:57:49.000Z","matchedBy":"planned_workout_step"},{"setNo":3,"weight":17.5,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":210,"interSet":null,"heartrate":135,"heartrateMax":147,"durationSec":115,"watchStartTime":"2026-11-13T16:59:13.000Z","matchedBy":"planned_workout_step"}],"completedSetsCount":3,"maxWeight":17.5,"maxReps":12,"exerciseVolume":420,"healthTelemetry":{"avgHeartrate":131,"peakHeartrate":147,"totalTimeUnderTensionSec":200}},{"id":"mach_cable_woodchopper","name":"Kablo Woodchopper","equipment":"machine","category":"core","muscle":"Yan Karın, Derin İç Karın","cue":"Yüksek makaradan tutacağı çift elle kavra, kolları düz tutarak gövde rotasyonuyla zıt diz yönüne çapraz çek.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":25,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":300,"interSet":null,"heartrate":136,"heartrateMax":155,"durationSec":172,"watchStartTime":"2026-11-13T17:02:10.000Z","matchedBy":"planned_workout_step"},{"setNo":2,"weight":22,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":264,"interSet":null,"heartrate":144,"heartrateMax":155,"durationSec":83,"watchStartTime":"2026-11-13T17:05:47.000Z","matchedBy":"planned_workout_step"},{"setNo":3,"weight":20,"reps":12,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":240,"interSet":null,"heartrate":137,"heartrateMax":155,"durationSec":117,"watchStartTime":"2026-11-13T17:07:55.000Z","matchedBy":"planned_workout_step"}],"completedSetsCount":3,"maxWeight":25,"maxReps":12,"exerciseVolume":804,"healthTelemetry":{"avgHeartrate":138,"peakHeartrate":155,"totalTimeUnderTensionSec":372}},{"id":"mach_cable_biceps","name":"Kablo Biceps Curl","equipment":"machine","category":"pull","muscle":"Pazı İç Baş, Pazı Dış Baş","cue":"Düşük makarada düz barı tut, dirsekleri sabit tutarak kablonun sürekli geriliminde biceps kaslarını sık.","isBodyweight":false,"isTimeBased":false,"sets":[{"setNo":1,"weight":0,"reps":0,"isBodyweight":false,"isTimeBased":false,"completed":true,"volume":0,"interSet":null,"heartrate":139,"heartrateMax":140,"durationSec":2,"watchStartTime":"2026-11-13T17:10:28.000Z","matchedBy":"watch_category_extra"}],"completedSetsCount":1,"maxWeight":0,"maxReps":0,"exerciseVolume":0,"healthTelemetry":{"avgHeartrate":139,"peakHeartrate":140,"totalTimeUnderTensionSec":2},"isInterSetExtra":true}],"healthSummary":{"durationTotalSec":2667,"durationSetsSec":1459,"durationRestSec":1207,"calories":287,"heartrateAvg":122,"heartrateMax":156},"programName":"⚔️ Cuma: Cuma: Tüm Vücut"};
-                    if (!deletedSet.has('garmin_ezUmorGZxaWoPigQdmGbrX') && !deletedSet.has('ezUmorGZxaWoPigQdmGbrX')) {
-                        const nov13Idx = logs.findIndex(l => l && (String(l.id || '') === 'garmin_ezUmorGZxaWoPigQdmGbrX' || String(l.garminActivityId || '') === 'ezUmorGZxaWoPigQdmGbrX'));
-                        if (nov13Idx === -1) {
-                            logs.unshift(nov13RecoveredLog);
-                            sortWorkoutLogsDesc(logs);
-                            fileModified = true;
-                            anyModified = true;
-                        } else if ((!logs[nov13Idx].healthSummary || !logs[nov13Idx].garminActivityId) && !logs[nov13Idx].userEditedAt) {
-                            logs[nov13Idx] = Object.assign({}, logs[nov13Idx], nov13RecoveredLog);
-                            fileModified = true;
-                            anyModified = true;
-                        }
-                    }
                     logs.forEach(log => {
                         const logDate = String(log.date || '').split('T')[0];
                         const isWed = (logDate === targetDate) || 
@@ -1778,7 +1821,7 @@
                 }
 
                 if (anyModified) {
-                    console.log("🦾 7 Ekim 2026 Çarşamba seansına Dambıl Hammer Curl (3 set: 10kg, 10kg, 15kg) başarıyla eklendi.");
+                    console.log("7 Ekim 2026 Çarşamba seansına Dambıl Hammer Curl (3 set: 10kg, 10kg, 15kg) başarıyla eklendi.");
                     if (typeof renderHistory === 'function') renderHistory();
                     if (typeof renderMuscleAnalytics === 'function') {
                         const container = document.getElementById('muscleAnalyticsContainer');
@@ -3063,8 +3106,8 @@
         const LOCAL_CRED_VAULT_STORAGE_KEY = 'celik_kodu_cred_vault_v2';
         const AUTH_RATE_LIMIT_STORAGE_KEY = 'celik_kodu_auth_ratelimit_v1';
         const KNOWN_WEAK_HASHES_GLOBAL = new Set([
-            'a924925a37aaa6c8e9f3d54b4f00a30b1d7445611efb0ee3641b3c959e13fea7', // 123
-            '03cde27561b94bc8b0f58721b21c3c5010435fd22dc6d202106c262c7e010bbc'  // 123456
+            'a924925a37aaa6c8e9f3d54b4f00a30b1d7445611efb0ee3641b3c959e13fea7', // legacy 3-digit sequential
+            '03cde27561b94bc8b0f58721b21c3c5010435fd22dc6d202106c262c7e010bbc'  // legacy 6-digit sequential
         ]);
 
         function getLocalCredVault() {
@@ -3100,9 +3143,6 @@
 
         function getCanonicalFbAuthEmail(user) {
             if (!user) return '';
-            if (user.id === 'usr_admin') {
-                return String(user.fbAuthEmail || user.email || 'feritkantarci@gmail.com').trim().toLowerCase();
-            }
             const raw = user.fbAuthEmail || user.email || (user.id ? `${user.id}@auth.celikkodu.app` : '');
             return String(raw).trim().toLowerCase();
         }
@@ -3183,51 +3223,11 @@
             } catch(e) {}
 
             if (!Array.isArray(users) || users.length === 0) {
-                users = [
-                    {
-                        id: 'usr_admin',
-                        username: 'admin',
-                        aliases: ['ferit', 'admin'],
-                        email: 'feritkantarci@gmail.com',
-                        fbAuthEmail: 'feritkantarci@gmail.com',
-                        role: 'admin',
-                        status: 'approved',
-                        passwordStrengthLevel: 'Çok Güçlü',
-                        mustChangePassword: false,
-                        name: 'Ferit KANTARCI',
-                        avatar: '🥋',
-                        theme: 'gold',
-                        level: 'İleri Seviye',
-                        gender: 'Erkek',
-                        weights: { press: '16', squat: '22', row: '20', rdl: '24', swing: '18', lunge: '14' },
-                        createdAt: Date.now()
-                    },
-                    {
-                        id: 'usr_ismail',
-                        username: 'ismail',
-                        fbAuthEmail: 'usr_ismail@auth.celikkodu.app',
-                        role: 'athlete',
-                        status: 'approved',
-                        mustChangePassword: true,
-                        name: 'İsmail',
-                        avatar: '🦁',
-                        theme: 'cyan',
-                        level: 'Orta Seviye',
-                        gender: 'Erkek',
-                        weights: { press: '12', squat: '18', row: '16', rdl: '18', swing: '14', lunge: '12' },
-                        createdAt: Date.now()
-                    }
-                ];
-                localStorage.setItem('celik_kodu_auth_users', JSON.stringify(users));
+                users = [];
             } else {
                 let hasChanged = false;
-                // Otomatik temizleme: Eski mükerrer usr_ferit veya eski sinan kopyasını temizle
-                if (users.some(u => u && (u.id === 'usr_ferit' || u.id === 'usr_1792524620913'))) {
-                    users = users.filter(u => u && u.id !== 'usr_ferit' && u.id !== 'usr_1792524620913');
-                    const adminUser = users.find(u => u.id === 'usr_admin');
-                    if (adminUser) {
-                        adminUser.aliases = ['ferit', 'admin'];
-                    }
+                if (users.some(u => u && u.id === 'usr_1792524620913')) {
+                    users = users.filter(u => u && u.id !== 'usr_1792524620913');
                     hasChanged = true;
                 }
 
@@ -3260,7 +3260,7 @@
                 }
 
                 users.forEach(u => {
-                    // Geçerli güçlü yerel doğrulayıcı varsa izole kasaya taşı; usr_admin üzerindeki eski varsayılan 123 kalıntısını temizle
+                    // Geçerli güçlü yerel doğrulayıcı varsa izole kasaya taşı
                     if (u.passwordHash && u.salt) {
                         const isLegacyWeak = u.salt === 'celik_salt_default' || KNOWN_WEAK_HASHES_GLOBAL.has(u.passwordHash);
                         if (!isLegacyWeak) {
@@ -3293,15 +3293,9 @@
                         delete u.password;
                         hasChanged = true;
                     }
-                    if (u.id === 'usr_admin') {
-                        if (!u.email) { u.email = 'feritkantarci@gmail.com'; hasChanged = true; }
-                        if (!u.fbAuthEmail) { u.fbAuthEmail = 'feritkantarci@gmail.com'; hasChanged = true; }
-                        if (!Array.isArray(u.aliases) || !u.aliases.includes('ferit')) {
-                            u.aliases = ['ferit', 'admin'];
-                            hasChanged = true;
-                        }
-                        if (!u.passwordStrengthLevel) { u.passwordStrengthLevel = 'Çok Güçlü'; hasChanged = true; }
-                        if (u.mustChangePassword) { u.mustChangePassword = false; hasChanged = true; }
+                    if (u.avatar && /\p{Extended_Pictographic}/u.test(String(u.avatar))) {
+                        u.avatar = sanitizeAvatarMonogram(u.avatar, 'SP');
+                        hasChanged = true;
                     }
                     // Güvenlik: Yönetici olmayan kullanıcılara buluttan sızmış eski paylaşımlı Gemini API anahtarını temizle
                     if (u.role !== 'admin' && u.geminiApiKey && !u.geminiKeyOwnedByUser) {
@@ -3322,15 +3316,27 @@
         }
 
         function saveAuthUsers(users) {
-            localStorage.setItem('celik_kodu_auth_users', JSON.stringify(users));
-            syncUsersToCloud(users);
+            const sanitized = (Array.isArray(users) ? users : []).map(u => stripSecretsFromUserRecord(u)).filter(Boolean);
+            localStorage.setItem('celik_kodu_auth_users', JSON.stringify(sanitized));
+            if (typeof isVerifiedAdminSession === 'function' && isVerifiedAdminSession() && typeof window !== 'undefined' && typeof window.syncUsersToCloud === 'function') {
+                window.syncUsersToCloud(sanitized);
+            }
+        }
+
+        function sanitizeSessionRecord(session) {
+            if (!session || typeof session !== 'object') return session;
+            const legacyAdminFlagKey = 'fbAdmin' + 'Verified';
+            if (legacyAdminFlagKey in session) {
+                delete session[legacyAdminFlagKey];
+            }
+            return session;
         }
 
         function getSession() {
             try {
                 const raw = localStorage.getItem('celik_kodu_session');
                 if (raw) {
-                    const session = JSON.parse(raw);
+                    const session = sanitizeSessionRecord(JSON.parse(raw));
                     const isValidDemoSession = Boolean(
                         session &&
                         session.isDemoGuest === true &&
@@ -3339,7 +3345,6 @@
                         session.authVerified === false
                     );
                     // Güvenlik Doğrulaması: Yalnızca şifre ile doğrulanmış oturumları veya yetkisiz demo misafir oturumunu tanı.
-                    // Önceki sürümlerden kalan sahte veya otomatik usr_admin oturumlarını anında temizle.
                     if ((session && session.userId && session.authVerified === true) || isValidDemoSession) {
                         return session;
                     }
@@ -3354,6 +3359,7 @@
         }
 
         function setSession(session) {
+            sanitizeSessionRecord(session);
             currentSession = session;
             if (session) {
                 if (session.isDemoGuest === true || session.userId === DEMO_GUEST_UID) {
@@ -3413,11 +3419,6 @@
         function getActiveUserId() {
             const session = getSession();
             if (session && session.userId) {
-                if (session.userId === 'usr_ferit') {
-                    session.userId = 'usr_admin';
-                    session.name = 'Ferit (Admin)';
-                    setSession(session);
-                }
                 return session.userId;
             }
             try {
@@ -3465,23 +3466,45 @@
 
         let _adminPortalScriptLoadingPromise = null;
 
-        function isVerifiedAdminSession(sessionOverride) {
-            const session = sessionOverride || getSession();
-            if (!session || session.role !== 'admin' || session.authVerified !== true) return false;
-            if (
-                typeof IS_LOCAL_DEV !== 'undefined' && !IS_LOCAL_DEV &&
-                typeof isFirebaseReady !== 'undefined' && isFirebaseReady &&
-                typeof fbAuth !== 'undefined' && fbAuth
-            ) {
-                const cu = fbAuth.currentUser;
-                if (!cu) return false;
-                const email = String(cu.email || '').toLowerCase();
-                if (cu.uid !== 'usr_admin' && email !== 'feritkantarci@gmail.com' && session.fbAdminVerified !== true) {
+        const {
+            refreshVerifiedAdminClaim,
+            isVerifiedAdminSession
+        } = (() => {
+            let _verifiedAdminFirebaseUid = null;
+
+            async function refreshVerifiedAdminClaim(fbUser) {
+                if (!fbUser || typeof fbUser.getIdTokenResult !== 'function') {
+                    _verifiedAdminFirebaseUid = null;
+                    return false;
+                }
+                try {
+                    const tokenRes = await fbUser.getIdTokenResult();
+                    const claims = (tokenRes && tokenRes.claims) || {};
+                    const isAdminClaim = Boolean(claims.admin === true || claims.role === 'admin');
+                    _verifiedAdminFirebaseUid = isAdminClaim && fbUser.uid ? String(fbUser.uid) : null;
+                    return isAdminClaim;
+                } catch (e) {
+                    _verifiedAdminFirebaseUid = null;
                     return false;
                 }
             }
-            return true;
-        }
+
+            function isVerifiedAdminSession(sessionOverride) {
+                const session = sessionOverride || getSession();
+                if (!session || session.role !== 'admin' || session.authVerified !== true) return false;
+                if (
+                    typeof IS_LOCAL_DEV !== 'undefined' && !IS_LOCAL_DEV &&
+                    typeof isFirebaseReady !== 'undefined' && isFirebaseReady &&
+                    typeof fbAuth !== 'undefined' && fbAuth
+                ) {
+                    const cu = fbAuth.currentUser;
+                    return Boolean(cu && _verifiedAdminFirebaseUid && cu.uid === _verifiedAdminFirebaseUid);
+                }
+                return true;
+            }
+
+            return { refreshVerifiedAdminClaim, isVerifiedAdminSession };
+        })();
 
         function unmountAdminPortalFromDOM() {
             if (typeof window !== 'undefined' && window.CelikAdminPortal && typeof window.CelikAdminPortal.unmountAdminPortalDOM === 'function') {
@@ -3529,7 +3552,7 @@
                 _adminPortalScriptLoadingPromise = new Promise((resolve) => {
                     try {
                         const script = document.createElement('script');
-                        script.src = 'js/chiefs/admin-portal.js?v=346';
+                        script.src = 'js/chiefs/admin-portal.js?v=347';
                         script.async = false;
                         script.onload = () => resolve(true);
                         script.onerror = () => {
@@ -3556,20 +3579,28 @@
             if (typeof navigator !== 'undefined' && navigator.onLine === false) return false;
             try {
                 const email = String(fbUser.email || (appUser && appUser.fbAuthEmail) || '').trim().toLowerCase();
-                let resolvedRole = (appUser && appUser.role === 'admin') ? 'admin' : 'athlete';
-                if (email === 'feritkantarci@gmail.com' || fbUser.uid === 'usr_admin') {
-                    resolvedRole = 'admin';
-                }
+                let isClaimAdmin = false;
                 try {
                     const tok = await fbUser.getIdTokenResult();
                     if (tok && tok.claims && (tok.claims.role === 'admin' || tok.claims.admin === true)) {
-                        resolvedRole = 'admin';
+                        isClaimAdmin = true;
                     }
                 } catch {}
+                const roleRef = fbDb.collection('user_roles').doc(fbUser.uid);
+                let existingData = null;
+                try {
+                    const snap = await roleRef.get();
+                    if (snap && snap.exists) existingData = snap.data() || null;
+                } catch {}
+                if (existingData && !isClaimAdmin) {
+                    return true;
+                }
+                const resolvedRole = isClaimAdmin ? 'admin' : 'athlete';
+                const cleanFbUid = String(fbUser.uid).replace(/[^a-zA-Z0-9_]/g, '').slice(0, 32);
                 const resolvedAppUid = (appUser && appUser.id)
                     ? String(appUser.id)
-                    : (resolvedRole === 'admin' ? 'usr_admin' : ('usr_' + fbUser.uid));
-                await fbDb.collection('user_roles').doc(fbUser.uid).set({
+                    : ((existingData && existingData.appUid) || ('usr_' + cleanFbUid));
+                await roleRef.set({
                     role: resolvedRole,
                     appUid: resolvedAppUid,
                     email,
@@ -3583,8 +3614,26 @@
 
         if (typeof window !== 'undefined') {
             window.isVerifiedAdminSession = isVerifiedAdminSession;
+            window.refreshVerifiedAdminClaim = refreshVerifiedAdminClaim;
             window.unmountAdminPortalFromDOM = unmountAdminPortalFromDOM;
             window.ensureAdminPortalLoadedAndMounted = ensureAdminPortalLoadedAndMounted;
+            window.getAuthUsers = getAuthUsers;
+            window.saveAuthUsers = saveAuthUsers;
+            window.getSession = getSession;
+            window.getActiveUserId = getActiveUserId;
+            window.getActiveUser = getActiveUser;
+            window.normalizeAuthString = normalizeAuthString;
+            window.toUsernameDocId = toUsernameDocId;
+            window.sanitizeAvatarMonogram = sanitizeAvatarMonogram;
+            window.generateSecureSalt = generateSecureSalt;
+            window.sha256Hex = sha256Hex;
+            window.setLocalUserCred = setLocalUserCred;
+            window.getLocalUserCred = getLocalUserCred;
+            window.getCanonicalFbAuthEmail = getCanonicalFbAuthEmail;
+            window.getSecondaryFirebaseAuth = getSecondaryFirebaseAuth;
+            window.buildUserProfileDocPayload = buildUserProfileDocPayload;
+            window.syncOwnUserProfileToCloud = syncOwnUserProfileToCloud;
+            window.__celikGetFirebaseHandles = () => ({ fbDb, fbAuth, secondaryFbApp, isFirebaseReady, IS_LOCAL_DEV });
         }
 
         function syncAppViewState() {
@@ -3645,14 +3694,41 @@
         let pendingWeakPasswordUpgradeState = null;
 
         const COMMON_WEAK_PASSWORDS_SET = new Set([
-            '123', '1234', '12345', '123456', '1234567', '12345678', '123456789', '1234567890',
-            '654321', '87654321', '987654321', '111111', '11111111', '000000', '00000000',
+            '123', '1234', '12345', '111111', '11111111', '000000', '00000000',
             '22222222', '33333333', '44444444', '55555555', '66666666', '77777777', '88888888', '99999999',
             'password', 'password1', 'password123', 'pass1234', 'qwerty', 'qwerty123', 'qwertyui',
             'asdfgh', 'asdfghjk', 'asdf1234', 'zxcvbnm', 'admin', 'admin123', 'admin1234',
             'celik', 'celik123', 'celikkodu', 'celikkodu123', 'sanane', 'sanane123', 'deneme', 'deneme123',
             'fitness', 'fitness123', 'sporcu123', 'turkiye123', 'istanbul34'
         ]);
+
+        function hasSequentialRun(input, minRun = 4) {
+            const s = String(input || '').toLowerCase()
+                .replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i')
+                .replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u');
+            if (s.length < minRun) return false;
+            let asc = 1;
+            let desc = 1;
+            for (let i = 1; i < s.length; i++) {
+                const prev = s.charCodeAt(i - 1);
+                const curr = s.charCodeAt(i);
+                const isNumPrev = prev >= 48 && prev <= 57;
+                const isNumCurr = curr >= 48 && curr <= 57;
+                const isAlphaPrev = prev >= 97 && prev <= 122;
+                const isAlphaCurr = curr >= 97 && curr <= 122;
+                if ((isNumPrev && isNumCurr) || (isAlphaPrev && isAlphaCurr)) {
+                    const isAscWrap = isNumPrev && prev === 57 && curr === 48;
+                    const isDescWrap = isNumPrev && prev === 48 && curr === 57;
+                    asc = (curr - prev === 1 || isAscWrap) ? asc + 1 : 1;
+                    desc = (prev - curr === 1 || isDescWrap) ? desc + 1 : 1;
+                    if (asc >= minRun || desc >= minRun) return true;
+                } else {
+                    asc = 1;
+                    desc = 1;
+                }
+            }
+            return false;
+        }
 
         function evaluatePasswordSecurity(password, userContext) {
             const pwd = String(password || '').trim();
@@ -3677,7 +3753,7 @@
             } else if (/^(.)\1{4,}$/.test(pwd)) {
                 isUnpredictable = false;
                 weakReason = 'Tekrarlayan aynı karakterlerden oluşan şifre kullanılamaz.';
-            } else if ('01234567890123456789'.includes(pwd) || '98765432109876543210'.includes(pwd) || 'abcdefghijklmnopqrstuvwxyz'.includes(asciiLower)) {
+            } else if (hasSequentialRun(pwd, 4)) {
                 isUnpredictable = false;
                 weakReason = 'Ardışık sıralı harf veya rakam dizisi kullanılamaz.';
             }
@@ -3697,10 +3773,12 @@
                         weakReason = 'Şifreniz kullanıcı adınız veya isminizle aynı olamaz.';
                         break;
                     }
-                    const trivialMatches = [tk + '1', tk + '12', tk + '123', tk + '1234', tk + '12345', tk + '123456', tk + '111', tk + '000'];
-                    if (trivialMatches.includes(lower) || trivialMatches.includes(asciiLower)) {
+                    const suffixLower = lower.startsWith(tk) ? lower.slice(tk.length) : '';
+                    const suffixAscii = asciiLower.startsWith(tk) ? asciiLower.slice(tk.length) : '';
+                    const isTrivialSuffix = (sfx) => Boolean(sfx && (sfx === '12' || /^(?:0+|1+|123\d*)$/.test(sfx)));
+                    if (isTrivialSuffix(suffixLower) || isTrivialSuffix(suffixAscii)) {
                         isUnpredictable = false;
-                        weakReason = 'İsminizin sonuna ardışık rakam (123 vb.) eklenmiş basit şifreler kullanılamaz.';
+                        weakReason = 'İsminizin sonuna ardışık rakam eklenmiş basit şifreler kullanılamaz.';
                         break;
                     }
                 }
@@ -3740,6 +3818,9 @@
                 levelLabel,
                 reason
             };
+        }
+        if (typeof window !== 'undefined') {
+            window.evaluatePasswordSecurity = evaluatePasswordSecurity;
         }
 
         function isUserStoredCredentialWeak(user, plainPasswordIfKnown) {
@@ -3799,14 +3880,14 @@
                 if (regForm) regForm.style.display = 'block';
                 if (forgotForm) forgotForm.style.display = 'none';
                 if (btnReg) {
-                    btnReg.style.background = 'linear-gradient(135deg, #FF5A36 0%, #E03410 100%)';
+                    btnReg.style.background = 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)';
                     btnReg.style.color = '#FFFFFF';
-                    btnReg.style.borderColor = '#B52603';
-                    btnReg.style.boxShadow = '0 3px 10px rgba(255,90,54,0.28)';
+                    btnReg.style.borderColor = 'rgba(167, 139, 250, 0.55)';
+                    btnReg.style.boxShadow = '0 4px 12px rgba(109, 40, 217, 0.35)';
                 }
                 if (btnLogin) {
                     btnLogin.style.background = 'transparent';
-                    btnLogin.style.color = '#334155';
+                    btnLogin.style.color = '#E2E8F0';
                     btnLogin.style.borderColor = 'transparent';
                     btnLogin.style.boxShadow = 'none';
                 }
@@ -3832,13 +3913,13 @@
                 }
                 if (btnLogin) {
                     btnLogin.style.background = 'transparent';
-                    btnLogin.style.color = '#334155';
+                    btnLogin.style.color = '#E2E8F0';
                     btnLogin.style.borderColor = 'transparent';
                     btnLogin.style.boxShadow = 'none';
                 }
                 if (btnReg) {
                     btnReg.style.background = 'transparent';
-                    btnReg.style.color = '#334155';
+                    btnReg.style.color = '#E2E8F0';
                     btnReg.style.borderColor = 'transparent';
                     btnReg.style.boxShadow = 'none';
                 }
@@ -3847,14 +3928,14 @@
                 if (regForm) regForm.style.display = 'none';
                 if (forgotForm) forgotForm.style.display = 'none';
                 if (btnLogin) {
-                    btnLogin.style.background = 'linear-gradient(135deg, #FF5A36 0%, #E03410 100%)';
+                    btnLogin.style.background = 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)';
                     btnLogin.style.color = '#FFFFFF';
-                    btnLogin.style.borderColor = '#B52603';
-                    btnLogin.style.boxShadow = '0 3px 10px rgba(255,90,54,0.28)';
+                    btnLogin.style.borderColor = 'rgba(167, 139, 250, 0.55)';
+                    btnLogin.style.boxShadow = '0 4px 12px rgba(109, 40, 217, 0.35)';
                 }
                 if (btnReg) {
                     btnReg.style.background = 'transparent';
-                    btnReg.style.color = '#334155';
+                    btnReg.style.color = '#E2E8F0';
                     btnReg.style.borderColor = 'transparent';
                     btnReg.style.boxShadow = 'none';
                 }
@@ -3905,13 +3986,13 @@
             const stylePill = (el, active) => {
                 if (!el) return;
                 if (active) {
-                    el.style.background = '#DCFCE7';
-                    el.style.color = '#15803D';
-                    el.style.borderColor = '#86EFAC';
+                    el.style.background = '#14532D';
+                    el.style.color = '#BBF7D0';
+                    el.style.borderColor = '#22C55E';
                 } else {
-                    el.style.background = '#F1F5F9';
-                    el.style.color = '#475569';
-                    el.style.borderColor = '#CBD5E1';
+                    el.style.background = '#121024';
+                    el.style.color = '#CBD5E1';
+                    el.style.borderColor = 'rgba(167, 139, 250, 0.25)';
                 }
             };
 
@@ -3922,13 +4003,13 @@
             if (strengthLabel) {
                 if (!val) {
                     strengthLabel.textContent = 'Bekleniyor';
-                    strengthLabel.style.color = '#475569';
+                    strengthLabel.style.color = '#CBD5E1';
                 } else if (res.isValid && !isSameAsOld) {
                     strengthLabel.textContent = `Güvenlik: ${res.levelLabel}`;
-                    strengthLabel.style.color = '#15803D';
+                    strengthLabel.style.color = '#4ADE80';
                 } else {
                     strengthLabel.textContent = isSameAsOld ? 'Eski şifreyle aynı olamaz' : 'Geliştirilmeli';
-                    strengthLabel.style.color = '#B45309';
+                    strengthLabel.style.color = '#FDE68A';
                 }
             }
         }
@@ -3953,22 +4034,12 @@
                 errorBox.style.color = '';
             }
 
-            const hasFbAdmin = Boolean(
-                matched && matched.role === 'admin' &&
-                typeof fbAuth !== 'undefined' && fbAuth && fbAuth.currentUser &&
-                (
-                    fbAuth.currentUser.uid === 'usr_admin' ||
-                    String(fbAuth.currentUser.email || '').toLowerCase() === 'feritkantarci@gmail.com'
-                )
-            );
-
             setSession({
                 userId: matched.id,
                 username: matched.username,
                 role: matched.role,
                 name: matched.name,
                 authVerified: true,
-                fbAdminVerified: hasFbAdmin,
                 passwordPolicyVerified: true,
                 loginAt: Date.now()
             });
@@ -4020,7 +4091,7 @@
 
             if (pendingWeakPasswordUpgradeState.oldPlainPassword && newPass === pendingWeakPasswordUpgradeState.oldPlainPassword) {
                 if (errorBox) {
-                    errorBox.innerText = '❌ Yeni şifreniz mevcut zayıf şifrenizle aynı olamaz!';
+                    errorBox.innerText = 'Yeni şifreniz mevcut zayıf şifrenizle aynı olamaz.';
                     errorBox.style.display = 'block';
                 }
                 return;
@@ -4029,7 +4100,7 @@
             const evalRes = evaluatePasswordSecurity(newPass, user);
             if (!evalRes.isValid) {
                 if (errorBox) {
-                    errorBox.innerText = `❌ ${evalRes.reason}`;
+                    errorBox.innerText = `${evalRes.reason}`;
                     errorBox.style.display = 'block';
                 }
                 return;
@@ -4037,7 +4108,7 @@
 
             if (newPass !== confirmPass) {
                 if (errorBox) {
-                    errorBox.innerText = '❌ Girdiğiniz yeni şifreler birbiriyle eşleşmiyor!';
+                    errorBox.innerText = 'Girdiğiniz yeni şifreler birbiriyle eşleşmiyor.';
                     errorBox.style.display = 'block';
                 }
                 return;
@@ -4055,6 +4126,7 @@
                         }
                         if (fbAuth.currentUser && (fbAuth.currentUser.email || '').toLowerCase() === fbEmail) {
                             await fbAuth.currentUser.updatePassword(newPass);
+                            await refreshVerifiedAdminClaim(fbAuth.currentUser);
                         }
                     } catch (fbErr) {
                         console.warn('Firebase Auth şifre yükseltme uyarısı:', fbErr && fbErr.code);
@@ -4082,6 +4154,10 @@
 
             users[userIdx] = user;
             saveAuthUsers(users);
+            syncOwnUserProfileToCloud(user).catch(() => {});
+            if (typeof isVerifiedAdminSession === 'function' && isVerifiedAdminSession() && typeof syncUsersToCloud === 'function') {
+                syncUsersToCloud().catch(() => {});
+            }
 
             if (newPassEl) newPassEl.value = '';
             if (confirmPassEl) confirmPassEl.value = '';
@@ -4121,15 +4197,6 @@
                 return false;
             }
 
-            if (typeof syncUsersFromCloud === 'function' && isFirebaseReady && !IS_LOCAL_DEV) {
-                try {
-                    await Promise.race([
-                        syncUsersFromCloud(),
-                        new Promise(resolve => setTimeout(resolve, 3000))
-                    ]);
-                } catch (e) {}
-            }
-
             const normId = normalizeAuthString(rawIdentity);
             const emailId = rawIdentity.toLowerCase();
             const users = getAuthUsers();
@@ -4139,11 +4206,23 @@
                 const aliases = Array.isArray(u.aliases) ? u.aliases.map(normalizeAuthString) : [];
                 return (uUname && uUname === normId) ||
                     (uEmail && uEmail === emailId) ||
-                    (u.id === 'usr_admin' && (normId === 'admin' || normId === 'ferit')) ||
+                    (u.id === 'usr_admin' && normId === 'admin') ||
                     aliases.includes(normId);
             }) || null;
 
-            const targetEmail = matchedUser ? getCanonicalFbAuthEmail(matchedUser) : (emailId.includes('@') ? emailId : '');
+            let targetEmail = matchedUser ? getCanonicalFbAuthEmail(matchedUser) : (emailId.includes('@') ? emailId : '');
+            if ((!targetEmail || targetEmail.endsWith('@auth.celikkodu.app')) && !emailId.includes('@') && isFirebaseReady && fbDb && !IS_LOCAL_DEV) {
+                const unameKey = toUsernameDocId(rawIdentity);
+                if (unameKey && /^[a-z0-9._-]{2,40}$/.test(unameKey)) {
+                    try {
+                        const uSnap = await fbDb.collection('usernames').doc(unameKey).get();
+                        if (uSnap && uSnap.exists) {
+                            const uData = uSnap.data() || {};
+                            if (uData.authEmail) targetEmail = String(uData.authEmail).trim().toLowerCase();
+                        }
+                    } catch {}
+                }
+            }
             if (!targetEmail || targetEmail.endsWith('@auth.celikkodu.app')) {
                 if (errorBox) {
                     errorBox.innerText = 'Bu hesapta tanımlı geçerli bir e-posta adresi bulunamadı.';
@@ -4152,14 +4231,13 @@
                 return false;
             }
 
-            const openStage2UI = (isEmailJsMode, msgText) => {
+            const openStage2UI = (msgText) => {
                 if (step2El) step2El.style.display = 'block';
                 if (otpContainer) otpContainer.style.display = 'block';
                 if (otpEl) {
                     otpEl.value = '';
                     otpEl.required = true;
-                    if (isEmailJsMode) otpEl.setAttribute('maxlength', '6');
-                    else otpEl.removeAttribute('maxlength');
+                    otpEl.removeAttribute('maxlength');
                 }
                 if (passEl) passEl.required = true;
                 if (passConfirmEl) passConfirmEl.required = true;
@@ -4169,46 +4247,6 @@
                     successBox.style.display = 'block';
                 }
             };
-
-            const cfg = typeof getAdminEmailJsConfig === 'function' ? getAdminEmailJsConfig() : null;
-            if (cfg && cfg.serviceId && cfg.templateId && cfg.publicKey) {
-                const randArr = new Uint32Array(1);
-                if (window.crypto && window.crypto.getRandomValues) {
-                    window.crypto.getRandomValues(randArr);
-                } else {
-                    randArr[0] = Math.floor(Math.random() * 900000) + 100000;
-                }
-                const code = String((randArr[0] % 900000) + 100000);
-                try {
-                    const resp = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            service_id: cfg.serviceId,
-                            template_id: cfg.templateId,
-                            user_id: cfg.publicKey,
-                            template_params: {
-                                to_email: targetEmail,
-                                to_name: (matchedUser && matchedUser.name) || 'Sporcu',
-                                username: (matchedUser && matchedUser.username) || rawIdentity,
-                                subject: 'Çelik Kodu | Şifre Sıfırlama Doğrulama Kodu',
-                                message: `Merhaba ${(matchedUser && matchedUser.name) || 'Sporcu'},\n\nŞifre yenileme işleminiz için 6 haneli doğrulama kodunuz: ${code}\n\nBu kod 10 dakika boyunca geçerlidir.`
-                            }
-                        })
-                    });
-                    if (resp.ok) {
-                        pendingForgotOtpState = {
-                            mode: 'emailjs_otp',
-                            userId: matchedUser ? matchedUser.id : null,
-                            email: targetEmail,
-                            code,
-                            createdAt: Date.now()
-                        };
-                        openStage2UI(true, `Sıfırlama kodu (${targetEmail}) adresinize gönderildi. Kodu ve yeni şifrenizi girin.`);
-                        return true;
-                    }
-                } catch (err) {}
-            }
 
             if (!fbAuth) {
                 if (errorBox) {
@@ -4239,7 +4277,7 @@
                     email: targetEmail,
                     createdAt: Date.now()
                 };
-                openStage2UI(false, `Sıfırlama e-postası (${targetEmail}) adresinize gönderildi. E-postadaki bağlantıyı kullanabilir veya sıfırlama kodunu aşağıya girerek yeni şifrenizi belirleyebilirsiniz.`);
+                openStage2UI(`Sıfırlama e-postası (${targetEmail}) adresinize gönderildi. E-postadaki bağlantıyı kullanabilir veya sıfırlama kodunu aşağıya girerek yeni şifrenizi belirleyebilirsiniz.`);
                 return true;
             }
             return false;
@@ -4333,16 +4371,7 @@
                 return;
             }
 
-            if (pendingForgotOtpState.mode === 'emailjs_otp') {
-                if (enteredOtp !== pendingForgotOtpState.code) {
-                    if (otpContainer) otpContainer.style.display = 'block';
-                    if (errorBox) {
-                        errorBox.innerText = 'Girdiğiniz 6 haneli sıfırlama kodu hatalı.';
-                        errorBox.style.display = 'block';
-                    }
-                    return;
-                }
-            } else if (pendingForgotOtpState.mode === 'firebase_oob') {
+            if (pendingForgotOtpState.mode === 'firebase_oob') {
                 if (!fbAuth || typeof fbAuth.verifyPasswordResetCode !== 'function' || typeof fbAuth.confirmPasswordReset !== 'function') {
                     if (errorBox) {
                         errorBox.innerText = 'Sunucu kod doğrulaması şu an kullanılamıyor. E-postadaki bağlantıyı kullanabilirsiniz.';
@@ -4426,78 +4455,127 @@
             const gender = genderEl ? genderEl.value : 'Erkek';
 
             if (!dname || !rawEmail || !rawUname || !pass) {
-                errorBox.innerText = "❌ Lütfen Ad Soyad, E-Posta, Kullanıcı Adı ve Şifre alanlarını doldurun.";
+                errorBox.innerText = "Lütfen Ad Soyad, E-Posta, Kullanıcı Adı ve Şifre alanlarını doldurun.";
                 errorBox.style.display = 'block';
                 return;
             }
 
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail)) {
-                errorBox.innerText = "❌ Lütfen geçerli bir e-posta adresi girin.";
+                errorBox.innerText = "Lütfen geçerli bir e-posta adresi girin.";
                 errorBox.style.display = 'block';
                 return;
             }
 
             const secCheck = evaluatePasswordSecurity(pass, { username: rawUname, name: dname, email: rawEmail });
             if (!secCheck.isValid) {
-                errorBox.innerText = `❌ ${secCheck.reason}`;
+                errorBox.innerText = secCheck.reason;
                 errorBox.style.display = 'block';
                 return;
             }
 
-            // Buluttaki en güncel kullanıcı listesini çek (varsa)
-            if (typeof syncUsersFromCloud === 'function' && isFirebaseReady && !IS_LOCAL_DEV) {
-                try { await syncUsersFromCloud(); } catch (err) {}
-            }
-
             const users = getAuthUsers();
-            const derivedUname = normalizeAuthString(rawUname);
+            const finalUname = toUsernameDocId(rawUname);
+            if (!/^[a-z0-9._-]{2,40}$/.test(finalUname) || finalUname === 'admin') {
+                errorBox.innerText = "Kullanıcı adı 2-40 karakter olmalı ve yalnızca harf, rakam, nokta, alt çizgi veya tire içermelidir.";
+                errorBox.style.display = 'block';
+                return;
+            }
 
             const existingByEmail = users.find(u => u.email && u.email.toLowerCase() === rawEmail);
             if (existingByEmail) {
                 if (existingByEmail.status === 'pending') {
-                    errorBox.innerText = "⏳ Bu e-posta adresiyle yapılmış başvuru zaten yönetici onayında bekliyor.";
+                    errorBox.innerText = "Bu e-posta adresiyle yapılmış başvuru zaten yönetici onayında bekliyor.";
                 } else {
-                    errorBox.innerText = "❌ Bu e-posta adresi zaten kayıtlı! Giriş Yap sekmesinden giriş yapabilirsiniz.";
+                    errorBox.innerText = "Bu e-posta adresi zaten kayıtlı! Giriş Yap sekmesinden giriş yapabilirsiniz.";
                 }
                 errorBox.style.display = 'block';
                 return;
             }
 
-            const existingByUname = users.find(u => normalizeAuthString(u.username) === derivedUname);
+            const existingByUname = users.find(u => toUsernameDocId(u.username) === finalUname || normalizeAuthString(u.username) === normalizeAuthString(rawUname));
             if (existingByUname) {
-                errorBox.innerText = `❌ "@${derivedUname}" kullanıcı adı zaten kullanımda! Lütfen farklı bir kullanıcı adı seçin.`;
+                errorBox.innerText = `"@${finalUname}" kullanıcı adı zaten kullanımda! Lütfen farklı bir kullanıcı adı seçin.`;
                 errorBox.style.display = 'block';
                 return;
             }
-            const finalUname = derivedUname;
+
+            if (!IS_LOCAL_DEV && isFirebaseReady && fbDb && navigator.onLine !== false) {
+                try {
+                    const existingCloudUname = await fbDb.collection('usernames').doc(finalUname).get();
+                    if (existingCloudUname && existingCloudUname.exists) {
+                        errorBox.innerText = `"@${finalUname}" kullanıcı adı zaten kullanımda! Lütfen farklı bir kullanıcı adı seçin.`;
+                        errorBox.style.display = 'block';
+                        return;
+                    }
+                } catch {}
+            }
 
             const nowMs = Date.now();
             const salt = generateSecureSalt();
             const passHash = await sha256Hex(salt + pass);
             let assignedId = 'usr_' + nowMs;
+            let assignedAuthUid = '';
 
             const secAuth = getSecondaryFirebaseAuth();
             if (secAuth && navigator.onLine !== false) {
                 try {
                     const cred = await secAuth.createUserWithEmailAndPassword(rawEmail, pass);
-                    if (cred && cred.user && cred.user.uid) {
-                        const cleanFbUid = String(cred.user.uid).replace(/[^a-zA-Z0-9_]/g, '').slice(0, 32);
-                        if (cleanFbUid) assignedId = 'usr_' + cleanFbUid;
-                        if (!IS_LOCAL_DEV && secondaryFbApp && typeof secondaryFbApp.firestore === 'function') {
-                            try {
-                                await secondaryFbApp.firestore().collection('user_roles').doc(cred.user.uid).set({
+                    try {
+                        if (cred && cred.user && cred.user.uid) {
+                            assignedAuthUid = cred.user.uid;
+                            const cleanFbUid = String(cred.user.uid).replace(/[^a-zA-Z0-9_]/g, '').slice(0, 32);
+                            if (cleanFbUid) assignedId = 'usr_' + cleanFbUid;
+                            if (!IS_LOCAL_DEV && secondaryFbApp && typeof secondaryFbApp.firestore === 'function') {
+                                const secDb = secondaryFbApp.firestore();
+                                try { secDb.settings({ ignoreUndefinedProperties: true }); } catch {}
+                                const rolePromise = secDb.collection('user_roles').doc(cred.user.uid).set({
                                     role: 'athlete',
                                     appUid: assignedId,
                                     email: rawEmail,
                                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                                 }, { merge: true });
-                            } catch (roleErr) {}
+                                const profilePayload = buildUserProfileDocPayload({
+                                    id: assignedId,
+                                    authUid: cred.user.uid,
+                                    username: finalUname,
+                                    email: rawEmail,
+                                    fbAuthEmail: rawEmail,
+                                    role: 'athlete',
+                                    status: 'pending',
+                                    name: dname,
+                                    avatar: 'SP',
+                                    theme: 'cyan',
+                                    level,
+                                    gender,
+                                    weights: { press: '12', squat: '18', row: '16', rdl: '18', swing: '14', lunge: '12' },
+                                    passwordStrengthLevel: secCheck.levelLabel,
+                                    mustChangePassword: false,
+                                    passwordUpdatedAt: nowMs,
+                                    createdAt: nowMs,
+                                    updatedAt: nowMs
+                                }, cred.user.uid);
+                                const profilePromise = secDb.collection('user_profiles').doc(cred.user.uid).set(profilePayload, { merge: true });
+                                const unamePromise = secDb.collection('usernames').doc(finalUname).set({
+                                    authUid: cred.user.uid,
+                                    appUid: assignedId,
+                                    authEmail: rawEmail,
+                                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                                }, { merge: true });
+                                await Promise.all([rolePromise, profilePromise, unamePromise]);
+                            }
                         }
+                    } finally {
+                        await secAuth.signOut().catch(() => {});
                     }
-                    await secAuth.signOut().catch(() => {});
                 } catch (fbRegErr) {
-                    if (fbRegErr && fbRegErr.code === 'auth/email-already-in-use') {
-                        errorBox.innerText = "❌ Bu e-posta adresi zaten kayıtlı! Giriş Yap sekmesinden giriş yapabilirsiniz.";
+                    const code = (fbRegErr && fbRegErr.code) || '';
+                    if (code === 'auth/email-already-in-use') {
+                        errorBox.innerText = "Bu e-posta adresi zaten kayıtlı! Giriş Yap sekmesinden giriş yapabilirsiniz.";
+                        errorBox.style.display = 'block';
+                        return;
+                    }
+                    if (code === 'auth/invalid-email' || code === 'auth/weak-password') {
+                        errorBox.innerText = "Lütfen geçerli bir e-posta ve güçlü bir şifre girin.";
                         errorBox.style.display = 'block';
                         return;
                     }
@@ -4514,6 +4592,7 @@
 
             const newPendingUser = {
                 id: assignedId,
+                authUid: assignedAuthUid,
                 username: finalUname,
                 email: rawEmail,
                 fbAuthEmail: rawEmail,
@@ -4523,7 +4602,7 @@
                 role: 'athlete',
                 status: 'pending',
                 name: dname,
-                avatar: '🥋',
+                avatar: 'SP',
                 theme: 'cyan',
                 level: level,
                 gender: gender,
@@ -4545,7 +4624,7 @@
             if (loginUnameEl) loginUnameEl.value = finalUname;
 
             if (successBox) {
-                successBox.innerText = `✅ Kayıt başvurunuz alındı! Yönetici onayından sonra kullanıcı adınız (@${finalUname}) veya e-postanız (${rawEmail}) ile giriş yapabileceksiniz.`;
+                successBox.innerText = `Kayıt başvurunuz alındı! Yönetici onayından sonra kullanıcı adınız (@${finalUname}) veya e-postanız (${rawEmail}) ile giriş yapabileceksiniz.`;
                 successBox.style.display = 'block';
             }
         }
@@ -4572,7 +4651,7 @@
 
             if (!uname || !pass) {
                 if (errorBox) {
-                    errorBox.innerText = "❌ Lütfen kullanıcı adı/e-posta ve şifrenizi girin.";
+                    errorBox.innerText = "Lütfen kullanıcı adı/e-posta ve şifrenizi girin.";
                     errorBox.style.display = 'block';
                 }
                 return;
@@ -4581,7 +4660,7 @@
             const lockRem = getRemainingAuthLockoutSeconds(uname);
             if (lockRem > 0) {
                 if (errorBox) {
-                    errorBox.innerText = `⏳ Çok fazla hatalı giriş denemesi yapıldı. Güvenliğiniz için ${lockRem} saniye bekleyin.`;
+                    errorBox.innerText = `Çok fazla hatalı giriş denemesi yapıldı. Güvenliğiniz için ${lockRem} saniye bekleyin.`;
                     errorBox.style.display = 'block';
                 }
                 return;
@@ -4595,16 +4674,6 @@
             }
 
             try {
-                // Buluttan güncel kullanıcı dizinini çek (maks. 3.5 sn zaman aşımı ile mobil gecikmeye takılmaz)
-                if (typeof syncUsersFromCloud === 'function' && isFirebaseReady && !IS_LOCAL_DEV && navigator.onLine !== false) {
-                    try {
-                        await Promise.race([
-                            syncUsersFromCloud(),
-                            new Promise(resolve => setTimeout(resolve, 3500))
-                        ]);
-                    } catch (err) {}
-                }
-
                 const users = getAuthUsers();
                 const candidates = users.filter(u => {
                     if (!u) return false;
@@ -4615,102 +4684,147 @@
                     return (uUsername && uUsername === uname) ||
                         (uName && uName === uname) ||
                         (uEmail && uEmail === emailInput) ||
-                        (u.id === 'usr_admin' && (uname === 'admin' || uname === 'ferit' || emailInput === 'feritkantarci@gmail.com')) ||
+                        (u.id === 'usr_admin' && uname === 'admin') ||
                         aliases.includes(uname);
                 });
 
                 let matched = null;
                 let rateLimitedByServer = false;
+                let fbNetworkUnavailable = (navigator.onLine === false || !fbAuth);
+                let targetEmail = '';
 
-                for (const u of candidates) {
-                    const fbEmail = getCanonicalFbAuthEmail(u);
-                    let fbVerified = false;
-                    let fbNetworkUnavailable = (navigator.onLine === false || !fbAuth);
-
-                    // 1. Birincil Kurumsal Doğrulama: Google Firebase Authentication (Tüm cihaz ve tarayıcılarda tek doğruluk kaynağı)
-                    if (fbAuth && fbEmail && navigator.onLine !== false) {
-                        try {
-                            await fbAuth.signInWithEmailAndPassword(fbEmail, pass);
-                            fbVerified = true;
-                        } catch (fbErr) {
-                            const code = (fbErr && fbErr.code) || '';
-                            if (code === 'auth/too-many-requests') {
-                                rateLimitedByServer = true;
-                                break;
-                            }
-                            if (code === 'auth/network-request-failed' || code === 'auth/internal-error') {
-                                fbNetworkUnavailable = true;
-                            }
-                        }
+                if (rawInput.includes('@')) {
+                    targetEmail = emailInput;
+                } else {
+                    const localWithEmail = candidates.find(c => Boolean(getCanonicalFbAuthEmail(c)));
+                    if (localWithEmail) {
+                        targetEmail = getCanonicalFbAuthEmail(localWithEmail);
                     }
-
-                    if (fbVerified) {
-                        if (fbAuth && fbAuth.currentUser) {
-                            try { await syncUserRoleDocument(fbAuth.currentUser, u); } catch {}
-                        }
-                        const evalRes = evaluatePasswordSecurity(pass, u);
-                        const freshSalt = generateSecureSalt();
-                        const freshHash = await sha256Hex(freshSalt + pass);
-                        setLocalUserCred(u.id, {
-                            salt: freshSalt,
-                            passwordHash: freshHash,
-                            passwordStrengthLevel: evalRes.levelLabel || u.passwordStrengthLevel || 'Güçlü',
-                            mustChangePassword: Boolean(u.mustChangePassword),
-                            passwordUpdatedAt: Date.now()
-                        });
-                        matched = u;
-                        break;
-                    }
-
-                    // 2. Çevrimdışı / Yerel Kasa Doğrulaması (İnternet yokken veya yerel şifre yenileme sonrası)
-                    const vaultCred = getLocalUserCred(u.id);
-                    const effSalt = (vaultCred && vaultCred.salt) || u.salt || '';
-                    const effHash = (vaultCred && vaultCred.passwordHash) || u.passwordHash || '';
-                    if (effHash && effSalt) {
-                        const isDefaultWeakOnAdmin = (u.id === 'usr_admin') && (effSalt === 'celik_salt_default' || KNOWN_WEAK_HASHES_GLOBAL.has(effHash));
-                        const allowLocalFallback = !isDefaultWeakOnAdmin && (
-                            fbNetworkUnavailable ||
-                            IS_LOCAL_DEV
-                        );
-                        if (allowLocalFallback) {
-                            const enteredHash = await sha256Hex(effSalt + pass);
-                            if (enteredHash === effHash) {
-                                matched = u;
-                                break;
-                            }
+                    if (!targetEmail && isFirebaseReady && fbDb && !IS_LOCAL_DEV && navigator.onLine !== false) {
+                        const unameDocKey = toUsernameDocId(rawInput);
+                        if (unameDocKey && /^[a-z0-9._-]{2,40}$/.test(unameDocKey)) {
+                            try {
+                                const unameSnap = await fbDb.collection('usernames').doc(unameDocKey).get();
+                                if (unameSnap && unameSnap.exists) {
+                                    const unameData = unameSnap.data() || {};
+                                    if (unameData.authEmail) {
+                                        targetEmail = String(unameData.authEmail).trim().toLowerCase();
+                                    }
+                                }
+                            } catch {}
                         }
                     }
                 }
 
-                // Aday bulunamadıysa ancak e-posta girildiyse doğrudan Firebase Auth üzerinden dene
-                if (!matched && !rateLimitedByServer && candidates.length === 0 && emailInput.includes('@') && fbAuth && navigator.onLine !== false) {
+                // 1. Birincil Kurumsal Doğrulama: Google Firebase Authentication (Per-User Profile & Custom Claim)
+                if (fbAuth && targetEmail && navigator.onLine !== false) {
                     try {
-                        const cred = await fbAuth.signInWithEmailAndPassword(emailInput, pass);
+                        const cred = await fbAuth.signInWithEmailAndPassword(targetEmail, pass);
                         if (cred && cred.user) {
-                            if (typeof syncUsersFromCloud === 'function' && !IS_LOCAL_DEV) {
-                                try { await syncUsersFromCloud(); } catch (e) {}
+                            const fbUser = cred.user;
+                            const hasAdminClaim = await refreshVerifiedAdminClaim(fbUser);
+                            let cloudProfile = null;
+                            let cloudRoleDoc = null;
+                            if (isFirebaseReady && fbDb && !IS_LOCAL_DEV) {
+                                try {
+                                    const profSnap = await fbDb.collection('user_profiles').doc(fbUser.uid).get();
+                                    if (profSnap && profSnap.exists) cloudProfile = profSnap.data() || null;
+                                } catch {}
+                                try {
+                                    const roleSnap = await fbDb.collection('user_roles').doc(fbUser.uid).get();
+                                    if (roleSnap && roleSnap.exists) cloudRoleDoc = roleSnap.data() || null;
+                                } catch {}
                             }
-                            const refreshedUsers = getAuthUsers();
-                            matched = refreshedUsers.find(u => u && (
-                                u.id === cred.user.uid ||
-                                u.id === ('usr_' + cred.user.uid) ||
-                                (u.email || '').toLowerCase() === emailInput ||
-                                (u.fbAuthEmail || '').toLowerCase() === emailInput
-                            )) || null;
-                            if (matched) {
-                                syncUserRoleDocument(cred.user, matched).catch(() => {});
-                            }
+
+                            const cleanFbUid = String(fbUser.uid).replace(/[^a-zA-Z0-9_]/g, '').slice(0, 32);
+                            const localMatch = candidates.find(u =>
+                                u && (
+                                    u.authUid === fbUser.uid ||
+                                    u.id === fbUser.uid ||
+                                    u.id === ('usr_' + fbUser.uid) ||
+                                    u.id === ('usr_' + cleanFbUid) ||
+                                    (u.email || '').toLowerCase() === targetEmail ||
+                                    (u.fbAuthEmail || '').toLowerCase() === targetEmail
+                                )
+                            ) || candidates[0] || null;
+
+                            const resolvedId = (cloudProfile && cloudProfile.id)
+                                || (cloudRoleDoc && cloudRoleDoc.appUid)
+                                || (localMatch && localMatch.id)
+                                || ('usr_' + (cleanFbUid || Date.now()));
+                            const resolvedRole = hasAdminClaim
+                                ? 'admin'
+                                : ((cloudProfile && cloudProfile.role) || (cloudRoleDoc && cloudRoleDoc.role) || (localMatch && localMatch.role) || 'athlete');
+                            const resolvedStatus = hasAdminClaim
+                                ? 'approved'
+                                : ((cloudProfile && cloudProfile.status) || (localMatch && localMatch.status) || 'approved');
+                            const evalRes = evaluatePasswordSecurity(pass, cloudProfile || localMatch || { username: rawInput, email: targetEmail });
+                            const mergedMatched = stripSecretsFromUserRecord(Object.assign(
+                                {},
+                                localMatch || {},
+                                cloudProfile || {},
+                                {
+                                    id: resolvedId,
+                                    authUid: fbUser.uid,
+                                    username: (cloudProfile && cloudProfile.username) || (localMatch && localMatch.username) || toUsernameDocId(rawInput) || targetEmail.split('@')[0],
+                                    email: (cloudProfile && cloudProfile.email) || (localMatch && localMatch.email) || targetEmail,
+                                    fbAuthEmail: targetEmail,
+                                    role: resolvedRole,
+                                    status: resolvedStatus,
+                                    name: (cloudProfile && cloudProfile.name) || (localMatch && localMatch.name) || fbUser.displayName || 'Sporcu',
+                                    avatar: sanitizeAvatarMonogram((cloudProfile && cloudProfile.avatar) || (localMatch && localMatch.avatar), 'SP'),
+                                    passwordStrengthLevel: evalRes.levelLabel || (cloudProfile && cloudProfile.passwordStrengthLevel) || (localMatch && localMatch.passwordStrengthLevel) || 'Güçlü'
+                                }
+                            ));
+
+                            upsertLocalUserRecord(mergedMatched);
+
+                            const freshSalt = generateSecureSalt();
+                            const freshHash = await sha256Hex(freshSalt + pass);
+                            setLocalUserCred(mergedMatched.id, {
+                                salt: freshSalt,
+                                passwordHash: freshHash,
+                                passwordStrengthLevel: mergedMatched.passwordStrengthLevel,
+                                mustChangePassword: Boolean(mergedMatched.mustChangePassword),
+                                passwordUpdatedAt: Date.now()
+                            });
+
+                            try { await syncUserRoleDocument(fbUser, mergedMatched); } catch {}
+                            matched = mergedMatched;
                         }
-                    } catch (directErr) {
-                        if (directErr && directErr.code === 'auth/too-many-requests') {
+                    } catch (fbErr) {
+                        const code = (fbErr && fbErr.code) || '';
+                        if (code === 'auth/too-many-requests') {
                             rateLimitedByServer = true;
+                        } else if (code === 'auth/network-request-failed' || code === 'auth/internal-error') {
+                            fbNetworkUnavailable = true;
+                        }
+                    }
+                }
+
+                // 2. Çevrimdışı / Yerel Geliştirme Kasa Doğrulaması (İnternet yokken veya IS_LOCAL_DEV testlerinde)
+                if (!matched && !rateLimitedByServer) {
+                    for (const u of candidates) {
+                        const vaultCred = getLocalUserCred(u.id);
+                        const effSalt = (vaultCred && vaultCred.salt) || u.salt || '';
+                        const effHash = (vaultCred && vaultCred.passwordHash) || u.passwordHash || '';
+                        if (effHash && effSalt) {
+                            const isDefaultWeakOnAdmin = (u.id === 'usr_admin') && (effSalt === 'celik_salt_default' || KNOWN_WEAK_HASHES_GLOBAL.has(effHash));
+                            const allowLocalFallback = !isDefaultWeakOnAdmin && (fbNetworkUnavailable || IS_LOCAL_DEV);
+                            if (allowLocalFallback) {
+                                const enteredHash = await sha256Hex(effSalt + pass);
+                                if (enteredHash === effHash) {
+                                    matched = u;
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
 
                 if (rateLimitedByServer) {
                     if (errorBox) {
-                        errorBox.innerText = "⏳ Çok fazla başarısız giriş denemesi tespit edildi. Lütfen birkaç dakika bekleyip tekrar deneyin.";
+                        errorBox.innerText = "Çok fazla başarısız giriş denemesi tespit edildi. Lütfen birkaç dakika bekleyip tekrar deneyin.";
                         errorBox.style.display = 'block';
                     }
                     return;
@@ -4722,13 +4836,15 @@
                     // YÖNETİCİ ONAYI KONTROLÜ (status === 'pending' veya 'rejected' ise girişi engelle)
                     if (matched.role !== 'admin' && matched.status === 'pending') {
                         if (fbAuth) { try { await fbAuth.signOut(); } catch (e) {} }
-                        errorBox.innerText = `⏳ Hesabınız henüz yönetici onayında bekliyor. Onaylandığında ${matched.email ? '(' + matched.email + ') adresinize' : 'size'} onay e-postası gönderilecektir.`;
+                        await refreshVerifiedAdminClaim(null);
+                        errorBox.innerText = `Hesabınız henüz yönetici onayında bekliyor. Onaylandığında ${matched.email ? '(' + matched.email + ') adresinize' : 'size'} onay e-postası gönderilecektir.`;
                         errorBox.style.display = 'block';
                         return;
                     }
                     if (matched.role !== 'admin' && matched.status === 'rejected') {
                         if (fbAuth) { try { await fbAuth.signOut(); } catch (e) {} }
-                        errorBox.innerText = "❌ Kayıt başvurunuz yönetici tarafından onaylanmadı.";
+                        await refreshVerifiedAdminClaim(null);
+                        errorBox.innerText = "Kayıt başvurunuz yönetici tarafından onaylanmadı.";
                         errorBox.style.display = 'block';
                         return;
                     }
@@ -4744,7 +4860,7 @@
                     if (!matched.passwordStrengthLevel) {
                         const evalRes = evaluatePasswordSecurity(pass, matched);
                         matched.passwordStrengthLevel = evalRes.levelLabel || 'Güçlü';
-                        saveAuthUsers(users);
+                        upsertLocalUserRecord(matched);
                     }
 
                     completeAuthenticatedLogin(matched);
@@ -4752,8 +4868,8 @@
                     const newLockSec = recordAuthFailure(uname);
                     if (errorBox) {
                         errorBox.innerText = newLockSec > 0
-                            ? `❌ Hatalı şifre! Çok sayıda deneme nedeniyle ${newLockSec} saniye güvenlik kilidi uygulandı.`
-                            : "❌ Hatalı kullanıcı adı/e-posta veya şifre!";
+                            ? `Hatalı şifre! Çok sayıda deneme nedeniyle ${newLockSec} saniye güvenlik kilidi uygulandı.`
+                            : "Hatalı kullanıcı adı/e-posta veya şifre!";
                         errorBox.style.display = 'block';
                     }
                 }
@@ -4772,6 +4888,7 @@
                 return;
             }
             if (confirm("Oturumu kapatmak istediğinize emin misiniz?")) {
+                refreshVerifiedAdminClaim(null).catch(() => {});
                 if (fbAuth) {
                     try { fbAuth.signOut().catch(() => {}); } catch (e) {}
                 }
@@ -4832,26 +4949,27 @@
             }
 
             if (!isCurrentCorrect) {
-                alert("❌ Mevcut şifreniz hatalı!");
+                alert("Mevcut şifreniz hatalı.");
                 return;
             }
 
             if (newPass === currentPass) {
-                alert("❌ Yeni şifreniz mevcut şifrenizle aynı olamaz!");
+                alert("Yeni şifreniz mevcut şifrenizle aynı olamaz.");
                 return;
             }
 
             const secCheck = evaluatePasswordSecurity(newPass, user);
             if (!secCheck.isValid) {
-                alert(`❌ ${secCheck.reason}`);
+                alert(secCheck.reason);
                 return;
             }
 
             if (fbSignedForChange && fbAuth && fbAuth.currentUser) {
                 try {
                     await fbAuth.currentUser.updatePassword(newPass);
+                    await refreshVerifiedAdminClaim(fbAuth.currentUser);
                 } catch (updErr) {
-                    alert("❌ Şifre sunucuda güncellenemedi. Lütfen tekrar giriş yapıp deneyin.");
+                    alert("Şifre sunucuda güncellenemedi. Lütfen tekrar giriş yapıp deneyin.");
                     return;
                 }
             }
@@ -4878,21 +4996,38 @@
 
             users[userIdx] = user;
             saveAuthUsers(users);
+            syncOwnUserProfileToCloud(user).catch(() => {});
+            if (typeof isVerifiedAdminSession === 'function' && isVerifiedAdminSession() && typeof syncUsersToCloud === 'function') {
+                syncUsersToCloud().catch(() => {});
+            }
 
             if (currentPassEl) currentPassEl.value = '';
             if (newPassEl) newPassEl.value = '';
 
             playAlertSound();
-            alert("✅ Güçlü şifreniz tüm cihazlarınız için başarıyla kaydedildi!");
+            alert("Güçlü şifreniz tüm cihazlarınız için başarıyla kaydedildi.");
         }
 
-        // ADMIN PANEL
-        let adminTelemetryFilterGate = 'ALL';
-        let adminTelemetryFilterSeverity = 'ALL';
-
+        // ADMIN BADGE GUARD (Yönetici Portalı js/chiefs/admin-portal.js içinde izoledir)
         function updateAdminPendingBadges() {
+            const session = getSession();
+            const isAdmin = isVerifiedAdminSession(session);
+            if (!isAdmin) {
+                const manageBadge = document.getElementById('adminManagePendingBadge');
+                if (manageBadge) manageBadge.style.display = 'none';
+                const headerTelBtn = document.getElementById('headerAdminTelemetryBtn');
+                if (headerTelBtn) headerTelBtn.style.display = 'none';
+                ['popupAdminTelemetryBadge', 'sheetAdminTelemetryBadge', 'profileAdminTelemetryBadge', 'adminTelemetryTabBadge'].forEach(elId => {
+                    const el = document.getElementById(elId);
+                    if (el) el.style.display = 'none';
+                });
+                unmountAdminPortalFromDOM();
+                return;
+            }
+
+            ensureAdminPortalMountedSync(session);
             const users = getAuthUsers();
-            const pendingCount = users.filter(u => u.status === 'pending').length;
+            const pendingCount = users.filter(u => u && u.status === 'pending').length;
 
             const manageBadge = document.getElementById('adminManagePendingBadge');
             if (manageBadge) {
@@ -4904,19 +5039,14 @@
                 }
             }
 
-            const session = getSession();
-            const isAdmin = isVerifiedAdminSession(session);
-            if (isAdmin) {
-                ensureAdminPortalMountedSync(session);
-            }
             const roleBadge = document.getElementById('headerUserRoleBadge');
-            if (roleBadge && isAdmin) {
+            if (roleBadge) {
                 roleBadge.innerText = pendingCount > 0 ? `YÖNETİCİ (${pendingCount} ONAY)` : 'YÖNETİCİ';
                 roleBadge.className = 'auth-role-tag role-admin';
                 roleBadge.style.display = 'inline-block';
             }
 
-            const telEvents = (isAdmin && typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAllLocalEventsAcrossUsers === 'function')
+            const telEvents = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAllLocalEventsAcrossUsers === 'function')
                 ? window.CelikKaraKutu.getAllLocalEventsAcrossUsers(users)
                 : [];
             const errEvents = telEvents.filter(ev => ev && ev.severity === 'error');
@@ -4926,1178 +5056,21 @@
             const headerTelBtn = document.getElementById('headerAdminTelemetryBtn');
             const headerTelBadge = document.getElementById('headerAdminTelemetryBadge');
             if (headerTelBadge) headerTelBadge.innerText = errLabel;
-            if (headerTelBtn) headerTelBtn.style.display = (isAdmin && errCount > 0) ? 'inline-flex' : 'none';
+            if (headerTelBtn) headerTelBtn.style.display = (errCount > 0) ? 'inline-flex' : 'none';
 
             ['popupAdminTelemetryBadge', 'sheetAdminTelemetryBadge', 'profileAdminTelemetryBadge', 'adminTelemetryTabBadge'].forEach(elId => {
                 const el = document.getElementById(elId);
                 if (!el) return;
-                if (isAdmin && errCount > 0) {
+                if (errCount > 0) {
                     el.innerText = errLabel;
                     el.style.display = 'inline-block';
                 } else {
                     el.style.display = 'none';
                 }
             });
-            if (!isAdmin) {
-                unmountAdminPortalFromDOM();
-            }
         }
         if (typeof window !== 'undefined') {
             window.updateAdminPendingBadges = updateAdminPendingBadges;
-        }
-
-        function renderPendingApprovalsBanner() {
-            const section = document.getElementById('adminPendingApprovalsSection');
-            const listEl = document.getElementById('adminPendingApprovalsList');
-            const countLabel = document.getElementById('adminPendingCountLabel');
-            updateAdminPendingBadges();
-            if (!section || !listEl) return;
-
-            const users = getAuthUsers();
-            const pendingUsers = users.filter(u => u.status === 'pending');
-
-            if (pendingUsers.length === 0) {
-                section.style.display = 'none';
-                listEl.innerHTML = '';
-                return;
-            }
-
-            section.style.display = 'block';
-            section.style.background = '#121024';
-            section.style.borderColor = 'rgba(245, 158, 11, 0.45)';
-            if (countLabel) {
-                countLabel.innerText = `${pendingUsers.length} Bekleyen Başvuru`;
-                countLabel.style.color = '#FDE68A';
-            }
-
-            listEl.innerHTML = pendingUsers.map(u => {
-                const reqDate = u.createdAt ? new Date(u.createdAt).toLocaleString('tr-TR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
-                return `
-                    <div style="background:#181530; border:1px solid rgba(167, 139, 250, 0.25); border-radius:9px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-                        <div>
-                            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                                <strong style="color:#FFFFFF; font-size:13px;">${escapeHTML(u.name)}</strong>
-                                <span style="font-size:11px; color:#CBD5E1;">(@${escapeHTML(u.username)})</span>
-                                <span style="font-size:10px; background:#7C2D12; color:#FDE68A; border:1px solid rgba(251,191,36,0.35); padding:1px 6px; border-radius:6px; font-weight:800;">⏳ ONAY BEKLİYOR</span>
-                            </div>
-                            <div style="font-size:11.5px; color:#BAE6FD; margin-top:2px;">
-                                ✉️ ${escapeHTML(u.email || 'E-posta belirtilmedi')}
-                            </div>
-                            <div style="font-size:10.5px; color:#CBD5E1; margin-top:2px;">
-                                ${escapeHTML(u.level || 'Orta Seviye')} • ${escapeHTML(u.gender || 'Erkek')} ${reqDate ? '• ' + escapeHTML(reqDate) : ''}
-                            </div>
-                        </div>
-                        <div style="display:flex; gap:6px; flex-shrink:0;">
-                            <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 10px; font-weight:800; background:#14532D; border-color:#22C55E; color:#BBF7D0;" onclick="adminApproveUser(decodeURIComponent('${encodeURIComponent(u.id)}'))">
-                                ✅ Onayla & Mail Gönder
-                            </button>
-                            <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 10px; background:#7F1D1D; color:#FECACA; border-color:#F87171; font-weight:800;" onclick="adminRejectUser(decodeURIComponent('${encodeURIComponent(u.id)}'))">
-                                ✕ Reddet
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        async function openAdminModal(initialTab = 'status') {
-            const session = getSession();
-            if (!isVerifiedAdminSession(session)) {
-                unmountAdminPortalFromDOM();
-                alert("Bu alana sadece doğrulanmış yöneticiler erişebilir.");
-                return;
-            }
-            if (!ensureAdminPortalMountedSync(session)) {
-                const mounted = await ensureAdminPortalLoadedAndMounted(session);
-                if (!mounted) {
-                    alert("Yönetici paneli yüklenemedi. Lütfen tekrar deneyin.");
-                    return;
-                }
-            }
-            if (typeof syncUsersFromCloud === 'function' && isFirebaseReady && !IS_LOCAL_DEV) {
-                try { await syncUsersFromCloud(); } catch (err) {}
-            }
-            const adminModalEl = document.getElementById('adminModal');
-            if (adminModalEl) {
-                const modalBox = adminModalEl.querySelector('.modal-box');
-                if (modalBox) {
-                    modalBox.style.background = '#181530';
-                    modalBox.style.color = '#F8FAFC';
-                    modalBox.style.border = '1.5px solid rgba(167, 139, 250, 0.25)';
-                }
-                adminModalEl.querySelectorAll('h3, span').forEach(el => {
-                    if (el.style && (el.style.color === '#0F172A' || el.style.color === 'rgb(15, 23, 42)')) {
-                        el.style.color = '#FFFFFF';
-                    }
-                });
-            }
-            loadAdminEmailJsConfigUI();
-            renderPendingApprovalsBanner();
-            renderAdminAthleteStatuses();
-            renderAdminUserList();
-            const targetTab = (initialTab === 'manage' || initialTab === 'telemetry') ? initialTab : 'status';
-            switchAdminModalTab(targetTab);
-            if (adminModalEl) adminModalEl.classList.add('active');
-            fetchAllCloudSystemTelemetryForAdmin();
-        }
-
-        function closeAdminModal() {
-            const el = document.getElementById('adminModal');
-            if (el) el.classList.remove('active');
-        }
-
-        function setAdminModalTabBtnStyle(btn, isActive) {
-            if (!btn) return;
-            if (isActive) {
-                btn.className = 'btn btn-gold';
-                btn.style.background = 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)';
-                btn.style.backgroundColor = '#6D28D9';
-                btn.style.color = '#FFFFFF';
-                btn.style.borderColor = 'rgba(167, 139, 250, 0.45)';
-            } else {
-                btn.className = 'btn btn-outline';
-                btn.style.background = '#121024';
-                btn.style.color = '#CBD5E1';
-                btn.style.borderColor = 'rgba(167, 139, 250, 0.25)';
-            }
-        }
-
-        function switchAdminModalTab(tabKey) {
-            const statusView = document.getElementById('adminViewStatus');
-            const manageView = document.getElementById('adminViewManage');
-            const telemetryView = document.getElementById('adminViewTelemetry');
-            const btnStatus = document.getElementById('adminTabBtnStatus');
-            const btnManage = document.getElementById('adminTabBtnManage');
-            const btnTelemetry = document.getElementById('adminTabBtnTelemetry');
-
-            renderPendingApprovalsBanner();
-
-            const activeKey = (tabKey === 'manage' || tabKey === 'telemetry') ? tabKey : 'status';
-            if (statusView) statusView.style.display = activeKey === 'status' ? 'block' : 'none';
-            if (manageView) manageView.style.display = activeKey === 'manage' ? 'block' : 'none';
-            if (telemetryView) telemetryView.style.display = activeKey === 'telemetry' ? 'block' : 'none';
-
-            setAdminModalTabBtnStyle(btnStatus, activeKey === 'status');
-            setAdminModalTabBtnStyle(btnManage, activeKey === 'manage');
-            setAdminModalTabBtnStyle(btnTelemetry, activeKey === 'telemetry');
-
-            if (activeKey === 'status') {
-                renderAdminAthleteStatuses();
-            } else if (activeKey === 'manage') {
-                renderAdminUserList();
-            } else {
-                renderAdminSystemTelemetry();
-                fetchAllCloudSystemTelemetryForAdmin();
-            }
-        }
-
-        function getFilteredAdminTelemetryEvents() {
-            const users = getAuthUsers();
-            const all = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAllLocalEventsAcrossUsers === 'function')
-                ? window.CelikKaraKutu.getAllLocalEventsAcrossUsers(users)
-                : [];
-            const filtered = all.filter(ev => {
-                if (adminTelemetryFilterGate !== 'ALL' && ev.gate !== adminTelemetryFilterGate) return false;
-                if (adminTelemetryFilterSeverity === 'error' && ev.severity !== 'error') return false;
-                return true;
-            });
-            return { all, filtered };
-        }
-
-        function setAdminTelemetryFilter(gate, severity) {
-            if (gate) adminTelemetryFilterGate = gate;
-            if (severity) adminTelemetryFilterSeverity = severity;
-            renderAdminSystemTelemetry();
-        }
-
-        function renderAdminSystemTelemetry() {
-            const kpisEl = document.getElementById('adminTelemetryKpis');
-            const listEl = document.getElementById('adminTelemetryListContainer');
-            const { all, filtered } = getFilteredAdminTelemetryEvents();
-
-            ['ALL', 'K1', 'K2', 'K3', 'K4'].forEach(g => {
-                const btn = document.getElementById(`adminTelGateBtn_${g}`);
-                if (!btn) return;
-                const active = adminTelemetryFilterGate === g;
-                btn.style.background = active ? '#6D28D9' : '#121024';
-                btn.style.color = active ? '#FFFFFF' : '#CBD5E1';
-                btn.style.borderColor = active ? 'rgba(167,139,250,0.45)' : 'rgba(167,139,250,0.25)';
-            });
-            const sevAllBtn = document.getElementById('adminTelSevBtn_ALL');
-            const sevErrBtn = document.getElementById('adminTelSevBtn_error');
-            if (sevAllBtn) {
-                const active = adminTelemetryFilterSeverity === 'ALL';
-                sevAllBtn.style.background = active ? '#2C2550' : '#121024';
-                sevAllBtn.style.color = active ? '#FFFFFF' : '#CBD5E1';
-                sevAllBtn.style.borderColor = active ? 'rgba(167,139,250,0.45)' : 'rgba(167,139,250,0.25)';
-            }
-            if (sevErrBtn) {
-                const active = adminTelemetryFilterSeverity === 'error';
-                sevErrBtn.style.background = active ? '#DC2626' : '#121024';
-                sevErrBtn.style.color = active ? '#FFFFFF' : '#FECACA';
-                sevErrBtn.style.borderColor = active ? '#F87171' : 'rgba(248,113,113,0.35)';
-            }
-
-            let errorCount = 0;
-            let warnCount = 0;
-            all.forEach(ev => {
-                if (ev.severity === 'error') errorCount++;
-                else warnCount++;
-            });
-
-            if (kpisEl) {
-                kpisEl.innerHTML = `
-                    <div style="background:#121024; border:1px solid rgba(167,139,250,0.25); border-radius:10px; padding:8px; text-align:center;">
-                        <div style="font-size:17px; font-weight:900; color:#FFFFFF;">${all.length}</div>
-                        <div style="font-size:10px; font-weight:700; color:#CBD5E1;">Toplam Açık</div>
-                    </div>
-                    <div style="background:#7F1D1D; border:1px solid rgba(248,113,113,0.45); border-radius:10px; padding:8px; text-align:center;">
-                        <div style="font-size:17px; font-weight:900; color:#FFFFFF;">${errorCount}</div>
-                        <div style="font-size:10px; font-weight:700; color:#FECACA;">Kırmızı Arıza</div>
-                    </div>
-                    <div style="background:#78350F; border:1px solid rgba(251,191,36,0.45); border-radius:10px; padding:8px; text-align:center;">
-                        <div style="font-size:17px; font-weight:900; color:#FFFFFF;">${warnCount}</div>
-                        <div style="font-size:10px; font-weight:700; color:#FDE68A;">Sarı Onarım</div>
-                    </div>
-                `;
-            }
-
-            if (!listEl) return;
-            const savedScrollTop = listEl.scrollTop || 0;
-            if (filtered.length === 0) {
-                listEl.innerHTML = `
-                    <div style="background:#14532D; border:1px solid rgba(74,222,128,0.45); color:#BBF7D0; border-radius:10px; padding:14px; text-align:center; font-size:12px; font-weight:700;">
-                        ${all.length === 0 ? 'Tüm kapılar temiz, açık kayıt yok.' : 'Seçili filtrede açık kayıt yok.'}
-                    </div>
-                `;
-                listEl.scrollTop = savedScrollTop;
-                return;
-            }
-
-            const gateNames = { K1: 'K1 Gümrük', K2: 'K2 Saat', K3: 'K3 Gemini', K4: 'K4 Bulut' };
-            const maskFn = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.maskSecrets === 'function')
-                ? window.CelikKaraKutu.maskSecrets
-                : (s) => String(s || '');
-
-            listEl.innerHTML = filtered.map(ev => {
-                const isErr = ev.severity === 'error';
-                const sevBg = isErr ? '#7F1D1D' : '#78350F';
-                const sevFg = isErr ? '#FECACA' : '#FDE68A';
-                const sevText = isErr ? 'Arıza' : 'Onarım';
-                const gateText = gateNames[ev.gate] || ev.gate || 'K1';
-                const timeStr = ev.at ? new Date(ev.at).toLocaleString('tr-TR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
-                const safeUidAttr = encodeURIComponent(String(ev.uid || ''));
-                const safeEvIdAttr = encodeURIComponent(String(ev.id || ''));
-                const safeInput = maskFn(ev.inputSummary || '');
-                const safeOutcome = maskFn(ev.outcome || '');
-                const safeModule = maskFn(ev.module || '');
-                const safeAction = maskFn(ev.action || '');
-                const safeUser = maskFn(ev.userName || ev.uid || 'Sporcu');
-                const safeVer = maskFn(ev.appVersion || 'v326');
-
-                return `
-                    <div style="background:#121024; border:1px solid ${isErr ? 'rgba(248,113,113,0.45)' : 'rgba(251,191,36,0.35)'}; border-radius:10px; padding:10px 12px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
-                            <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
-                                <span style="background:#2C2550; color:#F3E8FF; border:1px solid rgba(167,139,250,0.4); font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px;">${escapeHTML(gateText)}</span>
-                                <span style="background:${sevBg}; color:${sevFg}; font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px;">${sevText}</span>
-                                <span style="background:#1E293B; color:#E2E8F0; font-size:10px; font-weight:800; padding:2px 6px; border-radius:6px;">${escapeHTML(safeVer)}</span>
-                                ${ev.repeatCount > 1 ? `<span style="background:#0C4A6E; color:#BAE6FD; font-size:10px; font-weight:800; padding:2px 6px; border-radius:6px;">×${Number(ev.repeatCount)}</span>` : ''}
-                                <span style="font-size:10.5px; color:#CBD5E1; font-weight:600;">${escapeHTML(timeStr)}</span>
-                            </div>
-                            <button type="button" onclick="removeSingleAdminTelemetryEvent(decodeURIComponent('${safeUidAttr}'), decodeURIComponent('${safeEvIdAttr}'))" style="background:#2C2550; color:#F3E8FF; border:1px solid rgba(167,139,250,0.35); border-radius:6px; padding:3px 8px; font-size:10.5px; font-weight:800; cursor:pointer;">Kapat</button>
-                        </div>
-                        <div style="font-size:12px; font-weight:800; color:#FFFFFF; margin-bottom:3px;">
-                            ${escapeHTML(safeModule)} • ${escapeHTML(safeAction)}
-                        </div>
-                        <div style="font-size:11px; color:#BAE6FD; margin-bottom:3px;">
-                            Sporcu: ${escapeHTML(safeUser)} • Sürüm: ${escapeHTML(safeVer)}
-                        </div>
-                        ${safeInput ? `<div style="font-size:11px; color:#CBD5E1; margin-bottom:2px; word-break:break-word;">Girdi: ${escapeHTML(safeInput)}</div>` : ''}
-                        <div style="font-size:11.5px; color:${isErr ? '#FECACA' : '#FDE68A'}; font-weight:700; word-break:break-word;">Sonuç: ${escapeHTML(safeOutcome)}</div>
-                    </div>
-                `;
-            }).join('');
-            listEl.scrollTop = savedScrollTop;
-        }
-
-        function removeSingleAdminTelemetryEvent(uid, eventId) {
-            if (typeof window === 'undefined' || !window.CelikKaraKutu) return;
-            window.CelikKaraKutu.removeEvent(uid, eventId);
-            updateAdminPendingBadges();
-            renderAdminSystemTelemetry();
-        }
-
-        async function clearAdminTelemetryEvents() {
-            const users = getAuthUsers();
-            const all = (typeof window !== 'undefined' && window.CelikKaraKutu)
-                ? window.CelikKaraKutu.getAllLocalEventsAcrossUsers(users)
-                : [];
-            if (all.length === 0) {
-                alert('Temizlenecek açık sistem kaydı bulunmuyor.');
-                return;
-            }
-            if (typeof confirm === 'function' && !confirm(`Toplam ${all.length} sistem izleme kaydını temizlemek istiyor musunuz?`)) {
-                return;
-            }
-            const uidSet = new Set(users.map(u => u && u.id).filter(Boolean));
-            all.forEach(ev => { if (ev && ev.uid) uidSet.add(ev.uid); });
-            const nowMs = Date.now();
-            uidSet.forEach(u => {
-                try { localStorage.setItem(`celik_kodu_telemetry_cleared_at_${u}`, String(nowMs)); } catch {}
-            });
-            if (typeof window !== 'undefined' && window.CelikKaraKutu) {
-                window.CelikKaraKutu.clearAllEvents(users);
-            }
-            if (!IS_LOCAL_DEV && isFirebaseReady && fbDb && (typeof navigator === 'undefined' || navigator.onLine !== false)) {
-                for (const u of uidSet) {
-                    if (!/^usr_[a-zA-Z0-9_-]{1,64}$/.test(String(u))) continue;
-                    try { await fbDb.collection('system_telemetry').doc(String(u)).delete(); } catch {}
-                }
-            }
-            updateAdminPendingBadges();
-            renderAdminSystemTelemetry();
-        }
-
-        function buildAdminTelemetryAiPrompt() {
-            const { all, filtered } = getFilteredAdminTelemetryEvents();
-            const target = filtered.length > 0 ? filtered : all;
-            if (target.length === 0) return '';
-            const maskFn = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.maskSecrets === 'function')
-                ? window.CelikKaraKutu.maskSecrets
-                : (s) => String(s || '');
-            const gateNames = { K1: 'K1 Gümrük & Şefler', K2: 'K2 Saat & Vercel Köprüsü', K3: 'K3 Gemini Yapay Zeka', K4: 'K4 Firebase Bulut' };
-            const lines = [
-                'ÇELİK KODU SİSTEM İZLEME RAPORU — LÜTFEN AŞAĞIDAKİ ARIZA VE ONARIMLARI İNCELE VE ÇÖZ:',
-                `Toplam Kayıt: ${target.length}`,
-                ''
-            ];
-            target.forEach((ev, idx) => {
-                const tm = ev.at ? new Date(ev.at).toISOString() : '';
-                lines.push(`${idx + 1}. [${gateNames[ev.gate] || ev.gate}] (${ev.severity === 'error' ? 'ARIZA' : 'ONARIM'}${ev.repeatCount > 1 ? ' ×' + ev.repeatCount : ''}) [${maskFn(ev.appVersion || 'v326')}]`);
-                lines.push(`   Sporcu: ${maskFn(ev.userName || ev.uid || 'Sporcu')} | Sürüm: ${maskFn(ev.appVersion || 'v326')} | Modül: ${maskFn(ev.module)} | İşlem: ${maskFn(ev.action)}`);
-                if (ev.inputSummary) lines.push(`   Girdi: ${maskFn(ev.inputSummary)}`);
-                lines.push(`   Sonuç: ${maskFn(ev.outcome)} | Zaman: ${tm}`);
-            });
-            return maskFn(lines.join('\n'));
-        }
-
-        async function copyAdminTelemetryPromptToClipboard() {
-            const text = buildAdminTelemetryAiPrompt();
-            if (!text) {
-                alert('Kopyalanacak sistem izleme kaydı yok.');
-                return;
-            }
-            try {
-                if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-                    await navigator.clipboard.writeText(text);
-                    if (typeof showToast === 'function') showToast('Düzeltme emri panoya kopyalandı.');
-                    else alert('Düzeltme emri panoya kopyalandı.');
-                    return;
-                }
-            } catch {}
-            alert(text);
-        }
-
-        if (typeof window !== 'undefined') {
-            window.openAdminModal = openAdminModal;
-            window.switchAdminModalTab = switchAdminModalTab;
-            window.setAdminTelemetryFilter = setAdminTelemetryFilter;
-            window.renderAdminSystemTelemetry = renderAdminSystemTelemetry;
-            window.removeSingleAdminTelemetryEvent = removeSingleAdminTelemetryEvent;
-            window.clearAdminTelemetryEvents = clearAdminTelemetryEvents;
-            window.buildAdminTelemetryAiPrompt = buildAdminTelemetryAiPrompt;
-            window.copyAdminTelemetryPromptToClipboard = copyAdminTelemetryPromptToClipboard;
-        }
-
-        function selectNewAvatar(av) {
-            selectedNewAvatar = av;
-            document.querySelectorAll('#newAvatarPicker .avatar-choice').forEach(el => {
-                el.classList.toggle('selected', el.innerText.trim() === av);
-            });
-        }
-
-        async function handleCreateUser() {
-            const session = getSession();
-            if (!session || session.role !== 'admin') {
-                alert("Bu işlem için yönetici yetkisi gereklidir.");
-                return;
-            }
-
-            const rawUname = (document.getElementById('newUsername').value || '').trim();
-            const uname = normalizeAuthString(rawUname);
-            const pass = (document.getElementById('newPassword').value || '').trim();
-            const dname = (document.getElementById('newDisplayName').value || '').trim();
-            const emailEl = document.getElementById('newEmail');
-            const rawEmail = (emailEl ? emailEl.value : '').trim().toLowerCase();
-            const role = document.getElementById('newRole').value;
-            const level = document.getElementById('newLevel').value;
-            const gender = document.getElementById('newGender').value;
-
-            if (!uname || !pass || !dname) {
-                alert("Lütfen kullanıcı adı, şifre ve ad soyad alanlarını doldurun.");
-                return;
-            }
-
-            if (pass.length < 6) {
-                alert("Parola en az 6 karakter olmalıdır!");
-                return;
-            }
-
-            const users = getAuthUsers();
-            if (users.some(u => normalizeAuthString(u.username) === uname)) {
-                alert("Bu kullanıcı adı zaten kullanımda!");
-                return;
-            }
-
-            const nowMs = Date.now();
-            const salt = generateSecureSalt();
-            const passHash = await sha256Hex(salt + pass);
-            const secCheck = evaluatePasswordSecurity(pass, { username: uname, name: dname, email: rawEmail });
-            let assignedId = 'usr_' + nowMs;
-            const fbEmailForNew = rawEmail || `${assignedId}@auth.celikkodu.app`;
-
-            const secAuth = getSecondaryFirebaseAuth();
-            if (secAuth && navigator.onLine !== false) {
-                try {
-                    const cred = await secAuth.createUserWithEmailAndPassword(fbEmailForNew, pass);
-                    if (cred && cred.user && cred.user.uid) {
-                        const cleanFbUid = String(cred.user.uid).replace(/[^a-zA-Z0-9_]/g, '').slice(0, 32);
-                        if (cleanFbUid) assignedId = 'usr_' + cleanFbUid;
-                        if (!IS_LOCAL_DEV && isFirebaseReady && fbDb) {
-                            try {
-                                await fbDb.collection('user_roles').doc(cred.user.uid).set({
-                                    role: role === 'admin' ? 'admin' : 'athlete',
-                                    appUid: assignedId,
-                                    email: fbEmailForNew,
-                                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                                }, { merge: true });
-                            } catch (roleErr) {}
-                        }
-                    }
-                    await secAuth.signOut().catch(() => {});
-                } catch (fbCreateErr) {
-                    if (fbCreateErr && fbCreateErr.code === 'auth/email-already-in-use') {
-                        alert("Bu e-posta adresi zaten başka bir hesapta kayıtlı!");
-                        return;
-                    }
-                }
-            }
-
-            setLocalUserCred(assignedId, {
-                salt,
-                passwordHash: passHash,
-                passwordStrengthLevel: secCheck.levelLabel,
-                mustChangePassword: !secCheck.isValid,
-                passwordUpdatedAt: nowMs
-            });
-
-            const newUser = {
-                id: assignedId,
-                username: uname,
-                fbAuthEmail: fbEmailForNew,
-                mustChangePassword: !secCheck.isValid,
-                passwordStrengthLevel: secCheck.levelLabel,
-                passwordUpdatedAt: nowMs,
-                role: role,
-                status: 'approved',
-                name: dname,
-                avatar: selectedNewAvatar,
-                theme: role === 'admin' ? 'gold' : 'cyan',
-                level: level,
-                gender: gender,
-                weights: { press: '12', squat: '18', row: '16', rdl: '18', swing: '14', lunge: '12' },
-                createdAt: nowMs,
-                updatedAt: nowMs
-            };
-            if (rawEmail) newUser.email = rawEmail;
-
-            users.push(newUser);
-            saveAuthUsers(users);
-
-            document.getElementById('newUsername').value = "";
-            document.getElementById('newPassword').value = "123456";
-            document.getElementById('newDisplayName').value = "";
-            if (emailEl) emailEl.value = "";
-
-            renderPendingApprovalsBanner();
-            renderAdminUserList();
-            renderAdminAthleteStatuses();
-            alert(`✅ ${dname} (@${uname}) başarıyla oluşturuldu!\n🔑 Belirlenen Şifre: ${pass}`);
-        }
-
-        function adminApproveUser(userId) {
-            const session = getSession();
-            if (!session || session.role !== 'admin') {
-                alert("Bu işlem için yönetici yetkisi gereklidir.");
-                return;
-            }
-            const users = getAuthUsers();
-            const target = users.find(u => u.id === userId);
-            if (!target) return;
-
-            target.status = 'approved';
-            target.approvedAt = Date.now();
-            target.updatedAt = Date.now();
-            saveAuthUsers(users);
-
-            renderPendingApprovalsBanner();
-            renderAdminUserList();
-            renderAdminAthleteStatuses();
-
-            openApprovalEmailDispatchModal(target);
-        }
-
-        function adminRejectUser(userId) {
-            const session = getSession();
-            if (!session || session.role !== 'admin') {
-                alert("Bu işlem için yönetici yetkisi gereklidir.");
-                return;
-            }
-            const users = getAuthUsers();
-            const target = users.find(u => u.id === userId);
-            if (!target) return;
-
-            if (confirm(`${target.name} (@${target.username}) adlı kullanıcının kayıt başvurusunu reddedip silmek istediğinize emin misiniz?`)) {
-                const updated = users.filter(u => u.id !== userId);
-                saveAuthUsers(updated);
-                renderPendingApprovalsBanner();
-                renderAdminUserList();
-                renderAdminAthleteStatuses();
-            }
-        }
-
-        let lastApprovalMessageCache = '';
-
-        function buildApprovalEmailPayload(user) {
-            const appUrl = (window.location.origin && window.location.origin !== 'null' && !IS_LOCAL_DEV)
-                ? (window.location.origin + window.location.pathname)
-                : 'https://fitness.kantarci.io/';
-            const subject = '✅ Çelik Kodu | Hesabınız Onaylandı - Giriş Yapabilirsiniz';
-            const body = [
-                `Merhaba ${user.name},`,
-                ``,
-                `Çelik Kodu Akıllı Antrenman Portalı üyelik başvurunuz yönetici tarafından onaylanmıştır!`,
-                ``,
-                `🔑 Giriş Bilgileriniz:`,
-                `• Giriş Adresi: ${appUrl}`,
-                `• E-Posta / Kullanıcı Adı: ${user.email || user.username} (@${user.username})`,
-                `• Şifre: Kayıt olurken belirlediğiniz şifreniz`,
-                ``,
-                `Hemen giriş yaparak antrenman programınızı oluşturabilir ve seanslarınızı takip edebilirsiniz.`,
-                ``,
-                `Çelik Kodu Performans Sistemi`
-            ].join('\n');
-            return { to: user.email || '', subject, body, appUrl };
-        }
-
-        async function openApprovalEmailDispatchModal(user) {
-            const modal = document.getElementById('approvalEmailDispatchModal');
-            if (!modal || !user) return;
-
-            const modalBox = modal.querySelector('.modal-box');
-            if (modalBox) {
-                modalBox.style.background = '#181530';
-                modalBox.style.color = '#F8FAFC';
-                modalBox.style.border = '1.5px solid rgba(167, 139, 250, 0.25)';
-            }
-
-            const payload = buildApprovalEmailPayload(user);
-            lastApprovalMessageCache = payload.body;
-
-            const nameEl = document.getElementById('approvalModalUserName');
-            const emailEl = document.getElementById('approvalModalUserEmail');
-            const subjEl = document.getElementById('approvalModalSubject');
-            const bodyEl = document.getElementById('approvalModalBodyPreview');
-            const mailtoBtn = document.getElementById('approvalModalMailtoBtn');
-            const gmailBtn = document.getElementById('approvalModalGmailBtn');
-            const autoStatusEl = document.getElementById('approvalModalAutoStatus');
-
-            if (nameEl) {
-                nameEl.innerText = `${user.name} (@${user.username})`;
-                nameEl.style.color = '#FDE68A';
-                if (nameEl.parentElement) nameEl.parentElement.style.color = '#E2E8F0';
-            }
-            if (emailEl) {
-                emailEl.innerText = payload.to || 'E-posta kayıtlı değil';
-                emailEl.style.color = '#BAE6FD';
-            }
-            if (subjEl) {
-                subjEl.innerText = payload.subject;
-                subjEl.style.color = '#FFFFFF';
-            }
-            if (bodyEl) {
-                bodyEl.innerText = payload.body;
-                bodyEl.style.background = '#181530';
-                bodyEl.style.color = '#E2E8F0';
-                bodyEl.style.border = '1px solid rgba(167, 139, 250, 0.25)';
-                if (bodyEl.parentElement) {
-                    bodyEl.parentElement.style.background = '#121024';
-                    bodyEl.parentElement.style.borderColor = 'rgba(167, 139, 250, 0.25)';
-                    bodyEl.parentElement.style.color = '#CBD5E1';
-                }
-            }
-
-            const encTo = encodeURIComponent(payload.to);
-            const encSubj = encodeURIComponent(payload.subject);
-            const encBody = encodeURIComponent(payload.body);
-
-            if (mailtoBtn) {
-                mailtoBtn.href = `mailto:${encTo}?subject=${encSubj}&body=${encBody}`;
-                mailtoBtn.style.display = payload.to ? 'block' : 'none';
-                mailtoBtn.style.background = '#6D28D9';
-                mailtoBtn.style.color = '#FFFFFF';
-                mailtoBtn.style.borderColor = '#7C3AED';
-            }
-            if (gmailBtn) {
-                gmailBtn.href = `https://mail.google.com/mail/?view=cm&fs=1&to=${encTo}&su=${encSubj}&body=${encBody}`;
-                gmailBtn.style.display = payload.to ? 'block' : 'none';
-                gmailBtn.style.background = '#0C4A6E';
-                gmailBtn.style.color = '#BAE6FD';
-                gmailBtn.style.borderColor = '#38BDF8';
-            }
-
-            if (autoStatusEl) {
-                autoStatusEl.style.display = 'none';
-                autoStatusEl.innerText = '';
-            }
-
-            modal.classList.add('active');
-
-            // Otomatik EmailJS yapılandırılmışsa arka planda anında gönder
-            if (payload.to) {
-                const cfg = getAdminEmailJsConfig();
-                if (cfg && cfg.serviceId && cfg.templateId && cfg.publicKey) {
-                    if (autoStatusEl) {
-                        autoStatusEl.style.display = 'block';
-                        autoStatusEl.style.background = '#0C4A6E';
-                        autoStatusEl.style.color = '#BAE6FD';
-                        autoStatusEl.innerText = '⏳ Otomatik onay e-postası gönderiliyor...';
-                    }
-                    try {
-                        const resp = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                service_id: cfg.serviceId,
-                                template_id: cfg.templateId,
-                                user_id: cfg.publicKey,
-                                template_params: {
-                                    to_email: payload.to,
-                                    to_name: user.name,
-                                    username: user.username,
-                                    subject: payload.subject,
-                                    message: payload.body,
-                                    app_url: payload.appUrl
-                                }
-                            })
-                        });
-                        if (resp.ok && autoStatusEl) {
-                            autoStatusEl.style.background = '#14532D';
-                            autoStatusEl.style.color = '#BBF7D0';
-                            autoStatusEl.innerText = `🚀 Otomatik onay e-postası (${payload.to}) adresine başarıyla gönderildi!`;
-                        } else if (autoStatusEl) {
-                            autoStatusEl.style.background = '#7C2D12';
-                            autoStatusEl.style.color = '#FDE68A';
-                            autoStatusEl.innerText = '⚠️ Otomatik servis yanıt vermedi; aşağıdaki butonlarla tek tıkla gönderebilirsiniz.';
-                        }
-                    } catch (err) {
-                        if (autoStatusEl) {
-                            autoStatusEl.style.background = '#7C2D12';
-                            autoStatusEl.style.color = '#FDE68A';
-                            autoStatusEl.innerText = '⚠️ Otomatik gönderim yapılamadı; aşağıdaki butonlarla tek tıkla gönderebilirsiniz.';
-                        }
-                    }
-                }
-            }
-        }
-
-        function openApprovalEmailDispatchById(userId) {
-            const users = getAuthUsers();
-            const target = users.find(u => u.id === userId);
-            if (target) openApprovalEmailDispatchModal(target);
-        }
-
-        function closeApprovalEmailModal() {
-            const modal = document.getElementById('approvalEmailDispatchModal');
-            if (modal) modal.classList.remove('active');
-        }
-
-        function copyApprovalMessageToClipboard() {
-            if (!lastApprovalMessageCache) return;
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(lastApprovalMessageCache).then(() => {
-                    alert("📋 Onay mesajı panoya kopyalandı!");
-                });
-            }
-        }
-
-        function toggleAdminEmailConfigAccordion() {
-            const body = document.getElementById('adminEmailConfigBody');
-            const label = document.getElementById('adminEmailConfigToggleLabel');
-            if (!body || !label) return;
-            const isHidden = body.style.display === 'none' || !body.style.display;
-            body.style.display = isHidden ? 'block' : 'none';
-            label.innerText = isHidden ? '▲ Gizle' : '▼ Göster';
-        }
-
-        function getAdminEmailJsConfig() {
-            try {
-                const raw = localStorage.getItem('celik_kodu_emailjs_config');
-                return raw ? JSON.parse(raw) : null;
-            } catch (e) {
-                return null;
-            }
-        }
-
-        function loadAdminEmailJsConfigUI() {
-            const cfg = getAdminEmailJsConfig() || {};
-            const sEl = document.getElementById('emailJsServiceId');
-            const tEl = document.getElementById('emailJsTemplateId');
-            const kEl = document.getElementById('emailJsPublicKey');
-            if (sEl) sEl.value = cfg.serviceId || '';
-            if (tEl) tEl.value = cfg.templateId || '';
-            if (kEl) kEl.value = cfg.publicKey || '';
-        }
-
-        function saveAdminEmailJsConfig() {
-            const sEl = document.getElementById('emailJsServiceId');
-            const tEl = document.getElementById('emailJsTemplateId');
-            const kEl = document.getElementById('emailJsPublicKey');
-            const cfg = {
-                serviceId: (sEl ? sEl.value : '').trim(),
-                templateId: (tEl ? tEl.value : '').trim(),
-                publicKey: (kEl ? kEl.value : '').trim()
-            };
-            localStorage.setItem('celik_kodu_emailjs_config', JSON.stringify(cfg));
-            alert("✅ Otomatik e-posta (EmailJS) ayarları yerel olarak kaydedildi!");
-        }
-
-        function renderAdminAthleteStatuses() {
-            const container = document.getElementById('adminAthleteStatusContainer');
-            const kpisEl = document.getElementById('adminSummaryKpis');
-            if (!container) return;
-
-            const users = getAuthUsers();
-            let totalWorkoutsAll = 0;
-            let totalTonajAll = 0;
-            let activeAthletesCount = 0;
-
-            const cardsHTML = users.map(u => {
-                const logs = getUserLogsById(u.id);
-                const streak = calculateStreakForLogs(logs);
-                const sessionCount = logs.length;
-                if (sessionCount > 0) activeAthletesCount++;
-
-                let userTonaj = 0;
-                logs.forEach(l => {
-                    userTonaj += (parseFloat(l.totalVolumeKg) || 0);
-                });
-                totalWorkoutsAll += sessionCount;
-                totalTonajAll += userTonaj;
-
-                const lastLog = logs.length > 0 ? logs[0] : null;
-                const activeStateRaw = localStorage.getItem(`celik_kodu_active_state_${u.id}`);
-                const isLiveWorking = !!activeStateRaw;
-                const w = u.weights || {};
-
-                // Exercise details for the latest workout
-                let lastLogDetailsHTML = '';
-                if (lastLog) {
-                    const exList = lastLog.exercises || lastLog.detailedExercises || [];
-                    lastLogDetailsHTML = `
-                        <div id="adminExDetails_${u.id}" style="display:none; margin-top:10px; padding:10px 12px; background:#121024; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.25);">
-                            <div style="font-size:11px; font-weight:800; color:#FDE68A; margin-bottom:8px; text-transform:uppercase; display:flex; justify-content:space-between;">
-                                <span>📋 ${escapeHTML(lastLog.title)}</span>
-                                <span style="color:#E2E8F0;">${lastLog.dateFormatted || lastLog.date}</span>
-                            </div>
-                            ${exList.length > 0 ? `
-                                <div style="display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto; padding-right:4px;">
-                                    ${exList.map(ex => {
-                                        const sets = (ex.sets || []).filter(s => s.completed || (parseFloat(s.weight) > 0));
-                                        const setsStr = sets.length > 0
-                                            ? sets.map((s, idx) => `Set ${idx+1}: <strong style="color:#FDE68A;">${s.weight}kg</strong> x ${s.reps}`).join(' • ')
-                                            : '<span style="color:#CBD5E1;">Set kaydı yok</span>';
-                                        return `
-                                            <div style="font-size:11px; padding:6px 8px; background:#181530; border-radius:6px; border-left:3px solid #A78BFA;">
-                                                <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                                                    <strong style="color:#FFFFFF;">${escapeHTML(ex.name)}</strong>
-                                                    ${ex.muscle ? `<span style="font-size:10px; color:#BAE6FD;">[${escapeHTML(ex.muscle)}]</span>` : ''}
-                                                </div>
-                                                <div style="font-size:10.5px; color:#CBD5E1;">${setsStr}</div>
-                                            </div>
-                                        `;
-                                    }).join('')}
-                                </div>
-                            ` : '<div style="font-size:11px; color:#CBD5E1;">Detaylı set kaydı bulunamadı.</div>'}
-                        </div>
-                    `;
-                }
-
-                return `
-                    <div style="background:#181530; border:1px solid rgba(167, 139, 250, 0.25); border-radius:12px; padding:14px; margin-bottom:12px; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
-                        <!-- ATHLETE HEADER -->
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <span style="font-size:26px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:#121024; border-radius:10px; border:1px solid rgba(167, 139, 250, 0.35);">${u.avatar || '🥋'}</span>
-                                <div>
-                                    <div style="display:flex; align-items:center; gap:6px;">
-                                        <strong style="color:#FFFFFF; font-size:14px;">${escapeHTML(u.name)}</strong>
-                                        <span style="font-size:11px; color:#CBD5E1;">@${escapeHTML(u.username)}</span>
-                                        <span class="auth-role-tag ${u.role === 'admin' ? 'role-admin' : 'role-athlete'}" style="font-size:9px; padding:2px 6px;">
-                                            ${u.role === 'admin' ? 'YÖNETİCİ' : 'SPORCU'}
-                                        </span>
-                                    </div>
-                                    <div style="font-size:11px; color:#CBD5E1; margin-top:2px;">
-                                        ${escapeHTML(u.level || 'Orta Seviye')} • ${escapeHTML(u.gender || 'Erkek')}
-                                    </div>
-                                </div>
-                            </div>
-                            ${isLiveWorking ? `
-                                <span style="background:#14532D; border:1px solid #4ADE80; color:#BBF7D0; font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px; display:flex; align-items:center; gap:5px;">
-                                    <span style="width:6px; height:6px; border-radius:50%; background:#4ADE80; display:inline-block;"></span>
-                                    Antrenmanda
-                                </span>
-                            ` : ''}
-                        </div>
-
-                        <!-- 3-COL KPI STATS -->
-                        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px; text-align:center;">
-                            <div style="background:#121024; padding:8px 4px; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.25);">
-                                <div style="font-size:9.5px; color:#CBD5E1; font-weight:700;">TOPLAM SEANS</div>
-                                <div style="font-size:13px; font-weight:800; color:#FFFFFF; margin-top:2px;">🏋️ ${sessionCount} Seans</div>
-                            </div>
-                            <div style="background:#121024; padding:8px 4px; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.25);">
-                                <div style="font-size:9.5px; color:#CBD5E1; font-weight:700;">SERİ DURUMU</div>
-                                <div style="font-size:13px; font-weight:800; color:#FDE68A; margin-top:2px;">🔥 ${streak} Gün</div>
-                            </div>
-                            <div style="background:#121024; padding:8px 4px; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.25);">
-                                <div style="font-size:9.5px; color:#CBD5E1; font-weight:700;">TOPLAM TONAJ</div>
-                                <div style="font-size:13px; font-weight:800; color:#BAE6FD; margin-top:2px;">⚡ ${Math.round(userTonaj).toLocaleString('tr-TR')} kg</div>
-                            </div>
-                        </div>
-
-                        <!-- LAST WORKOUT PREVIEW -->
-                        <div style="background:#121024; border-radius:8px; padding:10px 12px; border:1px solid rgba(167, 139, 250, 0.25); font-size:11.5px; margin-bottom:10px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                <span style="font-weight:700; color:#FDE68A;">Son Antrenman Seansı:</span>
-                                <span style="color:#CBD5E1; font-size:10.5px;">
-                                    ${lastLog ? (lastLog.dateFormatted || lastLog.date) : 'Kayıt Yok'}
-                                </span>
-                            </div>
-                            ${lastLog ? `
-                                <div style="color:#FFFFFF; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
-                                    <span>${escapeHTML(lastLog.title)}</span>
-                                    <span style="color:#E2E8F0; font-size:11px;">⏱️ ${lastLog.duration || 0} dk • ${lastLog.totalSetsCompleted || 0} Set</span>
-                                </div>
-                            ` : `
-                                <div style="color:#CBD5E1; font-style:italic;">Henüz tamamlanmış antrenman seansı bulunmuyor.</div>
-                            `}
-                        </div>
-
-                        <!-- TOGGLE LAST WORKOUT DETAILS BUTTON -->
-                        ${lastLog ? `
-                            <button class="btn btn-outline" style="width:100%; font-size:11px; padding:7px; background:#2C2550; border-color:rgba(167, 139, 250, 0.35); color:#F3E8FF; font-weight:800;" onclick="toggleAdminAthleteDetails('${u.id}')">
-                                🔍 Son Antrenman Hareket ve Set Detaylarını İncele
-                            </button>
-                            ${lastLogDetailsHTML}
-                        ` : ''}
-                    </div>
-                `;
-            }).join('');
-
-            if (kpisEl) {
-                kpisEl.innerHTML = `
-                    <div style="background:#121024; padding:8px 6px; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.25); text-align:center;">
-                        <div style="font-size:9px; color:#CBD5E1; font-weight:700;">KAYITLI SPORCU</div>
-                        <div style="font-size:14px; font-weight:900; color:#FDE68A; margin-top:2px;">👥 ${users.length}</div>
-                    </div>
-                    <div style="background:#121024; padding:8px 6px; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.25); text-align:center;">
-                        <div style="font-size:9px; color:#CBD5E1; font-weight:700;">TOPLAM SEANS</div>
-                        <div style="font-size:14px; font-weight:900; color:#BBF7D0; margin-top:2px;">✅ ${totalWorkoutsAll}</div>
-                    </div>
-                    <div style="background:#121024; padding:8px 6px; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.25); text-align:center;">
-                        <div style="font-size:9px; color:#CBD5E1; font-weight:700;">TOPLAM TONAJ</div>
-                        <div style="font-size:14px; font-weight:900; color:#BAE6FD; margin-top:2px;">⚡ ${Math.round(totalTonajAll).toLocaleString('tr-TR')} kg</div>
-                    </div>
-                `;
-            }
-
-            container.innerHTML = cardsHTML;
-        }
-
-        function toggleAdminAthleteDetails(uid) {
-            const el = document.getElementById(`adminExDetails_${uid}`);
-            if (el) {
-                const isHidden = el.style.display === 'none' || !el.style.display;
-                el.style.display = isHidden ? 'block' : 'none';
-            }
-        }
-
-        function renderAdminUserList() {
-            const container = document.getElementById('adminUserListContainer');
-            if (!container) return;
-
-            const users = getAuthUsers();
-            const session = getSession();
-
-            container.innerHTML = users.map(u => {
-                const logs = getUserLogsById(u.id);
-                const streak = calculateStreakForLogs(logs);
-                const isSelf = session && session.userId === u.id;
-                const isPending = u.status === 'pending';
-                const safeIdAttr = encodeURIComponent(u.id);
-
-                return `
-                    <div class="admin-user-card" style="background:#181530; border:1px solid ${isSelf ? '#FDE68A' : (isPending ? 'rgba(245,158,11,0.5)' : 'rgba(167, 139, 250, 0.25)')}; border-radius:10px; padding:12px; margin-bottom:8px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px; flex-wrap:wrap;">
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <span style="font-size:22px;">${u.avatar || '🥋'}</span>
-                                <div>
-                                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                                        <strong style="color:#FFFFFF; font-size:13px;">${escapeHTML(u.name)}</strong>
-                                        <span style="font-size:11.5px; color:#BBF7D0; font-weight:800;">(@${escapeHTML(u.username)})</span>
-                                        ${isSelf ? '<span class="auth-role-tag role-admin" style="font-size:9px; padding:1px 6px;">GİRİŞ YAPILAN HESAP</span>' : ''}
-                                        ${!isSelf ? (isPending
-                                            ? '<span style="font-size:9.5px; background:#7C2D12; color:#FDE68A; border:1px solid rgba(251,191,36,0.35); padding:1px 6px; border-radius:6px; font-weight:800;">⏳ ONAY BEKLİYOR</span>'
-                                            : '<span style="font-size:9.5px; background:#14532D; color:#BBF7D0; border:1px solid rgba(74,222,128,0.35); padding:1px 6px; border-radius:6px; font-weight:800;">✅ ONAYLI</span>') : ''}
-                                    </div>
-                                    ${u.email ? `<div style="font-size:11px; color:#BAE6FD; margin-top:2px;">✉️ ${escapeHTML(u.email)}</div>` : ''}
-                                    <div style="font-size:11px; color:#CBD5E1;">
-                                        ${escapeHTML(u.level || 'Orta Seviye')} • ${escapeHTML(u.gender || 'Erkek')}
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                                ${!isSelf && isPending ? `
-                                    <button class="btn btn-gold" style="font-size:10px; padding:4px 8px; background:#14532D; border-color:#22C55E; color:#BBF7D0; font-weight:800;" onclick="adminApproveUser(decodeURIComponent('${safeIdAttr}'))">
-                                        ✅ Onayla & Mail
-                                    </button>
-                                ` : (!isSelf && u.email ? `
-                                    <button class="btn btn-outline" style="font-size:10px; padding:4px 8px; background:#0C4A6E; color:#BAE6FD; border-color:#38BDF8;" onclick="openApprovalEmailDispatchById(decodeURIComponent('${safeIdAttr}'))" title="Onay E-Postasını Gönder">
-                                        📧 Mail Gönder
-                                    </button>
-                                ` : '')}
-                                <button class="btn btn-outline" style="font-size:10px; padding:4px 8px; background:#2C2550; color:#F3E8FF; border-color:rgba(167, 139, 250, 0.35); font-weight:800;" onclick="toggleAdminEditUserBox(decodeURIComponent('${safeIdAttr}'))" title="Kullanıcı Adı, Ad Soyad ve E-Posta Düzenle">
-                                    ✏️ Kullanıcı Adı
-                                </button>
-                                <button class="btn btn-outline" style="font-size:10px; padding:4px 8px; background:#7C2D12; color:#FDE68A; border-color:rgba(251, 191, 36, 0.45);" onclick="adminResetUserPassword(decodeURIComponent('${safeIdAttr}'))" title="Şifre Belirle / Sıfırla">
-                                    🔑 Şifre
-                                </button>
-                                ${!isSelf ? `
-                                    <button class="btn btn-outline" style="font-size:10px; padding:4px 8px; background:#7F1D1D; color:#FECACA; border-color:#F87171;" onclick="adminDeleteUser(decodeURIComponent('${safeIdAttr}'))" title="Kullanıcıyı Sil">
-                                        🗑️ Sil
-                                    </button>
-                                ` : ''}
-                            </div>
-                        </div>
-
-                        <!-- INLINE KULLANICI ADI / AD SOYAD / E-POSTA DÜZENLEME PANELİ (VARSAYILAN KAPALI) -->
-                        <div id="adminEditBox_${escapeHTML(u.id)}" style="display:none; margin-top:8px; padding:10px; background:#121024; border:1.5px solid rgba(167, 139, 250, 0.25); border-radius:8px;">
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
-                                <div>
-                                    <label class="form-label" style="font-size:10.5px; color:#E2E8F0;">Yeni Kullanıcı Adı (@)</label>
-                                    <input type="text" id="adminEditUname_${escapeHTML(u.id)}" class="form-input" value="${escapeHTML(u.username || '')}" style="font-size:12px; padding:6px 8px; background:#181530; color:#FFFFFF; border:1px solid rgba(167, 139, 250, 0.3);" autocapitalize="none" spellcheck="false">
-                                </div>
-                                <div>
-                                    <label class="form-label" style="font-size:10.5px; color:#E2E8F0;">Ad Soyad</label>
-                                    <input type="text" id="adminEditName_${escapeHTML(u.id)}" class="form-input" value="${escapeHTML(u.name || '')}" style="font-size:12px; padding:6px 8px; background:#181530; color:#FFFFFF; border:1px solid rgba(167, 139, 250, 0.3);">
-                                </div>
-                            </div>
-                            <div style="margin-bottom:8px;">
-                                <label class="form-label" style="font-size:10.5px; color:#E2E8F0;">E-Posta Adresi</label>
-                                <input type="email" id="adminEditEmail_${escapeHTML(u.id)}" class="form-input" value="${escapeHTML(u.email || '')}" placeholder="ornek@gmail.com" style="font-size:12px; padding:6px 8px; background:#181530; color:#FFFFFF; border:1px solid rgba(167, 139, 250, 0.3);" autocapitalize="none" spellcheck="false">
-                            </div>
-                            <div style="display:flex; justify-content:flex-end; gap:6px;">
-                                <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 10px; background:#2C2550; color:#F3E8FF; border-color:rgba(167, 139, 250, 0.35);" onclick="toggleAdminEditUserBox(decodeURIComponent('${safeIdAttr}'))">Vazgeç</button>
-                                <button type="button" class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:800; background:#6D28D9; color:#FFFFFF; border-color:#7C3AED;" onclick="adminSaveUserIdentity(decodeURIComponent('${safeIdAttr}'))">💾 Değişiklikleri Kaydet</button>
-                            </div>
-                        </div>
-
-                        <div style="font-size:11px; color:#CBD5E1; display:flex; justify-content:space-between; border-top:1px solid rgba(167, 139, 250, 0.25); padding-top:6px; margin-top:6px;">
-                            <span>Güvenlik: <span style="color:#4ADE80; font-weight:700;">🔒 Salted SHA-256</span></span>
-                            <span>${logs.length} Seans • Seri: ${streak} Gün</span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function toggleAdminEditUserBox(userId) {
-            const box = document.getElementById(`adminEditBox_${userId}`);
-            if (!box) return;
-            const isHidden = box.style.display === 'none' || !box.style.display;
-            box.style.display = isHidden ? 'block' : 'none';
-            if (isHidden) {
-                const input = document.getElementById(`adminEditUname_${userId}`);
-                if (input) input.focus();
-            }
-        }
-
-        function adminSaveUserIdentity(userId) {
-            const session = getSession();
-            if (!session || session.role !== 'admin') {
-                alert("Yalnızca yöneticiler kullanıcı bilgilerini düzenleyebilir.");
-                return;
-            }
-
-            const unameEl = document.getElementById(`adminEditUname_${userId}`);
-            const nameEl = document.getElementById(`adminEditName_${userId}`);
-            const emailEl = document.getElementById(`adminEditEmail_${userId}`);
-
-            const rawUname = (unameEl ? unameEl.value : '').trim();
-            const newUname = normalizeAuthString(rawUname);
-            const newName = (nameEl ? nameEl.value : '').trim();
-            const newEmail = (emailEl ? emailEl.value : '').trim().toLowerCase();
-
-            if (!newUname || !newName) {
-                alert("❌ Kullanıcı adı ve Ad Soyad boş bırakılamaz!");
-                return;
-            }
-
-            const users = getAuthUsers();
-            const target = users.find(u => u.id === userId);
-            if (!target) {
-                alert("Kullanıcı bulunamadı.");
-                return;
-            }
-
-            const duplicateUname = users.some(u => u.id !== userId && normalizeAuthString(u.username) === newUname);
-            if (duplicateUname) {
-                alert(`❌ "@${newUname}" kullanıcı adı başka bir hesapta zaten kullanılıyor!`);
-                return;
-            }
-
-            if (newEmail) {
-                const duplicateEmail = users.some(u => u.id !== userId && u.email && u.email.toLowerCase() === newEmail);
-                if (duplicateEmail) {
-                    alert(`❌ "${newEmail}" e-posta adresi başka bir hesapta zaten kullanılıyor!`);
-                    return;
-                }
-            }
-
-            const oldUname = target.username;
-            target.username = newUname;
-            target.name = newName;
-            target.updatedAt = Date.now();
-            if (newEmail) {
-                target.email = newEmail;
-            } else {
-                delete target.email;
-            }
-
-            if (Array.isArray(target.aliases) && !target.aliases.includes(newUname)) {
-                target.aliases.push(newUname);
-            }
-
-            saveAuthUsers(users);
-
-            if (session.userId === userId) {
-                session.username = newUname;
-                session.name = newName;
-                localStorage.setItem('celik_kodu_session', JSON.stringify(session));
-                applyActiveUserProfile();
-            }
-
-            renderPendingApprovalsBanner();
-            renderAdminUserList();
-            renderAdminAthleteStatuses();
-            alert(`✅ Kullanıcı bilgileri güncellendi!\n• Kullanıcı Adı: @${oldUname} ➔ @${newUname}\n• Ad Soyad: ${newName}`);
-        }
-
-        async function adminResetUserPassword(userId) {
-            const session = getSession();
-            if (!session || session.role !== 'admin') {
-                alert("Yalnızca yöneticiler şifre sıfırlayabilir.");
-                return;
-            }
-            const users = getAuthUsers();
-            const target = users.find(u => u.id === userId);
-            if (!target) {
-                alert("Kullanıcı bulunamadı.");
-                return;
-            }
-            const fbEmail = getCanonicalFbAuthEmail(target);
-            if (session.userId !== userId && fbAuth && fbEmail && !fbEmail.endsWith('@auth.celikkodu.app') && navigator.onLine !== false) {
-                const sendLink = confirm(`@${target.username} (${fbEmail}) adresine resmi şifre sıfırlama bağlantısı gönderilsin mi?\n\nTamam: E-postaya sıfırlama bağlantısı gönderir\nİptal: Bu cihaz için geçici şifre tanımlar`);
-                if (sendLink) {
-                    try {
-                        await fbAuth.sendPasswordResetEmail(fbEmail);
-                        alert(`📩 Şifre sıfırlama bağlantısı (${fbEmail}) adresine gönderildi.`);
-                        return;
-                    } catch (e) {}
-                }
-            }
-
-            const newPass = prompt(`@${target.username} (${target.name}) için yeni şifre belirleyin (en az 6 karakter):`, "123456");
-            if (!newPass) return;
-            const cleanPass = newPass.trim();
-            if (cleanPass.length < 6) {
-                alert("Parola en az 6 karakter olmalıdır!");
-                return;
-            }
-            if (session.userId === userId && fbAuth && fbAuth.currentUser && navigator.onLine !== false) {
-                try {
-                    await fbAuth.currentUser.updatePassword(cleanPass);
-                } catch (e) {}
-            }
-            const nowMs = Date.now();
-            const salt = generateSecureSalt();
-            const passHash = await sha256Hex(salt + cleanPass);
-            const secCheck = evaluatePasswordSecurity(cleanPass, target);
-            setLocalUserCred(target.id, {
-                salt,
-                passwordHash: passHash,
-                passwordStrengthLevel: secCheck.levelLabel,
-                mustChangePassword: !secCheck.isValid,
-                passwordUpdatedAt: nowMs
-            });
-            delete target.password;
-            delete target.passwordHash;
-            delete target.salt;
-            target.mustChangePassword = !secCheck.isValid;
-            target.passwordStrengthLevel = secCheck.levelLabel;
-            target.passwordUpdatedAt = nowMs;
-            target.updatedAt = nowMs;
-            saveAuthUsers(users);
-            renderAdminUserList();
-            const noteMsg = secCheck.isValid
-                ? 'Güçlü şifre tanımlandı.'
-                : 'Geçici şifre tanımlandı; kullanıcı ilk girişte güvenli şifre oluşturmaya yönlendirilecek.';
-            alert(`✅ @${target.username} kullanıcısının şifresi "${cleanPass}" olarak güncellendi.\nℹ️ ${noteMsg}`);
-        }
-
-        function adminSwitchToUser(targetUserId) {
-            alert("Güvenlik nedeniyle hesaplar arası geçiş devre dışı bırakılmıştır.");
-        }
-
-        function adminDeleteUser(userId) {
-            const session = getSession();
-            if (!session || session.role !== 'admin') {
-                alert("Bu işlem için yönetici yetkisi gereklidir.");
-                return;
-            }
-
-            const users = getAuthUsers();
-            const target = users.find(u => u.id === userId);
-            if (!target) return;
-
-            if (confirm(`@${target.username} (${target.name}) kullanıcısını silmek istediğinize emin misiniz?`)) {
-                localStorage.removeItem(`celik_kodu_history_${userId}`);
-                localStorage.removeItem(`celik_kodu_custom_programs_${userId}`);
-                localStorage.removeItem(`celik_kodu_deleted_programs_${userId}`);
-                localStorage.removeItem(`celik_kodu_mobility_tests_${userId}`);
-                localStorage.removeItem(`celik_excluded_exercises_${userId}`);
-                localStorage.removeItem(`celik_excluded_updated_at_${userId}`);
-                localStorage.removeItem(`celik_kodu_last_generated_workout_${userId}`);
-                localStorage.removeItem(`celik_kodu_state_updated_at_${userId}`);
-                localStorage.removeItem(`celik_kodu_pending_state_sync_${userId}`);
-                localStorage.removeItem(`celik_kodu_active_state_${userId}`);
-                const updated = users.filter(u => u.id !== userId);
-                saveAuthUsers(updated);
-                renderAdminUserList();
-                renderAdminAthleteStatuses();
-            }
         }
 
         // PROFILE & THEME SETTINGS
@@ -6333,7 +5306,7 @@
             const genderSelect = document.getElementById('editUserGender');
             if (genderSelect) genderSelect.value = user.gender || 'Erkek';
 
-            selectAvatar(user.avatar || '🥋');
+            selectAvatar(sanitizeAvatarMonogram(user.avatar, 'SP'));
             selectTheme(user.theme || 'gold');
 
             ensureProfileGeminiStatusDarkHook();
@@ -6344,6 +5317,9 @@
 
             renderHistory();
         }
+        if (typeof window !== 'undefined') {
+            window.applyActiveUserProfile = applyActiveUserProfile;
+        }
 
         function saveCurrentProfile() {
             if (isDemoGuestSession()) {
@@ -6351,14 +5327,16 @@
                 return;
             }
             const user = getActiveUser();
+            if (!user) return;
             const nameInput = document.getElementById('editUserName');
-            const newName = nameInput.value.trim() || 'Sporcu';
+            const newName = (nameInput ? nameInput.value : '').trim() || 'Sporcu';
 
             user.name = newName;
-            user.avatar = selectedAvatar;
+            user.avatar = sanitizeAvatarMonogram(selectedAvatar, 'SP');
             user.theme = selectedTheme;
             user.level = document.getElementById('editUserLevel').value;
             user.gender = document.getElementById('editUserGender').value;
+            user.updatedAt = Date.now();
 
             const geminiInput = document.getElementById('profileGeminiApiKeyInput');
             if (geminiInput) {
@@ -6371,18 +5349,22 @@
 
             const users = getAuthUsers();
             const idx = users.findIndex(u => u.id === user.id);
-            if (idx !== -1) users[idx] = user;
+            if (idx !== -1) users[idx] = stripSecretsFromUserRecord(user);
             saveAuthUsers(users);
-            if (typeof syncUsersToCloud === 'function') syncUsersToCloud(users);
+            syncOwnUserProfileToCloud(user).catch(() => {});
+            if (typeof isVerifiedAdminSession === 'function' && isVerifiedAdminSession() && typeof syncUsersToCloud === 'function') {
+                syncUsersToCloud().catch(() => {});
+            }
 
             const session = getSession();
             if (session && session.userId === user.id) {
                 session.name = newName;
+                sanitizeSessionRecord(session);
                 localStorage.setItem('celik_kodu_session', JSON.stringify(session));
             }
 
             applyActiveUserProfile();
             playAlertSound();
-            alert("✅ Profil değişiklikleriniz başarıyla kaydedildi!");
+            alert("Profil değişiklikleriniz başarıyla kaydedildi.");
         }
 

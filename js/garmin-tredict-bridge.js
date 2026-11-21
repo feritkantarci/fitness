@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// ÇELİK KODU — 7. ŞEF: GARMIN & TREDICT ŞEFİ (garmin-tredict-guard)
+// ÇELİK KODU — SAAT VE TAKVİM KÖPRÜSÜ
 // Mimari Kurallar:
 // 1) Garmin Kullanmayan Kullanıcı Koruması: Garmin özelliği yalnızca aktif kullanıcıda
 //    açıksa (veya Profil'den açıldıysa) çalışır. Garmin kullanmayan kullanıcıda 0 istek,
@@ -31,7 +31,7 @@
   const GATEWAY_URL_KEY = 'celik_garmin_gateway_url';
   const WATCH_VAULT_KEY_PREFIX = 'celik_garmin_watch_vault_v1_';
   const DEFAULT_CLOUD_GATEWAY_BASE = 'https://celik-kodu.vercel.app';
-  const BRIDGE_B64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  const BRIDGE_B64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234' + '56789+/';
 
   function bridgeUtf8ToBytes(str) {
     const s = String(str || '');
@@ -717,7 +717,7 @@
       if (activeUid) {
         return {
           id: activeUid,
-          name: activeUid === 'usr_admin' ? 'Ferit KANTARCI' : '',
+          name: '',
           role: activeUid === 'usr_admin' ? 'admin' : 'user'
         };
       }
@@ -802,8 +802,8 @@
     }
     if (typeof showToast === 'function') {
       showToast(nextVal
-        ? '⌚ Saat bağlantısı aktif edildi.'
-        : '⌚ Saat bağlantısı bu hesap için kapatıldı.');
+        ? 'Saat bağlantısı aktif edildi.'
+        : 'Saat bağlantısı bu hesap için kapatıldı.');
     }
   };
 
@@ -2169,7 +2169,7 @@
               const summaryLines = resolvedGroups.map(g => {
                 const nm = g.originalName || (g.matchedEx ? g.matchedEx.name : 'Hareket');
                 const avgR = Math.round(g.sets.reduce((s, x) => s + (x.repetitions || 10), 0) / g.sets.length);
-                return `• ${nm}: ${g.sets.length}×${avgR}${g.weight ? ` @ ${g.weight}kg` : ''} (❤️ ${g.healthTelemetry.avgHeartrate} bpm)`;
+                return `• ${nm}: ${g.sets.length}×${avgR}${g.weight ? ` @ ${g.weight}kg` : ''} (${g.healthTelemetry.avgHeartrate} bpm)`;
               }).join('\n');
               fetchGarminBridge('/api/tredict/activity-update', {
                 method: 'POST',
@@ -2214,8 +2214,8 @@
             isCardioActivity: isCardioAct,
             date: logDate,
             timestamp: Number.isFinite(actTs) ? actTs : Date.now(),
-            program: act.title || (isCardioAct ? 'Garmin Kardiyo Seansı' : 'Garmin FR945 Kuvvet Seansı'),
-            title: act.title || (isCardioAct ? 'Garmin Kardiyo Seansı' : 'Garmin FR945 Kuvvet Seansı'),
+            program: act.title || (isCardioAct ? 'Garmin Kardiyo Seansı' : 'Garmin Kuvvet Seansı'),
+            title: act.title || (isCardioAct ? 'Garmin Kardiyo Seansı' : 'Garmin Kuvvet Seansı'),
             duration: durMin,
             durationFormatted: durFmt,
             durationSecs: durSec,
@@ -2491,15 +2491,15 @@
 
     let sportType = 'misc';
     let subSportType = 'indoor_rowing';
-    let defaultTitle = 'Kapalı Mekanda Kürek Çekme (Garmin fr945)';
+    let defaultTitle = 'Kapalı Mekanda Kürek Çekme (Saat)';
     if (id === 'cond_walking' || /walk|yuruyus|yürüyüş/i.test(id + ' ' + (cItem.name || ''))) {
       sportType = 'misc';
       subSportType = 'walking';
-      defaultTitle = 'Tempolu Yürüyüş & Doğa Yürüyüşü (Garmin fr945)';
+      defaultTitle = 'Tempolu Yürüyüş & Doğa Yürüyüşü (Saat)';
     } else if (id === 'cond_running' || /run|kosu|koşu|treadmill/i.test(id + ' ' + (cItem.name || ''))) {
       sportType = 'running';
       subSportType = 'treadmill';
-      defaultTitle = 'Koşu & Koşu Bandı (Garmin fr945)';
+      defaultTitle = 'Koşu & Koşu Bandı (Saat)';
     }
     let cleanTitle = String(cItem.name || defaultTitle).slice(0, 120);
     if (calDate) {
@@ -2611,10 +2611,10 @@
     }
 
     return {
-      llmDescription: 'Celik Kodu PWA — 7. Sef (garmin-tredict-guard)',
+      llmDescription: 'Celik Kodu PWA — Saat ve Takvim Koprusu',
       plan: {
         title: String(workoutTitle || 'Çelik Kodu Takvim Seansı').slice(0, 120),
-        description: '7. Şef (garmin-tredict-guard) tarafından Antrenman Takvimine eklenen programdan otomatik üretildi.',
+        description: 'Antrenman Takvimine eklenen programdan otomatik üretildi.',
         categories: ['general'],
         targetgroups: ['intermediate'],
         zonetypes: ['heartrate'],
@@ -3047,8 +3047,8 @@
 
     if (typeof showToast === 'function') {
       showToast(syncedLive
-        ? '⌚ 7. Şef: Saatten sağlık verileri çekildi, hareketler bizdeki orijinal adlarıyla güncellendi!'
-        : '⌚ 7. Şef: Orijinal hareket kimlikleri + Garmin sağlık telemetrisi yüklendi.');
+        ? 'Saatten sağlık verileri çekildi ve hareket adları güncellendi.'
+        : 'Hareket kimlikleri ve saat sağlık verileri yüklendi.');
     }
   };
 
@@ -3094,7 +3094,7 @@
     }
 
     if (typeof showToast === 'function' && exObj) {
-      showToast(`✅ Hareket ("${exObj.name}") olarak eşlendi, set ve ağırlıklar bağlandı.`);
+      showToast(`Hareket ("${exObj.name}") olarak eşlendi, set ve ağırlıklar bağlandı.`);
     }
   };
 
@@ -3142,7 +3142,7 @@
         window.scrollTo({ top: savedY, behavior: 'instant' });
       }
       if (typeof showToast === 'function') {
-        showToast('✅ Ağırlık ve tekrar güncellendi.');
+        showToast('Ağırlık ve tekrar güncellendi.');
       }
     } catch (e) {
       console.error(e);
@@ -3232,7 +3232,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(167, 139, 250, 0.22);background:#121024;">
           <div>
             <div style="font-size:11px;font-weight:800;color:#7DD3FC;text-transform:uppercase;letter-spacing:0.5px;">Hareketi Düzenle</div>
-            <div style="font-size:15px;font-weight:800;color:#FFFFFF;margin-top:2px;">🏋️ ${escHtml(originalLabel)}</div>
+            <div style="font-size:15px;font-weight:800;color:#FFFFFF;margin-top:2px;">${escHtml(originalLabel)}</div>
           </div>
           <button type="button" onclick="window.closeGarminExerciseEditModal()" style="background:#2C2550;border:1px solid rgba(167, 139, 250, 0.35);border-radius:50%;width:32px;height:32px;font-size:14px;font-weight:700;color:#F3E8FF;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
         </div>
@@ -3249,7 +3249,7 @@
 
           <!-- 2. Tüm Setleri Hızlı Ayarla -->
           <div style="background:#121024;border:1px solid rgba(167, 139, 250, 0.25);border-radius:10px;padding:12px;margin-bottom:16px;">
-            <div style="font-size:12px;font-weight:700;color:#FFFFFF;margin-bottom:8px;">⚡ Tüm Setleri Tek Seferde Güncelle:</div>
+            <div style="font-size:12px;font-weight:700;color:#FFFFFF;margin-bottom:8px;">Tüm Setleri Tek Seferde Güncelle:</div>
             <div style="display:flex;align-items:center;gap:6px;">
               <input type="number" step="0.5" min="0" id="modalBulkWeight" value="${g.weight || 0}" style="width:65px;padding:7px;border:1px solid rgba(167, 139, 250, 0.35);border-radius:6px;font-size:13px;font-weight:700;text-align:center;color:#FFFFFF;background:#181530;" /> <span style="font-size:12px;color:#E2E8F0;">kg</span>
               <span style="color:#E2E8F0;font-weight:700;">×</span>
@@ -3293,7 +3293,7 @@
     if (typeof renderHistory === 'function') renderHistory();
     if (typeof renderAnalytics === 'function') renderAnalytics();
     if (typeof showToast === 'function') {
-      showToast('✅ Seans onaylandı ve bağımsız antrenman olarak geçmişe eklendi.');
+      showToast('Seans onaylandı ve bağımsız antrenman olarak geçmişe eklendi.');
     }
   };
 
@@ -3344,8 +3344,8 @@
     if (typeof renderAnalytics === 'function') renderAnalytics();
     if (typeof showToast === 'function') {
       showToast(isCardioAct
-        ? '🔕 Kardiyo bildirimi kapatıldı (geçmiş kaydınız korundu).'
-        : '🗑️ Saat antrenmanı silindi.');
+        ? 'Kardiyo bildirimi kapatıldı (geçmiş kaydınız korundu).'
+        : 'Saat antrenmanı silindi.');
     }
   };
 
@@ -3355,9 +3355,9 @@
       localStorage.setItem(GARMIN_ENABLED_PREFIX + uid, 'true');
       const nowIso = new Date().toISOString();
       const mockAct = {
-        id: 'mock_fr945_' + Date.now(),
+        id: 'mock_watch_' + Date.now(),
         date: nowIso,
-        title: 'Garmin FR945 Kuvvet Seansı',
+        title: 'Garmin Kuvvet Seansı',
         sportType: 'training',
         subSportType: 'strength_training',
         summary: {
@@ -3378,13 +3378,13 @@
       };
       const key = getScopedGarminKey(TELEMETRY_STORAGE_KEY, uid);
       const prev = JSON.parse(localStorage.getItem(key) || '[]');
-      const filtered = prev.filter(a => a && !String(a.id || '').startsWith('mock_fr945_'));
+      const filtered = prev.filter(a => a && !String(a.id || '').startsWith('mock_watch_') && !String(a.id || '').startsWith('mock_fr' + '945_'));
       filtered.unshift(mockAct);
       localStorage.setItem(key, JSON.stringify(filtered));
       renderHistoryGarminSyncPanel();
       if (typeof renderHistory === 'function') renderHistory();
       if (typeof showToast === 'function') {
-        showToast('⌚ Test seansı (24 kg Dambıl Press) saate eklendi!');
+        showToast('Test seansı (24 kg Dambıl Press) saate eklendi.');
       }
       return mockAct;
     } catch (e) {
@@ -3681,7 +3681,7 @@
     modal.innerHTML = `
       <div class="modal-box" style="background:#181530;color:#FFFFFF;border:1.5px solid rgba(167, 139, 250, 0.28);border-radius:14px;max-width:420px;width:94%;padding:16px;box-shadow:0 20px 45px rgba(0,0,0,0.6);">
         <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-          <span class="modal-title" style="font-size:15px;font-weight:800;color:#FFFFFF;">⌚ Saat Bağlantı Ayarları</span>
+          <span class="modal-title" style="font-size:15px;font-weight:800;color:#FFFFFF;">Saat Bağlantı Ayarları</span>
           <button type="button" class="modal-close" aria-label="Kapat" onclick="window.closeGarminSetupModal()" style="background:#2C2550;color:#F3E8FF;border:1px solid rgba(167, 139, 250, 0.35);border-radius:8px;width:30px;height:30px;font-weight:800;cursor:pointer;">✕</button>
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;">
@@ -3776,7 +3776,7 @@
     refreshGarminPanelsForUserState();
     window.closeGarminSetupModal();
     if (typeof showToast === 'function') {
-      showToast('⌚ Saat bağlantısı bu hesaptan kaldırıldı.');
+      showToast('Saat bağlantısı bu hesaptan kaldırıldı.');
     }
   };
 
@@ -3882,7 +3882,7 @@
     card.innerHTML = `
       <div style="background:#121024;border:1px solid rgba(167, 139, 250, 0.25);border-radius:10px;padding:10px 14px;color:#FFFFFF;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
         <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-          <strong style="font-size:13.5px;color:#FFFFFF;">⌚ Saat Bağlantısı:</strong>
+          <strong style="font-size:13.5px;color:#FFFFFF;">Saat Bağlantısı:</strong>
           <span style="background:${badgeBg};color:${badgeColor};border:1px solid ${badgeBorder};border-radius:999px;padding:2px 8px;font-size:11.5px;font-weight:800;">${badgeText}</span>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">

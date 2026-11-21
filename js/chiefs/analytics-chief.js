@@ -1,4 +1,4 @@
-// ==================== ODA 5: ANALİZ, SKOR & TELEMETRİ ŞEFİ (analytics-guard) ====================
+// ==================== ODA 5: ANALİZ, SKOR & PERFORMANS ŞEFİ (analytics-guard) ====================
         // ==================== ADVANCED ANALYTICS, SCALE & MEASUREMENTS ENGINE ====================
         let currentAnalyticsSubView = 'muscle';
         let currentAnalyticsPeriodDays = 30;
@@ -180,7 +180,7 @@
         async function processScaleUploadFile(file) {
             if (!file) return;
             if (typeof file.size === 'number' && file.size > MAX_SCALE_UPLOAD_BYTES) {
-                setScaleBannerState('error', '❌ Dosya boyutu 15 MB sınırını aşıyor. Lütfen daha küçük bir dosya seçin.');
+                setScaleBannerState('error', 'Dosya boyutu 15 MB sınırını aşıyor. Lütfen daha küçük bir dosya seçin.');
                 return;
             }
             const isImage = (file.type && file.type.startsWith('image/')) || /\.(png|jpe?g|webp)$/i.test(file.name || '');
@@ -217,7 +217,7 @@
 
         async function processScalePdfFile(file) {
             if (!file) return;
-            setScaleBannerState('loading', '⏳ PDF dosyası taranıyor...');
+            setScaleBannerState('loading', 'PDF dosyası taranıyor...');
 
             try {
                 if (!window.pdfjsLib) {
@@ -246,7 +246,7 @@
                     return;
                 }
 
-                setScaleBannerState('loading', '📄 PDF görseli ayrıştırılıyor, akıllı tarama başlatılıyor...');
+                setScaleBannerState('loading', 'PDF görseli ayrıştırılıyor, akıllı tarama başlatılıyor...');
                 const page = await pdf.getPage(1);
                 const baseViewport = page.getViewport({ scale: 1.0 });
                 const targetScale = Math.min(3.0, Math.max(1.8, 2400 / (baseViewport.width || 800)));
@@ -260,13 +260,13 @@
                 await runOcrOnCanvas(canvas, 'PDF Görsel Raporu');
             } catch(err) {
                 console.error("PDF Parsing error:", err);
-                setScaleBannerState('error', `❌ Ayrıştırma Hatası: ${escapeHTML(formatScaleUploadError(err))}`);
+                setScaleBannerState('error', `Ayrıştırma Hatası: ${escapeHTML(formatScaleUploadError(err))}`);
             }
         }
 
         async function processScaleImageFile(file) {
             if (!file) return;
-            setScaleBannerState('loading', '⏳ Rapor görseli yükleniyor...');
+            setScaleBannerState('loading', 'Rapor görseli yükleniyor...');
 
             try {
                 const img = new Image();
@@ -300,7 +300,7 @@
                 await runOcrOnCanvas(canvas, 'Görsel Rapor');
             } catch(err) {
                 console.error("Görsel OCR hatası:", err);
-                setScaleBannerState('error', `❌ Görsel Okunamadı: ${escapeHTML(formatScaleUploadError(err))}`);
+                setScaleBannerState('error', `Görsel Okunamadı: ${escapeHTML(formatScaleUploadError(err))}`);
             }
         }
 
@@ -733,7 +733,7 @@
 
         async function getCachedScaleOcrWorker(onStatus) {
             if (window._scaleTesseractWorker) return window._scaleTesseractWorker;
-            if (onStatus) onStatus('📥 Akıllı metin tarayıcı hazırlanıyor...');
+            if (onStatus) onStatus('Akıllı metin tarayıcı hazırlanıyor...');
             const worker = await Tesseract.createWorker(['eng', 'tur']);
             await worker.setParameters({ tessedit_pageseg_mode: '6' });
             window._scaleTesseractWorker = worker;
@@ -741,7 +741,7 @@
         }
 
         async function runOcrOnCanvas(canvas, sourceLabel) {
-            setScaleBannerState('loading', '🔍 Rapor yapay zeka ile taranıyor...');
+            setScaleBannerState('loading', 'Rapor yapay zeka ile taranıyor...');
 
             // Katman 1: Anahtar ve kota müsaitse Gemini Vision ile doğrudan JSON okuma
             try {
@@ -757,7 +757,7 @@
                 throw new Error("Metin okuma modülü henüz yüklenemedi. İnternet bağlantınızı kontrol edip sayfayı yenileyin.");
             }
 
-            setScaleBannerState('loading', '🔍 Görsel bölümleri ayrı ayrı okunuyor... %0');
+            setScaleBannerState('loading', 'Görsel bölümleri ayrı ayrı okunuyor... %0');
             const panels = buildScaleOcrPanels(canvas);
 
             let combinedText = '';
@@ -766,14 +766,14 @@
                 worker = await getCachedScaleOcrWorker((msg) => setScaleBannerState('loading', msg));
                 for (let i = 0; i < panels.length; i++) {
                     const pct = Math.round((i / panels.length) * 100);
-                    setScaleBannerState('loading', `🔍 Değerler çözümleniyor... %${pct}`);
+                    setScaleBannerState('loading', `Değerler çözümleniyor... %${pct}`);
                     const res = await worker.recognize(panels[i].canvas);
                     const pText = (res && res.data && res.data.text) ? res.data.text.trim() : '';
                     if (pText) {
                         combinedText += `\n=== ${panels[i].name} ===\n${pText}\n`;
                     }
                 }
-                setScaleBannerState('loading', '🔍 Değerler çözümleniyor... %100');
+                setScaleBannerState('loading', 'Değerler çözümleniyor... %100');
             } catch (ocrErr) {
                 try { if (window._scaleTesseractWorker) await window._scaleTesseractWorker.terminate(); } catch (_) {}
                 window._scaleTesseractWorker = null;
@@ -848,7 +848,7 @@
             if (parsed.bodyFat) summaryParts.push(`%${parsed.bodyFat} Yağ`);
             if (parsed.bmr) summaryParts.push(`BMR ${parsed.bmr} kcal`);
             if (parsed.measurements?.waist) summaryParts.push(`Bel ${parsed.measurements.waist} cm`);
-            setScaleBannerState('success', `✅ <strong>${escapeHTML(sourceLabel)} Okundu!</strong><br>${escapeHTML(summaryParts.join(' • '))}`);
+            setScaleBannerState('success', `<strong>${escapeHTML(sourceLabel)} Okundu!</strong><br>${escapeHTML(summaryParts.join(' • '))}`);
             if (typeof playAlertSound === 'function') playAlertSound();
         }
 
@@ -878,7 +878,7 @@
                         for (const item of items) {
                             for (const type of item.types) {
                                 if (type.startsWith('image/')) {
-                                    setScaleBannerState('loading', '⏳ Panodaki görsel okunuyor...');
+                                    setScaleBannerState('loading', 'Panodaki görsel okunuyor...');
                                     const blob = await item.getType(type);
                                     const ext = type.split('/')[1] || 'png';
                                     const file = new File([blob], `pasted_report.${ext}`, { type });
@@ -886,7 +886,7 @@
                                     return;
                                 }
                                 if (type === 'application/pdf' || type.includes('pdf')) {
-                                    setScaleBannerState('loading', '⏳ Panodaki PDF taranıyor...');
+                                    setScaleBannerState('loading', 'Panodaki PDF taranıyor...');
                                     const blob = await item.getType(type);
                                     const file = new File([blob], "pasted_report.pdf", { type: 'application/pdf' });
                                     await processScalePdfFile(file);
@@ -1466,7 +1466,7 @@
             renderAnalytics();
             playAlertSound();
 
-            let msg = "⚖️📏 Vücut ve ölçüm kaydı başarıyla kaydedildi!\n\n";
+            let msg = "Vücut ve ölçüm kaydı başarıyla kaydedildi!\n\n";
             if (scaleSummary) msg += scaleSummary + "\n";
             if (measSummary) msg += measSummary;
             alert(msg.trim());
@@ -1544,7 +1544,7 @@
             setMeasurementsLogs(logs);
             closeMeasurementsModal();
             renderAnalytics();
-            alert("✅ Vücut ölçüleri başarıyla kaydedildi!");
+            alert("Vücut ölçüleri başarıyla kaydedildi!");
         }
 
         function deleteMeasurementsEntry(id) {
@@ -3657,7 +3657,7 @@
                 }
 
                 let status = 'unworked';
-                let statusBadge = '❌ Hiç Çalıştırılmadı';
+                let statusBadge = 'Hiç Çalıştırılmadı';
                 let statusColor = '#ef4444';
                 let statusBg = 'rgba(239, 68, 68, 0.12)';
                 let statusDesc = 'Bu kas grubu için antrenman hacmi bulunmuyor.';
@@ -3671,7 +3671,7 @@
                     }
                 } else if (evalDirectVolume === 0) {
                     status = 'insufficient';
-                    statusBadge = '⚠️ Sadece Yardımcı Çalıştı';
+                    statusBadge = 'Sadece Yardımcı Çalıştı';
                     statusColor = '#f59e0b';
                     statusBg = 'rgba(245, 158, 11, 0.12)';
                     statusDesc = `Bu kas için doğrudan bir hareket yapılmadı (diğer hareketlerden ${evalVolume.toFixed(1)} set yardımcı etki aldı).`;
@@ -3679,7 +3679,7 @@
                     insufficientNames.push(cfg.name);
                 } else if (evalVolume < cfg.optimalMin) {
                     status = 'insufficient';
-                    statusBadge = '⚠️ Az Çalıştı';
+                    statusBadge = 'Az Çalıştı';
                     statusColor = '#f59e0b';
                     statusBg = 'rgba(245, 158, 11, 0.12)';
                     statusDesc = `Haftalık hedefin altında kaldı (${evalVolume.toFixed(1)}/${cfg.optimalMin} set).`;
@@ -3687,7 +3687,7 @@
                     insufficientNames.push(cfg.name);
                 } else if (evalDirectVolume < minRequiredDirect) {
                     status = 'insufficient';
-                    statusBadge = '⚠️ Doğrudan Set Az';
+                    statusBadge = 'Doğrudan Set Az';
                     statusColor = '#f59e0b';
                     statusBg = 'rgba(245, 158, 11, 0.12)';
                     statusDesc = `Toplam ${evalVolume.toFixed(1)} setin çoğu yan etkiden geldi; en az ${minRequiredDirect.toFixed(0)} doğrudan set gerekir.`;
@@ -3695,7 +3695,7 @@
                     insufficientNames.push(cfg.name);
                 } else if (requiredSubCount > 0 && coveredSubCount < requiredSubCount) {
                     status = 'insufficient';
-                    statusBadge = `⚠️ Eksik Bölge (${coveredSubCount}/${totalSubCount})`;
+                    statusBadge = `Eksik Bölge (${coveredSubCount}/${totalSubCount})`;
                     statusColor = '#f59e0b';
                     statusBg = 'rgba(245, 158, 11, 0.12)';
                     const missingLabels = missingSubCols.map(c => c.label.split('(')[0].trim()).slice(0, 2).join(', ');
@@ -3704,7 +3704,7 @@
                     insufficientNames.push(cfg.name);
                 } else if (evalVolume <= cfg.optimalMax) {
                     status = 'optimal';
-                    statusBadge = '✅ İdeal Seviye';
+                    statusBadge = 'İdeal Seviye';
                     statusColor = '#10b981';
                     statusBg = 'rgba(16, 185, 129, 0.12)';
                     statusDesc = `İdeal çalışma aralığında (${evalVolume.toFixed(1)} set • ${coveredSubCount}/${totalSubCount} alt bölge).`;
@@ -3712,7 +3712,7 @@
                     optimalNames.push(cfg.name);
                 } else {
                     status = 'high';
-                    statusBadge = '🔥 Çok Yoğun Çalıştı';
+                    statusBadge = 'Çok Yoğun Çalıştı';
                     statusColor = '#818cf8';
                     statusBg = 'rgba(129, 140, 248, 0.12)';
                     statusDesc = `Çok yoğun çalıştı (${evalVolume.toFixed(1)} set); dinlenmeye özen gösterin.`;
@@ -3877,7 +3877,7 @@
             if (typeof activeSchedulingDayIdx !== 'undefined' && activeSchedulingDayIdx !== null && typeof openScheduleDayModal === 'function') {
                 openScheduleDayModal(dayIdx, targetDateStr);
             }
-            if (typeof showToast === 'function') showToast('🗑️ Ek kardiyo seansı takvimden kaldırıldı.');
+            if (typeof showToast === 'function') showToast('Ek kardiyo seansı takvimden kaldırıldı.');
         }
 
         function addExerciseToDaySchedule(dayIdx, exId, targetSets = 3, targetReps = '8-12', cardioLimits = null, targetDateStr = null) {
@@ -3886,8 +3886,8 @@
             const isTargetNextWk = Boolean(effDateStr && typeof isDateInNextWeek === 'function' && isDateInNextWeek(effDateStr));
             const basePlanRaw = (effDateStr && typeof getPlanForDate === 'function')
                 ? getPlanForDate(new Date(effDateStr + 'T00:00:00'))
-                : ((typeof getWeeklySchedule === 'function' ? getWeeklySchedule()[dayIdx] : null) || { id: 'rest', title: '🧘 Dinlenme & Toparlanma', type: 'rest', rest: true });
-            const targetPlan = Object.assign({}, basePlanRaw || { id: 'rest', title: '🧘 Dinlenme & Toparlanma', type: 'rest', rest: true });
+                : ((typeof getWeeklySchedule === 'function' ? getWeeklySchedule()[dayIdx] : null) || { id: 'rest', title: 'Dinlenme & Toparlanma', type: 'rest', rest: true });
+            const targetPlan = Object.assign({}, basePlanRaw || { id: 'rest', title: 'Dinlenme & Toparlanma', type: 'rest', rest: true });
 
             if (/^cond_/.test(String(exId || ''))) {
                 const ex = EXERCISES_DB.find(e => e.id === exId);
@@ -4027,7 +4027,7 @@
                         sel.style.display = 'none';
                     });
                     bodyEl.querySelectorAll('button[onclick*="applyQuickAddExerciseToDay"]').forEach(btn => {
-                        btn.innerHTML = '🚣 2. Ayrı Seans Ekle';
+                        btn.innerHTML = '2. Ayrı Seans Ekle';
                         btn.style.background = '#0369A1';
                         btn.style.color = '#FFFFFF';
                         btn.style.borderColor = '#0284C7';
@@ -4039,31 +4039,31 @@
                         infoBox.innerHTML = `
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
                                 <div style="font-size:12.5px; color:#7DD3FC; font-weight:800;">
-                                    🎯 Garmin fr945 Hedef & Alt Baraj Limitlerini Sen Belirle
+                                    Garmin Hedef & Alt Baraj Limitlerini Sen Belirle
                                 </div>
                                 <button type="button" class="btn btn-outline" style="font-size:11px; padding:4px 9px; font-weight:800; color:#BAE6FD; border-color:#38BDF8; background:#0C4A6E;" onclick="closeQuickAddToDayModal(); startQuickWorkoutWithExercise('${ex.id}');">
-                                    ⚡ Canlı Sayaç
+                                    Canlı Sayaç
                                 </button>
                             </div>
                             <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; background:#181530; border:1px solid rgba(167, 139, 250, 0.25); padding:10px; border-radius:8px;">
                                 <div>
-                                    <label style="display:block; font-size:10.5px; font-weight:800; color:#F8FAFC; margin-bottom:3px;">⏱️ Hedef Süre (Dk)</label>
+                                    <label style="display:block; font-size:10.5px; font-weight:800; color:#F8FAFC; margin-bottom:3px;">Hedef Süre (Dk)</label>
                                     <input id="cardioTargetMinInput" type="number" min="0" max="240" step="1" value="20" style="width:100%; padding:6px 8px; border:1.5px solid rgba(167, 139, 250, 0.35); border-radius:6px; font-size:12.5px; font-weight:800; color:#FFFFFF; background:#0B0A14;">
                                     <span style="font-size:9.5px; color:#CBD5E1;">0 = Serbest süre</span>
                                 </div>
                                 <div>
-                                    <label style="display:block; font-size:10.5px; font-weight:800; color:#F8FAFC; margin-bottom:3px;">📏 Hedef Mesafe (m)</label>
+                                    <label style="display:block; font-size:10.5px; font-weight:800; color:#F8FAFC; margin-bottom:3px;">Hedef Mesafe (m)</label>
                                     <input id="cardioTargetDistInput" type="number" min="0" max="50000" step="100" value="0" style="width:100%; padding:6px 8px; border:1.5px solid rgba(167, 139, 250, 0.35); border-radius:6px; font-size:12.5px; font-weight:800; color:#FFFFFF; background:#0B0A14;">
                                     <span style="font-size:9.5px; color:#CBD5E1;">0 = Mesafe hedefi yok</span>
                                 </div>
                                 <div>
-                                    <label style="display:block; font-size:10.5px; font-weight:800; color:#F8FAFC; margin-bottom:3px;">❤️ Hedef Nabız (bpm)</label>
+                                    <label style="display:block; font-size:10.5px; font-weight:800; color:#F8FAFC; margin-bottom:3px;">Hedef Nabız (bpm)</label>
                                     <input id="cardioTargetHrInput" type="number" min="0" max="210" step="1" value="0" style="width:100%; padding:6px 8px; border:1.5px solid rgba(167, 139, 250, 0.35); border-radius:6px; font-size:12.5px; font-weight:800; color:#FFFFFF; background:#0B0A14;">
                                     <span style="font-size:9.5px; color:#CBD5E1;">0 = Nabız uyarısı yok</span>
                                 </div>
                             </div>
                             <div style="font-size:10.5px; color:#BBF7D0; margin-top:8px; line-height:1.4; background:#14532D; border:1px solid #22C55E; padding:6px 9px; border-radius:6px; font-weight:700;">
-                                ✅ <strong>Ne Yaptıysan O Kaydedilir:</strong> Hedefin altında veya üstünde bitirsen de saatte yaptığın gerçek süre, mesafe ve nabız eksiksiz kayıt altına alınır.
+                                <strong>Ne Yaptıysan O Kaydedilir:</strong> Hedefin altında veya üstünde bitirsen de saatte yaptığın gerçek süre, mesafe ve nabız eksiksiz kayıt altına alınır.
                             </div>
                         `;
                     }
@@ -4074,7 +4074,7 @@
             const pNames = (ex.primaryMuscles || []).map(m => (TARGET_REGIONS[m] ? TARGET_REGIONS[m].name : m)).join(', ') || ex.muscle || '';
 
             if (titleEl) {
-                titleEl.innerHTML = `➕ ${escapeHTML(ex.name)}`;
+                titleEl.innerHTML = `+ ${escapeHTML(ex.name)}`;
             }
 
             const activeOffset = (typeof currentWeeklyMuscleOffset === 'number' && currentWeeklyMuscleOffset >= 0) ? currentWeeklyMuscleOffset : 0;
@@ -4116,7 +4116,7 @@
                 let buttonHtml = '';
 
                 if (isCompleted) {
-                    statusBadge = `<span style="font-size:10px; color:#BBF7D0; font-weight:800; background:#14532D; border:1px solid #22C55E; padding:2px 6px; border-radius:4px;">✅ Seans Tamamlandı</span>`;
+                    statusBadge = `<span style="font-size:10px; color:#BBF7D0; font-weight:800; background:#14532D; border:1px solid #22C55E; padding:2px 6px; border-radius:4px;">Seans Tamamlandı</span>`;
                     subtitleText = `${escapeHTML(planTitle)} • Tamamlanmış seans`;
                     buttonHtml = `
                         <div style="display:flex; align-items:center; gap:6px;">
@@ -4127,13 +4127,13 @@
                                 <option value="2">2 Set</option>
                             </select>
                             <button class="btn btn-outline" style="font-size:10.5px; padding:4px 8px; color:#E2E8F0; border-color:rgba(167, 139, 250, 0.3); background:#181530;" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}', '${dYMD}')">
-                                ➕ Yine de Ekle
+                                + Yine de Ekle
                             </button>
                         </div>
                     `;
                 } else if (isRest) {
-                    statusBadge = `<span style="font-size:10px; color:#BAE6FD; font-weight:800; background:#0C4A6E; border:1px solid #38BDF8; padding:2px 6px; border-radius:4px;">🧘 Dinlenme Günü (Boş)</span>`;
-                    subtitleText = `⚡ Eklendiğinde bu güne yeni bir Özel Takviye Seansı açılır`;
+                    statusBadge = `<span style="font-size:10px; color:#BAE6FD; font-weight:800; background:#0C4A6E; border:1px solid #38BDF8; padding:2px 6px; border-radius:4px;">Dinlenme Günü (Boş)</span>`;
+                    subtitleText = `Eklendiğinde bu güne yeni bir Özel Takviye Seansı açılır`;
                     buttonHtml = `
                         <div style="display:flex; align-items:center; gap:6px;">
                             <select id="quickAddSetsSelect_${dKey}" style="background:#181530; color:#FFFFFF; border:1px solid rgba(167, 139, 250, 0.3); font-size:11px; padding:4px 6px; border-radius:6px;">
@@ -4143,12 +4143,12 @@
                                 <option value="2">2 Set</option>
                             </select>
                             <button class="btn btn-outline" style="font-size:11px; padding:5px 12px; font-weight:800; border-radius:6px; color:#BAE6FD; border-color:#38BDF8; background:#0C4A6E;" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}', '${dYMD}')" title="Bu dinlenme gününü takviye seansına dönüştür">
-                                ⚡ Yeni Seans Aç
+                                Yeni Seans Aç
                             </button>
                         </div>
                     `;
                 } else {
-                    statusBadge = `<span style="font-size:10px; color:#FDE68A; font-weight:800; background:#7C2D12; border:1px solid #F59E0B; padding:2px 6px; border-radius:4px;">🏋️ Planlı Antrenman</span>`;
+                    statusBadge = `<span style="font-size:10px; color:#FDE68A; font-weight:800; background:#7C2D12; border:1px solid #F59E0B; padding:2px 6px; border-radius:4px;">Planlı Antrenman</span>`;
                     subtitleText = `${escapeHTML(planTitle)} • ${exCount} Hareket Mevcut (Sonuna eklenir)`;
                     buttonHtml = `
                         <div style="display:flex; align-items:center; gap:6px;">
@@ -4159,7 +4159,7 @@
                                 <option value="2">2 Set</option>
                             </select>
                             <button class="btn btn-gold" style="font-size:11px; padding:5px 12px; font-weight:800; border-radius:6px;" onclick="applyQuickAddExerciseToDay(${dKey}, '${ex.id}', '${dYMD}')" title="Mevcut antrenmanın sonuna ilave hareket olarak ekle">
-                                ➕ Antrenmana Ekle
+                                + Antrenmana Ekle
                             </button>
                         </div>
                     `;
@@ -4189,7 +4189,7 @@
                         <strong>Hedef Kas Grubu:</strong> ${escapeHTML(pNames)} • <strong>Ekipman:</strong> ${ex.equipment ? ex.equipment.toUpperCase() : 'SERBEST'}
                     </div>
                     <div style="font-size:11px; color:#E2E8F0; margin-top:8px; line-height:1.45; background:#181530; border:1px solid rgba(167, 139, 250, 0.22); padding:8px 10px; border-radius:6px;">
-                        💡 <strong>Nasıl Çalışır?</strong>
+                        <strong>Nasıl Çalışır?</strong>
                         <br>• <strong>Antrenman olan gün:</strong> Hareketi mevcut seansın sonuna (${ex.name}) olarak ilave eder.
                         <br>• <strong>Dinlenme günü:</strong> O gün dinlenmeden çıkar ve bu hareketle başlayan yeni bir <em>"Takviye Seansı"</em>na dönüşür. (Dinlenmenizi korumak istiyorsanız antrenman olan günleri tercih edebilirsiniz.)
                     </div>
@@ -4245,7 +4245,7 @@
             const ok = addExerciseToDaySchedule(dayIdx, exId, finalSets, finalReps, cardioLimits, effDateStr);
             if (ok && isCardioDur) {
                 closeQuickAddToDayModal();
-                showToast(`🚣 "${ex ? ex.name : 'Kardiyo'}" (${unitSummary}), ${DAY_NAMES_TR[dayIdx]} gününe 2. Bağımsız Kardiyo Seansı olarak eklendi (Mevcut güç programı korundu)!`);
+                showToast(`"${ex ? ex.name : 'Kardiyo'}" (${unitSummary}), ${DAY_NAMES_TR[dayIdx]} gününe 2. Bağımsız Kardiyo Seansı olarak eklendi (Mevcut güç programı korundu).`);
                 if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
                 if (typeof renderActiveWorkout === 'function') renderActiveWorkout();
                 if (typeof renderAnalytics === 'function') renderAnalytics();
@@ -4254,9 +4254,9 @@
             if (ok) {
                 closeQuickAddToDayModal();
                 if (wasRest) {
-                    showToast(`⚡ ${DAY_NAMES_TR[dayIdx]} gününe yeni Takviye Antrenmanı açıldı ve "${ex ? ex.name : 'Egzersiz'}" (${unitSummary}) eklendi!`);
+                    showToast(`${DAY_NAMES_TR[dayIdx]} gününe yeni Takviye Antrenmanı açıldı ve "${ex ? ex.name : 'Egzersiz'}" (${unitSummary}) eklendi.`);
                 } else {
-                    showToast(`✅ "${ex ? ex.name : 'Egzersiz'}", ${DAY_NAMES_TR[dayIdx]} antrenmanının sonuna ${unitSummary} olarak eklendi!`);
+                    showToast(`"${ex ? ex.name : 'Egzersiz'}", ${DAY_NAMES_TR[dayIdx]} antrenmanının sonuna ${unitSummary} olarak eklendi.`);
                 }
                 if (typeof renderAnalytics === 'function') {
                     renderAnalytics();
@@ -7157,7 +7157,7 @@
             setScaleLogs(logs);
             renderAnalytics();
             playAlertSound();
-            alert("✅ 07.10.2026 Unique Health Raporu başarıyla yüklendi!");
+            alert("07.10.2026 Unique Health Raporu başarıyla yüklendi!");
         }
 
         function renderMeasurementsAnalytics(container) {
@@ -8233,7 +8233,7 @@
                 }
             });
 
-            // 2. Doğrudan Garmin/Tredict telemetrisindeki kardiyo aktiviteleri (yalnızca Garmin sahibi aktif kullanıcı için)
+            // 2. Doğrudan Garmin/Tredict sağlık verilerindeki kardiyo aktiviteleri (yalnızca Garmin sahibi aktif kullanıcı için)
             try {
                 const rawGarminActs = (window.GarminTredictChief && typeof window.GarminTredictChief.getStoredActivities === 'function')
                     ? window.GarminTredictChief.getStoredActivities()

@@ -1,5 +1,5 @@
         :root {
-            /* Surface & Background Palette (Google Stitch — Functional Kinetic Slate) */
+            /* Surface & Background Palette */
             --bg-base: #F7F9FB;
             --bg-surface: #FFFFFF;
             --bg-elevated: #F2F4F6;
@@ -6130,7 +6130,7 @@
         }
 
         /* ==========================================================================
-           LA FORJA VISUAL ARCHITECTURE (FRONTEND-DESIGN OVERHAUL • V196)
+           CELIK KODU VISUAL ARCHITECTURE
            ========================================================================== */
 
         /* 1. Command Bar & Machined Brand Lockup */
@@ -9599,10 +9599,7 @@
         }
 
         /* =========================================================================
-           GOOGLE STITCH — FUNCTIONAL KINETIC SLATE DESIGN SYSTEM (UNIFIED V268)
-           Source: stitch_modern_fitness_design_system.zip (functional_kinetic_slate/DESIGN.md)
-           Palette: Surface #F7F9FB, Card #FFFFFF, Kinetic Orange #FF5A36 / #B52603,
-                    Dark Slate #191C1E / #0F172A, Muscle Status #15803D / #B45309 / #B91C1C
+           UNIFIED KINETIC SLATE DESIGN SYSTEM
            ========================================================================= */
 
         /* 1. Clean Kinetic Slate Canvas & Typography */
@@ -9613,7 +9610,7 @@
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
         }
 
-        /* 2. Stitch Top App Bar & Brand Identity */
+        /* 2. Top App Bar & Brand Identity */
         .modern-app-bar {
             background: rgba(247, 249, 251, 0.94) !important;
             backdrop-filter: blur(18px) !important;
@@ -9785,7 +9782,7 @@
             background: #F8FAFC !important;
         }
 
-        /* 3. Stitch 6-Tab Bottom Navigation Bar & Desktop Segmented Bar */
+        /* 3. 6-Tab Bottom Navigation Bar & Desktop Segmented Bar */
         .tab-nav {
             background: #ECEEF0 !important;
             border: 1px solid #E2E8F0 !important;
@@ -9966,7 +9963,7 @@
             background: #FFF1EE !important;
         }
 
-        /* 6. Selection Chips, Filters & Subtabs (Stitch Dark Slate & Kinetic Orange Pills) */
+        /* 6. Selection Chips, Filters & Subtabs */
         .analytics-subtab-btn,
         .wk-day-tab-btn {
             border-radius: 9999px !important;
@@ -10027,7 +10024,7 @@
             border-bottom-color: #FFFFFF !important;
         }
 
-        /* 7. Stitch Active Workout Dark Rest Timer HUD (antrenman_st_dyosu_zamanlay_c_2) */
+        /* 7. Active Workout Dark Rest Timer HUD */
         .workout-sticky-hud {
             background: radial-gradient(circle at 92% 15%, rgba(255, 90, 54, 0.22) 0%, transparent 52%), #22262A !important;
             border: 1px solid #334155 !important;
@@ -10099,7 +10096,7 @@
             color: #CBD5E1 !important;
         }
 
-        /* 8. Stitch Active Set Row & Completed Set Row Styling */
+        /* 8. Active Set Row & Completed Set Row Styling */
         .hevy-tr-row.active-target {
             background: #FFF1EE !important;
             border-left: 4px solid #FF5A36 !important;
@@ -10132,7 +10129,7 @@
             border-radius: 9999px !important;
         }
 
-        /* 9. Stitch Anatomical Muscle Status Badges */
+        /* 9. Anatomical Muscle Status Badges */
         .wk-ex-muscle-pill,
         .ex-chip-badge.muscle,
         .muscle-tag {
@@ -10688,7 +10685,7 @@
     border: 1px solid #BAE6FD;
 }
 
-/* ==================== STITCH ANTRENMAN SEKMESİ (YATAY HAFTA + BÜYÜK SET KARTI) ==================== */
+/* ==================== ANTRENMAN SEKMESİ (YATAY HAFTA + BÜYÜK SET KARTI) ==================== */
 .stitch-calendar-shell {
     padding: 12px !important;
     background: #FFFFFF !important;
@@ -10946,7 +10943,7 @@
     padding: 14px 8px;
 }
 
-/* Siyah Stitch Canlı Dinlenme & Odak Sayacı */
+/* Siyah Canlı Dinlenme & Odak Sayacı */
 .stitch-dark-hud {
     background: #181C22 !important;
     border: 1px solid #262B33 !important;
@@ -11081,7 +11078,7 @@
     cursor: pointer !important;
 }
 
-/* Stitch Aktif Egzersiz & Büyük Set Kartı */
+/* Aktif Egzersiz & Büyük Set Kartı */
 .stitch-focus-ex-card {
     background: #FFFFFF !important;
     border: 1px solid #E2E8F0 !important;
@@ -12462,28 +12459,69 @@
 }
 
 .login-subtitle {
-    color: #94A3B8 !important;
+    color: #CBD5E1 !important;
 }
 
 .badge-brand {
     background: rgba(139, 92, 246, 0.16) !important;
     border: 1px solid rgba(167, 139, 250, 0.3) !important;
-    color: var(--athletiq-violet) !important;
+    color: #DDD6FE !important;
 }
 
 .login-label {
     color: #CBD5E1 !important;
 }
 
-.login-input {
-    background: rgba(11, 10, 20, 0.8) !important;
-    border: 1px solid rgba(167, 139, 250, 0.2) !important;
+#loginScreen input.login-input,
+#loginScreen select.login-input,
+#loginScreen textarea.login-input {
+    background: #121024 !important;
+    background-color: #121024 !important;
+    border: 1px solid rgba(167, 139, 250, 0.35) !important;
+    color: #FFFFFF !important;
+    color-scheme: dark !important;
+}
+
+#loginScreen input.login-input:-webkit-autofill,
+#loginScreen input.login-input:-webkit-autofill:hover,
+#loginScreen input.login-input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 100px #121024 inset !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    caret-color: #FFFFFF !important;
+    border: 1px solid rgba(167, 139, 250, 0.45) !important;
+}
+
+#loginScreen .login-input::placeholder {
+    color: #94A3B8 !important;
+    opacity: 1 !important;
+}
+
+#loginScreen select.login-input option {
+    background: #121024 !important;
     color: #FFFFFF !important;
 }
 
-.login-input:focus {
+#loginScreen input.login-input:focus,
+#loginScreen select.login-input:focus,
+#loginScreen textarea.login-input:focus {
+    background: #121024 !important;
+    background-color: #121024 !important;
+    color: #FFFFFF !important;
     border-color: var(--athletiq-purple) !important;
     box-shadow: 0 0 12px rgba(139, 92, 246, 0.3) !important;
+    outline: none !important;
+}
+
+.login-error {
+    background: rgba(220, 38, 38, 0.16) !important;
+    border-left: 4px solid #F87171 !important;
+    color: #FECACA !important;
+}
+
+.login-hint {
+    background: #121024 !important;
+    border: 1px solid rgba(167, 139, 250, 0.22) !important;
+    color: #CBD5E1 !important;
 }
 
 .login-btn {
@@ -14314,7 +14352,7 @@ div[style*="linear-gradient"][style*="F43F5E"] div {
     box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(167, 139, 250, 0.1) !important;
 }
 
-/* Eski açık tema (Canva/Stitch) inline renk zorlamalarını Koyu Mor sekmeler ve modallarda iptal et */
+/* Eski açık tema inline renk zorlamalarını Koyu Mor sekmeler ve modallarda iptal et */
 #libraryTab [style*="color:#F3F6FA"]:not(.btn-gold),
 #libraryTab [style*="color: #F3F6FA"]:not(.btn-gold),
 #libraryTab [style*="color:#F8FAFC"]:not(.btn-gold),
@@ -16435,4 +16473,62 @@ html, body {
     min-height: 50px !important;
     font-size: 15.5px !important;
     letter-spacing: 0.01em !important;
+}
+
+#generatorTab .gen-doctrine-pills-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+}
+
+#generatorTab #doctrineSelectionGrid .gen-doctrine-pill {
+    appearance: none !important;
+    background: #121024 !important;
+    border: 1px solid rgba(167, 139, 250, 0.24) !important;
+    border-radius: 10px !important;
+    padding: 9px 10px !important;
+    color: #CBD5E1 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 38px !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+#generatorTab #doctrineSelectionGrid .gen-doctrine-pill:hover {
+    background: #221D42 !important;
+    border-color: rgba(167, 139, 250, 0.55) !important;
+    color: #FFFFFF !important;
+}
+
+#generatorTab #doctrineSelectionGrid .gen-doctrine-pill.selected {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(109, 40, 217, 0.45)) !important;
+    border: 1.5px solid #A78BFA !important;
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+}
+
+#generatorTab #aiTelemetryGrid .telemetry-pill {
+    background: #121024 !important;
+    border: 1px solid rgba(167, 139, 250, 0.18) !important;
+    border-radius: 8px !important;
+    padding: 7px 10px !important;
+}
+
+#generatorTab #aiTelemetryGrid .telemetry-pill-label {
+    color: #94A3B8 !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+}
+
+#generatorTab #aiTelemetryGrid .telemetry-pill-val {
+    color: #FFFFFF !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
 }

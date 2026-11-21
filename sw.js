@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v346';
+const CACHE_NAME = 'celik-kodu-cache-v347';
 const ASSETS = [
   './',
   './index.html',
@@ -8,7 +8,6 @@ const ASSETS = [
   './js/chiefs/bridge-customs.js',
   './js/chiefs/liaison-subchiefs.js',
   './js/chiefs/profile-chief.js',
-  './js/chiefs/admin-portal.js',
   './js/chiefs/library-chief.js',
   './js/chiefs/history-chief.js',
   './js/chiefs/analytics-chief.js',

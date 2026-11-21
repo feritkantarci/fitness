@@ -1161,7 +1161,7 @@
 
             bodyEl.innerHTML = `
                 <div style="font-size:11px; font-weight:800; color:#7DD3FC; text-transform:uppercase; margin-bottom:8px;">
-                    ✏️ Setleri ve Ağırlıkları Düzenle
+                    Setleri ve Ağırlıkları Düzenle
                 </div>
                 <div style="display:flex; flex-direction:column; gap:8px;">
                     ${editSets.map((st, sIdx) => `
@@ -1181,20 +1181,20 @@
                             <button type="button" onclick="window.toggleSubModalEditSetCompleted(${sIdx})" style="padding:4px 7px; border-radius:6px; font-size:11px; font-weight:800; border:1px solid ${st.completed ? '#22C55E' : '#475569'}; background:${st.completed ? '#14532D' : '#1E293B'}; color:${st.completed ? '#BBF7D0' : '#E2E8F0'}; cursor:pointer;">
                                 ${st.completed ? '✓' : '—'}
                             </button>
-                            <button type="button" onclick="window.removeSubModalEditSet(${sIdx})" style="background:none; border:none; color:#FCA5A5; font-size:13px; cursor:pointer; padding:2px 4px;" title="Seti Sil">
-                                🗑️
+                            <button type="button" onclick="window.removeSubModalEditSet(${sIdx})" style="background:none; border:none; color:#FCA5A5; font-size:11px; font-weight:800; cursor:pointer; padding:2px 4px;" title="Seti Sil" aria-label="Seti Sil">
+                                Sil
                             </button>
                         </div>
                     `).join('')}
                 </div>
 
                 <button type="button" onclick="window.addSubModalEditSet()" style="width:100%; margin-top:8px; padding:7px; background:#121024; border:1px dashed rgba(167, 139, 250, 0.45); color:#7DD3FC; font-size:11.5px; font-weight:800; border-radius:8px; cursor:pointer;">
-                    ➕ Set Ekle
+                    + Set Ekle
                 </button>
 
                 <div style="display:flex; gap:8px; margin-top:14px; padding-top:10px; border-top:1px solid rgba(167, 139, 250, 0.25);">
                     <button type="button" onclick="window.saveSubModalExerciseEdit()" style="flex:1; background:#6D28D9; border:none; color:#FFFFFF; border-radius:10px; padding:10px; font-size:13px; font-weight:800; cursor:pointer;">
-                        💾 Kaydet
+                        Kaydet
                     </button>
                     <button type="button" onclick="window.cancelSubModalExerciseEdit()" style="flex:1; background:#2C2550; border:1px solid rgba(167, 139, 250, 0.35); color:#F3E8FF; border-radius:10px; padding:10px; font-size:13px; font-weight:800; cursor:pointer;">
                         ✕ İptal
@@ -1264,9 +1264,9 @@
             bodyEl.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid rgba(167, 139, 250, 0.25);">
                     <div style="display:flex; gap:4px; flex-wrap:wrap;">
-                        ${ex.equipment ? `<span style="font-size:10.5px; font-weight:700; background:#2C2550; border:1px solid rgba(167, 139, 250, 0.35); color:#F3E8FF; padding:2px 6px; border-radius:4px; text-transform:capitalize;">🔧 ${escapeHTML(ex.equipment)}</span>` : ''}
+                        ${ex.equipment ? `<span style="font-size:10.5px; font-weight:700; background:#2C2550; border:1px solid rgba(167, 139, 250, 0.35); color:#F3E8FF; padding:2px 6px; border-radius:4px; text-transform:capitalize;">${escapeHTML(ex.equipment)}</span>` : ''}
                     </div>
-                    ${volText ? `<span style="font-size:11.5px; font-weight:800; color:#FDE68A; background:#451A03; border:1px solid #D97706; border-radius:6px; padding:2px 7px;">🏋️ ${volText}</span>` : ''}
+                    ${volText ? `<span style="font-size:11.5px; font-weight:800; color:#FDE68A; background:#451A03; border:1px solid #D97706; border-radius:6px; padding:2px 7px;">${volText}</span>` : ''}
                 </div>
 
                 <div style="font-size:12px; font-weight:800; color:#FFFFFF; margin-bottom:6px;">Tamamlanan Setler:</div>
@@ -2251,7 +2251,7 @@
 
             // Güvenlik: Maksimum 2 MB dosya sınırı (bellek tükenmesi ve DoS önleme)
             if (file.size > 2 * 1024 * 1024) {
-                alert("❌ Güvenlik Uyarısı: Yedek dosya boyutu 2 MB sınırından büyüktür!");
+                alert("Güvenlik Uyarısı: Yedek dosya boyutu 2 MB sınırından büyüktür!");
                 return;
             }
 
@@ -2322,12 +2322,12 @@
                             window.syncGarminActivitiesFromTredict();
                         }
                         renderHistory();
-                        alert("✅ Antrenman geçmişi yüklendi ve Garmin saat verileriyle eşleştirildi!");
+                        alert("Antrenman geçmişi yüklendi ve Garmin saat verileriyle eşleştirildi.");
                     } else {
-                        alert("❌ Hata: Geçersiz yedek dosyası şeması!");
+                        alert("Hata: Geçersiz yedek dosyası şeması.");
                     }
                 } catch(err) {
-                    alert("❌ Hata: Geçersiz veya bozuk yedek dosyası!");
+                    alert("Hata: Geçersiz veya bozuk yedek dosyası.");
                 }
             };
             reader.readAsText(file);

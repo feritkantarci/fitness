@@ -105,7 +105,7 @@ const TABS = [
     agent: 'garmin-tredict-guard',
     roomFile: 'js/garmin-tredict-bridge.js',
     title: '7. Garmin & Tredict Şefi',
-    whatIsInside: 'Yeni Hareket Kas Denetçisi, İsimsiz+Notlu FIT Üretici, Orijinal Ad Koruyucu, Sağlık Telemetrisi (Nabız/HRR/TUT)',
+    whatIsInside: 'Yeni Hareket Kas Denetçisi, İsimsiz+Notlu FIT Üretici, Orijinal Ad Koruyucu, Sağlık Verileri (Nabız/HRR/TUT)',
     whatItDoes: 'Yeni hareketlerin Garmin karşılığını library-guard kaslarıyla kıyaslar, olmayanları isimsiz+notlu gönderir, dönüşte saatin adını değil bizdeki orijinal adı koruyup sağlık verilerini ilgili şefe iletir',
     commonMistakes: 'Saatten gelen ham hareket adının olduğu gibi alınması, Garmin’de olmayan harekete zorlama isim verilmesi',
     entryFns: ['auditExerciseWithLibraryGuard', 'auditAllLibraryExercises', 'saveSentWorkoutManifest', 'analyzeActivityGroups', 'handoffCompletedActivitiesToTabChiefs', 'buildTredictPlanPayload'],
@@ -231,7 +231,7 @@ function createAppVmSandbox(moduleSources, dbText) {
   const makeEl = (tag = 'div', id = '') => ({
     id,
     tagName: String(tag).toUpperCase(),
-    style: {},
+    style: { setProperty() {}, removeProperty() {}, getPropertyValue: () => '' },
     classList: { add() {}, remove() {}, toggle() {}, contains: () => false },
     innerHTML: '',
     innerText: '',
@@ -2772,7 +2772,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
       id: 'T50',
       owner: 'generator-guard',
       title: 'Kondisyon Öncelik Ayrımı (Normalde 2. Plan, Kondisyonda 1. Sıra)',
-      expected: 'hipertrofide conditioning=0; emom_conditioningde conditioning>=1',
+      expected: 'hipertrofide conditioning=0; paced_conditioningde conditioning>=1',
       run: () => {
         ctx.__seedState();
         const res = vm.runInContext(`(() => {
@@ -2786,9 +2786,9 @@ function runAcademicMathSuite(moduleSources, dbText) {
           const hypExs = (currentGeneratedWorkout && currentGeneratedWorkout.exercises) || [];
           const hypCond = hypExs.filter(e => e.category === 'conditioning').length;
 
-          if (styleEl) styleEl.value = 'emom_conditioning';
+          if (styleEl) styleEl.value = 'paced_conditioning';
           if (goalEl) goalEl.value = 'endurance';
-          handleGenerateWorkout('emom_conditioning', '');
+          handleGenerateWorkout('paced_conditioning', '');
           const condExs = (currentGeneratedWorkout && currentGeneratedWorkout.exercises) || [];
           const condCount = condExs.filter(e => e.category === 'conditioning').length;
           return { hypTotal: hypExs.length, hypCond, condTotal: condExs.length, condCount };
@@ -3026,8 +3026,8 @@ function runAcademicMathSuite(moduleSources, dbText) {
     {
       id: 'T53',
       owner: 'generator-guard',
-      title: 'Üretici Sekmesi Tam Koyu Kabuk, 3 Sade Seçim, Gelişmiş Akordeon, Kutu İçi Kutu İptali & Sıfır Emoji',
-      expected: 'Program Oluştur başlığı, tutarlı 1-2-3 adım rozetleri, Gelişmiş Ayarlar (Opsiyonel) kapalı akordeon, emojisiz etiketler, koyu not girişi ve ortalı alt hint mevcuttur',
+      title: 'Üretici Sekmesi Tam Koyu Kabuk, 3 Sade Seçim, Birleşik Akordeon, Kutu İçi Kutu İptali & Sıfır Emoji',
+      expected: 'Program Oluştur başlığı, tutarlı 1-2-3 rozetler, kapalı Gelişmiş Ayarlar, paralel modal yok, satır içi Program Dengesi ve Hazırlık Özeti + tek openManualBuilderInWorkout(), emojisiz koyu yüzey',
       run: () => {
         const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
         const cssCode = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
@@ -3043,11 +3043,21 @@ function runAcademicMathSuite(moduleSources, dbText) {
           genHtml.includes('<span>MEVCUT EKİPMANLAR</span>') &&
           cssCode.includes('#generatorTab .gen-step-panel.gen-always-open .gen-step-badge') &&
           cssCode.includes('display: inline-flex !important;');
+        const manualCalls = genHtml.match(/openManualBuilderInWorkout\(\)/g) || [];
         const advancedAccordionCollapsed = /id="genAdvancedAccordionBody"[^>]*style="display:none;"/.test(genHtml) &&
           genHtml.includes('Gelişmiş Ayarlar (Opsiyonel)') &&
-          genHtml.includes('openAiHybridArchitectModal()') &&
-          genHtml.includes('openManualBuilderInWorkout()') &&
-          genHtml.includes('openQuickWorkoutModal()');
+          !indexHtml.includes('id="aiHybridArchitectModal"') &&
+          !indexHtml.includes('id="daylightQuickWorkoutModal"') &&
+          !genHtml.includes('openAiHybridArchitectModal()') &&
+          !genHtml.includes('openQuickWorkoutModal()') &&
+          genHtml.includes('Program Dengesi ve Hazırlık Özeti') &&
+          genHtml.includes('id="doctrineSelectionGrid"') &&
+          genHtml.includes('Hazırlık Özeti') &&
+          genHtml.includes('toggleAiTelemetryAccordion()') &&
+          genHtml.includes('value="paced_strength"') &&
+          genHtml.includes('value="paced_hypertrophy"') &&
+          genHtml.includes('value="paced_conditioning"') &&
+          manualCalls.length === 1;
         const noWishSvgIcon = /<label for="aiUnifiedWishInput" class="ai-unified-wish-label">ÖZEL ODAK VEYA HASSASİYET \(OPSİYONEL\)<\/label>/.test(genHtml);
         const htmlEmojis = genHtml.match(/\p{Extended_Pictographic}/gu) || [];
 
@@ -3079,6 +3089,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
             heroHeaderClean,
             consistentStepBadges,
             advancedAccordionCollapsed,
+            manualCallCount: manualCalls.length,
             noWishSvgIcon,
             htmlEmojiCount: htmlEmojis.length,
             vmEmojiCount: vmEmojis.length,
@@ -3170,7 +3181,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
       id: 'T55',
       owner: 'workout-guard',
       title: 'Antrenman Sekmesi, Üst Başlık ve Takvim/Stüdyo Yalın Koyu Standart',
-      expected: 'Beyaz Çelik Kodu başlığı + mor/kehribar üst barlar, alt çizgisiz mor dinlenme bağlantıları, tam kart tıklamalı Stüdyo + Anlık Seans + küçük aşağı ok ikonu',
+      expected: 'Beyaz Çelik Kodu başlığı + mor/kehribar üst barlar, alt çizgisiz mor dinlenme bağlantıları, Kendi Programını Kur başlığı + tam kart tıklamalı Stüdyo + küçük aşağı ok ikonu (btnQuickStudioLaunch yok)',
       run: () => {
         const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
         const cssCode = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
@@ -3189,7 +3200,6 @@ function runAcademicMathSuite(moduleSources, dbText) {
         const flatCalCssOk = cssCode.includes('#embeddedCalendarSection .stitch-day-strip') &&
           cssCode.includes('#embeddedCalendarSection .stitch-selected-day-card') &&
           cssCode.includes('border-top: 1px solid rgba(255, 255, 255, 0.06) !important') &&
-          cssCode.includes('#studioSectionInWorkout #btnQuickStudioLaunch') &&
           cssCode.includes('#studioSectionInWorkout .studio-accordion-chevron') &&
           restLinkCleanCss;
 
@@ -3201,10 +3211,11 @@ function runAcademicMathSuite(moduleSources, dbText) {
 
         const htmlCleanOk = !calSlice.includes('openCalendarToolsModal') &&
           calSlice.includes('id="calJumpTodayBtn"') &&
-          studioSlice.includes('id="btnQuickStudioLaunch"') &&
+          !studioSlice.includes('id="btnQuickStudioLaunch"') &&
+          !studioSlice.includes('+ Anlık Seans') &&
+          studioSlice.includes('Kendi Programını Kur') &&
           studioSlice.includes('id="studioCardShell"') &&
           studioSlice.includes('onclick="toggleStudioAccordion()"') &&
-          studioSlice.includes('+ Anlık Seans') &&
           studioSlice.includes('<svg') &&
           studioSlice.includes('class="studio-accordion-chevron"') &&
           !studioSlice.includes('btnToggleStudioAccordion') &&
@@ -3538,6 +3549,138 @@ function runAcademicMathSuite(moduleSources, dbText) {
           && res.hasBothInDom;
         return { ok, actual: JSON.stringify(res) };
       }
+    },
+    {
+      id: 'T58',
+      owner: 'profile-guard',
+      title: 'v347 Güvenlik Kuralları, Marka/İsim/Emoji Temizliği, SW İzolasyonu & Demo Girişi',
+      expected: '0 yasaklı marka/kişisel ad/EMOM/123456, 0 literal emoji, firestore.rules===config/firestore.rules + sıkı kurallar, sw.js v347 (admin-portal yok), #loginScreen kontrast & boş listede #btnEnterDemoMode',
+      run: () => {
+        const walkAssetFiles = (dir, out = []) => {
+          for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+            const p = path.join(dir, entry.name);
+            if (entry.isDirectory()) walkAssetFiles(p, out);
+            else if (/\.(html|js|css)$/.test(entry.name)) out.push(p);
+          }
+          return out;
+        };
+        const assetFiles = [path.join(ROOT, 'index.html'), ...walkAssetFiles(path.join(ROOT, 'css')), ...walkAssetFiles(path.join(ROOT, 'js'))];
+        const forbiddenExactRe = /(?:Rodium|Ferit|FitLab|FİTLAB|la_forja|LA FORJA|Schumann|Telemetri|TELEMETRİ|EMOM|7\. Şef|123456)/;
+        const forbiddenIcaseRe = /rodium|ferit|fitlab|la_forja|la forja|schumann|telemetri|emom|7\. şef|123456/i;
+        const forbiddenHits = [];
+        let literalEmojiCount = 0;
+
+        for (const f of assetFiles) {
+          const text = fs.readFileSync(f, 'utf8');
+          const lines = text.split('\n');
+          lines.forEach((line, idx) => {
+            if (forbiddenExactRe.test(line) || forbiddenIcaseRe.test(line.replace(/DemoMode/g, ''))) {
+              forbiddenHits.push(`${path.relative(ROOT, f)}:${idx + 1}`);
+            }
+            const scrubbed = line.replace(/\/\[?\\p\{Extended_Pictographic\}[^\n\/]*\/[gimsuy]*/g, '');
+            const em = scrubbed.match(/\p{Extended_Pictographic}/gu);
+            if (em) literalEmojiCount += em.length;
+          });
+        }
+
+        const rulesCode = fs.readFileSync(path.join(ROOT, 'firestore.rules'), 'utf8');
+        const configRulesCode = fs.readFileSync(path.join(ROOT, 'config', 'firestore.rules'), 'utf8');
+        const rulesIdentical = rulesCode === configRulesCode;
+        const noLegacyAdminLeak = !rulesCode.includes('isSafeNonAdminUsers') && !/ferit/i.test(rulesCode);
+
+        const appSystemBlockMatch = rulesCode.match(/match \/app_system\/\{docId\}\s*\{([\s\S]*?)\n\s*\}/);
+        const appSystemBlock = appSystemBlockMatch ? appSystemBlockMatch[1] : '';
+        const appSystemRestrictedOk = Boolean(appSystemBlock) &&
+          appSystemBlock.includes("docId == 'master_catalog'") &&
+          appSystemBlock.includes("(docId == 'ai_config' && isAuthenticated())") &&
+          /\|\|\s*isAdmin\(\);/.test(appSystemBlock) &&
+          appSystemBlock.includes("allow create, update: if isAdmin()") &&
+          appSystemBlock.includes("docId == 'users' && isValidUsersSystemPayload(request.resource.data)") &&
+          appSystemBlock.includes("allow delete: if isAdmin();");
+
+        const isOwnerMatch = rulesCode.match(/function isOwner\(uid\)\s*\{([\s\S]*?)\n\s*\}/);
+        const userRolesMatch = rulesCode.match(/match \/user_roles\/\{authUid\}\s*\{([\s\S]*?)\n\s*\n\s*\/\/ Kullanıcı Profilleri/);
+        const emailVerifiedSyntheticOk = Boolean(
+          isOwnerMatch &&
+          isOwnerMatch[1].includes("request.auth.token.email_verified == true") &&
+          isOwnerMatch[1].includes("@auth.celikkodu.app") &&
+          userRolesMatch &&
+          userRolesMatch[1].includes("request.auth.token.email_verified == true") &&
+          userRolesMatch[1].includes("@auth.celikkodu.app")
+        );
+
+        const bugReportsMatch = rulesCode.match(/match \/exercise_bug_reports\/\{docId\}\s*\{([\s\S]*?)\n\s*\}/);
+        const bugReportsReadRestricted = Boolean(
+          bugReportsMatch &&
+          /allow read:\s*if isAuthenticated\(\) && \(isAdmin\(\) \|\| \('uid' in resource\.data && resource\.data\.uid == request\.auth\.uid\)\);/.test(bugReportsMatch[1])
+        );
+
+        const swCode = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
+        const swOk = swCode.includes("celik-kodu-cache-v347") && !swCode.includes('admin-portal.js');
+
+        const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+        const loginStart = indexHtml.indexOf('id="loginScreen"');
+        const loginEnd = indexHtml.indexOf('id="mainAppWrapper"');
+        const loginSlice = loginStart >= 0 && loginEnd > loginStart ? indexHtml.slice(loginStart, loginEnd) : '';
+        const loginContrastOk = Boolean(loginSlice) &&
+          loginSlice.includes('#CBD5E1') &&
+          loginSlice.includes('#E2E8F0') &&
+          loginSlice.includes('#C4B5FD') &&
+          loginSlice.includes('#121024') &&
+          loginSlice.includes('id="btnEnterDemoMode"') &&
+          !/color:\s*#(?:334155|475569|15803D)/i.test(loginSlice);
+
+        const localCtx = createAppVmSandbox(moduleSources, dbText);
+        const demoRes = vm.runInContext(`(() => {
+          localStorage.removeItem('celik_kodu_auth_users');
+          localStorage.removeItem('celik_kodu_session');
+          localStorage.removeItem('celik_kodu_active_user_id');
+          currentSession = null;
+          currentGeneratedWorkout = null;
+          const usersBefore = initAuthDatabase();
+          enterGuestDemoMode();
+          const sess = getSession();
+          const activeUser = getActiveUser();
+          const genExercises = (currentGeneratedWorkout && Array.isArray(currentGeneratedWorkout.exercises)) ? currentGeneratedWorkout.exercises.length : 0;
+          return {
+            emptyAuthUsersOk: Array.isArray(usersBefore) && usersBefore.length === 0,
+            isDemoGuest: Boolean(sess && sess.isDemoGuest === true && sess.userId === DEMO_GUEST_UID),
+            isMisafirSporcu: Boolean(activeUser && activeUser.name === 'Misafir Sporcu'),
+            hasGenExercises: genExercises > 0,
+            mainShown: document.getElementById('mainAppWrapper').style.display === 'block',
+            notAdmin: !isVerifiedAdminSession()
+          };
+        })()`, localCtx);
+
+        const demoModeOk = Object.values(demoRes).every(Boolean);
+        const ok = forbiddenHits.length === 0 &&
+          literalEmojiCount === 0 &&
+          rulesIdentical &&
+          noLegacyAdminLeak &&
+          appSystemRestrictedOk &&
+          emailVerifiedSyntheticOk &&
+          bugReportsReadRestricted &&
+          swOk &&
+          loginContrastOk &&
+          demoModeOk;
+
+        return {
+          ok,
+          actual: JSON.stringify({
+            forbiddenHitCount: forbiddenHits.length,
+            forbiddenSample: forbiddenHits.slice(0, 5),
+            literalEmojiCount,
+            rulesIdentical,
+            noLegacyAdminLeak,
+            appSystemRestrictedOk,
+            emailVerifiedSyntheticOk,
+            bugReportsReadRestricted,
+            swOk,
+            loginContrastOk,
+            demoRes
+          })
+        };
+      }
     }
   ];
 
@@ -3667,7 +3810,7 @@ ${bridges.map(b => `| \`${b.key}\` | \`${b.writer}\` | ${b.customs} | ${b.reader
 - **7 Bağımsız Oda + Ortak Çekirdek + Köprü Gümrüğü:** **${missingRoomFiles.length === 0 ? '✅ Tüm modül odaları diskte mevcut ve izole' : '❌ Eksik dosyalar: ' + missingRoomFiles.join(', ')}**
 - **Tavsiye Edilen Hareketler Sağlam mı?:** ${recCheck.totalRecIds} tavsiye butonu kontrol edildi -> **${recCheck.missing.length === 0 ? '✅ Hepsi sağlam (0 hata)' : '❌ Bozuk olanlar: ' + recCheck.missing.join(', ')}**
 - **Sayfa Zıplama (Scroll) Koruması:** ${totalScrollWarnings === 0 ? '✅ Tüm odalarda ekran sabitleme aktif (0 uyarı)' : '⚠️ İnceleme gereken satırlar: ' + Object.values(agentStats).flatMap(s => s.scrollWarnings).join(' • ')}
-- **7. Şef (\`garmin-tredict-guard\`) Orijinal Ad & Sağlık Telemetrisi Koruması:** ✅ Aktif
+- **Saat & Takvim Köprüsü (\`garmin-tredict-guard\`) Orijinal Ad & Sağlık Verisi Koruması:** ✅ Aktif
 - **Modal & Hareketli Görsel Denetimi (${mediaAudit.totalExercises} Ana Hareket):**
   - \`window.exerciseGuideMap\` Global Erişim: **${mediaAudit.isGuideGlobal ? '✅ Açık' : '❌ KAPALI'}**
   - Diskte Eksik Olan MP4 Dosyası: **${mediaAudit.missingClipFiles.length === 0 ? '✅ 0 Eksik' : '❌ ' + mediaAudit.missingClipFiles.join(', ')}**

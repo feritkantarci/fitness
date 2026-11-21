@@ -5,7 +5,7 @@ description: Çelik Kodu PWA içindeki 6 ana sekmeyi (Üretici, Antrenman/Stüdy
 
 # 🎼 Çelik Kodu — Sekme Orkestrası, 7 Ayrı Oda ve Köprü Gümrüğü (`tab-orchestra`)
 
-Bu beceri, sitedeki 6 sekmenin ve Garmin/Tredict köprüsünün birbirini bozmasını engeller. Her şef kendi **ayrı fiziksel dosyasında (odasında)** yaşar, şefler arası paylaşılan 8 `localStorage` köprüsü **Köprü Gümrüğü (`js/chiefs/bridge-customs.js`)** tarafından denetlenir ve tüm sistem **7 Şef Bekçisi (`scripts/tab-watchdog.js`)** ile 36 maddelik sınavdan geçirilir.
+Bu beceri, sitedeki 6 sekmenin ve Garmin/Tredict köprüsünün birbirini bozmasını engeller. Her şef kendi **ayrı fiziksel dosyasında (odasında)** yaşar, şefler arası paylaşılan 8 `localStorage` köprüsü **Köprü Gümrüğü (`js/chiefs/bridge-customs.js`)** tarafından denetlenir ve tüm sistem **7 Şef Bekçisi (`scripts/tab-watchdog.js`)** ile 57 maddelik sınavdan geçirilir.
 
 ---
 
@@ -46,4 +46,4 @@ Ortak altyapı dosyaları:
    ```
 2. **Sadece İlgili Şefin Odasında Çalış:** Değişiklik yalnızca ilgili şefin fiziksel dosyasında (`js/chiefs/<şef>-chief.js` veya `js/garmin-tredict-bridge.js`) yapılır; diğer 6 şefin odasına dokunulmaz.
 3. **Kalıcı Hata Hafızası Kuralı:** Kullanıcının yakaladığı her gerçek hata, ilgili şefin `SKILL.md` dosyasına kural olarak yazılır ve `scripts/tab-watchdog.js` içine yeni bir kalıcı sınav maddesi (`T18`, `T19`...) olarak eklenir.
-4. **Zorunlu Canlıya Çıkış Kapısı (`.git/hooks/pre-push`):** `npm run verify` komutu **7/7 şefin tamamında** hem `Ekran Kontrolü` hem **`36/36` Matematik & Gümrük Sınavı** geçmeden `git push` yapılmasına izin vermez.
+4. **Zorunlu Canlıya Çıkış Kapısı (`.git/hooks/pre-push`):** `npm run verify` komutu **7/7 şefin tamamında** hem `Ekran Kontrolü` hem tüm Matematik & Gümrük Sınavını geçmeden `git push` yapılmasına izin vermez.

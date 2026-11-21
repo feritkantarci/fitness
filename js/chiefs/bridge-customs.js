@@ -641,7 +641,7 @@
                 }
             }
         } catch {}
-        return 'v326';
+        return 'v347';
     }
 
     function sanitizeTelemetryEvent(raw) {
@@ -655,7 +655,7 @@
         const action = maskTelemetrySecrets(raw.action || 'İşlem').trim().slice(0, 120) || 'İşlem';
         const inputSummary = maskTelemetrySecrets(raw.inputSummary || '').trim().slice(0, 240);
         const outcome = maskTelemetrySecrets(raw.outcome || '').trim().slice(0, 300) || (severity === 'error' ? 'İşlem başarısız oldu' : 'Veri otomatik onarıldı');
-        const appVersion = maskTelemetrySecrets(raw.appVersion || resolveAppVersionTag()).trim().slice(0, 20) || 'v326';
+        const appVersion = maskTelemetrySecrets(raw.appVersion || resolveAppVersionTag()).trim().slice(0, 20) || 'v347';
         const atNum = Number(raw.at);
         const at = (Number.isFinite(atNum) && atNum > 0) ? Math.round(atNum) : Date.now();
         const repNum = Number(raw.repeatCount);

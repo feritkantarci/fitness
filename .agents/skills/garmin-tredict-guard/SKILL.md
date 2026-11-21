@@ -1,6 +1,6 @@
 ---
 name: garmin-tredict-guard
-description: Çelik Kodu PWA içindeki 7. Özel Şef (Garmin & Tredict Telemetri ve Doğrulama Şefi). Yeni eklenen hareketlerin çalışan kas gruplarını library-guard'dan alıp Garmin resmi kas kataloğuyla kıyaslar; Garmin'de karşılığı olmayan hareketleri saate isimsiz ama notlu gönderir; saatte tamamlanan antrenmandan yalnızca sağlık verilerini (nabız, zirve nabız, HRR, TUT, kalori) çekip ilgili şeflere bizdeki orijinal hareket adıyla teslim eder.
+description: Çelik Kodu PWA içindeki Saat & Takvim Köprüsü Şefi (Garmin & Tredict Doğrulama ve Sağlık Verisi Şefi). Yeni eklenen hareketlerin çalışan kas gruplarını library-guard'dan alıp Garmin resmi kas kataloğuyla kıyaslar; Garmin'de karşılığı olmayan hareketleri saate isimsiz ama notlu gönderir; saatte tamamlanan antrenmandan yalnızca sağlık verilerini (nabız, zirve nabız, HRR, TUT, kalori) çekip ilgili şeflere bizdeki orijinal hareket adıyla teslim eder.
 ---
 
 # ⌚ Çelik Kodu — 7. Oda: Garmin & Tredict Şefi (`garmin-tredict-guard`)
@@ -34,7 +34,7 @@ Bu şef, **Çelik Kodu PWA** ile **Garmin Forerunner 945 / Tredict** arasındaki
    - Saatin yazdığı veya boş bıraktığı hareket isimleri yok sayılır.
    - Her set, gönderdiğimiz **orijinal antrenmandaki bizdeki orijinal hareket adıyla (`id` ve `name`)** değiştirilir.
    - Saatten **YALNIZCA sağlık verileri** (`heartrate` ortalama nabız, `heartrateMax` zirve nabız, `heartrateRecovery` set arası nabız düşüşü, `duration` gerçek gerilim süresi / TUT, `calories` ve saatte düzeltilen `repetitions` / `weight`) alınıp orijinal hareketimizin içine enjekte edilir.
-   - Sonuç, ilgili şeflere (`workout-guard`, `history-guard`, `analytics-guard`, `generator-guard`) **%100 bizdeki orijinal hareket kimliği + saat sağlık telemetrisi** olarak teslim edilir.
+   - Sonuç, ilgili şeflere (`workout-guard`, `history-guard`, `analytics-guard`, `generator-guard`) **%100 bizdeki orijinal hareket kimliği + saat sağlık verileri** olarak teslim edilir.
 
 ### Görev 4: Plan Dışı İlave Setlerin Yönetimi
 1. Eğer sporcu gönderdiğimiz orijinal antrenman bittikten sonra saatte `Lap` tuşuna basarak planda olmayan ilave setler yaptıysa:

@@ -82,20 +82,34 @@
             }
         }
 
+        function normalizeLegacyWorkoutStyle(rawStyle) {
+            const s = String(rawStyle || '').trim();
+            if (!s) return 'superset';
+            const pacedMatch = s.match(/^[a-z]+_(strength|hypertrophy|conditioning)$/i);
+            if (pacedMatch) return 'paced_' + pacedMatch[1].toLowerCase();
+            if (s === 'paced' || (/^em/i.test(s) && /om$/i.test(s) && s.length === 4)) return 'paced';
+            return s;
+        }
+        window.normalizeLegacyWorkoutStyle = normalizeLegacyWorkoutStyle;
+
         function updateSelectedParamLabel() {
             const el = document.getElementById('selectedParamLabel');
             const styleEl = document.getElementById('paramStyle');
             const goalEl = document.getElementById('paramGoal');
             const durEl = document.getElementById('paramDuration');
             const goalGroup = goalEl ? goalEl.closest('.param-group') : null;
-            const emomGoalMap = {
-                emom_strength: 'strength',
-                emom_hypertrophy: 'hypertrophy',
-                emom_conditioning: 'endurance'
+            const normalizedStyle = styleEl ? normalizeLegacyWorkoutStyle(styleEl.value) : '';
+            if (styleEl && normalizedStyle && styleEl.value !== normalizedStyle && Array.from(styleEl.options || []).some(o => o.value === normalizedStyle)) {
+                styleEl.value = normalizedStyle;
+            }
+            const pacedGoalMap = {
+                paced_strength: 'strength',
+                paced_hypertrophy: 'hypertrophy',
+                paced_conditioning: 'endurance'
             };
-            const isSplitEmom = styleEl && emomGoalMap[styleEl.value];
-            if (isSplitEmom) {
-                if (goalEl) goalEl.value = emomGoalMap[styleEl.value];
+            const isSplitPaced = Boolean(normalizedStyle && pacedGoalMap[normalizedStyle]);
+            if (isSplitPaced) {
+                if (goalEl) goalEl.value = pacedGoalMap[normalizedStyle];
                 if (goalGroup) goalGroup.style.display = 'none';
             } else {
                 if (goalGroup) goalGroup.style.display = '';
@@ -114,7 +128,7 @@
             const goalTxt = goalEl ? goalEl.options[goalEl.selectedIndex].text.replace(/^[^\w\sÇĞİÖŞÜçğıöşü]*\s*/, '').split('(')[0].trim() : 'Kas';
             const durTxt = durEl ? durEl.value + ' Dk' : '45 Dk';
 
-            el.innerText = isSplitEmom ? `${styleTxt} • ${durTxt}` : `${styleTxt} • ${goalTxt} • ${durTxt}`;
+            el.innerText = isSplitPaced ? `${styleTxt} • ${durTxt}` : `${styleTxt} • ${goalTxt} • ${durTxt}`;
         }
 
         function setGeneratorDurationQuick(val) {
@@ -317,10 +331,11 @@
             updateSelectedEquipLabel();
         }
 
-        window.showEmomInfoModal = function(style) {
+        window.showPacedRoundInfoModal = function(rawStyle) {
+            const style = normalizeLegacyWorkoutStyle(rawStyle);
             const infoMap = {
-                emom_strength: {
-                    title: '⚡ Kuvvet EMOM',
+                paced_strength: {
+                    title: 'Güç Odaklı',
                     items: [
                         '• Ağırlık: Normalden yüksek (%75–85)',
                         '• Tekrar: 1–3 patlayıcı tekrar (15 sn iş)',
@@ -328,8 +343,8 @@
                         '• Amaç: Formu bozmadan maksimum güç üretmek'
                     ]
                 },
-                emom_hypertrophy: {
-                    title: '💪 Kas EMOM',
+                paced_hypertrophy: {
+                    title: 'Kas Gelişimi',
                     items: [
                         '• Ağırlık: Orta-yüksek (%60–75)',
                         '• Tekrar: 6–10 kontrollü tekrar (30 sn iş)',
@@ -337,8 +352,8 @@
                         '• Amaç: Kas yanmasını ve hacmi yüksek tutmak'
                     ]
                 },
-                emom_conditioning: {
-                    title: '⏱️ Kondisyon EMOM',
+                paced_conditioning: {
+                    title: 'Nabız ve Kondisyon',
                     items: [
                         '• Ağırlık: Vücut ağırlığı veya hafif-orta yük',
                         '• Tekrar: 10–12 hızlı tekrar (35–40 sn iş)',
@@ -347,32 +362,33 @@
                     ]
                 }
             };
-            const data = infoMap[style] || infoMap.emom_conditioning;
-            const existing = document.getElementById('emomInfoModal');
+            const data = infoMap[style] || infoMap.paced_conditioning;
+            const existing = document.getElementById('pacedRoundInfoModal');
             if (existing) existing.remove();
             const overlay = document.createElement('div');
-            overlay.id = 'emomInfoModal';
+            overlay.id = 'pacedRoundInfoModal';
             overlay.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,23,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
             overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
             overlay.innerHTML = `
-                <div style="background:#0f172a;color:#f8fafc;border:1px solid rgba(56,189,248,0.4);border-radius:14px;max-width:340px;width:100%;padding:16px;box-shadow:0 16px 40px rgba(0,0,0,0.5);">
+                <div style="background:#181530;color:#F8FAFC;border:1px solid rgba(167,139,250,0.35);border-radius:14px;max-width:340px;width:100%;padding:16px;box-shadow:0 16px 40px rgba(0,0,0,0.5);">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                        <strong style="font-size:15px;color:#38bdf8;">${data.title}</strong>
-                        <button type="button" onclick="document.getElementById('emomInfoModal').remove()" style="background:transparent;border:none;color:#94a3b8;font-size:18px;cursor:pointer;line-height:1;">✕</button>
+                        <strong style="font-size:15px;color:#DDD6FE;">${data.title}</strong>
+                        <button type="button" onclick="document.getElementById('pacedRoundInfoModal').remove()" style="background:transparent;border:none;color:#CBD5E1;font-size:18px;cursor:pointer;line-height:1;">✕</button>
                     </div>
-                    <div style="font-size:13px;line-height:1.6;color:#e2e8f0;">
+                    <div style="font-size:13px;line-height:1.6;color:#E2E8F0;">
                         ${data.items.map(line => `<div>${line}</div>`).join('')}
                     </div>
                 </div>`;
             document.body.appendChild(overlay);
         };
 
-        function getRepAndRestScheme(goal, style) {
-            if (style === 'emom_strength') {
+        function getRepAndRestScheme(goal, rawStyle) {
+            const style = normalizeLegacyWorkoutStyle(rawStyle);
+            if (style === 'paced_strength') {
                 return { sets: 4, reps: '1 - 3', rest: 45, straightRest: 45, supersetRest: 45 };
-            } else if (style === 'emom_hypertrophy') {
+            } else if (style === 'paced_hypertrophy') {
                 return { sets: 4, reps: '6 - 10', rest: 30, straightRest: 30, supersetRest: 30 };
-            } else if (style === 'emom_conditioning' || style === 'emom') {
+            } else if (style === 'paced_conditioning' || style === 'paced') {
                 return { sets: 4, reps: '10 - 12', rest: 25, straightRest: 25, supersetRest: 25 };
             }
             if (goal === 'strength') {
@@ -380,20 +396,15 @@
             } else if (goal === 'endurance') {
                 return { sets: 3, reps: '12 - 15', rest: 30, straightRest: 45, supersetRest: 30 };
             } else {
-                // hypertrophy (Schumann et al. 2022 & Weakley et al. 2017)
                 if (style === 'superset') {
-                    // Orta / Akademik Hibrit: Ana bileşik düz setlerde 90s, süperset bloklarında 45-60s
                     return { sets: 3, reps: '8 - 12', rest: 60, straightRest: 90, supersetRest: 45 };
                 } else if (style === 'superset_light') {
-                    // Az Süperset: Düz setlerde 75-90s, kapanış süpersetinde 45s
                     return { sets: 3, reps: '8 - 12', rest: 75, straightRest: 90, supersetRest: 45 };
                 } else if (style === 'superset_intense') {
-                    // Yoğun Süperset: Tamamı ikili süperset, tur sonu 45s
                     return { sets: 3, reps: '8 - 12', rest: 45, straightRest: 60, supersetRest: 45 };
-                } else if (style === 'emom') {
+                } else if (style === 'paced') {
                     return { sets: 4, reps: '10 - 12', rest: 30, straightRest: 30, supersetRest: 30 };
                 } else if (style === 'complex' || style === 'flow') {
-                    // Akademik Kompleks (Javorek 1988 & McGill 2012): 4 Tur, 6-8 Akış Tekrarı, Dinlenme Sadece Tur Sonu 90s (İstasyon Arası 0s)
                     return { sets: 4, reps: '6 - 8', rest: 90, straightRest: 90, supersetRest: 0 };
                 }
                 return { sets: 3, reps: '8 - 12', rest: 75, straightRest: 75, supersetRest: 60 };
@@ -558,47 +569,47 @@
         };
 
 
-        // ==================== AI HYBRID BLUEPRINT & DOCTRINE ARCHITECT ENGINE ====================
+        // ==================== PROGRAM DENGESİ & HAZIRLIK ÖZETİ MOTORU ====================
         let currentSelectedDoctrine = 'bb_hybrid';
         const AI_DOCTRINES = {
             bb_pure: {
                 id: 'bb_pure',
-                name: 'Saf Bodybuilding',
+                name: 'Saf Kas',
                 shortTag: '%90 Kas / %10 Kond.',
                 badgeColor: '#B45309',
-                summary: 'Maksimum mekanik gerilim, izole kas tecridi ve simetri. Estetik ve hacim odaklı saf hipertrofi yaklaşımı.',
+                summary: 'Maksimum mekanik gerilim, bölgesel kas gelişimi ve simetri odaklı çalışma.',
                 academicRatio: { bb: 0.90, func: 0.10 }
             },
             bb_hybrid: {
                 id: 'bb_hybrid',
-                name: 'BB-Dominant Hibrit',
-                shortTag: '%70 Kas / %30 Fonk.',
+                name: 'Kas Odaklı',
+                shortTag: '%70 Kas / %30 Kond.',
                 badgeColor: '#7E22CE',
-                summary: 'Ana gövde ağır hipertrofi; seans sonlarına veya aralara Kettlebell, Carry ve metabolik kondisyon. Kas yaparken eklemleri korur ve iş kapasitesini artırır.',
+                summary: 'Ana bölümde kas geliştirme hareketleri; eklemleri destekleyen dengeli kondisyon ekleri.',
                 academicRatio: { bb: 0.70, func: 0.30 }
             },
             balanced_hybrid: {
                 id: 'balanced_hybrid',
-                name: 'Dengeli Hibrit Atlet',
+                name: 'Dengeli',
                 shortTag: '%50 / %50 Eşit',
                 badgeColor: '#0369A1',
-                summary: 'Ağır compound güç blokları ile patlayıcı kettlebell, dinamik rotasyon ve core zırhının 50/50 eşit sinerjisi.',
+                summary: 'Kuvvet ve kas gelişimi ile atletik kondisyon hareketlerinin eşit dağılımı.',
                 academicRatio: { bb: 0.50, func: 0.50 }
             },
             func_hybrid: {
                 id: 'func_hybrid',
-                name: 'Fonksiyonel-Dominant',
-                shortTag: '%70 Fonk. / %30 Kas',
+                name: 'Kondisyon Odaklı',
+                shortTag: '%70 Kond. / %30 Kas',
                 badgeColor: '#B45309',
-                summary: 'Ana omurga atletik güç ve yüksek dayanıklılık; zayıf kalan omuz, kol veya göğüs bölgelerine hedefe yönelik izole hipertrofi iğneleri.',
+                summary: 'Atletik güç ve dayanıklılık ağırlıklı akış; eksik bölgelere destekleyici kas hareketleri.',
                 academicRatio: { bb: 0.30, func: 0.70 }
             },
             func_pure: {
                 id: 'func_pure',
-                name: 'Saf Fonksiyonel & Kondisyon',
-                shortTag: '%90 Fonksiyonel',
+                name: 'Saf Kondisyon',
+                shortTag: '%90 Kondisyon',
                 badgeColor: '#15803D',
-                summary: 'Çok düzlemli hareket kalıpları, kettlebell kompleksleri, yüksek VO2 Max ve kardiyovasküler savaşçı dayanıklılığı.',
+                summary: 'Çok yönlü hareket kalıpları, dinamik setler ve yüksek kardiyovasküler dayanıklılık.',
                 academicRatio: { bb: 0.10, func: 0.90 }
             }
         };
@@ -668,7 +679,7 @@
             const funcRatio = totalExercisesCount > 0 ? (functionalCount / totalExercisesCount) : 0.18;
             const avgRpe = rpeLogsCount > 0 ? (totalRpeSum / rpeLogsCount).toFixed(1) : '8.0';
 
-            // Kilo Telemetrisi (Tarih sınırlaması olmadan en güncel tartı kaydı esas alınır)
+            // Kilo Özeti (Tarih sınırlaması olmadan en güncel tartı kaydı esas alınır)
             const sortedScaleLogs = Array.isArray(scaleLogs)
                 ? [...scaleLogs].filter(s => s && parseFloat(s.weight) > 30).sort((a, b) => {
                     const ta = new Date(a.date || a.timestamp || 0).getTime() || 0;
@@ -693,7 +704,7 @@
                 }
             }
 
-            // Ölçü Telemetrisi (Tarih sınırlaması olmadan en güncel mezura ölçümü esas alınır)
+            // Ölçü Özeti (Tarih sınırlaması olmadan en güncel mezura ölçümü esas alınır)
             const sortedMeasLogs = Array.isArray(measLogs)
                 ? [...measLogs].filter(Boolean).sort((a, b) => {
                     const ta = new Date(a.date || a.timestamp || 0).getTime() || 0;
@@ -710,37 +721,37 @@
                 currentArms = parseFloat(sortedMeasLogs[0].arms) || null;
             }
 
-            // Teşhis ve Öneri Mantığı
+            // Özet ve Öneri Mantığı
             let recommendedDoctrine = 'bb_hybrid';
             let headline = '';
             let summary = '';
-            let academicBadge = 'Schumann (2022) Hibrit Model';
+            let academicBadge = 'Dengeli Program Planlayıcı';
 
             if (totalLogsCount === 0) {
                 recommendedDoctrine = 'bb_hybrid';
-                headline = 'Biyomekanik Teşhis: Yeni Hibrit Döngü Başlangıcı';
-                summary = 'Henüz kayıtlı antrenman geçmişin oluşmadığı için spor biliminin en yüksek adaptasyon sağlayan **BB-Dominant Hibrit (%70 Hipertrofi + %30 Fonksiyonel Kondisyon)** doktriniyle başlamanı öneriyorum. Bu yaklaşım kas kütlesi inşa ederken kettlebell ve core hareketleriyle eklemlerini korur ve iş kapasiteni artırır.';
+                headline = 'Antrenman Özeti: Yeni Program Başlangıcı';
+                summary = 'Henüz kayıtlı antrenman geçmişin oluşmadığı için kas geliştirme ve kondisyonu birlikte destekleyen <strong>Kas Odaklı (%70 Kas + %30 Kondisyon)</strong> dengeyle başlamanı öneriyorum. Bu yaklaşım kas kütlesi inşa ederken eklemlerini korur ve dayanıklılığını artırır.';
             } else if (bbRatio >= 0.65) {
                 recommendedDoctrine = 'bb_hybrid';
-                headline = 'Biyomekanik Teşhis: Uzun Süredir Bodybuilding Tarzında Çalışıyorsun';
-                summary = `Son antrenmanlarının **%${Math.round(bbRatio * 100)}** kadarı izole ve klasik hipertrofi odaklı. Kas dolgunluğun ve mekanik gerilim birikimin mükemmel seviyede; ancak eklemleri tek yönlü aşınmadan korumak, fasyal rotasyonları uyarmak ve seanslar arası toparlanma hızını (mitokondriyal yoğunluk) artırmak için **BB-Dominant Hibrit (%70 Hipertrofi + %30 Fonksiyonel)** doktrinine geçmeni öneriyorum. Schumann et al. (2022) araştırmalarına göre seans sonuna eklenecek Kettlebell Swing ve Carry kompleksleri kas hipertrofisini engellemez, toparlanma toleransını yükseltir.`;
+                headline = 'Antrenman Özeti: Kas Geliştirme Ağırlıklı Geçmiş';
+                summary = `Son antrenmanlarının <strong>%${Math.round(bbRatio * 100)}</strong> kadarı kas geliştirme odaklı. Eklemleri tek yönlü yüklenmeden korumak ve toparlanma hızını artırmak için <strong>Kas Odaklı (%70 Kas + %30 Kondisyon)</strong> dengeye geçmeni öneriyorum.`;
             } else if (funcRatio >= 0.55) {
                 recommendedDoctrine = 'func_hybrid';
-                headline = 'Biyomekanik Teşhis: Yoğun Fonksiyonel Fitness & Kondisyon Çalışıyorsun';
-                summary = `Son antrenmanlarının **%${Math.round(funcRatio * 100)}** kadarı dinamik ve metabolik kondisyon odaklı. Laktat eşiğin ve atletizmin zirvede; ancak maksimal kas kütlesini ve eklem çevresindeki kas zırhını pekiştirmek için aralara izole hipertrofi süpersetleri ekleyerek **Fonksiyonel-Dominant Hibrit (%70 Fonksiyonel + %30 Kas İğnesi)** doktrinine geçmeni öneriyorum.`;
+                headline = 'Antrenman Özeti: Yoğun Kondisyon & Hareketlilik';
+                summary = `Son antrenmanlarının <strong>%${Math.round(funcRatio * 100)}</strong> kadarı dinamik ve kondisyon odaklı. Kas hacmini ve eklem desteğini güçlendirmek için <strong>Kondisyon Odaklı (%70 Kondisyon + %30 Kas)</strong> dengeyi öneriyorum.`;
             } else {
                 recommendedDoctrine = 'balanced_hybrid';
-                headline = 'Biyomekanik Teşhis: Dengeli Atletik Temel';
-                summary = `Antrenman geçmişin dengeli bir çizgide seyrediyor (%${Math.round(bbRatio * 100)} Hipertrofi / %${Math.round(funcRatio * 100)} Fonksiyonel). Hem estetik ve hacimli bir fizik, hem de çevik ve patlayıcı bir güç için **%50 Hipertrofi / %50 Fonksiyonel Dengeli Hibrit Atlet** doktrinini korumanı öneriyorum.`;
+                headline = 'Antrenman Özeti: Dengeli Temel';
+                summary = `Antrenman geçmişin dengeli ilerliyor (%${Math.round(bbRatio * 100)} Kas / %${Math.round(funcRatio * 100)} Kondisyon). Hem güç hem kondisyon için <strong>Dengeli (%50 / %50)</strong> dağılımı korumanı öneriyorum.`;
             }
 
             if (rpeLogsCount > 0 && parseFloat(avgRpe) >= 9.0) {
                 recommendedDoctrine = 'balanced_hybrid';
-                summary += ` <br><br><em>⚠️ Son antrenmanlarında ortalama zorlanma düzeyin (RPE ${avgRpe}) merkezi sinir sistemi sınırına yaklaşmış; eklem ve MSS toparlanması için dengeli hibrit yüklenme önerildi.</em>`;
+                summary += ` <br><br><em>Son antrenmanlarında ortalama zorlanma düzeyin (${avgRpe}/10) yüksek; toparlanma için dengeli yüklenme önerildi.</em>`;
             }
 
             if (currentWaist && currentWaist > 90) {
-                summary += ` <br><br><em>Bel çevren (${currentWaist} cm) metabolik uyarılmaya ihtiyaç olduğunu gösteriyor; seans sonu kettlebell/metabolik finisher yağ yakımını hızlandıracaktır.</em>`;
+                summary += ` <br><br><em>Bel çevren (${currentWaist} cm) yağ yakımına uygun bir tempo öneriyor; seans sonu kondisyon ekleri verimi artıracaktır.</em>`;
             }
 
             return {
@@ -957,11 +968,11 @@
             }
 
             if (teaser) {
-                const note = '<div style="margin-top:4px; font-size:13px; color:var(--text-muted); font-weight:600;">Schumann (2022) Concurrent Training Destekli</div>';
+                const note = '<div style="margin-top:4px; font-size:13px; color:var(--text-muted); font-weight:600;">Kas Gelişimi ve Kondisyon Dengeli Planlama</div>';
                 if (telemetry.totalLogsCount > 0) {
-                    teaser.innerHTML = `<strong>AI Teşhisi:</strong> Son ${telemetry.recentLogsCount} antrenmanın <strong>%${Math.round(telemetry.bbRatio * 100)}</strong> Hipertrofi, <strong>%${Math.round(telemetry.funcRatio * 100)}</strong> Fonksiyonel. Önerilen: <strong>${(AI_DOCTRINES[telemetry.recommendedDoctrine] || {}).name}</strong>.${note}`;
+                    teaser.innerHTML = `<strong>Antrenman Özeti:</strong> Son ${telemetry.recentLogsCount} antrenmanın <strong>%${Math.round(telemetry.bbRatio * 100)}</strong> Kas, <strong>%${Math.round(telemetry.funcRatio * 100)}</strong> Kondisyon. Önerilen: <strong>${(AI_DOCTRINES[telemetry.recommendedDoctrine] || {}).name}</strong>.${note}`;
                 } else {
-                    teaser.innerHTML = `Yapay zeka antrenman geçmişini, tartı trendini ve vücut ölçülerini analiz ederek sana özel <strong>Hipertrofi + Fonksiyonel Fitness</strong> dengesini program öncesinde baştan kurgular.${note}`;
+                    teaser.innerHTML = `Antrenman geçmişini, kilo değişimini ve vücut ölçülerini dikkate alarak sana özel <strong>Kas + Kondisyon</strong> dengesini program öncesinde kurgular.${note}`;
                 }
             }
 
@@ -971,12 +982,15 @@
                 pills.push(`<span class="ai-rec-pill">Kas ve fonksiyonel gelişim</span>`);
                 if (wkStatus.completedThisWeekCount > 0) {
                     if (wkStatus.isThisWeekComplete) {
-                        pills.push(`<span class="ai-rec-pill" style="border-color:rgba(74,222,128,0.45); color:#15803D;">✅ Bu hafta ${wkStatus.completedThisWeekCount} seans bitti • Hedef: Gelecek Hafta</span>`);
+                        pills.push(`<span class="ai-rec-pill" style="border-color:rgba(74,222,128,0.45); color:#86EFAC;">Bu hafta ${wkStatus.completedThisWeekCount} seans bitti • Hedef: Gelecek Hafta</span>`);
                     } else {
                         pills.push(`<span class="ai-rec-pill">Bu hafta ${wkStatus.completedThisWeekCount}/3 tamamlandı</span>`);
                     }
                 }
                 stats.innerHTML = pills.join('');
+            }
+            if (typeof renderInlineReadinessSummary === 'function') {
+                renderInlineReadinessSummary(telemetry);
             }
         }
 
@@ -1412,27 +1426,29 @@
             const scaleCheck = evaluateScaleFreshness30Days();
             const precheck = window.activePrecheckState || { fatigue: 'none', scaleTrend: 'stable' };
 
-            if (!isDirectSingle && !isDirectFlow) {
-                if (!scaleCheck.isFresh && precheck.scaleTrend === 'gained') {
-                    currentSelectedDoctrine = 'func_hybrid';
-                } else if (!scaleCheck.isFresh && precheck.scaleTrend === 'lost') {
-                    currentSelectedDoctrine = 'bb_hybrid';
-                } else if (goalVal === 'strength') {
-                    currentSelectedDoctrine = 'bb_pure';
-                } else if (goalVal === 'endurance') {
-                    currentSelectedDoctrine = 'func_hybrid';
-                } else if (telemetry && telemetry.recommendedDoctrine && AI_DOCTRINES[telemetry.recommendedDoctrine]) {
-                    currentSelectedDoctrine = telemetry.recommendedDoctrine;
+            if (!window._userPinnedDoctrine) {
+                if (!isDirectSingle && !isDirectFlow) {
+                    if (!scaleCheck.isFresh && precheck.scaleTrend === 'gained') {
+                        currentSelectedDoctrine = 'func_hybrid';
+                    } else if (!scaleCheck.isFresh && precheck.scaleTrend === 'lost') {
+                        currentSelectedDoctrine = 'bb_hybrid';
+                    } else if (goalVal === 'strength') {
+                        currentSelectedDoctrine = 'bb_pure';
+                    } else if (goalVal === 'endurance') {
+                        currentSelectedDoctrine = 'func_hybrid';
+                    } else if (telemetry && telemetry.recommendedDoctrine && AI_DOCTRINES[telemetry.recommendedDoctrine]) {
+                        currentSelectedDoctrine = telemetry.recommendedDoctrine;
+                    } else {
+                        currentSelectedDoctrine = 'bb_hybrid';
+                    }
                 } else {
-                    currentSelectedDoctrine = 'bb_hybrid';
-                }
-            } else {
-                if (goalVal === 'strength') currentSelectedDoctrine = 'bb_pure';
-                else if (goalVal === 'endurance') currentSelectedDoctrine = 'func_hybrid';
-                else if (telemetry && telemetry.recommendedDoctrine && AI_DOCTRINES[telemetry.recommendedDoctrine]) {
-                    currentSelectedDoctrine = telemetry.recommendedDoctrine;
-                } else {
-                    currentSelectedDoctrine = 'bb_hybrid';
+                    if (goalVal === 'strength') currentSelectedDoctrine = 'bb_pure';
+                    else if (goalVal === 'endurance') currentSelectedDoctrine = 'func_hybrid';
+                    else if (telemetry && telemetry.recommendedDoctrine && AI_DOCTRINES[telemetry.recommendedDoctrine]) {
+                        currentSelectedDoctrine = telemetry.recommendedDoctrine;
+                    } else {
+                        currentSelectedDoctrine = 'bb_hybrid';
+                    }
                 }
             }
 
@@ -1589,12 +1605,8 @@
         }
         window.toggleAiDoctrineTeaser = toggleAiDoctrineTeaser;
 
-        function openAiHybridArchitectModal() {
-            const telemetry = getAiDoctrineTelemetry();
-            const modal = document.getElementById('aiHybridArchitectModal');
-            if (!modal) return;
-
-            // 1. Telemetri Gridini Doldur
+        function renderInlineReadinessSummary(telemetryOverride = null) {
+            const telemetry = telemetryOverride || getAiDoctrineTelemetry();
             const teleGrid = document.getElementById('aiTelemetryGrid');
             if (teleGrid) {
                 teleGrid.innerHTML = `
@@ -1603,51 +1615,69 @@
                         <span class="telemetry-pill-val">${telemetry.totalLogsCount} Antrenman</span>
                     </div>
                     <div class="telemetry-pill">
-                        <span class="telemetry-pill-label">Kas Hipertrofisi</span>
-                        <span class="telemetry-pill-val" style="color:#f59e0b;">%${Math.round(telemetry.bbRatio * 100)}</span>
+                        <span class="telemetry-pill-label">Kas Gelişimi</span>
+                        <span class="telemetry-pill-val" style="color:#FCD34D;">%${Math.round(telemetry.bbRatio * 100)}</span>
                     </div>
                     <div class="telemetry-pill">
-                        <span class="telemetry-pill-label">Fonksiyonel Kondisyon</span>
-                        <span class="telemetry-pill-val" style="color:#15803D;">%${Math.round(telemetry.funcRatio * 100)}</span>
+                        <span class="telemetry-pill-label">Kondisyon Payı</span>
+                        <span class="telemetry-pill-val" style="color:#86EFAC;">%${Math.round(telemetry.funcRatio * 100)}</span>
                     </div>
                     <div class="telemetry-pill">
-                        <span class="telemetry-pill-label">Son Kilo Durumu</span>
-                        <span class="telemetry-pill-val" style="color:#0369A1;">${telemetry.currentWeight ? telemetry.currentWeight + ' kg' : 'Girilmedi'}</span>
+                        <span class="telemetry-pill-label">Son Kilo</span>
+                        <span class="telemetry-pill-val" style="color:#7DD3FC;">${telemetry.currentWeight ? telemetry.currentWeight + ' kg' : 'Girilmedi'}</span>
                     </div>
                     <div class="telemetry-pill">
                         <span class="telemetry-pill-label">Bel Çevresi</span>
-                        <span class="telemetry-pill-val" style="color:#7E22CE;">${telemetry.currentWaist ? telemetry.currentWaist + ' cm' : 'Girilmedi'}</span>
+                        <span class="telemetry-pill-val" style="color:#DDD6FE;">${telemetry.currentWaist ? telemetry.currentWaist + ' cm' : 'Girilmedi'}</span>
                     </div>
                     <div class="telemetry-pill">
-                        <span class="telemetry-pill-label">Ortalama RPE</span>
-                        <span class="telemetry-pill-val">⚡ ${telemetry.avgRpe} / 10</span>
+                        <span class="telemetry-pill-label">Ortalama Zorluk</span>
+                        <span class="telemetry-pill-val">${telemetry.avgRpe} / 10</span>
                     </div>
                 `;
             }
 
-            // 2. Teşhis ve Rapor Kutusu
-            const headlineEl = document.getElementById('aiDiagnosticHeadline');
             const contentEl = document.getElementById('aiDiagnosticContent');
-            if (headlineEl) headlineEl.innerText = telemetry.headline;
-            if (contentEl) contentEl.innerHTML = telemetry.summary;
+            if (contentEl) {
+                contentEl.innerHTML = `
+                    <div style="font-weight:800; color:#F8FAFC; margin-bottom:4px;">${escapeHTML(telemetry.headline || 'Antrenman Özeti')}</div>
+                    <div>${telemetry.summary || ''}</div>
+                `;
+            }
 
-            // Önerilen doktrini otomatik seç
-            selectAiDoctrine(telemetry.recommendedDoctrine, false);
+            if (!window._userPinnedDoctrine) {
+                selectAiDoctrine(telemetry.recommendedDoctrine, false);
+            }
+        }
+        window.renderInlineReadinessSummary = renderInlineReadinessSummary;
 
-            modal.classList.add('active');
+        function openAiHybridArchitectModal() {
+            renderInlineReadinessSummary();
+            if (typeof toggleGenAdvancedAccordion === 'function') {
+                toggleGenAdvancedAccordion(true);
+            }
+            const acc = document.getElementById('genAdvancedAccordion');
+            if (acc && typeof acc.scrollIntoView === 'function') {
+                try { acc.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
+            }
         }
 
         function closeAiHybridArchitectModal() {
-            const modal = document.getElementById('aiHybridArchitectModal');
-            if (modal) modal.classList.remove('active');
+            // Inline unified accordion replaces the legacy modal
         }
 
         function selectAiDoctrine(docKey, updateHero = true) {
             if (!AI_DOCTRINES[docKey]) docKey = 'bb_hybrid';
             currentSelectedDoctrine = docKey;
+            if (updateHero) {
+                window._userPinnedDoctrine = true;
+            }
+            const visualDocKey = (docKey === 'func_pure' && !document.getElementById('docCard_func_pure'))
+                ? 'func_hybrid'
+                : docKey;
 
             document.querySelectorAll('#doctrineSelectionGrid .doctrine-card').forEach(card => {
-                const isTarget = card.id === `docCard_${docKey}`;
+                const isTarget = card.id === `docCard_${visualDocKey}`;
                 card.classList.toggle('selected', isTarget);
             });
 
@@ -1666,32 +1696,32 @@
 
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '⏳ Gemini Analiz Ediyor...';
+                btn.innerHTML = 'Analiz Ediliyor...';
             }
 
             container.style.display = 'block';
             container.innerHTML = `
                 <div style="display:flex; align-items:center; gap:8px; color:var(--gold);">
                     <span class="loading-spinner" style="display:inline-block; width:14px; height:14px; border:2px solid var(--gold); border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite;"></span>
-                    <span>Google Gemini AI Biyomekanik Motoru canlı olarak antrenman geçmişini ve literatür verilerini analiz ediyor...</span>
+                    <span>Antrenman geçmişin ve hazırlık durumun inceleniyor...</span>
                 </div>
             `;
 
-            const prompt = `Sen elit bir spor bilimci ve biyomekanik uzmanısın (Concurrent / Hybrid Training & Hypertrophy Specialist).
-Aşağıdaki sporcu telemetri verilerini incele:
-- Toplam Antrenman: ${telemetry.totalLogsCount} (Son 15 antrenmanda %${Math.round(telemetry.bbRatio * 100)} Bodybuilding, %${Math.round(telemetry.funcRatio * 100)} Fonksiyonel Fitness)
+            const prompt = `Sen elit bir spor antrenörüsün.
+Aşağıdaki sporcu özet verilerini incele:
+- Toplam Antrenman: ${telemetry.totalLogsCount} (Son 15 antrenmanda %${Math.round(telemetry.bbRatio * 100)} Kas Odaklı, %${Math.round(telemetry.funcRatio * 100)} Kondisyon Odaklı)
 - Son Kilo: ${telemetry.currentWeight ? telemetry.currentWeight + ' kg' : 'Belirtilmedi'} (${telemetry.weightTrend})
 - Bel Çevresi: ${telemetry.currentWaist ? telemetry.currentWaist + ' cm' : 'Belirtilmedi'}
-- Ortalama RPE: ${telemetry.avgRpe}
-- Seçilen Doktrin: ${activeDoc.name} (${activeDoc.shortTag})
+- Ortalama Zorluk: ${telemetry.avgRpe}
+- Seçilen Program Dengesi: ${activeDoc.name} (${activeDoc.shortTag})
 
 Lütfen sporcuya hitaben:
-1. Neden bu antrenman doktrininin (Schumann et al. 2022 Concurrent Training, Hickson interferans modeli ve Fasyal hatlar uyarınca) kendisi için en yüksek verimi sağlayacağını 2-3 vurucu paragrafta açıkla.
-2. Bodybuilding izole kas hipertrofisi ile Kettlebell / Fonksiyonel fitness hareketlerinin nasıl bir sinerji oluşturacağını anlat.
-3. Seans için 1 altın koç tavsiyesi ver.
-Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
+1. Bu program dengesinin neden kendisine en yüksek verimi sağlayacağını 2-3 kısa paragrafta sade dille açıkla.
+2. Kas geliştirme hareketleri ile fonksiyonel kondisyon hareketlerinin nasıl birlikte gelişim sağlayacağını anlat.
+3. Seans için 1 net koç tavsiyesi ver.
+Türkçe, sade, motive edici ve net yaz.`;
 
-            const sysPrompt = 'Sen Çelik Kodu platformunun Baş Biyomekanik ve Hibrit Antrenör yapay zekasısın. Bilimsel referanslarla doğrudan sporcuya konuşursun.';
+            const sysPrompt = 'Sen Çelik Kodu platformunun Baş Antrenör yapay zekasısın. Doğrudan ve sade bir dille sporcuya konuşursun.';
 
             try {
                 if (typeof callGeminiAPI === 'function') {
@@ -1699,29 +1729,28 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     container.innerHTML = `
                         <div style="background:rgba(168,85,247,0.12); border:1px solid rgba(168,85,247,0.4); border-radius:10px; padding:12px; margin-top:4px;">
                             <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
-                                <span style="font-size:14px;">✨</span>
-                                <strong style="color:#7E22CE; font-size:13px;">Google Gemini AI Canlı Akademik Biyomekanik Raporu</strong>
+                                <strong style="color:#DDD6FE; font-size:13px;">Canlı Antrenman Özeti</strong>
                             </div>
-                            <div style="font-size:12.5px; color:#0F172A; line-height:1.6; white-space:pre-line;">${reply}</div>
+                            <div style="font-size:12.5px; color:#E2E8F0; line-height:1.6; white-space:pre-line;">${reply}</div>
                         </div>
                     `;
                 } else {
                     throw new Error("Gemini API fonksiyonu tanımlı değil.");
                 }
             } catch (err) {
-                console.warn("Gemini rapor hatası, yerel bilimsel analiz gösteriliyor:", err);
+                console.warn("Gemini rapor hatası, yerel analiz gösteriliyor:", err);
                 container.innerHTML = `
                     <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:10px; padding:12px; margin-top:4px;">
-                        <strong style="color:var(--gold); font-size:12.5px;">📚 Schumann et al. (2022) Hibrit Literatür Notu:</strong>
-                        <p style="margin:6px 0 0 0; font-size:12px; color:#475569; line-height:1.5;">
-                            Seçilen <strong>${activeDoc.name}</strong> doktrini; izole hipertrofi ile yüksek eşikli motor üniteleri rekrüte ederken, fonksiyonel kettlebell ve core kompleksleriyle mitokondriyal toparlanma hızını maksimize eder. Eklemler tek düzlemli aşınmadan korunur ve iş kapasitesi artar.
+                        <strong style="color:var(--gold); font-size:12.5px;">Program Dengesi Notu:</strong>
+                        <p style="margin:6px 0 0 0; font-size:12px; color:#CBD5E1; line-height:1.5;">
+                            Seçilen <strong>${activeDoc.name}</strong> dengesi; kas hacmi çalışmalarını desteklerken, fonksiyonel hareketlerle eklem sağlığını ve dayanıklılığı artırır.
                         </p>
                     </div>
                 `;
             } finally {
                 if (btn) {
                     btn.disabled = false;
-                    btn.innerHTML = '✨ Raporu Yenile';
+                    btn.innerHTML = 'Raporu Yenile';
                 }
             }
         }
@@ -2090,7 +2119,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             for (let d = 0; d <= 6; d++) {
                 draftSchedule[d] = {
                     id: 'rest',
-                    title: '🧘 Dinlenme & Aktif Toparlanma',
+                    title: 'Dinlenme & Aktif Toparlanma',
                     type: 'rest',
                     desc: 'Hafif yürüyüş, mobilite veya tam istirahat',
                     rest: true
@@ -2495,7 +2524,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             window.activeWorkoutCarouselIndex = currentIdx;
 
             const cleanWorkoutTitle = String(w.title || 'Antrenman')
-                .replace(/^(?:⚔️\s*)?(?:BB-Dominant Hibrit|Saf Bodybuilding|Dengeli Hibrit Atlet|Fonksiyonel-Dominant|Saf Fonksiyonel & Kondisyon)\s*•\s*/i, '')
+                .replace(/^(?:\p{Extended_Pictographic}[\uFE0F\u200D]*\s*)?(?:BB-Dominant Hibrit|Saf Bodybuilding|Dengeli Hibrit Atlet|Fonksiyonel-Dominant|Saf Fonksiyonel & Kondisyon|Saf Kas|Kas Odaklı|Dengeli|Kondisyon Odaklı|Saf Kondisyon)\s*•\s*/iu, '')
                 .replace(/\s*\((?:Full Body|Push|Pull|İzole|Biceps & Triceps|%\d+[^)]*|AI Hibrit|Bacak Korumalı|Üst Vücut Korumalı|Sırt\/Bel Korumalı|Ardışık Gün Dengeli)\)/gi, '')
                 .trim() || 'Tüm Vücut Antrenmanı';
 
@@ -2539,7 +2568,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 }
 
                 const blockBadgeText = ex.blockLabel
-                    ? `${escapeHTML(ex.blockLabel)} • ${ex.blockType === 'superset' ? 'SÜPERSET' : 'DÜZ SET'}`
+                    ? `${escapeHTML(ex.blockLabel)} • ${ex.blockType === 'superset' ? 'SÜPERSET' : (ex.blockType === 'paced' ? 'SÜRELİ TUR' : (ex.blockType === 'complex' ? 'AKIŞ' : 'DÜZ SET'))}`
                     : `${idx + 1}. İSTASYON`;
                 const muscleText = ex.primarySubMuscles || ex.muscle || 'Hedef Kas';
 
@@ -2592,7 +2621,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                         ? 'db_swing'
                         : (fNameLower.includes('plank') || fNameLower.includes('hollow') || fNameLower.includes('core')
                             ? 'bw_plank'
-                            : (fNameLower.includes('burpee') || fNameLower.includes('emom')
+                            : (fNameLower.includes('burpee') || fNameLower.includes('süreli') || /\btur\b/.test(fNameLower)
                                 ? 'bw_burpee'
                                 : (fNameLower.includes('farmer') || fNameLower.includes('yürüyüş') || fNameLower.includes('taşıma') || fNameLower.includes('carry')
                                     ? 'db_farmers_walk'
@@ -3051,7 +3080,7 @@ Hareketler: ${wA.exercises.map(e => e.name + ' (' + e.muscle + ')').join(', ')}
 2. GÜN (${dayNameB}): ${wB.title}
 Hareketler: ${wB.exercises.map(e => e.name + ' (' + e.muscle + ')').join(', ')}
 
-BİYOMEKANİK KURALLAR (Schumann 2022 & Dr. Stuart McGill):
+BİYOMEKANİK KURALLAR:
 1. Ard arda gelen günlerde AYNI KAS GRUBUNA (örn. iki gün üst üste göğüs/itiş veya iki gün üst üste bacak/squat) ağır yük binemez (en az 48 saat toparlanma zorunludur).
 2. İki gün üst üste omurgaya ağır eksenel/makaslama yükü (Squat, Deadlift, Barbell Row) bindirilemez.
 3. 2. Günün hareketleri 1. Gün ile zıt veya tamamlayıcı olmalıdır (örn: 1. Gün Üst Vücut İtiş ise 2. Gün Alt Vücut veya Çekiş olmalı).
@@ -3093,7 +3122,7 @@ Aşağıdaki JSON şemasında çıktı ver:
                                         }
                                     });
                                     wB.consecutiveNote = parsed.explanation || 'AI: Ardışık gün çakışması önlendi.';
-                                    itemB.desc += ` • ⚡ ${wB.consecutiveNote}`;
+                                    itemB.desc += ` • ${wB.consecutiveNote}`;
                                 }
                             }
                         }
@@ -3109,7 +3138,7 @@ Aşağıdaki JSON şemasında çıktı ver:
         async function confirmPendingAiWeeklyPlan(mode = 'next') {
             const plan = window.pendingAiWeeklyPlan;
             if (!plan || !plan.draftSchedule) {
-                if (typeof showToast === 'function') showToast("⚠️ Onaylanacak haftalık taslak bulunamadı.");
+                if (typeof showToast === 'function') showToast("Onaylanacak haftalık taslak bulunamadı.");
                 return;
             }
             const user = getActiveUser();
@@ -3147,7 +3176,7 @@ Aşağıdaki JSON şemasında çıktı ver:
                 renderActiveWorkout();
                 if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
                 if (typeof showToast === 'function') {
-                    showToast(`✅ "${plan.templateName}" Gelecek Hafta takvimine işlendi! Bu haftaki tamamlanan antrenmanlarınız korundu.`);
+                    showToast(`"${plan.templateName}" Gelecek Hafta takvimine işlendi! Bu haftaki tamamlanan antrenmanlarınız korundu.`);
                 }
             } else {
                 // 'current_safe': Haftanın kalan günlerine esnek ve eşit aralıklı dağıtım (Hiçbir antrenman ezilmez!)
@@ -3172,7 +3201,7 @@ Aşağıdaki JSON şemasında çıktı ver:
                 }
 
                 if (availableDays.length === 0) {
-                    if (typeof showToast === 'function') showToast("⚠️ Bu hafta için uygun gün kalmadı; Gelecek Haftaya ekleyebilirsiniz.");
+                    if (typeof showToast === 'function') showToast("Bu hafta için uygun gün kalmadı; Gelecek Haftaya ekleyebilirsiniz.");
                     return;
                 }
 
@@ -3201,7 +3230,7 @@ Aşağıdaki JSON şemasında çıktı ver:
                 availableDays.forEach(d => {
                     currentSched[d] = {
                         id: 'rest',
-                        title: '🧘 Dinlenme & Aktif Toparlanma',
+                        title: 'Dinlenme & Aktif Toparlanma',
                         type: 'rest',
                         desc: 'Hafif yürüyüş, mobilite veya tam istirahat',
                         rest: true,
@@ -3216,8 +3245,8 @@ Aşağıdaki JSON şemasında çıktı ver:
                         const wkClone = JSON.parse(JSON.stringify(wk));
                         wkClone.id = 'ai_dyn_' + targetDay + '_' + nowTs + '_' + i;
                         wkClone.updatedAt = nowTs;
-                        const cleanSub = wkClone.title ? wkClone.title.replace(/^⚔️\s*(Pzt|Sal|Çar|Per|Cum|Cmt|Paz):\s*/i, '') : 'Antrenman';
-                        wkClone.title = `⚔️ ${DAY_NAMES_TR[targetDay]}: ${cleanSub}`;
+                        const cleanSub = wkClone.title ? wkClone.title.replace(/^(?:\p{Extended_Pictographic}[\uFE0F\u200D]*\s*)?(Pzt|Sal|Çar|Per|Cum|Cmt|Paz):\s*/iu, '') : 'Antrenman';
+                        wkClone.title = `${DAY_NAMES_TR[targetDay]}: ${cleanSub}`;
                         currentSched[targetDay] = {
                             id: wkClone.id,
                             title: wkClone.title,
@@ -3314,9 +3343,9 @@ Aşağıdaki JSON şemasında çıktı ver:
 
                 if (typeof showToast === 'function') {
                     if (hasConsecutiveFix) {
-                        showToast(`⚡ 3 antrenman haftaya dağıtıldı (${assignedDays.map(d => DAY_NAMES_TR[d]).join(' • ')}). Ard arda gelen günler için AI kas çakışmasını önleyen antagonist düzenleme uyguladı!`);
+                        showToast(`3 antrenman haftaya dağıtıldı (${assignedDays.map(d => DAY_NAMES_TR[d]).join(' • ')}). Ard arda gelen günler için kas çakışmasını önleyen düzenleme uygulandı!`);
                     } else {
-                        showToast(`✅ 3 antrenmanın tamamı haftaya (${assignedDays.map(d => DAY_NAMES_TR[d]).join(' • ')}) eşit aralıklarla yerleştirildi! Hiçbir antrenman ezilmedi.`);
+                        showToast(`3 antrenmanın tamamı haftaya (${assignedDays.map(d => DAY_NAMES_TR[d]).join(' • ')}) eşit aralıklarla yerleştirildi! Hiçbir antrenman ezilmedi.`);
                     }
                 }
             }
@@ -3778,14 +3807,15 @@ Aşağıdaki JSON şemasında çıktı ver:
             return p31.some(k => k === 'back_lats' || k === 'back_mid');
         }
 
-        function getExerciseOrderTier(ex, style = 'superset') {
+        function getExerciseOrderTier(ex, rawStyle = 'superset') {
+            const style = normalizeLegacyWorkoutStyle(rawStyle);
             if (!ex) return 3;
             if (isBurnoutOrFinisherExercise(ex)) return 5;
             const effCat = (typeof getEffectiveExerciseCategory === 'function') ? getEffectiveExerciseCategory(ex) : ex.category;
             const pk = (typeof getExercisePrimaryMuscleKeys === 'function') ? getExercisePrimaryMuscleKeys(ex) : [];
             const fam = (typeof getExerciseMovementFamily === 'function') ? getExerciseMovementFamily(ex) : '';
             const idLow = String(ex.id || '').toLowerCase();
-            const isFlowOrCondMode = style === 'emom_conditioning' || style === 'complex' || style === 'flow';
+            const isFlowOrCondMode = style === 'paced_conditioning' || style === 'complex' || style === 'flow';
             const isCond = effCat === 'conditioning' || effCat === 'cardio' || ex.category === 'conditioning' || ex.category === 'cardio'
                 || /jumping_jack|high_knees|butt_kicks|mountain_climber|skater_hops|lateral_shuffle|squat_thrust|burpee|jump_rope|running|walking/.test(idLow);
             if (isCond && !isFlowOrCondMode) return 4;
@@ -3866,9 +3896,10 @@ Aşağıdaki JSON şemasında çıktı ver:
             return p;
         }
 
-        function enforceUniversalBiomechanicalOrder(exercises, style = 'superset') {
+        function enforceUniversalBiomechanicalOrder(exercises, rawStyle = 'superset') {
+            const style = normalizeLegacyWorkoutStyle(rawStyle);
             if (!Array.isArray(exercises) || exercises.length <= 1) return exercises;
-            if (style === 'complex' || style === 'flow' || style === 'emom_conditioning') {
+            if (style === 'complex' || style === 'flow' || style === 'paced_conditioning') {
                 const nonBurnout = exercises.filter(e => !isBurnoutOrFinisherExercise(e));
                 const burnouts = exercises.filter(e => isBurnoutOrFinisherExercise(e));
                 return [...nonBurnout, ...burnouts];
@@ -4186,7 +4217,7 @@ Aşağıdaki JSON şemasında çıktı ver:
             const finisherCandidates = [
                 { exId: "db_swing", family: "ballistic_hip_hinge", name: "3 Dk Tabata Balistik Bitiş", desc: "20 sn Maksimum Tempolu Swing / Snatch + 10 sn Dinlenme (4 Tur)" },
                 { exId: "db_farmers_walk", family: "loaded_carry", name: "Çiftçi Yürüyüşü (Farmer's Walk / Carry Burnout)", desc: "Mümkün olan en ağır dambıllarla 3 tur 40 metre kesintisiz yürüyüş." },
-                { exId: "bw_burpee", family: "fullbody_metcon_burpee", name: "3 Dk EMOM Kondisyon Zırhı (Burpee / Mountain Climber)", desc: "Her dakika başında 10 Burpee veya 30 sn Mountain Climber, kalan sürede aktif dinlenme." },
+                { exId: "bw_burpee", family: "fullbody_metcon_burpee", name: "3 Dk Süreli Tur Kondisyon Zırhı (Burpee / Mountain Climber)", desc: "Her dakika başında 10 Burpee veya 30 sn Mountain Climber, kalan sürede aktif dinlenme." },
                 { exId: "bw_plank", family: "core_anterior_plank", name: "2 Dk İzometrik Core & Hollow Hold Burnout", desc: "40 sn RKC Plank + 20 sn Dinlenme × 2 Tur maksimum karın duvarı sıkışı." },
                 { exId: "bw_mountain_climber", family: "core_dynamic_climber", name: "2 Dk Dağ Tırmanışı (Mountain Climber Burnout)", desc: "30 sn maksimum tempo + 15 sn dinlenme × 3 tur." },
                 { exId: "bw_hollow_body", family: "core_isometric_hollow", name: "2 Dk Hollow Body Zırh Tutuşu", desc: "30 sn Hollow Body Hold + 15 sn dinlenme × 3 tur." },
@@ -4303,8 +4334,9 @@ Aşağıdaki JSON şemasında çıktı ver:
         }
         window.sanitizeAndAdaptPresetWorkout = sanitizeAndAdaptPresetWorkout;
 
-        function assignAcademicBlockStructure(exercises, style, baseScheme) {
+        function assignAcademicBlockStructure(exercises, rawStyle, baseScheme) {
             if (!Array.isArray(exercises)) return [];
+            const style = normalizeLegacyWorkoutStyle(rawStyle);
             const straightRest = (baseScheme && baseScheme.straightRest) || 90;
             const supersetRest = (baseScheme && baseScheme.supersetRest) || 45;
             const midRest = 60;
@@ -4328,26 +4360,25 @@ Aşağıdaki JSON şemasında çıktı ver:
                 }
                 ex.targetReps = normTarget.reps;
                 if (style === 'superset') {
-                    // ORTA / AKADEMİK HİBRİT (Schumann et al. 2022 & Weakley et al. 2017):
-                    // 1 Düz Bileşik Set + 1 Süperset (A1+A2) + 1 Düz Bileşik Set + 1 Süperset (B1+B2)
+                    // ORTA DENGELİ: 1 Düz Bileşik Set + 1 Süperset (A1+A2) + 1 Düz Bileşik Set + 1 Süperset (B1+B2)
                     if (idx === 0) {
                         straightSeq++;
                         ex.blockType = 'straight';
                         ex.blockLabel = String(straightSeq);
-                        ex.blockHeader = `🎯 BLOK ${straightSeq}: ANA BİLEŞİK DÜZ SET (${straightRest} sn Tam Dinlenme)`;
+                        ex.blockHeader = `BLOK ${straightSeq}: ANA BİLEŞİK DÜZ SET (${straightRest} sn Tam Dinlenme)`;
                         ex.customRest = straightRest;
                     } else if (idx === 1 && total >= 3) {
                         const pairOk = (idx + 1 < total) && isSupersetPairValid(optimized[1], optimized[2]);
                         if (pairOk) {
                             ex.blockType = 'superset';
                             ex.blockLabel = 'A1';
-                            ex.blockHeader = `🔥 SÜPERSET BLOK A (A1 + A2 Peş Peşe • Tur Sonu ${midRest} sn Dinlenme)`;
+                            ex.blockHeader = `SÜPERSET BLOK A (A1 + A2 Peş Peşe • Tur Sonu ${midRest} sn Dinlenme)`;
                             ex.customRest = midRest;
                         } else {
                             straightSeq++;
                             ex.blockType = 'straight';
                             ex.blockLabel = String(straightSeq);
-                            ex.blockHeader = `🎯 BLOK ${straightSeq}: BİLEŞİK DÜZ SET (75 sn Dinlenme)`;
+                            ex.blockHeader = `BLOK ${straightSeq}: BİLEŞİK DÜZ SET (75 sn Dinlenme)`;
                             ex.customRest = 75;
                         }
                     } else if (idx === 2 && total >= 3) {
@@ -4361,27 +4392,27 @@ Aşağıdaki JSON şemasında çıktı ver:
                             straightSeq++;
                             ex.blockType = 'straight';
                             ex.blockLabel = String(straightSeq);
-                            ex.blockHeader = `🎯 BLOK ${straightSeq}: TAMAMLAYICI DÜZ SET (75 sn Dinlenme)`;
+                            ex.blockHeader = `BLOK ${straightSeq}: TAMAMLAYICI DÜZ SET (75 sn Dinlenme)`;
                             ex.customRest = 75;
                         }
                     } else if (idx === 3) {
                         straightSeq++;
                         ex.blockType = 'straight';
                         ex.blockLabel = String(straightSeq);
-                        ex.blockHeader = `🎯 BLOK ${straightSeq}: İKİNCİL BİLEŞİK DÜZ SET (75 sn Dinlenme)`;
+                        ex.blockHeader = `BLOK ${straightSeq}: İKİNCİL BİLEŞİK DÜZ SET (75 sn Dinlenme)`;
                         ex.customRest = 75;
                     } else if (idx === 4 && total >= 6) {
                         const pairOk = (idx + 1 < total) && isSupersetPairValid(optimized[4], optimized[5]);
                         if (pairOk) {
                             ex.blockType = 'superset';
                             ex.blockLabel = 'B1';
-                            ex.blockHeader = `🔥 SÜPERSET BLOK B (B1 + B2 Peş Peşe • Tur Sonu ${supersetRest} sn Dinlenme)`;
+                            ex.blockHeader = `SÜPERSET BLOK B (B1 + B2 Peş Peşe • Tur Sonu ${supersetRest} sn Dinlenme)`;
                             ex.customRest = supersetRest;
                         } else {
                             straightSeq++;
                             ex.blockType = 'straight';
                             ex.blockLabel = String(straightSeq);
-                            ex.blockHeader = `🎯 BLOK ${straightSeq}: TAMAMLAYICI DÜZ SET (${supersetRest} sn Dinlenme)`;
+                            ex.blockHeader = `BLOK ${straightSeq}: TAMAMLAYICI DÜZ SET (${supersetRest} sn Dinlenme)`;
                             ex.customRest = supersetRest;
                         }
                     } else if (idx === 5 && total >= 6) {
@@ -4395,20 +4426,20 @@ Aşağıdaki JSON şemasında çıktı ver:
                             straightSeq++;
                             ex.blockType = 'straight';
                             ex.blockLabel = String(straightSeq);
-                            ex.blockHeader = `🎯 BLOK ${straightSeq}: TAMAMLAYICI DÜZ SET (${supersetRest} sn Dinlenme)`;
+                            ex.blockHeader = `BLOK ${straightSeq}: TAMAMLAYICI DÜZ SET (${supersetRest} sn Dinlenme)`;
                             ex.customRest = supersetRest;
                         }
                     } else if (idx === 6) {
                         straightSeq++;
                         ex.blockType = 'straight';
                         ex.blockLabel = String(straightSeq);
-                        ex.blockHeader = `🎯 BLOK ${straightSeq}: TAMAMLAYICI DÜZ SET (${midRest} sn Dinlenme)`;
+                        ex.blockHeader = `BLOK ${straightSeq}: TAMAMLAYICI DÜZ SET (${midRest} sn Dinlenme)`;
                         ex.customRest = midRest;
                     } else {
                         straightSeq++;
                         ex.blockType = 'straight';
                         ex.blockLabel = String(straightSeq);
-                        ex.blockHeader = `🎯 BLOK ${straightSeq}: TAMAMLAYICI SET (${supersetRest} sn Dinlenme)`;
+                        ex.blockHeader = `BLOK ${straightSeq}: TAMAMLAYICI SET (${supersetRest} sn Dinlenme)`;
                         ex.customRest = supersetRest;
                     }
                 } else if (style === 'superset_light') {
@@ -4418,7 +4449,7 @@ Aşağıdaki JSON şemasında çıktı ver:
                     if (pairOk && idx === supersetStartIdx) {
                         ex.blockType = 'superset';
                         ex.blockLabel = 'A1';
-                        ex.blockHeader = `🔥 KAPANIŞ SÜPERSETİ BLOK A (A1 + A2 Peş Peşe • Tur Sonu ${supersetRest} sn Dinlenme)`;
+                        ex.blockHeader = `KAPANIŞ SÜPERSETİ BLOK A (A1 + A2 Peş Peşe • Tur Sonu ${supersetRest} sn Dinlenme)`;
                         ex.customRest = supersetRest;
                     } else if (pairOk && idx === supersetStartIdx + 1) {
                         ex.blockType = 'superset';
@@ -4430,7 +4461,7 @@ Aşağıdaki JSON şemasında çıktı ver:
                         ex.blockType = 'straight';
                         ex.blockLabel = String(straightNo);
                         ex.blockHeader = straightNo === 1
-                            ? `🛡️ DÜZ SET BLOKLARI (75-${straightRest} sn Tam Toparlanma)`
+                            ? `DÜZ SET BLOKLARI (75-${straightRest} sn Tam Toparlanma)`
                             : null;
                         ex.customRest = idx === 0 ? straightRest : 75;
                     }
@@ -4448,7 +4479,7 @@ Aşağıdaki JSON şemasında çıktı ver:
                     if (isFirstInPair && hasPartner && pairOk) {
                         ex.blockType = 'superset';
                         ex.blockLabel = `${blockLetter}1`;
-                        ex.blockHeader = `🔥 SÜPERSET BLOK ${blockLetter} (${blockLetter}1 + ${blockLetter}2 Dinlenmeden Peş Peşe • ${supersetRest} sn Dinlenme)`;
+                        ex.blockHeader = `SÜPERSET BLOK ${blockLetter} (${blockLetter}1 + ${blockLetter}2 Dinlenmeden Peş Peşe • ${supersetRest} sn Dinlenme)`;
                         ex.customRest = supersetRest;
                     } else if (!isFirstInPair && pairOk) {
                         ex.blockType = 'superset';
@@ -4458,33 +4489,33 @@ Aşağıdaki JSON şemasında çıktı ver:
                     } else {
                         ex.blockType = 'straight';
                         ex.blockLabel = String(idx + 1);
-                        ex.blockHeader = `🎯 GÜVENLİ DÜZ SET ${idx + 1} (${straightRest} sn Dinlenme)`;
+                        ex.blockHeader = `GÜVENLİ DÜZ SET ${idx + 1} (${straightRest} sn Dinlenme)`;
                         ex.customRest = straightRest;
                     }
-                } else if (style === 'emom_strength' || style === 'emom_hypertrophy' || style === 'emom_conditioning' || style === 'emom') {
-                    ex.blockType = 'emom';
+                } else if (style === 'paced_strength' || style === 'paced_hypertrophy' || style === 'paced_conditioning' || style === 'paced') {
+                    ex.blockType = 'paced';
                     ex.blockLabel = `DK ${idx + 1}`;
-                    const emomTitleMap = {
-                        emom_strength: '⚡ KUVVET EMOM',
-                        emom_hypertrophy: '💪 KAS EMOM',
-                        emom_conditioning: '⏱️ KONDİSYON EMOM',
-                        emom: '⏱️ EMOM DÖNGÜSÜ'
+                    const pacedTitleMap = {
+                        paced_strength: 'GÜÇ ODAKLI',
+                        paced_hypertrophy: 'KAS GELİŞİMİ',
+                        paced_conditioning: 'NABIZ VE KONDİSYON',
+                        paced: 'SÜREYE GÖRE TUR'
                     };
-                    const emomTitle = emomTitleMap[style] || '⏱️ EMOM DÖNGÜSÜ';
+                    const pacedTitle = pacedTitleMap[style] || 'SÜREYE GÖRE TUR';
                     ex.blockHeader = idx === 0
-                        ? `${emomTitle} <button type="button" onclick="event.stopPropagation(); showEmomInfoModal('${style}')" title="EMOM Kuralları" style="margin-left:6px;width:20px;height:20px;border-radius:50%;border:1px solid rgba(56,189,248,0.6);background:rgba(56,189,248,0.15);color:#38bdf8;font-size:11px;font-weight:800;cursor:pointer;vertical-align:middle;line-height:1;">i</button>`
+                        ? `${pacedTitle} <button type="button" onclick="event.stopPropagation(); showPacedRoundInfoModal('${style}')" title="Tur Kuralları" style="margin-left:6px;width:20px;height:20px;border-radius:50%;border:1px solid rgba(56,189,248,0.6);background:rgba(56,189,248,0.15);color:#38bdf8;font-size:11px;font-weight:800;cursor:pointer;vertical-align:middle;line-height:1;">i</button>`
                         : null;
                     ex.customRest = (baseScheme && baseScheme.rest) || 30;
                 } else if (style === 'complex' || style === 'flow') {
                     ex.blockType = 'complex';
                     ex.blockLabel = `İstasyon ${idx + 1}`;
-                    ex.blockHeader = idx === 0 ? `⚔️ ÇELİK AKIŞI • KESİNTİSİZ KOMPLEKS (4 Tur • Tur Sonu ${(baseScheme && baseScheme.rest) || 90} sn Dinlenme)` : null;
+                    ex.blockHeader = idx === 0 ? `ÇELİK AKIŞI • KESİNTİSİZ KOMPLEKS (4 Tur • Tur Sonu ${(baseScheme && baseScheme.rest) || 90} sn Dinlenme)` : null;
                     ex.customRest = (idx === total - 1) ? ((baseScheme && baseScheme.rest) || 90) : 0;
                 } else {
                     // KLASİK DÜZ SET (straight)
                     ex.blockType = 'straight';
                     ex.blockLabel = String(idx + 1);
-                    ex.blockHeader = idx === 0 ? `🛡️ KLASİK DÜZ SET BLOKLARI (Set Arası ${baseScheme ? baseScheme.rest : 75} sn Dinlenme)` : null;
+                    ex.blockHeader = idx === 0 ? `KLASİK DÜZ SET BLOKLARI (Set Arası ${baseScheme ? baseScheme.rest : 75} sn Dinlenme)` : null;
                     ex.customRest = (baseScheme && baseScheme.rest) || 75;
                 }
                 return ex;
@@ -4802,7 +4833,7 @@ Aşağıdaki JSON şemasında çıktı ver:
                             : (Array.isArray(ex.sets) ? ex.sets.filter(s => s && s.completed).length : (Number(ex.sets) || 3));
                         const setsCount = cSets > 0 ? cSets : 3;
 
-                        // AKADEMİK + SAAT TELEMETRİSİ TOPARLANMA EĞRİSİ (Damas 2016, Pareja-Blanco 2020, Maeo 2023):
+                        // SAAT VE GEÇMİŞ TOPARLANMA EĞRİSİ:
                         const isSpinalEx = typeof isSpinalAxialLoadedExercise === 'function' && isSpinalAxialLoadedExercise(dbEx);
                         if (isSpinalEx && ageHours <= 60 && !ex.isInterSetExtra) {
                             hadSpinalHinge48h = true;
@@ -5365,7 +5396,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     });
                 }
                 if (activeAi.summary) {
-                    appliedFilters.push(`🤖 AI: ${activeAi.summary}`);
+                    appliedFilters.push(`AI: ${activeAi.summary}`);
                 }
                 if (Array.isArray(activeAi.excludedExerciseNames)) {
                     activeAi.excludedExerciseNames.forEach(exName => {
@@ -5566,7 +5597,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             const goalEl = document.getElementById('paramGoal');
             const durEl = document.getElementById('paramDuration');
 
-            const style = (styleEl && styleEl.value) ? styleEl.value : 'superset';
+            const style = normalizeLegacyWorkoutStyle((styleEl && styleEl.value) ? styleEl.value : 'superset');
             const goal = (goalEl && goalEl.value) ? goalEl.value : 'hypertrophy';
             const duration = (durEl && parseInt(durEl.value, 10) > 0) ? parseInt(durEl.value, 10) : 45;
             const scheme = getRepAndRestScheme(goal, style);
@@ -5687,7 +5718,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
 
                 const pk = (typeof getExercisePrimaryMuscleKeys === 'function') ? getExercisePrimaryMuscleKeys(ex) : [];
                 const effCat = (typeof getEffectiveExerciseCategory === 'function') ? getEffectiveExerciseCategory(ex) : ex.category;
-                const isCondAllowed = style === 'emom_conditioning' && (effCat === 'cardio' || ex.isComplex || /burpee|swing|thruster|mountain|jack|rope|skater|thrust|high_knees|butt_kicks|shuffle/i.test(ex.id || ''));
+                const isCondAllowed = style === 'paced_conditioning' && (effCat === 'cardio' || ex.isComplex || /burpee|swing|thruster|mountain|jack|rope|skater|thrust|high_knees|butt_kicks|shuffle/i.test(ex.id || ''));
                 if (isCondAllowed) return true;
 
                 const isCardioJunk = effCat === 'cardio' || /jumping_jack|high_knees|butt_kicks|running|walking|jump_rope|skater|shuffle|squat_thrust/i.test(ex.id || '');
@@ -5713,16 +5744,16 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         return pk.some(k => k.startsWith('legs_')) || effCat === 'legs_quad' || effCat === 'legs_hinge';
                     }
                     if (sp === 'lower') {
-                        if (effCat === 'core' && !pk.some(k => k.startsWith('legs_'))) return chosenCoreCount < 1 && style !== 'emom_conditioning';
+                        if (effCat === 'core' && !pk.some(k => k.startsWith('legs_'))) return chosenCoreCount < 1 && style !== 'paced_conditioning';
                         return pk.some(k => k.startsWith('legs_')) || effCat === 'legs_quad' || effCat === 'legs_hinge';
                     }
                     if (sp === 'iso_core' || sp === 'core' || sp === 'core_functional') return pk.some(k => k.startsWith('core_')) || effCat === 'core';
                     if (sp === 'upper_push') {
-                        if (effCat === 'core' && !pk.some(k => k.startsWith('chest_') || k.startsWith('shoulders_') || k.startsWith('triceps_'))) return chosenCoreCount < 1 && style !== 'emom_conditioning';
+                        if (effCat === 'core' && !pk.some(k => k.startsWith('chest_') || k.startsWith('shoulders_') || k.startsWith('triceps_'))) return chosenCoreCount < 1 && style !== 'paced_conditioning';
                         return effCat === 'push' || pk.some(k => k.startsWith('chest_') || k === 'shoulders_front' || k === 'shoulders_side' || k.startsWith('triceps_'));
                     }
                     if (sp === 'upper_pull') {
-                        if (effCat === 'core' && !pk.some(k => k.startsWith('back_') || k === 'biceps' || k === 'shoulders_rear')) return chosenCoreCount < 1 && style !== 'emom_conditioning';
+                        if (effCat === 'core' && !pk.some(k => k.startsWith('back_') || k === 'biceps' || k === 'shoulders_rear')) return chosenCoreCount < 1 && style !== 'paced_conditioning';
                         return effCat === 'pull' || pk.some(k => k.startsWith('back_') || k === 'shoulders_rear' || k === 'biceps' || k === 'traps');
                     }
                     if (sp === 'upper') return effCat === 'push' || effCat === 'pull' || (effCat === 'core' && chosenCoreCount < 1);
@@ -6289,7 +6320,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     const effCat = getEffectiveExerciseCategory(ex);
                     return effCat === 'conditioning' || ex.category === 'conditioning' || effCat === 'cardio' || ex.category === 'cardio';
                 };
-                const hasConditioningNeed = style === 'emom_conditioning'
+                const hasConditioningNeed = style === 'paced_conditioning'
                     || goal === 'endurance'
                     || /kondisyon|kardiyo|cardio|hiit|yağ yak|nabız|metabolik|dayanıklılık/.test(String(customWish || '').toLocaleLowerCase('tr-TR'));
 
@@ -6317,10 +6348,10 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         const nonCondPool = finalPool.filter(e => !isConditioningMovementExercise(e));
                         if (nonCondPool.length > 0) finalPool = nonCondPool;
                     }
-                    if ((style === 'emom_strength' || goal === 'strength') && Array.isArray(finalPool)) {
+                    if ((style === 'paced_strength' || goal === 'strength') && Array.isArray(finalPool)) {
                         const compOnly = finalPool.filter(e => e.mechanic === 'compound' || e.isComplex);
                         if (compOnly.length > 0) finalPool = compOnly;
-                        if (style === 'emom_strength') {
+                        if (style === 'paced_strength') {
                             const strRegex = /squat|deadlift|rdl|bench|press|row|pullup|chinup|pulldown|clean|thruster/i;
                             const strPreferred = finalPool.filter(e => strRegex.test(e.id || '') || strRegex.test(e.name || ''));
                             if (strPreferred.length > 0) finalPool = strPreferred;
@@ -6355,7 +6386,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         const nonCondMode = modeBase.filter(e => !isConditioningMovementExercise(e));
                         if (nonCondMode.length > 0) modeBase = nonCondMode;
                     }
-                    if (goal === 'strength' || style === 'emom_strength') {
+                    if (goal === 'strength' || style === 'paced_strength') {
                         const modeComp = modeBase.filter(e => e.mechanic === 'compound' || e.isComplex);
                         if (modeComp.length > 0) modeBase = modeComp;
                     }
@@ -6379,13 +6410,13 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         const nonCondFb = fallbackPool.filter(e => !isConditioningMovementExercise(e));
                         if (nonCondFb.length > 0) fallbackPool = nonCondFb;
                     }
-                    if (goal === 'strength' || style === 'emom_strength') {
+                    if (goal === 'strength' || style === 'paced_strength') {
                         const fbComp = fallbackPool.filter(e => e.mechanic === 'compound' || e.isComplex);
                         if (fbComp.length > 0) fallbackPool = fbComp;
                     }
                     chosen = pickRandom(fallbackPool);
                 }
-                if (!chosen && (isComplexFlow || style === 'emom_conditioning')) {
+                if (!chosen && (isComplexFlow || style === 'paced_conditioning')) {
                     let nonTwinAnyCatPool = filterToUnworkedAdjacentSubMuscles(
                         preferWeeklyFreshExercises(
                             EXERCISES_DB.filter(ex => isCandidateBiochemicallyCompatible(ex, hasLowerOrFullOrFuncSplit) && slotPoolGuard(ex))
@@ -6698,7 +6729,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 if (chosenExercises.length >= targetCount || typeof EXERCISES_DB === 'undefined' || !Array.isArray(EXERCISES_DB)) return true;
 
                 // Aşama 1: Dün çalışmamış (0 çakışmalı) uygun hareketlerle eksik slotları doldur
-                const canUseComplexFallback = hasLowerOrFullOrFuncSplit || style === 'emom_conditioning';
+                const canUseComplexFallback = hasLowerOrFullOrFuncSplit || style === 'paced_conditioning';
                 while (chosenExercises.length < targetCount) {
                     let strictPool = preferWeeklyFreshExercises(EXERCISES_DB.filter(c => isStrictCandidateValid(c, false, false)));
                     if (strictPool.length === 0 && canUseComplexFallback) {
@@ -6719,7 +6750,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                             if (typeof window !== 'undefined' && typeof window._interactiveFatigueOverrideConfirmed === 'boolean') {
                                 confirmedFatigue = window._interactiveFatigueOverrideConfirmed;
                             } else if (typeof confirm === 'function') {
-                                confirmedFatigue = confirm("⚠️ Seçtiğiniz bölge dün yapılan antrenmanda çalıştı. Yorgun kasları bugün tekrar çalıştırmak istiyor musunuz?");
+                                confirmedFatigue = confirm("Seçtiğiniz bölge dün yapılan antrenmanda çalıştı. Yorgun kasları bugün tekrar çalıştırmak istiyor musunuz?");
                             }
                             if (confirmedFatigue) {
                                 userConfirmedFatiguedSplit = true;
@@ -7155,8 +7186,8 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 }
             } else if (structuredExercises.length < targetCount) {
                 equipmentWarning = fatigueWarning || `Dinlenme/ekipman sınırı: ${structuredExercises.length}/${targetCount} hareket`;
-            } else if (style === 'emom_strength' && structuredExercises.every(e => e.equipment === 'bodyweight')) {
-                equipmentWarning = 'Kuvvet EMOM ağır yük gerektirir; yalnızca vücut ağırlığı sınırlıdır.';
+            } else if (style === 'paced_strength' && structuredExercises.every(e => e.equipment === 'bodyweight')) {
+                equipmentWarning = 'Güç Odaklı tur ağır yük gerektirir; yalnızca vücut ağırlığı sınırlıdır.';
             } else if (usedCooldownRepeat) {
                 equipmentWarning = 'Dar ekipman: hareket tekrarlandı';
             } else if (fatigueWarning) {
@@ -7297,7 +7328,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             w.exercises = structuredList;
 
             const cleanWorkoutTitle = String(w.title || 'Antrenman')
-                .replace(/^(?:⚔️\s*)?(?:BB-Dominant Hibrit|Saf Bodybuilding|Dengeli Hibrit Atlet|Fonksiyonel-Dominant|Saf Fonksiyonel & Kondisyon)\s*•\s*/i, '')
+                .replace(/^(?:\p{Extended_Pictographic}[\uFE0F\u200D]*\s*)?(?:BB-Dominant Hibrit|Saf Bodybuilding|Dengeli Hibrit Atlet|Fonksiyonel-Dominant|Saf Fonksiyonel & Kondisyon|Saf Kas|Kas Odaklı|Dengeli|Kondisyon Odaklı|Saf Kondisyon)\s*•\s*/iu, '')
                 .replace(/\s*\((?:Full Body|Push|Pull|İzole|Biceps & Triceps|%\d+[^)]*|AI Hibrit|Bacak Korumalı|Üst Vücut Korumalı|Sırt\/Bel Korumalı|Ardışık Gün Dengeli)\)/gi, '')
                 .trim() || 'Tüm Vücut Antrenmanı';
             w.title = cleanWorkoutTitle;
@@ -7345,7 +7376,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 } catch(e) {}
             }
             if (!workout || !Array.isArray(workout.exercises) || workout.exercises.length === 0) {
-                if (typeof showToast === 'function') showToast("⚠️ Atanacak hazır program bulunamadı.");
+                if (typeof showToast === 'function') showToast("Atanacak hazır program bulunamadı.");
                 return;
             }
             const user = getActiveUser();
@@ -7368,7 +7399,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
             if (typeof playAlertSound === 'function') playAlertSound();
             if (typeof showToast === 'function') {
-                showToast(`📅 "${workout.title}" Gelecek Hafta ${dayName} gününe başarıyla atandı! Bu haftaki tamamlanan antrenmanlarınız korundu.`);
+                showToast(`"${workout.title}" Gelecek Hafta ${dayName} gününe başarıyla atandı! Bu haftaki tamamlanan antrenmanlarınız korundu.`);
             }
         }
         window.assignGeneratedToNextWeekDay = assignGeneratedToNextWeekDay;
@@ -8100,26 +8131,26 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
 
         // ==================== EXERCISE PICKER & ALTERNATIVE MODAL LOGIC ====================
         const PICKER_MUSCLE_GROUPS = [
-            { key: 'chest', name: 'Göğüs', icon: '🛡️', category: 'push' },
-            { key: 'back', name: 'Sırt & Kanat', icon: '🏹', category: 'pull' },
-            { key: 'shoulders', name: 'Omuz', icon: '⚔️', category: 'push' },
-            { key: 'quads', name: 'Ön Bacak (Quad)', icon: '🦵', category: 'legs_quad' },
-            { key: 'hamstrings', name: 'Arka Bacak (Hamstring)', icon: '🦿', category: 'legs_hinge' },
-            { key: 'glutes', name: 'Kalça (Glute)', icon: '🍑', category: 'legs_hinge' },
-            { key: 'biceps', name: 'Biceps (Pazı)', icon: '💪', category: 'pull' },
-            { key: 'triceps', name: 'Triceps (Arka Kol)', icon: '⚡', category: 'push' },
-            { key: 'core', name: 'Karın & Core', icon: '🧱', category: 'core' },
-            { key: 'calves', name: 'Kalf & Alt Bacak', icon: '🦶', category: 'legs' }
+            { key: 'chest', name: 'Göğüs', icon: '', category: 'push' },
+            { key: 'back', name: 'Sırt & Kanat', icon: '', category: 'pull' },
+            { key: 'shoulders', name: 'Omuz', icon: '', category: 'push' },
+            { key: 'quads', name: 'Ön Bacak (Quad)', icon: '', category: 'legs_quad' },
+            { key: 'hamstrings', name: 'Arka Bacak (Hamstring)', icon: '', category: 'legs_hinge' },
+            { key: 'glutes', name: 'Kalça (Glute)', icon: '', category: 'legs_hinge' },
+            { key: 'biceps', name: 'Biceps (Pazı)', icon: '', category: 'pull' },
+            { key: 'triceps', name: 'Triceps (Arka Kol)', icon: '', category: 'push' },
+            { key: 'core', name: 'Karın & Core', icon: '', category: 'core' },
+            { key: 'calves', name: 'Kalf & Alt Bacak', icon: '', category: 'legs' }
         ];
 
         const EQUIP_LABELS = {
-            dumbbell: { label: 'Dambıl', icon: '🏋️' },
-            kettlebell: { label: 'Kettlebell', icon: '🔔' },
-            barbell: { label: 'Barbell', icon: '⚡' },
-            machine: { label: 'Makine/Kablo', icon: '⚙️' },
-            mini_band: { label: 'Kısa Bant', icon: '🔄' },
-            resistance_band: { label: 'Uzun Bant', icon: '➰' },
-            bodyweight: { label: 'Vücut Ağırlığı', icon: '🤸' }
+            dumbbell: { label: 'Dambıl', icon: '' },
+            kettlebell: { label: 'Kettlebell', icon: '' },
+            barbell: { label: 'Barbell', icon: '' },
+            machine: { label: 'Makine/Kablo', icon: '' },
+            mini_band: { label: 'Kısa Bant', icon: '' },
+            resistance_band: { label: 'Uzun Bant', icon: '' },
+            bodyweight: { label: 'Vücut Ağırlığı', icon: '' }
         };
 
         let pickerContext = {
@@ -8302,10 +8333,10 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             }
 
             if (badge) {
-                badge.innerText = key ? '🟢 Kişisel Anahtar Aktif' : '🟢 Akıllı Koç Hazır';
-                badge.style.background = 'rgba(34, 197, 94, 0.15)';
-                badge.style.color = '#15803D';
-                badge.style.border = '1px solid rgba(34, 197, 94, 0.35)';
+                badge.innerText = key ? 'Kişisel Anahtar Aktif' : 'Akıllı Koç Hazır';
+                badge.style.background = '#14532D';
+                badge.style.color = '#BBF7D0';
+                badge.style.border = '1px solid rgba(187, 247, 208, 0.35)';
             }
         }
 
@@ -8317,17 +8348,17 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     return;
                 }
                 setGeminiApiKey('', false);
-                showToast("ℹ️ Kişisel bağlantı anahtarı bu cihazdan temizlendi.");
+                showToast("Kişisel bağlantı anahtarı bu cihazdan temizlendi.");
                 return;
             }
 
-            showToast("⏳ Bağlantı test ediliyor...");
+            showToast("Bağlantı test ediliyor...");
             try {
                 const testResp = await callGeminiAPI("Biyomekanik test mesajı. Tek kelimeyle 'Hazır' de.", "Sen fitness koçusun.", key);
                 if (testResp) {
                     setGeminiApiKey(key, false);
                     if (input) input.value = '';
-                    showToast("✅ Kişisel bağlantı anahtarı doğrulandı ve yalnızca bu cihaza kaydedildi!");
+                    showToast("Kişisel bağlantı anahtarı doğrulandı ve yalnızca bu cihaza kaydedildi!");
                 }
             } catch (err) {
                 alert("Bağlantı Hatası:\n" + (err.message || err));
@@ -8341,13 +8372,13 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 alert("Lütfen geçerli bir bağlantı anahtarı girin.");
                 return;
             }
-            showToast("⏳ Bağlantı test ediliyor...");
+            showToast("Bağlantı test ediliyor...");
             try {
                 const testResp = await callGeminiAPI("Biyomekanik test mesajı. Tek kelimeyle 'Hazır' de.", "Sen fitness koçusun.", key);
                 if (testResp) {
                     setGeminiApiKey(key, false);
                     if (input) input.value = '';
-                    showToast("✅ Kişisel bağlantı anahtarı doğrulandı ve yalnızca bu cihaza kaydedildi!");
+                    showToast("Kişisel bağlantı anahtarı doğrulandı ve yalnızca bu cihaza kaydedildi!");
                     const curEx = (pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
                     updateGeminiAiModalUI(curEx);
                 }
@@ -8364,7 +8395,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     return;
                 }
                 setGeminiApiKey(clean, false);
-                showToast(clean ? "✅ Kişisel anahtar bu cihazda güncellendi!" : "ℹ️ Kişisel anahtar bu cihazdan silindi.");
+                showToast(clean ? "Kişisel anahtar bu cihazda güncellendi!" : "Kişisel anahtar bu cihazdan silindi.");
             }
         }
 
@@ -8604,7 +8635,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 resArea.style.display = 'block';
                 resArea.innerHTML = `
                     <div style="text-align:center; padding:24px 14px; background:#F8FAFC; border-radius:8px; border:1px dashed #c084fc;">
-                        <div style="font-size:24px; animation:spin 1s linear infinite; display:inline-block; margin-bottom:8px;">🧠</div>
+                        <div style="width:24px; height:24px; border:3px solid #E2E8F0; border-top-color:#7E22CE; border-radius:50%; animation:spin 1s linear infinite; display:inline-block; margin-bottom:8px;"></div>
                         <div style="font-size:12.5px; font-weight:800; color:#6B21A8;">Gemini Biyomekanik Motoru Analiz Ediyor...</div>
                         <div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">"${escapeHTML(currentEx.name)}" için en güvenli ve bilimsel ikameler hesaplanıyor.</div>
                     </div>
@@ -8653,7 +8684,7 @@ KURALLAR:
                 if (resArea) {
                     resArea.innerHTML = `
                         <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:12px; font-size:11.5px; color:#DC2626;">
-                            ⚠️ <strong>Gemini Bağlantı Hatası:</strong> ${escapeHTML(err.message || 'Bilinmeyen hata')}<br>
+                            <strong>Gemini Bağlantı Hatası:</strong> ${escapeHTML(err.message || 'Bilinmeyen hata')}<br>
                             <span style="font-size:10.5px; color:var(--text-secondary); margin-top:4px; display:inline-block;">API anahtarınızın geçerli olduğundan ve internet bağlantınızdan emin olun.</span>
                         </div>
                     `;
@@ -8777,7 +8808,7 @@ KURALLAR:
             idMatches.forEach(exId => {
                 const ex = EXERCISES_DB.find(e => e.id === exId);
                 if (ex) {
-                    const eqMeta = EQUIP_LABELS[ex.equipment] || { label: ex.equipment || '', icon: '🏋️' };
+                    const eqMeta = EQUIP_LABELS[ex.equipment] || { label: ex.equipment || '', icon: '' };
                     const guide = (typeof exerciseGuideMap !== 'undefined' && exerciseGuideMap[ex.id]) || null;
                     const thumbImg = (guide && guide.form) ? guide.form : (ex.diagram || '');
 
@@ -8791,7 +8822,7 @@ KURALLAR:
                                         ${escapeHTML(ex.name)}
                                     </div>
                                     <div style="font-size:10px; color:var(--text-secondary); display:flex; flex-wrap:wrap; gap:4px; align-items:center;">
-                                        <span style="color:#475569; font-weight:700;">${eqMeta.icon} ${eqMeta.label}</span>
+                                        <span style="color:#475569; font-weight:700;">${eqMeta.icon ? escapeHTML(eqMeta.icon) + ' ' : ''}${escapeHTML(eqMeta.label)}</span>
                                         <span>•</span>
                                         <span style="color:var(--gold); font-weight:700;">${CANVA_ICONS.crosshair} ${escapeHTML(ex.muscle || '')}</span>
                                     </div>
@@ -8808,13 +8839,13 @@ KURALLAR:
                                 <div style="width:100%; height:115px; border-radius:6px; background:#000; overflow:hidden; border:1px solid rgba(192,132,252,0.25); margin-top:8px; display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer;" onclick="openExerciseDetailModal('${ex.id}')" title="Form rehberini incele">
                                     <img src="${thumbImg}" style="max-width:100%; max-height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}" loading="lazy">
                                     <div style="position:absolute; bottom:4px; right:4px; background:#F8FAFC; backdrop-filter:blur(4px); border:1px solid #E2E8F0; border-radius:4px; padding:2px 6px; font-size:9.5px; color:#6B21A8; font-weight:700; display:flex; align-items:center; gap:3px;">
-                                        <span>🔍 Büyüt / İncele</span>
+                                        <span>Büyüt / İncele</span>
                                     </div>
                                 </div>
                             ` : ''}
 
                             <!-- FORM İPUCU -->
-                            ${ex.cue ? `<div style="font-size:10.5px; color:#6B21A8; margin-top:6px; background:#F8FAFC; padding:5px 8px; border-radius:4px; border:1px solid rgba(192,132,252,0.15); line-height:1.35;">💡 <strong>İpucu:</strong> ${escapeHTML(ex.cue)}</div>` : ''}
+                            ${ex.cue ? `<div style="font-size:10.5px; color:#6B21A8; margin-top:6px; background:#F8FAFC; padding:5px 8px; border-radius:4px; border:1px solid rgba(192,132,252,0.15); line-height:1.35;"><strong>İpucu:</strong> ${escapeHTML(ex.cue)}</div>` : ''}
                         </div>
                     `;
                 }
@@ -8824,7 +8855,6 @@ KURALLAR:
                 <div style="background:#F8FAFC; border:1px solid rgba(192, 132, 252, 0.35); border-radius:10px; padding:10px 12px; margin-top:6px;">
                     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid rgba(192,132,252,0.2); padding-bottom:5px;">
                         <div style="display:flex; align-items:center; gap:6px;">
-                            <span style="font-size:15px;">🤖</span>
                             <span style="font-size:12px; font-weight:800; color:#6B21A8;">Gemini Biyomekanik İkameler</span>
                         </div>
                         <span style="font-size:9.5px; color:#7E22CE; background:rgba(192,132,252,0.15); padding:2px 6px; border-radius:4px; font-weight:700;">Hızlı Seçim</span>
@@ -8837,7 +8867,7 @@ KURALLAR:
                     ${cleanedText ? `
                         <div style="margin-top:6px;">
                             <button type="button" class="btn btn-outline" style="font-size:10px; padding:4px 8px; border:none; color:var(--text-secondary); width:100%; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px; cursor:pointer;" onclick="const b = document.getElementById('aiCoachWhyBox'); if(b) b.style.display = b.style.display === 'none' ? 'block' : 'none';">
-                                <span>💡 Biyomekanik Gerekçeyi Gör / Gizle</span>
+                                <span>Biyomekanik Gerekçeyi Gör / Gizle</span>
                             </button>
                             <div id="aiCoachWhyBox" style="display:none; background:rgba(192, 132, 252, 0.06); border:1px solid rgba(192, 132, 252, 0.2); border-radius:6px; padding:8px 10px; margin-top:4px; font-size:10.5px; color:#475569; line-height:1.4;">
                                 ${formattedHtml}
@@ -9011,12 +9041,12 @@ KURALLAR:
 
             const container = document.getElementById(containerId);
             if (!container) {
-                if (!silentAuto && typeof showToast === 'function') showToast("⚠️ Denetim kutusu bulunamadı.");
+                if (!silentAuto && typeof showToast === 'function') showToast("Denetim kutusu bulunamadı.");
                 return;
             }
 
             if (!workout || !Array.isArray(workout.exercises) || workout.exercises.length === 0) {
-                if (!silentAuto && typeof showToast === 'function') showToast("⚠️ Denetlenecek aktif bir antrenman bulunamadı.");
+                if (!silentAuto && typeof showToast === 'function') showToast("Denetlenecek aktif bir antrenman bulunamadı.");
                 return;
             }
 
@@ -9053,11 +9083,11 @@ BİTİŞ (FINISHER): ${workout.finisher ? workout.finisher.name : 'Yok'}`;
 
             const academicSystemPrompt = `Sen "Çelik Kodu" platformunun Kıdemli Antrenörüsün.
 KESİN KURALLAR:
-1. ASLA akademisyen ismi (McGill, Schumann, Weakley, Hickson, Robbins, Schoenfeld vb.) KULLANMA.
+1. ASLA araştırmacı veya yazar ismi kullanma; tamamen sade ve pratik uygulama dili kullan.
 2. Yanıtın SADECE aşağıdaki 3 tek satırlık maddeden oluşsun (her satır maksimum 18 kelime, net ve göz yormayan mikro-metin):
-🛡️ **Kas Koruması:** (Son 48 saatte yorulan kasların ve alt belin nasıl korunduğu)
-🎯 **Eksik Telafisi:** (Geçen hafta/ay eksik kalan hangi kasın bu programdaki hangi hareketle telafi edildiği)
-💡 **Seans Notu:** (Antrenman sırasındaki en kritik 1 cümlelik uygulama/tempo ipucu)
+**Kas Koruması:** (Son 48 saatte yorulan kasların ve alt belin nasıl korunduğu)
+**Eksik Telafisi:** (Geçen hafta/ay eksik kalan hangi kasın bu programdaki hangi hareketle telafi edildiği)
+**Seans Notu:** (Antrenman sırasındaki en kritik 1 cümlelik uygulama/tempo ipucu)
 3. BİYOMEKANİK AÇI & %70 KAS ÖRTÜŞME KONTROLÜ:
    - Eğilerek yapılan ama FARKLI kasları hedefleyen hareketleri (örn. Arka Bacak RDL ile Sırt Row veya Arka Omuz Açış) ASLA çakışma sayma.
    - Ancak aynı birincil kas grubunu (%70+ örtüşme) aynı çekiş/itiş açısıyla vuran iki hareket varsa (örn. Barbell Row ile Rotasyonel Gorilla Row gibi iki eğik sırt çekişi) en sona \`\`\`json {"actions":[{"type":"replace","fromId":"eski_id","toId":"yeni_id","reason":"Aynı kası aynı açıyla vuran ikiz hareket farklı açılı alternatifle dengelendi"}]} \`\`\` ekle; yoksa JSON ekleme.`;
@@ -9096,9 +9126,9 @@ KESİN KURALLAR:
 
                 const applyActionBtnHtml = aiSuggestedActions.length > 0 ? `
                     <div style="margin-top:10px; padding-top:8px; border-top:1px solid #CBD5E1; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-                        <span style="font-size:11.5px; color:#6B21A8; font-weight:700;">⚡ ${aiSuggestedActions.length} hareket telafi önerisi hazır</span>
+                        <span style="font-size:11.5px; color:#6B21A8; font-weight:700;">${aiSuggestedActions.length} hareket telafi önerisi hazır</span>
                         <button type="button" class="btn btn-gold" style="padding:6px 12px; font-size:11.5px; font-weight:800; background:#7E22CE; border:none; color:#FFFFFF; border-radius:6px; cursor:pointer;" onclick="applyAcademicAiCorrections()">
-                            ⚡ Tek Tıkla Uygula
+                            Tek Tıkla Uygula
                         </button>
                     </div>
                 ` : '';
@@ -9107,7 +9137,6 @@ KESİN KURALLAR:
                     <div style="background:#F8FAFC; border:1.5px solid #CBD5E1; border-left:4px solid #7E22CE; border-radius:12px; padding:12px 14px;">
                         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                             <div style="display:flex; align-items:center; gap:6px;">
-                                <span style="font-size:15px;">✨</span>
                                 <strong style="color:#0F172A; font-size:12.5px; font-weight:900; letter-spacing:0.3px;">KOÇ ÖZETİ & EKSİK TELAFİSİ</strong>
                             </div>
                             <span style="font-size:10.5px; background:#F3E8FF; color:#6B21A8; border:1px solid #D8B4FE; padding:2px 8px; border-radius:6px; font-weight:800;">AI + 3 Katmanlı Analiz</span>
@@ -9129,7 +9158,7 @@ KESİN KURALLAR:
             const formattedAuditHtml = (options && options.formattedAuditHtml) ? options.formattedAuditHtml : '';
             const auditData = window.lastAiAuditActions;
             if (!auditData || !Array.isArray(auditData.actions) || auditData.actions.length === 0) {
-                if (!silentAuto && typeof showToast === 'function') showToast("⚠️ Uygulanacak geçerli bir düzeltme bulunamadı.");
+                if (!silentAuto && typeof showToast === 'function') showToast("Uygulanacak geçerli bir düzeltme bulunamadı.");
                 return;
             }
 
@@ -9145,7 +9174,7 @@ KESİN KURALLAR:
             }
 
             if (!workout || !Array.isArray(workout.exercises)) {
-                if (!silentAuto && typeof showToast === 'function') showToast("⚠️ Hedef antrenman bulunamadı.");
+                if (!silentAuto && typeof showToast === 'function') showToast("Hedef antrenman bulunamadı.");
                 return;
             }
 
@@ -9258,26 +9287,25 @@ KESİN KURALLAR:
                         <div style="background:#F8FAFC; border:1.5px solid #CBD5E1; border-left:4px solid #15803D; border-radius:12px; padding:12px 14px;">
                             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                                 <div style="display:flex; align-items:center; gap:6px;">
-                                    <span style="font-size:15px;">✅</span>
                                     <strong style="color:#0F172A; font-size:12.5px; font-weight:900;">KOÇ ÖZETİ & AI AÇI DÜZELTMESİ</strong>
                                 </div>
                                 <span style="font-size:10.5px; background:#DCFCE7; color:#15803D; border:1px solid #86EFAC; padding:2px 8px; border-radius:6px; font-weight:800;">Otomatik Dengelendi</span>
                             </div>
                             ${formattedAuditHtml ? `<div style="font-size:12px; color:#0F172A; line-height:1.5; margin-bottom:8px;">${formattedAuditHtml}</div>` : ''}
                             <div style="font-size:11.5px; color:#15803D; font-weight:700; background:#DCFCE7; padding:6px 10px; border-radius:8px;">
-                                ${appliedMessages.map(m => `<div>⚡ ${escapeHTML(m)}</div>`).join('')}
+                                ${appliedMessages.map(m => `<div>${escapeHTML(m)}</div>`).join('')}
                             </div>
                         </div>
                     `;
                 }
 
                 if (typeof showToast === 'function') {
-                    showToast(`✅ AI Denetimi: ${appliedMessages.join(' | ')}`);
+                    showToast(`AI Denetimi: ${appliedMessages.join(' | ')}`);
                 }
                 if (!silentAuto && typeof playAlertSound === 'function') playAlertSound();
             } else if (!silentAuto) {
                 if (typeof showToast === 'function') {
-                    showToast("ℹ️ Eşleşen bir düzeltme bulunamadı veya program zaten güncel.");
+                    showToast("Eşleşen bir düzeltme bulunamadı veya program zaten güncel.");
                 }
             }
         }
@@ -9310,7 +9338,7 @@ KESİN KURALLAR:
                 }
             }
             if (!currentEx) {
-                showToast('⚠️ Hareket alternatifi bulunamadı.');
+                showToast('Hareket alternatifi bulunamadı.');
                 return;
             }
 
@@ -9794,11 +9822,10 @@ KESİN KURALLAR:
             if (filtered.length === 0) {
                 container.innerHTML = `
                     <div style="text-align:center; padding:32px 14px; background:#F8FAFC; border-radius:8px; border:1px dashed var(--border);">
-                        <div style="font-size:20px; margin-bottom:6px;">🔍</div>
                         <div style="font-size:12.5px; font-weight:700; color:#0F172A;">Bu kriterlere uygun başka egzersiz bulunamadı</div>
                         <div style="font-size:11px; color:var(--text-secondary); margin:4px 0 12px;">Mevcut listenizde yer almayan alternatifler için farklı bir ekipman filtresi seçebilir veya tüm kataloğu inceleyebilirsiniz.</div>
                         <button type="button" class="btn btn-gold" style="font-size:11px; padding:6px 14px; font-weight:800;" onclick="switchPickerTab('catalog')">
-                            ➕ Diğer (Tüm Egzersiz Kataloğunu Aç)
+                            + Diğer (Tüm Egzersiz Kataloğunu Aç)
                         </button>
                     </div>
                 `;
@@ -9808,14 +9835,14 @@ KESİN KURALLAR:
             let cardsHtml = filtered.map(ex => {
                 const media = getExerciseVisualMedia(ex.id, ex.category);
                 const thumbImg = media.still || '';
-                const eqMeta = EQUIP_LABELS[ex.equipment] || { label: ex.equipment || '', icon: '🏋️' };
+                const eqMeta = EQUIP_LABELS[ex.equipment] || { label: ex.equipment || '', icon: '' };
 
                 return `
                     <div style="margin-bottom:6px; padding:8px 10px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                             <div style="display:flex; align-items:center; gap:9px; min-width:0; flex:1; cursor:pointer;" onclick="togglePickerExerciseForm('${ex.id}')">
                                 <div style="width:38px; height:38px; border-radius:8px; background:#FFFFFF; overflow:hidden; flex-shrink:0; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center;">
-                                    ${thumbImg ? `<img src="${thumbImg}" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}">` : '🏋️'}
+                                    ${thumbImg ? `<img src="${thumbImg}" style="width:100%; height:100%; object-fit:contain;" alt="${escapeHTML(ex.name)}">` : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5h11M6.5 17.5h11M3 10v4M21 10v4M7 6v12M17 6v12"/></svg>`}
                                 </div>
                                 <div style="min-width:0; flex:1;">
                                     <div style="font-size:13px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
@@ -10063,7 +10090,7 @@ KESİN KURALLAR:
                 closeExercisePickerModal();
                 renderCustomRoutine();
                 renderRegionStatus();
-                showToast(`✅ "${newEx.name}" programa eklendi!`);
+                showToast(`"${newEx.name}" programa eklendi!`);
                 playAlertSound();
                 return;
             }
@@ -10123,7 +10150,7 @@ KESİN KURALLAR:
                         details.scheme || { sets: 3, reps: '8-12', rest: details.rest || 60 }
                     );
 
-                    const cleanTitle = (details.title || plan.title || 'Özel Program').replace(/⚔️|Çelik Kodu/g, '').trim();
+                    const cleanTitle = (details.title || plan.title || 'Özel Program').replace(/\p{Extended_Pictographic}[\uFE0F\u200D]*|Çelik Kodu/gu, '').trim();
                     const progId = (plan.id && plan.id.startsWith('custom_')) ? plan.id : ('custom_day_' + dayIdx + '_' + Date.now());
                     const nowTs = Date.now();
 
@@ -10184,7 +10211,7 @@ KESİN KURALLAR:
                 if (wasSchedModalOpen) {
                     openScheduleDayModal(dayIdx, preservedDateStr);
                 }
-                showToast(`✅ "${newEx.name}" güncellendi ve kaydedildi!`);
+                showToast(`"${newEx.name}" güncellendi ve kaydedildi!`);
                 playAlertSound();
                 return;
             }
@@ -10243,13 +10270,13 @@ KESİN KURALLAR:
                 } else if (Math.abs(window.scrollY - savedScrollY) > 1) {
                     window.scrollTo({ top: savedScrollY, left: 0, behavior: 'instant' });
                 }
-                showToast(`✅ Aktif antrenmanda "${newEx.name}" alternatifi seçildi!`);
+                showToast(`Aktif antrenmanda "${newEx.name}" alternatifi seçildi!`);
             } else if (pickerContext.scope === 'weekly_preview' && window.pendingAiWeeklyPlan) {
                 renderPendingWeeklyPlanPreview({ preserveScroll: true });
-                showToast(`✅ "${newEx.name}" alternatifi seçildi!`);
+                showToast(`"${newEx.name}" alternatifi seçildi!`);
             } else {
                 renderGeneratedWorkout({ preserveScroll: true });
-                showToast(`✅ "${newEx.name}" alternatifi seçildi!`);
+                showToast(`"${newEx.name}" alternatifi seçildi!`);
             }
             playAlertSound();
         }
@@ -10329,10 +10356,10 @@ KESİN KURALLAR:
             renderActiveWorkout();
             playAlertSound();
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            alert("🔥 İlave Finisher seansınıza eklendi! Son egzersiz olarak odaklandınız.");
+            alert("İlave Finisher seansınıza eklendi! Son egzersiz olarak odaklandınız.");
         }
 
-        // ==================== FIREBASE FIRESTORE BUG REPORT ENGINE ====================
+        // ==================== BUG REPORT ENGINE ====================
         let currentBugReportTarget = null;
         let selectedBugCategory = 'image_mismatch';
 
@@ -10399,7 +10426,7 @@ KESİN KURALLAR:
                     imgEl.style.display = 'block';
                 } else {
                     imgEl.style.display = 'none';
-                    imgBox.innerHTML = '<span style="font-size:24px;">🏋️</span>';
+                    imgBox.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5h11M6.5 17.5h11M3 10v4M21 10v4M7 6v12M17 6v12"/></svg>';
                 }
             }
 
@@ -10450,8 +10477,9 @@ KESİN KURALLAR:
                 muscle: currentBugReportTarget.muscle || '',
                 sourceScreen: currentBugReportTarget.sourceScreen || 'Egzersiz Kartı',
                 workoutTitle: (activeWorkoutSession && activeWorkoutSession.title) ? activeWorkoutSession.title : (currentBugReportTarget.sourceScreen || 'Serbest İnceleme'),
+                uid: (typeof fbAuth !== 'undefined' && fbAuth && fbAuth.currentUser ? fbAuth.currentUser.uid : ''),
                 userId: getActiveUserId(),
-                userName: user.name || 'Ferit',
+                userName: (user && user.name) ? user.name : 'Sporcu',
                 status: 'pending_ai_review',
                 aiResolutionNote: '',
                 createdAt: new Date().toISOString(),
@@ -10467,96 +10495,52 @@ KESİN KURALLAR:
             } catch(e) {}
 
             let cloudSaved = false;
-            if (fbDb && isFirebaseReady) {
+            if (fbDb && isFirebaseReady && typeof fbAuth !== 'undefined' && fbAuth && fbAuth.currentUser && report.uid) {
                 try {
                     await fbDb.collection('exercise_bug_reports').doc(docId).set({
                         ...report,
                         serverTimestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
                     cloudSaved = true;
-                    console.log("🔥 Hata bildirimi Firestore SDK ile yazıldı:", docId);
                 } catch(err) {
-                    console.warn("Firestore SDK yazma hatası, REST deneniyor:", err);
-                }
-            }
-
-            if (!cloudSaved) {
-                try {
-                    const restFields = {};
-                    for (const [k, v] of Object.entries(report)) {
-                        if (typeof v === 'string') restFields[k] = { stringValue: v };
-                        else if (typeof v === 'number') restFields[k] = { doubleValue: v };
-                        else if (typeof v === 'boolean') restFields[k] = { booleanValue: v };
-                        else if (v === null || v === undefined) restFields[k] = { nullValue: null };
-                    }
-                    const restUrl = `https://firestore.googleapis.com/v1/projects/fitness-4f427/databases/(default)/documents/exercise_bug_reports?documentId=${docId}`;
-                    const resp = await fetch(restUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ fields: restFields })
-                    });
-                    if (resp.ok) {
-                        cloudSaved = true;
-                        console.log("🔥 Hata bildirimi Firestore REST ile yazıldı:", docId);
-                    }
-                } catch(restErr) {
-                    console.warn("Firestore REST yazma hatası (Yerelde saklandı):", restErr);
+                    console.warn("Bulut bildirim yazma hatası (Yerelde saklandı):", err);
                 }
             }
 
             closeExerciseBugReportModal();
             playAlertSound();
-            alert("✅ Geri bildiriminiz incelenmek üzere kaydedildi. Teşekkür ederiz!");
+            alert("Geri bildiriminiz incelenmek üzere kaydedildi. Teşekkür ederiz!");
         }
 
         async function openBugReportsPoolModal() {
             const modal = document.getElementById('bugReportsPoolModal');
             if (modal) modal.classList.add('active');
 
+            const isAdminUser = (typeof isVerifiedAdminSession === 'function') && isVerifiedAdminSession();
             const copyAdminBtn = document.getElementById('btnCopyBugReportsAdmin');
             if (copyAdminBtn) {
-                const isAdminUser = (typeof isVerifiedAdminSession === 'function') && isVerifiedAdminSession();
                 copyAdminBtn.style.display = isAdminUser ? 'inline-block' : 'none';
             }
 
             const listEl = document.getElementById('bugReportsPoolList');
             const countEl = document.getElementById('bugPoolCountText');
-            if (listEl) listEl.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><span style="font-size:24px;">🔄</span><br>Geri bildirimler yükleniyor...</div>`;
+            if (listEl) listEl.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);">Geri bildirimler yükleniyor...</div>`;
 
             let reports = [];
 
-            if (fbDb && isFirebaseReady) {
+            if (fbDb && isFirebaseReady && typeof fbAuth !== 'undefined' && fbAuth && fbAuth.currentUser) {
                 try {
-                    const snap = await fbDb.collection('exercise_bug_reports').get();
+                    const colRef = fbDb.collection('exercise_bug_reports');
+                    const snap = isAdminUser
+                        ? await colRef.get()
+                        : await colRef.where('uid', '==', fbAuth.currentUser.uid).get();
                     snap.forEach(doc => {
                         const d = doc.data();
                         d._docId = doc.id;
                         reports.push(d);
                     });
                 } catch(e) {
-                    console.warn("Firestore SDK okuma hatası, REST deneniyor:", e);
-                }
-            }
-
-            if (reports.length === 0) {
-                try {
-                    const resp = await fetch('https://firestore.googleapis.com/v1/projects/fitness-4f427/databases/(default)/documents/exercise_bug_reports');
-                    if (resp.ok) {
-                        const data = await resp.json();
-                        const docs = data.documents || [];
-                        docs.forEach(doc => {
-                            const name = doc.name || '';
-                            const docId = name.split('/').pop();
-                            const fields = doc.fields || {};
-                            const parsed = { _docId: docId };
-                            for (const [k, v] of Object.entries(fields)) {
-                                parsed[k] = v.stringValue || v.integerValue || v.doubleValue || (v.booleanValue !== undefined ? v.booleanValue : '');
-                            }
-                            reports.push(parsed);
-                        });
-                    }
-                } catch(restErr) {
-                    console.warn("REST okuma hatası:", restErr);
+                    console.warn("Bulut bildirim okuma hatası:", e);
                 }
             }
 
@@ -10575,7 +10559,6 @@ KESİN KURALLAR:
                 if (listEl) {
                     listEl.innerHTML = `
                         <div style="text-align:center; padding:40px 20px; color:var(--text-secondary);">
-                            <span style="font-size:36px;">🎉</span>
                             <div style="font-size:14px; font-weight:800; color:#0F172A; margin-top:8px;">Henüz Bildirim Yok</div>
                             <p style="font-size:12px; margin-top:4px;">Şu an incelenmeyi bekleyen bir geri bildirim bulunmuyor.</p>
                         </div>
@@ -10589,7 +10572,8 @@ KESİN KURALLAR:
                     const docId = r._docId || r.id;
                     const isPending = r.status === 'pending_ai_review';
                     const isProcessed = r.status === 'ai_processed_awaiting_user_ok';
-                    const statusText = isPending ? '🟡 İnceleme Bekliyor' : (isProcessed ? '🔵 Güncellendi (Onay Bekliyor)' : '🟢 Tamamlandı');
+                    const statusText = isPending ? 'İnceleme Bekliyor' : (isProcessed ? 'Güncellendi (Onay Bekliyor)' : 'Tamamlandı');
+                    const statusColor = isPending ? '#B45309' : (isProcessed ? '#1D4ED8' : '#15803D');
 
                     return `
                         <div class="bug-pool-card ${isPending ? 'pending' : (isProcessed ? 'processed' : 'resolved')}">
@@ -10602,27 +10586,27 @@ KESİN KURALLAR:
                                         ${escapeHTML(r.categoryLabel || r.category)}
                                     </div>
                                 </div>
-                                <span style="font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:4px; background:#F1F5F9;">
+                                <span style="font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:4px; background:#F1F5F9; color:${statusColor};">
                                     ${statusText}
                                 </span>
                             </div>
 
                             ${r.userNote ? `
                                 <div style="font-size:12px; color:#475569; margin-top:8px; background:#F8FAFC; padding:6px 10px; border-radius:6px; border-left:2px solid var(--cyan);">
-                                    💬 <em>"${escapeHTML(r.userNote)}"</em>
+                                    <em>"${escapeHTML(r.userNote)}"</em>
                                 </div>
                             ` : ''}
 
                             ${r.aiResolutionNote ? `
                                 <div style="font-size:11.5px; color:#15803D; margin-top:6px; background:rgba(34,197,94,0.1); padding:6px 10px; border-radius:6px;">
-                                    🤖 <strong>AI Notu:</strong> ${escapeHTML(r.aiResolutionNote)}
+                                    <strong>AI Notu:</strong> ${escapeHTML(r.aiResolutionNote)}
                                 </div>
                             ` : ''}
 
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:10.5px; color:var(--text-secondary); flex-wrap:wrap; gap:6px;">
-                                <span>📅 ${escapeHTML(r.createdAtFormatted || (r.createdAt ? r.createdAt.substring(0, 16) : ''))}</span>
+                                <span>${escapeHTML(r.createdAtFormatted || (r.createdAt ? r.createdAt.substring(0, 16) : ''))}</span>
                                 <button type="button" class="btn btn-outline" style="border-color:#22c55e; color:#15803D; font-size:11px; padding:4px 10px; font-weight:800;" onclick="confirmAndDeleteBugReport(decodeURIComponent('${encodeURIComponent(docId)}'))">
-                                    ✅ Listeden Kaldır
+                                    Listeden Kaldır
                                 </button>
                             </div>
                         </div>
@@ -10641,7 +10625,7 @@ KESİN KURALLAR:
                 return;
             }
 
-            if (fbDb && isFirebaseReady) {
+            if (fbDb && isFirebaseReady && typeof fbAuth !== 'undefined' && fbAuth && fbAuth.currentUser) {
                 try {
                     await fbDb.collection('exercise_bug_reports').doc(docId).delete();
                 } catch(e) {
@@ -10658,15 +10642,19 @@ KESİN KURALLAR:
                 }
             } catch(e) {}
 
-            alert("✅ Geri bildirim listeden kaldırıldı.");
+            alert("Geri bildirim listeden kaldırıldı.");
             openBugReportsPoolModal();
         }
 
         async function copyBugReportsToClipboard() {
             let reports = [];
-            if (fbDb && isFirebaseReady) {
+            if (fbDb && isFirebaseReady && typeof fbAuth !== 'undefined' && fbAuth && fbAuth.currentUser) {
                 try {
-                    const snap = await fbDb.collection('exercise_bug_reports').get();
+                    const isAdminUser = (typeof isVerifiedAdminSession === 'function') && isVerifiedAdminSession();
+                    const colRef = fbDb.collection('exercise_bug_reports');
+                    const snap = isAdminUser
+                        ? await colRef.get()
+                        : await colRef.where('uid', '==', fbAuth.currentUser.uid).get();
                     snap.forEach(doc => {
                         const d = doc.data();
                         d._docId = doc.id;
@@ -10686,8 +10674,8 @@ KESİN KURALLAR:
                 return;
             }
 
-            let text = "Antigravity AI Antrenörüne Görev Emri:\n";
-            text += "Aşağıdaki egzersiz hata bildirimleri antrenman esnasında Firebase havuzuna kaydedildi. Lütfen kodda ve görsellerde düzeltmeleri yap:\n\n";
+            let text = "Antrenman Asistanına Görev Emri:\n";
+            text += "Aşağıdaki egzersiz hata bildirimleri antrenman esnasında bulut havuzuna kaydedildi. Lütfen kodda ve görsellerde düzeltmeleri yap:\n\n";
 
             reports.forEach((r, idx) => {
                 text += `${idx + 1}. [${r.exerciseId}] ${r.exerciseName}\n`;
@@ -10697,13 +10685,13 @@ KESİN KURALLAR:
                 text += `   - Rapor ID: ${r._docId || r.id}\n\n`;
             });
 
-            text += "Düzeltmeleri tamamladıktan sonra bana rapor ver, benden onay aldıktan sonra bu kayıtları Firebase'den sileceğiz.";
+            text += "Düzeltmeleri tamamladıktan sonra bana rapor ver, benden onay aldıktan sonra bu kayıtları sileceğiz.";
 
             try {
                 await navigator.clipboard.writeText(text);
-                alert("📋 Hazır AI Talimat Metni panoya kopyalandı!\n\nŞimdi sohbet alanına yapıştırıp gönderebilirsiniz.");
+                alert("Hazır Talimat Metni panoya kopyalandı!\n\nŞimdi sohbet alanına yapıştırıp gönderebilirsiniz.");
             } catch(e) {
-                prompt("Aşağıdaki metni kopyalayıp AI sohbetine iletebilirsiniz:", text);
+                prompt("Aşağıdaki metni kopyalayıp sohbete iletebilirsiniz:", text);
             }
         }
 
@@ -10755,7 +10743,7 @@ KESİN KURALLAR:
             );
             const currentSubKey = getExerciseAnatomy(currentEx)?.subKey;
             const recentGenSet = new Set(getRecentGeneratedIds());
-            const style = workout.style || '';
+            const style = normalizeLegacyWorkoutStyle(workout.style || '');
             const wishParsed = (typeof parseUserWishConstraints === 'function' && workout.customWish)
                 ? parseUserWishConstraints(workout.customWish, EXERCISES_DB, window.lastGeminiWishAnalysis)
                 : { excludedIds: new Set(), excludedKeywords: [] };
@@ -10784,11 +10772,11 @@ KESİN KURALLAR:
 
             const filterSwapPool = (basePool) => {
                 let candidates = basePool;
-                if (style === 'emom_conditioning') {
+                if (style === 'paced_conditioning') {
                     const isoEx = /curl|extension|fly|raise|kickback|shrug|calf|wrist|face_pull|pullover|concentration|preacher|hammer/i;
                     const condOnly = candidates.filter(e => !isoEx.test(e.id || '') && !isoEx.test(e.name || ''));
                     if (condOnly.length > 0) candidates = condOnly;
-                } else if (style === 'emom_strength') {
+                } else if (style === 'paced_strength') {
                     const strRe = /squat|deadlift|rdl|bench|press|row|pullup|chinup|pulldown|clean|thruster/i;
                     const strOnly = candidates.filter(e => strRe.test(e.id || '') || strRe.test(e.name || ''));
                     if (strOnly.length > 0) candidates = strOnly;

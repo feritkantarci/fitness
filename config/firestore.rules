@@ -7,9 +7,28 @@ rules_version = '2';
 // Collection: user_roles/{authUid}
 // Document ID: Firebase Auth UID
 // Fields:
-//   - role: string (required, 'athlete' | 'admin') - server-checked authority role
-//   - appUid: string | null (optional, 1..128 chars) - mapped athlete doc ID (^usr_... or authUid)
+//   - role: string (required, 'athlete' | 'admin') - server/admin-verified role (non-admin create restricted to 'athlete')
+//   - appUid: string | null (optional, 1..128 chars) - mapped athlete doc ID (synthetic @auth.celikkodu.app requires email_verified == true)
 //   - email: string | null (optional, <= 254 chars) - normalized auth email
+//   - updatedAt: timestamp | string | number | null (optional) - sync timestamp
+//
+// Collection: user_profiles/{authUid}
+// Document ID: Firebase Auth UID
+// Fields (strictly isolated per-user profile, zero secrets/API keys/watch tokens):
+//   - id: string (required, ^usr_[a-zA-Z0-9_-]{1,64}$) - athlete ID (immutable for non-admin; non-admin create forbids 'usr_admin')
+//   - authUid: string (required, must match {authUid}) - Firebase Auth UID
+//   - username, email, fbAuthEmail: string | null (optional) - account identifiers
+//   - role: string (required, 'athlete' | 'admin') - non-admin create restricted to 'athlete', immutable on non-admin update
+//   - status: string (required, 'pending' | 'approved') - non-admin create restricted to 'pending', immutable on non-admin update
+//   - name, avatar, theme, level, gender, weights, passwordStrengthLevel, mustChangePassword, passwordUpdatedAt, approvedAt, createdAt, updatedAt
+//
+// Collection: usernames/{uname}
+// Document ID: Normalized lowercase username (^[a-z0-9._-]{2,40}$, != 'admin')
+// Access: Single-document get allowed for login resolution; list restricted strictly to isAdmin().
+// Fields:
+//   - authUid: string (required, 1..128 chars) - owner Firebase Auth UID
+//   - appUid: string (required, ^usr_[a-zA-Z0-9_-]{1,64}$) - mapped athlete ID
+//   - authEmail: string (required, 3..254 chars) - resolved Firebase Auth login email
 //   - updatedAt: timestamp | string | number | null (optional) - sync timestamp
 //
 // Collection: workout_logs/{uid}
@@ -53,14 +72,14 @@ rules_version = '2';
 //
 // Collection: exercise_bug_reports/{docId}
 // Document ID: string (<= 120 chars, non-relay)
-// Fields: Genuine exercise bug report payload (strictly non-relay; exerciseId != 'garmin_outbox_relay'; read/create by authenticated users, update/delete by admin only).
+// Fields: Genuine exercise bug report payload (requires uid == request.auth.uid on create; exerciseId != 'garmin_outbox_relay'; read by owner/admin, update/delete by admin only).
 //
 // Collection: app_system/{docId}
-// Document ID: 'users' | 'ai_config' | 'master_catalog'
+// Document ID: 'master_catalog' | 'ai_config' | 'users' | other admin-only docs
 // Fields:
-//   - 'users': { users: list (1..200 sanitized user profiles, zero plaintext passwords/hashes/salts/API keys/watch tokens), updatedAt }
-//   - 'ai_config': Admin-managed non-secret AI bridge & catalog metadata (strictly zero geminiApiKey/sealedAiKey).
-//   - 'master_catalog': Non-sensitive static exercise catalog metadata/JSON (read by app/athletes, write restricted strictly to isAdmin()).
+//   - 'master_catalog': Non-sensitive static exercise catalog metadata/JSON (public read allowed; write restricted strictly to isAdmin()).
+//   - 'ai_config': Admin-managed non-secret AI bridge & catalog metadata (read restricted to isAuthenticated(); write restricted strictly to isAdmin(), zero geminiApiKey/sealedAiKey).
+//   - 'users': { users: list (1..200 sanitized user profiles, zero secrets), updatedAt } (read and write restricted strictly to isAdmin()).
 //
 // Collection: system_telemetry/{uid}
 // Document ID: Athlete ID (^usr_[a-zA-Z0-9_-]{1,64}$)
@@ -99,10 +118,6 @@ service cloud.firestore {
         (
           exists(/databases/$(database)/documents/user_roles/$(request.auth.uid)) &&
           get(/databases/$(database)/documents/user_roles/$(request.auth.uid)).data.get('role', '') == 'admin'
-        ) ||
-        (
-          'email' in request.auth.token &&
-          request.auth.token.email == 'feritkantarci@gmail.com'
         )
       );
     }
@@ -115,6 +130,8 @@ service cloud.firestore {
         (
           uid != 'usr_admin' &&
           'email' in request.auth.token &&
+          'email_verified' in request.auth.token &&
+          request.auth.token.email_verified == true &&
           request.auth.token.email == (uid + '@auth.celikkodu.app')
         ) ||
         (
@@ -190,6 +207,115 @@ service cloud.firestore {
           || data.email == null
           || (data.email is string && data.email.size() <= 254)
         )
+        && (
+          !('updatedAt' in data)
+          || data.updatedAt == null
+          || data.updatedAt is timestamp
+          || (data.updatedAt is string && data.updatedAt.size() <= 64)
+          || (data.updatedAt is number && data.updatedAt >= 0)
+        );
+    }
+
+    function isValidUserProfileDoc(data, authUid) {
+      let secretKeys = ['password', 'passwordHash', 'salt', 'geminiApiKey', 'tredictToken', 'intervalsToken'];
+      return hasOnlyAllowedFields(data, [
+          'id',
+          'authUid',
+          'username',
+          'email',
+          'fbAuthEmail',
+          'role',
+          'status',
+          'name',
+          'avatar',
+          'theme',
+          'level',
+          'gender',
+          'weights',
+          'passwordStrengthLevel',
+          'mustChangePassword',
+          'passwordUpdatedAt',
+          'approvedAt',
+          'createdAt',
+          'updatedAt'
+        ])
+        && !data.keys().hasAny(secretKeys)
+        && 'authUid' in data
+        && data.authUid is string
+        && data.authUid.size() >= 1
+        && data.authUid.size() <= 128
+        && data.authUid == authUid
+        && 'id' in data
+        && data.id is string
+        && data.id.matches('^usr_[a-zA-Z0-9_-]{1,64}$')
+        && 'role' in data
+        && data.role is string
+        && data.role in ['athlete', 'admin']
+        && 'status' in data
+        && data.status is string
+        && data.status in ['pending', 'approved']
+        && (!('username' in data) || data.username == null || (data.username is string && data.username.size() <= 80))
+        && (!('email' in data) || data.email == null || (data.email is string && data.email.size() <= 254))
+        && (!('fbAuthEmail' in data) || data.fbAuthEmail == null || (data.fbAuthEmail is string && data.fbAuthEmail.size() <= 254))
+        && (!('name' in data) || data.name == null || (data.name is string && data.name.size() <= 120))
+        && (!('avatar' in data) || data.avatar == null || (data.avatar is string && data.avatar.size() <= 32))
+        && (!('theme' in data) || data.theme == null || (data.theme is string && data.theme.size() <= 32))
+        && (!('level' in data) || data.level == null || (data.level is string && data.level.size() <= 64))
+        && (!('gender' in data) || data.gender == null || (data.gender is string && data.gender.size() <= 32))
+        && (
+          !('weights' in data)
+          || data.weights == null
+          || (
+            data.weights is map
+            && data.weights.keys().size() <= 30
+            && !data.weights.keys().hasAny(secretKeys)
+          )
+        )
+        && (!('passwordStrengthLevel' in data) || data.passwordStrengthLevel == null || (data.passwordStrengthLevel is string && data.passwordStrengthLevel.size() <= 64))
+        && (!('mustChangePassword' in data) || data.mustChangePassword == null || data.mustChangePassword is bool)
+        && (
+          !('passwordUpdatedAt' in data)
+          || data.passwordUpdatedAt == null
+          || data.passwordUpdatedAt is timestamp
+          || (data.passwordUpdatedAt is string && data.passwordUpdatedAt.size() <= 64)
+          || (data.passwordUpdatedAt is number && data.passwordUpdatedAt >= 0)
+        )
+        && (
+          !('approvedAt' in data)
+          || data.approvedAt == null
+          || data.approvedAt is timestamp
+          || (data.approvedAt is string && data.approvedAt.size() <= 64)
+          || (data.approvedAt is number && data.approvedAt >= 0)
+        )
+        && (
+          !('createdAt' in data)
+          || data.createdAt == null
+          || data.createdAt is timestamp
+          || (data.createdAt is string && data.createdAt.size() <= 64)
+          || (data.createdAt is number && data.createdAt >= 0)
+        )
+        && (
+          !('updatedAt' in data)
+          || data.updatedAt == null
+          || data.updatedAt is timestamp
+          || (data.updatedAt is string && data.updatedAt.size() <= 64)
+          || (data.updatedAt is number && data.updatedAt >= 0)
+        );
+    }
+
+    function isValidUsernameMappingDoc(data) {
+      return hasOnlyAllowedFields(data, ['authUid', 'appUid', 'authEmail', 'updatedAt'])
+        && 'authUid' in data
+        && data.authUid is string
+        && data.authUid.size() >= 1
+        && data.authUid.size() <= 128
+        && 'appUid' in data
+        && data.appUid is string
+        && data.appUid.matches('^usr_[a-zA-Z0-9_-]{1,64}$')
+        && 'authEmail' in data
+        && data.authEmail is string
+        && data.authEmail.size() >= 3
+        && data.authEmail.size() <= 254
         && (
           !('updatedAt' in data)
           || data.updatedAt == null
@@ -556,54 +682,6 @@ service cloud.firestore {
         );
     }
 
-    function isSafeNonAdminUsersCreate() {
-      let users = request.resource.data.users;
-      return isAdmin() || (
-        users.size() == 1
-        && (!('role' in users[0]) || users[0].role == 'athlete')
-        && (!('status' in users[0]) || users[0].status == 'pending')
-        && (!('id' in users[0]) || users[0].id != 'usr_admin')
-      );
-    }
-
-    function isSafeNonAdminUsersUpdate() {
-      let oldUsers = resource.data.users;
-      let newUsers = request.resource.data.users;
-      let lastIdx = newUsers.size() - 1;
-      return 'users' in resource.data
-        && oldUsers is list
-        && newUsers.size() == oldUsers.size() + 1
-        && (
-          oldUsers.size() == 0
-          || (
-            newUsers[0].get('id', '') == oldUsers[0].get('id', '')
-            && newUsers[0].get('role', 'athlete') == oldUsers[0].get('role', 'athlete')
-            && newUsers[0].get('status', 'pending') == oldUsers[0].get('status', 'pending')
-            && newUsers[0].get('email', '') == oldUsers[0].get('email', '')
-            && newUsers[0].get('fbAuthEmail', '') == oldUsers[0].get('fbAuthEmail', '')
-            && (
-              oldUsers.size() <= 1
-              || (
-                newUsers[1].get('id', '') == oldUsers[1].get('id', '')
-                && newUsers[1].get('role', 'athlete') == oldUsers[1].get('role', 'athlete')
-                && newUsers[1].get('status', 'pending') == oldUsers[1].get('status', 'pending')
-                && newUsers[1].get('email', '') == oldUsers[1].get('email', '')
-                && newUsers[1].get('fbAuthEmail', '') == oldUsers[1].get('fbAuthEmail', '')
-              )
-            )
-            && newUsers[oldUsers.size() - 1].get('id', '') == oldUsers[oldUsers.size() - 1].get('id', '')
-            && newUsers[oldUsers.size() - 1].get('role', 'athlete') == oldUsers[oldUsers.size() - 1].get('role', 'athlete')
-            && newUsers[oldUsers.size() - 1].get('status', 'pending') == oldUsers[oldUsers.size() - 1].get('status', 'pending')
-            && newUsers[oldUsers.size() - 1].get('email', '') == oldUsers[oldUsers.size() - 1].get('email', '')
-            && newUsers[oldUsers.size() - 1].get('fbAuthEmail', '') == oldUsers[oldUsers.size() - 1].get('fbAuthEmail', '')
-          )
-        )
-        && newUsers[lastIdx] is map
-        && newUsers[lastIdx].get('role', 'athlete') == 'athlete'
-        && newUsers[lastIdx].get('status', 'pending') == 'pending'
-        && newUsers[lastIdx].get('id', '') != 'usr_admin';
-    }
-
     function isValidBugReportOrRelayPayload(data) {
       return 'exerciseId' in data
         && data.exerciseId is string
@@ -624,6 +702,7 @@ service cloud.firestore {
           'workoutTitle',
           'userId',
           'userName',
+          'uid',
           'status',
           'aiResolutionNote',
           'createdAt',
@@ -643,6 +722,7 @@ service cloud.firestore {
         && (!('workoutTitle' in data) || data.workoutTitle == null || (data.workoutTitle is string && data.workoutTitle.size() <= 200))
         && (!('userId' in data) || data.userId == null || (data.userId is string && data.userId.size() <= 80))
         && (!('userName' in data) || data.userName == null || (data.userName is string && data.userName.size() <= 120))
+        && (!('uid' in data) || (data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128))
         && (!('status' in data) || data.status == null || (data.status is string && data.status.size() <= 80))
         && (!('aiResolutionNote' in data) || data.aiResolutionNote == null || (data.aiResolutionNote is string && data.aiResolutionNote.size() <= 2000))
         && (
@@ -820,24 +900,23 @@ service cloud.firestore {
         isAdmin() || (
           isAuthenticated()
           && request.auth.uid == authUid
-          && (
-            request.resource.data.role == 'athlete'
-            || (
-              'email' in request.auth.token
-              && request.auth.token.email == 'feritkantarci@gmail.com'
-              && request.resource.data.role == 'admin'
-            )
-          )
+          && request.resource.data.role == 'athlete'
           && (
             !('appUid' in request.resource.data)
             || request.resource.data.appUid == null
-            || request.resource.data.appUid == request.auth.uid
-            || request.resource.data.appUid == ('usr_' + request.auth.uid)
-            || ('appUid' in request.auth.token && request.auth.token.appUid == request.resource.data.appUid)
             || (
               request.resource.data.appUid != 'usr_admin'
-              && 'email' in request.auth.token
-              && request.auth.token.email == (request.resource.data.appUid + '@auth.celikkodu.app')
+              && (
+                request.resource.data.appUid == request.auth.uid
+                || request.resource.data.appUid == ('usr_' + request.auth.uid)
+                || ('appUid' in request.auth.token && request.auth.token.appUid == request.resource.data.appUid)
+                || (
+                  'email' in request.auth.token
+                  && 'email_verified' in request.auth.token
+                  && request.auth.token.email_verified == true
+                  && request.auth.token.email == (request.resource.data.appUid + '@auth.celikkodu.app')
+                )
+              )
             )
           )
         )
@@ -851,6 +930,59 @@ service cloud.firestore {
         )
       );
       allow delete: if isAdmin();
+    }
+
+    // Kullanıcı Profilleri (Auth UID Bazlı İzole Hesap Kayıtları)
+    match /user_profiles/{authUid} {
+      allow read: if isAuthenticated() && (request.auth.uid == authUid || isAdmin());
+      allow create: if isAuthenticated()
+        && isValidUserProfileDoc(request.resource.data, authUid)
+        && (
+          isAdmin() || (
+            request.auth.uid == authUid
+            && request.resource.data.role == 'athlete'
+            && request.resource.data.status == 'pending'
+            && request.resource.data.id != 'usr_admin'
+          )
+        );
+      allow update: if isAuthenticated()
+        && isValidUserProfileDoc(request.resource.data, authUid)
+        && (
+          isAdmin() || (
+            request.auth.uid == authUid
+            && request.resource.data.role == resource.data.role
+            && request.resource.data.status == resource.data.status
+            && request.resource.data.id == resource.data.id
+          )
+        );
+      allow delete: if isAdmin();
+    }
+
+    // Kullanıcı Adı -> Auth E-posta ve UID Çözümleme Eşlemesi
+    match /usernames/{uname} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create: if isAuthenticated()
+        && uname.matches('^[a-z0-9._-]{2,40}$')
+        && uname != 'admin'
+        && !exists(/databases/$(database)/documents/usernames/$(uname))
+        && isValidUsernameMappingDoc(request.resource.data)
+        && (
+          isAdmin() || (
+            request.resource.data.authUid == request.auth.uid
+            && request.resource.data.appUid != 'usr_admin'
+          )
+        );
+      allow update: if isAuthenticated()
+        && isValidUsernameMappingDoc(request.resource.data)
+        && (
+          isAdmin() || (
+            resource.data.authUid == request.auth.uid
+            && request.resource.data.authUid == resource.data.authUid
+            && request.resource.data.appUid != 'usr_admin'
+          )
+        );
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.authUid == request.auth.uid);
     }
 
     // Sporcu Antrenman Kayıtları
@@ -939,12 +1071,14 @@ service cloud.firestore {
 
     // Egzersiz Hata Bildirim Havuzu
     match /exercise_bug_reports/{docId} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && (isAdmin() || ('uid' in resource.data && resource.data.uid == request.auth.uid));
       allow create: if isAuthenticated()
         && docId is string
         && docId.size() <= 120
         && !docId.matches('^garmin_relay.*')
         && isValidBugReportOrRelayPayload(request.resource.data)
+        && 'uid' in request.resource.data
+        && request.resource.data.uid == request.auth.uid
         && uidUnchanged();
       allow update: if isAdmin()
         && isValidBugReportOrRelayPayload(request.resource.data)
@@ -954,11 +1088,13 @@ service cloud.firestore {
 
     // Sistem Konfigürasyonu, Ana Katalog ve Kullanıcı Listesi
     match /app_system/{docId} {
-      allow read: if docId == 'master_catalog' || docId == 'users' || docId == 'ai_config' || isAdmin();
-      allow create: if (docId == 'users' && isValidUsersSystemPayload(request.resource.data) && isSafeNonAdminUsersCreate())
+      allow read: if docId == 'master_catalog'
+        || (docId == 'ai_config' && isAuthenticated())
+        || isAdmin();
+      allow create, update: if isAdmin() && (
+        (docId == 'users' && isValidUsersSystemPayload(request.resource.data))
         || (
           docId == 'ai_config'
-          && isAdmin()
           && isValidAdminSystemDoc(request.resource.data)
           && !('geminiApiKey' in request.resource.data)
           && !('sealedAiKey' in request.resource.data)
@@ -966,31 +1102,13 @@ service cloud.firestore {
         || (
           docId != 'users'
           && docId != 'ai_config'
-          && isAdmin()
           && isValidAdminSystemDoc(request.resource.data)
-        );
-      allow update: if (
-          docId == 'users'
-          && isValidUsersSystemPayload(request.resource.data)
-          && (isAdmin() || isSafeNonAdminUsersUpdate())
         )
-        || (
-          docId == 'ai_config'
-          && isAdmin()
-          && isValidAdminSystemDoc(request.resource.data)
-          && !('geminiApiKey' in request.resource.data)
-          && !('sealedAiKey' in request.resource.data)
-        )
-        || (
-          docId != 'users'
-          && docId != 'ai_config'
-          && isAdmin()
-          && isValidAdminSystemDoc(request.resource.data)
-        );
+      );
       allow delete: if isAdmin();
     }
 
-    // Sistem Telemetrisi ve İstemci Hata/Uyarı İzleme Kayıtları
+    // Sistem İzleme ve İstemci Hata/Uyarı Kayıtları
     match /system_telemetry/{uid} {
       allow read: if isAdmin() || (isOwner(uid) && isValidAthleteId(uid));
       allow create: if (isOwner(uid) || isAdmin())

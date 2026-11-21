@@ -54,16 +54,16 @@
         };
 
         const MUSCLE_DEFS = {
-            chest: { name: "Göğüs", icon: "🛡️", desc: "Üst, Orta ve Alt Göğüs", color: "#38bdf8" },
-            back: { name: "Sırt & Kanat", icon: "🏹", desc: "Kanat, Orta ve Üst Sırt", color: "#818cf8" },
-            shoulders: { name: "Omuz", icon: "⚔️", desc: "Ön, Yan ve Arka Omuz", color: "#f59e0b" },
-            biceps: { name: "Ön Kol (Pazı)", icon: "💪", desc: "Pazı & Kol Çekiş Gücü", color: "#ec4899" },
-            triceps: { name: "Arka Kol", icon: "⚡", desc: "Arka Kol & Kol İtiş Gücü", color: "#10b981" },
-            quads: { name: "Ön Bacak", icon: "🦵", desc: "Ön Bacak & Çömelme Gücü", color: "#06b6d4" },
-            hamstrings: { name: "Arka Bacak", icon: "🦿", desc: "Arka Bacak & Eğilme Gücü", color: "#f97316" },
-            glutes: { name: "Kalça", icon: "🍑", desc: "Kalça & Denge Gücü", color: "#a855f7" },
-            core: { name: "Karın & Bel", icon: "🧱", desc: "Ön Karın, Yan Karın & Bel Çevresi", color: "#eab308" },
-            calves_grip: { name: "Baldır & Tutuş", icon: "🦶", desc: "Baldır, Ayak Bileği & El Tutuşu", color: "#94a3b8" }
+            chest: { name: "Göğüs", icon: "", desc: "Üst, Orta ve Alt Göğüs", color: "#38bdf8" },
+            back: { name: "Sırt & Kanat", icon: "", desc: "Kanat, Orta ve Üst Sırt", color: "#818cf8" },
+            shoulders: { name: "Omuz", icon: "", desc: "Ön, Yan ve Arka Omuz", color: "#f59e0b" },
+            biceps: { name: "Ön Kol (Pazı)", icon: "", desc: "Pazı & Kol Çekiş Gücü", color: "#ec4899" },
+            triceps: { name: "Arka Kol", icon: "", desc: "Arka Kol & Kol İtiş Gücü", color: "#10b981" },
+            quads: { name: "Ön Bacak", icon: "", desc: "Ön Bacak & Çömelme Gücü", color: "#06b6d4" },
+            hamstrings: { name: "Arka Bacak", icon: "", desc: "Arka Bacak & Eğilme Gücü", color: "#f97316" },
+            glutes: { name: "Kalça", icon: "", desc: "Kalça & Denge Gücü", color: "#a855f7" },
+            core: { name: "Karın & Bel", icon: "", desc: "Ön Karın, Yan Karın & Bel Çevresi", color: "#eab308" },
+            calves_grip: { name: "Baldır & Tutuş", icon: "", desc: "Baldır, Ayak Bileği & El Tutuşu", color: "#94a3b8" }
         };
 
         // ==================== BÖLGESEL KAS HARİTASI (SSOT) ====================
@@ -3247,8 +3247,8 @@
 
         // AUTH & ATHLETE SESSION
         let currentSession = null;
-        let selectedNewAvatar = 'A';
-        let selectedAvatar = 'A';
+        let selectedNewAvatar = 'SP';
+        let selectedAvatar = 'SP';
         let selectedTheme = 'gold';
 
         const THEMES = {

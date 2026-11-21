@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=346">
+    <link rel="stylesheet" href="css/style.css?v=347">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH */
         html, body { background-color: #0B0A14; color: #F8FAFC; color-scheme: dark; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -44,13 +44,13 @@
                     <rect width="64" height="64" rx="16" fill="#0F172A"/>
                     <rect x="1" y="1" width="62" height="62" rx="15" stroke="#334155" stroke-width="1.5" stroke-opacity="0.6"/>
                     <defs>
-                        <linearGradient id="stitchLoginFlame" x1="16" y1="12" x2="48" y2="52" gradientUnits="userSpaceOnUse">
+                        <linearGradient id="loginBrandFlame" x1="16" y1="12" x2="48" y2="52" gradientUnits="userSpaceOnUse">
                             <stop offset="0%" stop-color="#FF6B4A"/>
                             <stop offset="100%" stop-color="#FF3D12"/>
                         </linearGradient>
                     </defs>
                     <path d="M25 18C25 14.134 28.134 11 32 11C35.866 11 39 14.134 39 18V21H25V18Z" stroke="#94A3B8" stroke-width="3.5" stroke-linecap="round"/>
-                    <path d="M20 23H44L47 38C47 44.6274 41.6274 50 35 50H29C22.3726 50 17 44.6274 17 38L20 23Z" fill="url(#stitchLoginFlame)"/>
+                    <path d="M20 23H44L47 38C47 44.6274 41.6274 50 35 50H29C22.3726 50 17 44.6274 17 38L20 23Z" fill="url(#loginBrandFlame)"/>
                     <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                 </svg>
             </div>
@@ -58,38 +58,38 @@
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
-            <!-- GİRİŞ / KAYIT OL SEKME GEÇİŞİ (STITCH KINETIC SLATE) -->
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; background:#F1F5F9; padding:5px; border-radius:999px; border:1.5px solid #CBD5E1; margin-bottom:16px;">
-                <button type="button" id="authTabBtnLogin" onclick="switchAuthScreenTab('login')" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border-radius:999px; border:1px solid #B52603; font-size:13px; font-weight:800; cursor:pointer; background:linear-gradient(135deg, #FF5A36 0%, #E03410 100%); color:#FFFFFF; box-shadow:0 3px 10px rgba(255,90,54,0.28); transition:all 0.2s;">
+            <!-- GİRİŞ / KAYIT OL SEKME GEÇİŞİ -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; background:#121024; padding:5px; border-radius:999px; border:1px solid rgba(167,139,250,0.3); margin-bottom:16px;">
+                <button type="button" id="authTabBtnLogin" onclick="switchAuthScreenTab('login')" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border-radius:999px; border:1px solid rgba(167,139,250,0.45); font-size:13px; font-weight:800; cursor:pointer; background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color:#FFFFFF; box-shadow:0 3px 10px rgba(109,40,217,0.35); transition:all 0.2s;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
                     <span>Giriş Yap</span>
                 </button>
-                <button type="button" id="authTabBtnRegister" onclick="switchAuthScreenTab('register')" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border-radius:999px; border:1px solid transparent; font-size:13px; font-weight:800; cursor:pointer; background:transparent; color:#334155; transition:all 0.2s;">
+                <button type="button" id="authTabBtnRegister" onclick="switchAuthScreenTab('register')" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border-radius:999px; border:1px solid transparent; font-size:13px; font-weight:800; cursor:pointer; background:transparent; color:#E2E8F0; transition:all 0.2s;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
                     <span>Kayıt Ol</span>
                 </button>
             </div>
 
             <div id="loginErrorMsg" class="login-error" role="alert" aria-live="polite"></div>
-            <div id="loginSuccessMsg" style="display:none; background:#ECFDF5; border-left:4px solid #10B981; color:#065F46; font-weight:600; padding:10px 12px; border-radius:6px; font-size:12.5px; margin-bottom:16px; text-align:left; line-height:1.45;" role="status" aria-live="polite"></div>
+            <div id="loginSuccessMsg" style="display:none; background:rgba(16,185,129,0.16); border:1px solid rgba(52,211,153,0.42); border-left:4px solid #10B981; color:#D1FAE5; font-weight:600; padding:10px 12px; border-radius:8px; font-size:12.5px; margin-bottom:16px; text-align:left; line-height:1.45;" role="status" aria-live="polite"></div>
 
             <!-- GİRİŞ FORMU -->
             <form id="loginForm" onsubmit="handleAuthLogin(event)">
                 <div class="login-field">
-                    <label class="login-label" for="loginUsername" style="color:#334155;">Kullanıcı Adı veya E-Posta</label>
-                    <input type="text" id="loginUsername" name="username" class="login-input" placeholder="admin veya e-posta adresiniz" required autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="next" oninput="clearAuthInlineError()">
+                    <label class="login-label" for="loginUsername" style="color:#CBD5E1;">Kullanıcı Adı veya E-Posta</label>
+                    <input type="text" id="loginUsername" name="username" class="login-input" placeholder="kullanıcı adı veya e-posta" required autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="next" oninput="clearAuthInlineError()">
                 </div>
 
                 <div class="login-field" style="margin-bottom:10px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                        <label class="login-label" for="loginPassword" style="margin-bottom:0; color:#334155;">Şifre</label>
-                        <button type="button" onclick="switchAuthScreenTab('forgot')" style="background:none; border:none; color:#15803D; font-size:12px; font-weight:800; cursor:pointer; padding:0; text-decoration:underline;">
+                        <label class="login-label" for="loginPassword" style="margin-bottom:0; color:#CBD5E1;">Şifre</label>
+                        <button type="button" onclick="switchAuthScreenTab('forgot')" style="background:none; border:none; color:#C4B5FD; font-size:12px; font-weight:800; cursor:pointer; padding:0; text-decoration:underline;">
                             Şifremi Unuttum?
                         </button>
                     </div>
                     <div style="position:relative; display:flex; align-items:center;">
-                        <input type="password" id="loginPassword" name="password" class="login-input" placeholder="••••••••" required autocomplete="current-password" enterkeyhint="done" oninput="clearAuthInlineError()" style="padding-right:44px;">
-                        <button type="button" onclick="togglePasswordFieldVisibility('loginPassword', this)" aria-label="Şifreyi göster" aria-pressed="false" style="position:absolute; right:8px; background:transparent; border:none; color:#334155; font-size:12px; font-weight:800; cursor:pointer; padding:6px 8px; border-radius:6px;">Göster</button>
+                        <input type="password" id="loginPassword" name="password" class="login-input" placeholder="••••••••" required autocomplete="current-password" enterkeyhint="done" oninput="clearAuthInlineError()" style="padding-right:58px;">
+                        <button type="button" onclick="togglePasswordFieldVisibility('loginPassword', this)" aria-label="Şifreyi göster" aria-pressed="false" style="position:absolute; right:8px; background:transparent; border:none; color:#E2E8F0; font-size:12px; font-weight:800; cursor:pointer; padding:6px 8px; border-radius:6px;">Göster</button>
                     </div>
                 </div>
 
@@ -141,65 +141,65 @@
 
             <!-- ZAYIF ŞİFRE TESPİTİNDE ZORUNLU GÜÇLÜ ŞİFRE OLUŞTURMA ADIMI -->
             <form id="forcePasswordUpgradeForm" onsubmit="handleForcePasswordUpgradeSubmit(event)" style="display:none;">
-                <div style="background:#FFFBEB; border:1.5px solid #F59E0B; border-radius:10px; padding:10px 12px; margin-bottom:12px; text-align:left;">
-                    <div id="forceUpgradeUserGreeting" style="font-size:13px; font-weight:800; color:#0F172A; margin-bottom:3px;">Güvenli Şifre Oluşturun</div>
-                    <div id="forceUpgradeReasonText" style="font-size:11.5px; font-weight:600; color:#B45309; line-height:1.4;">
+                <div style="background:rgba(245,158,11,0.14); border:1px solid rgba(251,191,36,0.42); border-radius:10px; padding:10px 12px; margin-bottom:12px; text-align:left;">
+                    <div id="forceUpgradeUserGreeting" style="font-size:13px; font-weight:800; color:#FFFFFF; margin-bottom:3px;">Güvenli Şifre Oluşturun</div>
+                    <div id="forceUpgradeReasonText" style="font-size:11.5px; font-weight:600; color:#FDE68A; line-height:1.4;">
                         Mevcut şifreniz kolay tahmin edilebilir düzeyde. Hesabınızı korumak için yeni bir şifre belirleyin.
                     </div>
                 </div>
 
                 <!-- CANLI GÜVENLİK KRİTERLERİ ROZETLERİ -->
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:12px; text-align:center;">
-                    <div id="pwRuleLenPill" style="font-size:10.5px; font-weight:800; padding:6px 4px; border-radius:8px; background:#F1F5F9; color:#475569; border:1px solid #CBD5E1; white-space:nowrap;">8+ Karakter</div>
-                    <div id="pwRuleMixPill" style="font-size:10.5px; font-weight:800; padding:6px 4px; border-radius:8px; background:#F1F5F9; color:#475569; border:1px solid #CBD5E1; white-space:nowrap;">Harf + Rakam</div>
-                    <div id="pwRuleSafePill" style="font-size:10.5px; font-weight:800; padding:6px 4px; border-radius:8px; background:#F1F5F9; color:#475569; border:1px solid #CBD5E1; white-space:nowrap;">Tahmin Edilemez</div>
+                    <div id="pwRuleLenPill" style="font-size:10.5px; font-weight:800; padding:6px 4px; border-radius:8px; background:#121024; color:#CBD5E1; border:1px solid rgba(167,139,250,0.28); white-space:nowrap;">8+ Karakter</div>
+                    <div id="pwRuleMixPill" style="font-size:10.5px; font-weight:800; padding:6px 4px; border-radius:8px; background:#121024; color:#CBD5E1; border:1px solid rgba(167,139,250,0.28); white-space:nowrap;">Harf + Rakam</div>
+                    <div id="pwRuleSafePill" style="font-size:10.5px; font-weight:800; padding:6px 4px; border-radius:8px; background:#121024; color:#CBD5E1; border:1px solid rgba(167,139,250,0.28); white-space:nowrap;">Tahmin Edilemez</div>
                 </div>
 
                 <div class="login-field" style="margin-bottom:10px; text-align:left;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <label class="login-label" for="forceUpgradeNewPass" style="margin-bottom:0; color:#334155;">Yeni Güçlü Şifre *</label>
-                        <span id="forceUpgradeStrengthLabel" style="font-size:11px; font-weight:800; color:#475569;">Bekleniyor</span>
+                        <label class="login-label" for="forceUpgradeNewPass" style="margin-bottom:0; color:#CBD5E1;">Yeni Güçlü Şifre *</label>
+                        <span id="forceUpgradeStrengthLabel" style="font-size:11px; font-weight:800; color:#CBD5E1;">Bekleniyor</span>
                     </div>
                     <input type="password" id="forceUpgradeNewPass" class="login-input" placeholder="En az 8 karakter, harf ve rakam" minlength="8" required autocomplete="new-password" oninput="updateForceUpgradePasswordPreview()">
                 </div>
 
                 <div class="login-field" style="margin-bottom:14px; text-align:left;">
-                    <label class="login-label" for="forceUpgradeConfirmPass" style="color:#334155;">Yeni Şifre (Tekrar) *</label>
+                    <label class="login-label" for="forceUpgradeConfirmPass" style="color:#CBD5E1;">Yeni Şifre (Tekrar) *</label>
                     <input type="password" id="forceUpgradeConfirmPass" class="login-input" placeholder="Yeni şifrenizi tekrar yazın" minlength="8" required autocomplete="new-password" oninput="updateForceUpgradePasswordPreview()">
                 </div>
 
                 <button type="submit" class="login-btn" id="forceUpgradeSubmitBtn">ŞİFREYİ KAYDET VE GİRİŞ YAP</button>
-                <button type="button" onclick="cancelForcePasswordUpgrade()" style="width:100%; margin-top:8px; padding:9px; background:#F8FAFC; border:1.5px solid #CBD5E1; border-radius:10px; color:#334155; font-size:12px; font-weight:800; cursor:pointer;">
+                <button type="button" onclick="cancelForcePasswordUpgrade()" style="width:100%; margin-top:8px; padding:9px; background:#121024; border:1px solid rgba(167,139,250,0.3); border-radius:10px; color:#E2E8F0; font-size:12px; font-weight:800; cursor:pointer;">
                     ← Vazgeç
                 </button>
             </form>
 
-            <!-- KAYIT OL (ADMİN ONAYLI BAŞVURU) FORMU -->
+            <!-- KAYIT OL (YÖNETİCİ ONAYLI BAŞVURU) FORMU -->
             <form id="registerForm" onsubmit="handleAuthRegister(event)" style="display:none;">
                 <div class="login-field" style="margin-bottom:12px;">
-                    <label class="login-label" for="regDisplayName" style="color:#334155;">Ad Soyad *</label>
+                    <label class="login-label" for="regDisplayName" style="color:#CBD5E1;">Ad Soyad *</label>
                     <input type="text" id="regDisplayName" class="login-input" placeholder="Örn: Ahmet Yılmaz" required autocomplete="name">
                 </div>
 
                 <div class="login-field" style="margin-bottom:12px;">
-                    <label class="login-label" for="regEmail" style="color:#334155;">E-Posta Adresi * (Onay Maili İçin)</label>
+                    <label class="login-label" for="regEmail" style="color:#CBD5E1;">E-Posta Adresi * (Onay Maili İçin)</label>
                     <input type="email" id="regEmail" class="login-input" placeholder="ornek@gmail.com" required autocomplete="email" autocapitalize="none" spellcheck="false">
                 </div>
 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; text-align:left; align-items:end;">
                     <div>
-                        <label class="login-label" for="regUsername" style="color:#334155; white-space:nowrap;">Kullanıcı Adı *</label>
+                        <label class="login-label" for="regUsername" style="color:#CBD5E1; white-space:nowrap;">Kullanıcı Adı *</label>
                         <input type="text" id="regUsername" class="login-input" placeholder="Örn: ahmet" required autocapitalize="none" spellcheck="false" style="padding:11px 12px; font-size:13px;">
                     </div>
                     <div>
-                        <label class="login-label" for="regPassword" style="color:#334155; white-space:nowrap;">Şifre * (8+ krk)</label>
+                        <label class="login-label" for="regPassword" style="color:#CBD5E1; white-space:nowrap;">Şifre * (8+ krk)</label>
                         <input type="password" id="regPassword" class="login-input" placeholder="Harf + Rakam" minlength="8" required autocomplete="new-password" style="padding:11px 12px; font-size:13px;">
                     </div>
                 </div>
 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; text-align:left;">
                     <div>
-                        <label class="login-label" for="regLevel" style="color:#334155;">Seviye</label>
+                        <label class="login-label" for="regLevel" style="color:#CBD5E1;">Seviye</label>
                         <select id="regLevel" class="login-input" style="padding:10px 12px; font-size:13px;">
                             <option value="Başlangıç">Başlangıç</option>
                             <option value="Orta Seviye" selected>Orta Seviye</option>
@@ -207,7 +207,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="login-label" for="regGender" style="color:#334155;">Cinsiyet</label>
+                        <label class="login-label" for="regGender" style="color:#CBD5E1;">Cinsiyet</label>
                         <select id="regGender" class="login-input" style="padding:10px 12px; font-size:13px;">
                             <option value="Erkek" selected>Erkek</option>
                             <option value="Kadın">Kadın</option>
@@ -216,7 +216,7 @@
                 </div>
 
                 <button type="submit" class="login-btn" id="registerSubmitBtn">KAYIT BAŞVURUSU GÖNDER</button>
-                <div style="font-size:11.5px; color:#475569; font-weight:600; margin-top:10px; line-height:1.4;">
+                <div style="font-size:11.5px; color:#CBD5E1; font-weight:600; margin-top:10px; line-height:1.4;">
                     Başvurunuz yönetici onayına düşer. Onaylandığında e-posta adresinize bilgilendirme maili gönderilir.
                 </div>
             </form>
@@ -228,7 +228,7 @@
                 </button>
             </div>
 
-            <div class="login-hint" style="color:#94A3B8; font-size:11.5px; margin-top:14px;">
+            <div class="login-hint" style="color:#CBD5E1; font-size:11.5px; margin-top:14px;">
                 Yetkili Girişi • Yönetici Onaylı Üyelik Sistemi
             </div>
         </div>
@@ -238,7 +238,7 @@
     <div id="mainAppWrapper" style="display:none;">
         <div class="app-container">
 
-            <!-- MODERN UNIFIED APP BAR (STITCH FUNCTIONAL KINETIC SLATE) -->
+            <!-- MODERN UNIFIED APP BAR -->
             <div class="modern-app-bar">
                 <div class="modern-brand" onclick="switchTab('generatorTab')" title="Ana Ekrana Dön">
                     <span class="canva-brand-monogram" aria-hidden="true" translate="no">
@@ -246,13 +246,13 @@
                             <rect width="64" height="64" rx="16" fill="#0F172A"/>
                             <rect x="1" y="1" width="62" height="62" rx="15" stroke="#334155" stroke-width="1.5" stroke-opacity="0.6"/>
                             <defs>
-                                <linearGradient id="stitchBarFlame" x1="16" y1="12" x2="48" y2="52" gradientUnits="userSpaceOnUse">
+                                <linearGradient id="appBarBrandFlame" x1="16" y1="12" x2="48" y2="52" gradientUnits="userSpaceOnUse">
                                     <stop offset="0%" stop-color="#FF6B4A"/>
                                     <stop offset="100%" stop-color="#FF3D12"/>
                                 </linearGradient>
                             </defs>
                             <path d="M25 18C25 14.134 28.134 11 32 11C35.866 11 39 14.134 39 18V21H25V18Z" stroke="#94A3B8" stroke-width="3.5" stroke-linecap="round"/>
-                            <path d="M20 23H44L47 38C47 44.6274 41.6274 50 35 50H29C22.3726 50 17 44.6274 17 38L20 23Z" fill="url(#stitchBarFlame)"/>
+                            <path d="M20 23H44L47 38C47 44.6274 41.6274 50 35 50H29C22.3726 50 17 44.6274 17 38L20 23Z" fill="url(#appBarBrandFlame)"/>
                             <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                         </svg>
                     </span>
@@ -260,13 +260,13 @@
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" style="display:none;">v346</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" style="display:none;">v347</span>
                         </div>
                     </div>
                 </div>
                 <div class="modern-bar-actions" id="headerBarActions">
                     <div class="modern-user-badge" onclick="if(window.innerWidth <= 768){ openMoreSheet(); } else { switchTab('profileTab'); }" title="Profil & Menü">
-                        <span class="modern-user-avatar" id="headerUserAvatar">F</span>
+                        <span class="modern-user-avatar" id="headerUserAvatar">S</span>
                         <span class="modern-user-name" id="headerUserName">Sporcu</span>
                         <span class="auth-role-tag role-admin" id="headerUserRoleBadge" style="display:none;">Yönetici</span>
                     </div>
@@ -291,7 +291,7 @@
                     <div id="headerPopupMenu" class="header-popup-menu" style="display:none;">
                         <div class="header-popup-status-row">
                             <span class="header-popup-status-label">Sistem Durumu</span>
-                            <span class="cloud-sync-badge" id="headerCloudSyncBadge" onclick="if(this.classList.contains('auth-required') && typeof reauthToLoginScreenPreservingLocalData === 'function'){ closeHeaderPopupMenu(); reauthToLoginScreenPreservingLocalData(); }" title="Firebase Bulut Veritabanı">Bulut Aktif</span>
+                            <span class="cloud-sync-badge" id="headerCloudSyncBadge" onclick="if(this.classList.contains('auth-required') && typeof reauthToLoginScreenPreservingLocalData === 'function'){ closeHeaderPopupMenu(); reauthToLoginScreenPreservingLocalData(); }" title="Bulut Eşitleme Durumu">Bulut Aktif</span>
                         </div>
                         <button type="button" class="header-popup-item" id="headerReauthCloudBtn" style="display:none; color:#FDE68A;" onclick="closeHeaderPopupMenu(); if(typeof reauthToLoginScreenPreservingLocalData === 'function'){ reauthToLoginScreenPreservingLocalData(); }">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
@@ -578,23 +578,23 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- B. Set Düzeni, EMOM Döngüsü & Hedef -->
+                            <!-- B. Set Düzeni & Hedef -->
                             <div class="gen-adv-block" id="paramSection">
-                                <div class="gen-adv-title">Set Düzeni, EMOM Döngüsü &amp; Hedef</div>
-                                <p class="gen-adv-desc">Süperset iki hareketi peş peşe eşleştirir; EMOM her dakika başında yeni set başlatır.</p>
+                                <div class="gen-adv-title">Set Düzeni ve Hedef</div>
+                                <p class="gen-adv-desc">Süperset iki hareketi peş peşe eşleştirir; süreli turlar her dakika yeni set başlatır.</p>
                                 <span id="selectedParamLabel" style="display:none;">Orta Süperset • Kas &amp; Hacim • 45 Dk</span>
                                 <div class="param-grid">
                                     <div class="param-group">
                                         <label for="paramStyle">SET DÜZENİ</label>
                                         <select id="paramStyle" class="param-select" onchange="updateSelectedParamLabel()">
-                                            <option value="superset" selected>Orta Süperset (Dengeli)</option>
-                                            <option value="complex">Birleşik Akış (Çelik Akışı)</option>
+                                            <option value="superset" selected>Orta Süperset</option>
+                                            <option value="complex">Birleşik Akış</option>
                                             <option value="superset_light">Az Süperset</option>
                                             <option value="superset_intense">Yoğun Süperset</option>
                                             <option value="straight">Klasik Düz Set</option>
-                                            <option value="emom_strength">Kuvvet EMOM</option>
-                                            <option value="emom_hypertrophy">Kas EMOM</option>
-                                            <option value="emom_conditioning">Kondisyon EMOM</option>
+                                            <option value="paced_strength">Güç Odaklı</option>
+                                            <option value="paced_hypertrophy">Kas Gelişimi</option>
+                                            <option value="paced_conditioning">Nabız ve Kondisyon</option>
                                         </select>
                                     </div>
                                     <div class="param-group">
@@ -620,13 +620,26 @@
                                 </div>
                             </div>
 
-                            <!-- C. Schumann (2022) Hibrit Model, Durum Telemetrisi & RPE -->
-                            <div class="gen-adv-block">
-                                <div class="gen-adv-title">Akademik Hibrit Model &amp; Durum Telemetrisi</div>
-                                <p class="gen-adv-desc">Schumann (2022) hibrit modeli kas gelişimi ile kondisyonu güç kaybı olmadan dengeler; durum telemetrisi ise geçmiş zorluk derecesi (RPE) ve kas yorgunluğuna göre yükü ayarlar.</p>
-                                <button type="button" class="btn btn-outline gen-adv-sub-btn" onclick="openAiHybridArchitectModal()">
-                                    Akademik Model &amp; Telemetri Paneli
-                                </button>
+                            <!-- C. Program Dengesi ve Hazırlık Özeti -->
+                            <div class="gen-adv-block" id="doctrineReadinessSection">
+                                <div class="gen-adv-title">Program Dengesi ve Hazırlık Özeti</div>
+                                <p class="gen-adv-desc">Kas geliştirme ile kondisyon oranını seçin; hazırlık özetinden son dönem yoğunluğunu inceleyin.</p>
+                                <div class="gen-doctrine-pills-grid" id="doctrineSelectionGrid" role="group" aria-label="Program Dengesi">
+                                    <button type="button" class="gen-doctrine-pill doctrine-card" id="docCard_bb_pure" onclick="selectAiDoctrine('bb_pure')">Saf Kas</button>
+                                    <button type="button" class="gen-doctrine-pill doctrine-card selected" id="docCard_bb_hybrid" onclick="selectAiDoctrine('bb_hybrid')">Kas Odaklı</button>
+                                    <button type="button" class="gen-doctrine-pill doctrine-card" id="docCard_balanced_hybrid" onclick="selectAiDoctrine('balanced_hybrid')">Dengeli</button>
+                                    <button type="button" class="gen-doctrine-pill doctrine-card" id="docCard_func_hybrid" onclick="selectAiDoctrine('func_hybrid')">Kondisyon Odaklı</button>
+                                </div>
+                                <div style="margin-top:8px;">
+                                    <button type="button" id="btnToggleReadinessSummary" class="gen-adv-sub-btn" aria-expanded="false" onclick="toggleAiTelemetryAccordion()" style="display:flex; justify-content:space-between; align-items:center;">
+                                        <span>Hazırlık Özeti</span>
+                                        <span id="aiTelemetryToggleLabel" style="color:#A78BFA; font-weight:800;">Göster</span>
+                                    </button>
+                                    <div id="aiTelemetryAccordionBody" style="display:none; margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
+                                        <div id="aiTelemetryGrid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:6px; margin-bottom:8px;"></div>
+                                        <div id="aiDiagnosticContent" style="font-size:12px; color:#CBD5E1; line-height:1.5;"></div>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- D. Özel Not & Hassasiyet -->
@@ -639,16 +652,13 @@
                                 </div>
                             </div>
 
-                            <!-- E. Manuel & Hızlı Antrenman Modları -->
+                            <!-- E. Kendi Programını Kur -->
                             <div class="gen-adv-block" style="margin-bottom:0;">
-                                <div class="gen-adv-title">Manuel Kurulum &amp; Hızlı Başlat</div>
-                                <p class="gen-adv-desc">Hareketleri kütüphaneden tek tek kendiniz seçerek liste kurar veya tek hareketle anında seans başlatır.</p>
-                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+                                <div class="gen-adv-title">Kendi Programını Kur</div>
+                                <p class="gen-adv-desc">Hareketleri kütüphaneden tek tek kendin seçerek özel seansını oluştur.</p>
+                                <div style="margin-top:8px;">
                                     <button type="button" class="btn btn-outline gen-adv-sub-btn" onclick="openManualBuilderInWorkout()">
-                                        Manuel Program Kur
-                                    </button>
-                                    <button type="button" class="btn btn-outline gen-adv-sub-btn" onclick="openQuickWorkoutModal()">
-                                        Hızlı Antrenman Başlat
+                                        Kendi Programını Kur
                                     </button>
                                 </div>
                             </div>
@@ -675,7 +685,7 @@
             <!-- ==================== TAB 2: ACTIVE WORKOUT ==================== -->
             <div id="activeWorkoutTab" class="tab-content">
 
-                <!-- 1. WORKOUT STICKY HUD (STITCH SİYAH DİNLENME & ODAK SAYACI) -->
+                <!-- 1. WORKOUT STICKY HUD -->
                 <div id="activeWorkoutHUD" class="workout-sticky-hud stitch-dark-hud" style="display:none;">
                     <div class="stitch-hud-top-row">
                         <div class="stitch-hud-status">
@@ -708,8 +718,8 @@
                         </div>
                         <div class="stitch-hud-btn-grid">
                             <button type="button" class="stitch-hud-btn-secondary" onclick="adjustTimer(15)" title="15 saniye ekle">+15 sn</button>
-                            <button type="button" class="stitch-hud-btn-primary" id="btnPlayPauseTimer" onclick="toggleTimer()" title="Başlat / Duraklat">▶ Başlat</button>
-                            <button type="button" class="stitch-hud-btn-secondary btn-skip-rest" onclick="skipRestTimer()" title="Dinlenmeyi bitir">⏭ Atla</button>
+                            <button type="button" class="stitch-hud-btn-primary" id="btnPlayPauseTimer" onclick="toggleTimer()" title="Başlat / Duraklat">Başlat</button>
+                            <button type="button" class="stitch-hud-btn-secondary btn-skip-rest" onclick="skipRestTimer()" title="Dinlenmeyi bitir">Atla</button>
                         </div>
                     </div>
                 </div>
@@ -781,20 +791,17 @@
                     </div>
                 </div>
 
-                <!-- EMBEDDED PROGRAM ATÖLYESİ (MANUEL PROGRAM OLUŞTURUCU & HIZLI ANTRENMAN) -->
+                <!-- EMBEDDED PROGRAM ATÖLYESİ (KENDİ PROGRAMINI KUR) -->
                 <div id="studioSectionInWorkout" style="display:block; margin-top:0; margin-bottom:12px;">
                     <div class="generator-card" id="studioCardShell" style="border:1.5px solid #E2E8F0; padding:14px 16px; cursor:pointer;" onclick="toggleStudioAccordion()">
                         
                         <!-- ACCORDION HEADER -->
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                             <div style="min-width:0; flex:1;">
-                                <h3 style="font-size:14.5px; font-weight:900; color:#FFFFFF; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Manuel Program & Hızlı Antrenman</h3>
-                                <p style="font-size:11.5px; color:#CBD5E1; margin:2px 0 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Özel program kurun veya anlık seans başlatın</p>
+                                <h3 style="font-size:14.5px; font-weight:900; color:#FFFFFF; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Kendi Programını Kur</h3>
+                                <p style="font-size:11.5px; color:#CBD5E1; margin:2px 0 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Hareketleri seçip kendi seansını oluştur veya hemen başlat</p>
                             </div>
                             <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
-                                <button type="button" class="btn studio-quick-btn" id="btnQuickStudioLaunch" onclick="event.stopPropagation(); openQuickWorkoutModal()">
-                                    + Anlık Seans
-                                </button>
                                 <span id="studioAccordionArrow" class="studio-accordion-chevron" aria-hidden="true">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                                 </span>
@@ -1091,9 +1098,9 @@
                 <div class="generator-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
                         <div style="display:flex; align-items:center; gap:12px;">
-                            <span style="display:none;" id="profileCardAvatar"></span>
+                            <span style="display:none;" id="profileCardAvatar">S</span>
                             <div>
-                                <h2 style="font-size:18px; font-weight:800; color:#FFFFFF;" id="profileCardName">Ferit</h2>
+                                <h2 style="font-size:18px; font-weight:800; color:#FFFFFF;" id="profileCardName">Sporcu</h2>
                                 <p style="font-size:12.5px; color:#CBD5E1;" id="profileCardMeta">Kişisel Sporcu Profili</p>
                             </div>
                         </div>
@@ -1131,16 +1138,11 @@
                         <div class="form-group">
                             <label class="form-label">Avatar Seç</label>
                             <div class="avatar-picker-grid" id="avatarPicker">
-                                <div class="avatar-choice" onclick="selectAvatar('🥋')">🥋</div>
-                                <div class="avatar-choice" onclick="selectAvatar('🦁')">🦁</div>
-                                <div class="avatar-choice" onclick="selectAvatar('⚡')">⚡</div>
-                                <div class="avatar-choice" onclick="selectAvatar('🛡️')">🛡️</div>
-                                <div class="avatar-choice" onclick="selectAvatar('🦅')">🦅</div>
-                                <div class="avatar-choice" onclick="selectAvatar('🐺')">🐺</div>
-                                <div class="avatar-choice" onclick="selectAvatar('👑')">👑</div>
-                                <div class="avatar-choice" onclick="selectAvatar('🔥')">🔥</div>
-                                <div class="avatar-choice" onclick="selectAvatar('🏋️‍♂️')">🏋️‍♂️</div>
-                                <div class="avatar-choice" onclick="selectAvatar('🏋️‍♀️')">🏋️‍♀️</div>
+                                <div class="avatar-choice" onclick="selectAvatar('SP')">SP</div>
+                                <div class="avatar-choice" onclick="selectAvatar('AT')">AT</div>
+                                <div class="avatar-choice" onclick="selectAvatar('GZ')">GZ</div>
+                                <div class="avatar-choice" onclick="selectAvatar('KL')">KL</div>
+                                <div class="avatar-choice" onclick="selectAvatar('DM')">DM</div>
                             </div>
                         </div>
 
@@ -1534,15 +1536,15 @@
 
             <!-- CAROUSEL CONTROLS BAR -->
             <div id="workoutDetailsCarouselNav" style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:6px 12px; margin-bottom:10px;">
-                <button type="button" id="workoutDetailsPrevBtn" onclick="window.navigateWorkoutDetailsExercise(-1)" style="height:32px; width:36px; background:#FFFFFF; border:1px solid #CBD5E1; color:#0F172A; border-radius:8px; font-size:13px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 1px 2px rgba(0,0,0,0.05);" title="Önceki Hareket">
-                    ◀
+                <button type="button" id="workoutDetailsPrevBtn" onclick="window.navigateWorkoutDetailsExercise(-1)" style="height:32px; width:36px; background:#FFFFFF; border:1px solid #CBD5E1; color:#0F172A; border-radius:8px; font-size:15px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 1px 2px rgba(0,0,0,0.05);" title="Önceki Hareket">
+                    &lsaquo;
                 </button>
                 <div style="text-align:center; user-select:none;">
                     <span id="workoutDetailsCarouselCounter" style="font-size:12px; font-weight:800; color:#0F172A;">Hareket 1 / 1</span>
                     <div id="workoutDetailsCarouselDots" style="display:flex; justify-content:center; gap:4px; margin-top:3px; max-width:200px; overflow-x:auto;"></div>
                 </div>
-                <button type="button" id="workoutDetailsNextBtn" onclick="window.navigateWorkoutDetailsExercise(1)" style="height:32px; width:36px; background:#FFFFFF; border:1px solid #CBD5E1; color:#0F172A; border-radius:8px; font-size:13px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 1px 2px rgba(0,0,0,0.05);" title="Sonraki Hareket">
-                    ▶
+                <button type="button" id="workoutDetailsNextBtn" onclick="window.navigateWorkoutDetailsExercise(1)" style="height:32px; width:36px; background:#FFFFFF; border:1px solid #CBD5E1; color:#0F172A; border-radius:8px; font-size:15px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 1px 2px rgba(0,0,0,0.05);" title="Sonraki Hareket">
+                    &rsaquo;
                 </button>
             </div>
 
@@ -1885,181 +1887,6 @@
         </div>
     </div>
 
-    <!-- ==================== AI HYBRID BLUEPRINT & DOCTRINE ARCHITECT MODAL ==================== -->
-    <div id="aiHybridArchitectModal" class="modal-overlay" onclick="if(event.target === this) closeAiHybridArchitectModal()">
-        <div class="modal-box ai-architect-modal-box" style="max-width: 740px; border: 1px solid rgba(168, 85, 247, 0.45); box-shadow: 0 10px 40px rgba(147, 51, 234, 0.25);">
-            <!-- SABİT ÜST BAŞLIK (STICKY HEADER) -->
-            <div class="modal-header ai-architect-modal-header">
-                <div style="min-width:0; padding-right:8px;">
-                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                        <span class="auth-role-tag" style="background:linear-gradient(135deg, rgba(168,85,247,0.35), rgba(245,158,11,0.25)); color:#F3E8FF; border:1px solid rgba(168,85,247,0.5); font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px;">AKADEMİK AI MİMARI</span>
-                        <span style="font-size:10.5px; color:var(--gold); font-weight:800;" id="aiModalVersionTag">Schumann (2022) Hibrit Model</span>
-                    </div>
-                    <span class="modal-title" style="font-size:16px; margin-top:3px; display:block; line-height:1.25;">Bodybuilding &amp; Fonksiyonel Hibrit Doktrini</span>
-                </div>
-                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeAiHybridArchitectModal()" style="width:34px; height:34px; border-radius:8px; background:rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; flex-shrink:0;">✕</button>
-            </div>
-
-            <!-- KAYDIRILABİLİR ORTA GÖVDE (SCROLLABLE BODY) -->
-            <div class="ai-architect-modal-body">
-                <!-- BÖLÜM 1: CANLI TELEMETRİ (VARSAYILAN GİZLENEBİLİR AKORDİYON) -->
-                <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:10px; padding:9px 12px; margin-bottom:8px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleAiTelemetryAccordion()">
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <strong style="font-size:12px; color:#0F172A;">Durum Telemetrisi</strong>
-                        </div>
-                        <span id="aiTelemetryToggleLabel" style="font-size:11px; color:var(--cyan); font-weight:700;">▼ Göster</span>
-                    </div>
-                    <div id="aiTelemetryAccordionBody" style="display:none; margin-top:8px; padding-top:8px; border-top:1px dashed #CBD5E1;">
-                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:6px;" id="aiTelemetryGrid">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- BÖLÜM 2: AI TEŞHİS VE BİYOMEKANİK RAPORU (VARSAYILAN GİZLENEBİLİR AKORDİYON) -->
-                <div style="background:linear-gradient(135deg, #FAF5FF, #F3E8FF); border:1.5px solid #D8B4FE; border-radius:10px; padding:10px 12px; margin-bottom:10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; gap:8px;" onclick="toggleAiDiagnosticAccordion()">
-                        <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-                            <strong style="font-size:12px; color:#0F172A; line-height:1.35;" id="aiDiagnosticHeadline">AI Biyomekanik Teşhis Raporu</strong>
-                        </div>
-                        <span id="aiDiagnosticToggleLabel" style="font-size:11px; color:#6B21A8; font-weight:700; flex-shrink:0;">▼ Göster</span>
-                    </div>
-                    <div id="aiDiagnosticAccordionBody" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed #D8B4FE;">
-                        <div id="aiDiagnosticContent" style="font-size:12px; color:#334155; line-height:1.55; margin-bottom:8px;">
-                            <!-- Populated by JS -->
-                        </div>
-                        <div style="display:flex; justify-content:flex-end;">
-                            <button type="button" class="btn btn-outline" id="btnTriggerGeminiLiveReport" onclick="requestGeminiDeepHybridReport()" style="font-size:11px; padding:4px 10px; border-color:#9333EA; color:#6B21A8; background:#FFFFFF; font-weight:800; display:flex; align-items:center; gap:5px;">
-                                <span>Canlı Gemini Analizi</span>
-                            </button>
-                        </div>
-                        <div id="aiGeminiExtraReportContainer" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed #D8B4FE; font-size:12px; color:#0F172A; line-height:1.55;">
-                            <!-- Gemini live output will be streamed/rendered here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- BÖLÜM 3: HİBRİT DOKTRİN SEÇİMİ -->
-                <div style="margin-bottom:10px;">
-                    <div style="font-size:12px; font-weight:800; color:#0F172A; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
-                        <span>Programın Temel Doktrinini Seç:</span>
-                    </div>
-                    <div class="doctrine-grid" id="doctrineSelectionGrid">
-                        <!-- 1. Pure Bodybuilding -->
-                        <div class="doctrine-card" id="docCard_bb_pure" onclick="selectAiDoctrine('bb_pure')" style="padding:9px 11px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
-                                <strong style="color:#0F172A; font-size:12px;">Saf Kas</strong>
-                                <span style="font-size:10.5px; color:var(--gold); font-weight:800;">%90 Kas</span>
-                            </div>
-                        </div>
-
-                        <!-- 2. BB-Dominant Hybrid -->
-                        <div class="doctrine-card selected ai-recommended" id="docCard_bb_hybrid" onclick="selectAiDoctrine('bb_hybrid')" style="padding:9px 11px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
-                                <strong style="color:var(--gold); font-size:12px;">Kas Hibrit</strong>
-                                <span style="font-size:10.5px; color:var(--gold); font-weight:800;">%70 Kas</span>
-                            </div>
-                        </div>
-
-                        <!-- 3. Balanced Hybrid (50/50) -->
-                        <div class="doctrine-card" id="docCard_balanced_hybrid" onclick="selectAiDoctrine('balanced_hybrid')" style="padding:9px 11px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
-                                <strong style="color:#0F172A; font-size:12px;">Dengeli</strong>
-                                <span style="font-size:10.5px; color:#38bdf8; font-weight:800;">%50/%50</span>
-                            </div>
-                        </div>
-
-                        <!-- 4. Functional-Dominant Hybrid -->
-                        <div class="doctrine-card" id="docCard_func_hybrid" onclick="selectAiDoctrine('func_hybrid')" style="padding:9px 11px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
-                                <strong style="color:#0F172A; font-size:12px;">Fonk-Hibrit</strong>
-                                <span style="font-size:10.5px; color:#f97316; font-weight:800;">%70 Fonk</span>
-                            </div>
-                        </div>
-
-                        <!-- 5. Pure Functional -->
-                        <div class="doctrine-card" id="docCard_func_pure" onclick="selectAiDoctrine('func_pure')" style="padding:9px 11px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
-                                <strong style="color:#0F172A; font-size:12px;">Saf Kondisyon &amp; Fonksiyonel</strong>
-                                <span style="font-size:10.5px; color:#4ade80; font-weight:800;">%90 Fonk</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- BÖLÜM 4: HIZLI PARAMETRE VE ÖZEL İSTEKLER -->
-                <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:10px; padding:10px 12px;">
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; align-items:stretch;">
-                        <div style="min-width:0;">
-                            <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block;">Günlük Bölge / Split</label>
-                            <select id="aiModalSplitSelect" class="form-input" style="font-size:12px; padding:7px 9px; width:100%; box-sizing:border-box;">
-                                <option value="full_body" selected>Tüm Vücut</option>
-                                <option value="upper_push">İtiş (Göğüs/Omuz/Triceps)</option>
-                                <option value="upper_pull">Çekiş (Sırt/Arka Omuz/Biceps)</option>
-                                <option value="lower">Alt Vücut &amp; Bacak</option>
-                                <option value="upper">Tüm Üst Vücut</option>
-                                <option value="core">Karın &amp; Core Zırhı</option>
-                                <option value="functional">Fonksiyonel &amp; Kondisyon</option>
-                            </select>
-                        </div>
-                        <div style="min-width:0;">
-                            <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block;">Seans Süresi</label>
-                            <select id="aiModalDurationSelect" class="form-input" style="font-size:12px; padding:7px 9px; width:100%; box-sizing:border-box;">
-                                <option value="30">30 Dk (4 Hareket)</option>
-                                <option value="45" selected>45 Dk (6 Hareket)</option>
-                                <option value="60">60 Dk (8 Hareket)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div style="margin-bottom:8px;">
-                        <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block;">Set &amp; Süperset Yoğunluğu (Akademik Hibrit)</label>
-                        <select id="aiModalStyleSelect" class="form-input" style="font-size:12px; padding:7px 9px; width:100%; box-sizing:border-box;">
-                            <option value="superset" selected>Orta Süperset</option>
-                            <option value="complex">Birleşik Akış (Kompleks)</option>
-                            <option value="superset_light">Az Süperset</option>
-                            <option value="superset_intense">Yoğun Süperset</option>
-                            <option value="straight">Klasik Düz Set</option>
-                            <option value="emom_strength">Kuvvet EMOM</option>
-                            <option value="emom_hypertrophy">Kas EMOM</option>
-                            <option value="emom_conditioning">Kondisyon EMOM</option>
-                        </select>
-                    </div>
-                    <div style="margin-bottom:8px;">
-                        <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block; color:#38bdf8;">Haftalık Şablon</label>
-                        <select id="aiModalWeeklyTemplateSelect" class="form-input" style="font-size:12px; padding:7px 9px; width:100%; box-sizing:border-box; border-color:rgba(56,189,248,0.35);">
-                            <option value="ai_auto" selected>Otomatik Haftalık Denge</option>
-                            <option value="upper_lower_full">3 Gün: Üst • Alt • Tüm Vücut</option>
-                            <option value="ppl_3day">3 Gün: İtiş • Çekiş • Bacak</option>
-                            <option value="fullbody_3day">3 Gün: Tüm Vücut (Farklı Hareketler)</option>
-                            <option value="flow_complex_3day">3 Gün: Çelik Akışı</option>
-                            <option value="upper_lower_4day">4 Gün: Üst / Alt</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="form-label" style="font-size:10.5px; margin-bottom:3px;">Özel İstek, Zayıf Bölge veya Sakatlık Durumu (Opsiyonel)</label>
-                        <input type="text" id="aiModalUserWishInput" name="ai_modal_wish" class="form-input" placeholder="Örn: Geçen hafta sırt ve kol az çalıştım, dizimde hassasiyet var..." style="font-size:12px; padding:8px 10px;" autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true">
-                    </div>
-                </div>
-            </div>
-
-            <!-- SABİT ALT AKSİYON ÇUBUĞU (HER ZAMAN EKRANDA GÖRÜNÜR - STICKY FOOTER) -->
-            <div class="ai-architect-modal-footer">
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
-                    <button type="button" class="btn btn-outline" style="width:100%; padding:11px 10px; font-weight:800; font-size:12.5px; display:flex; justify-content:center; align-items:center; gap:5px; border-color:var(--gold); color:var(--gold);" onclick="applyAiHybridProgram(false)">
-                        <span>Günlük Program Oluştur</span>
-                    </button>
-                    <button type="button" class="btn btn-gold" style="width:100%; padding:11px 10px; font-weight:800; font-size:12.5px; display:flex; justify-content:center; align-items:center; gap:5px;" onclick="applyAiHybridProgram(true)">
-                        <span>Günlük Hemen Başlat</span>
-                    </button>
-                </div>
-                <button type="button" class="btn btn-outline" style="width:100%; padding:10px 12px; font-weight:800; font-size:12px; display:flex; justify-content:center; align-items:center; gap:6px; border-color:#38bdf8; color:#38bdf8; background:rgba(56,189,248,0.08);" onclick="applyAiWeeklySchedule()">
-                    <span>Haftalık Programı Kur</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- ==================== QUICK PRE-CHECK POPUP MODAL ==================== -->
     <div id="aiQuickPrecheckModal" class="modal-overlay" style="overscroll-behavior:contain; background:rgba(6,5,12,0.85); backdrop-filter:blur(14px);" onclick="if(event.target === this) closeQuickAiPrecheckModal()">
         <div class="modal-box" style="max-width:440px; width:92%; padding:22px; border-radius:20px; background:#181530; border:1px solid rgba(167,139,250,0.2); box-shadow:0 20px 50px rgba(0,0,0,0.7); overscroll-behavior:contain;">
@@ -2385,7 +2212,7 @@
 
             <!-- Liste Konteyneri -->
             <div id="bugReportsPoolList" style="min-height:120px;">
-                <!-- Dynamically populated from Firestore -->
+                <!-- Bildirim listesi burada gösterilir -->
             </div>
         </div>
     </div>
@@ -2535,7 +2362,7 @@
         </div>
     </div>
 
-    <!-- ==================== DAYLIGHT HALTER & PLAKA HESAPLAMA MODALI ==================== -->
+    <!-- ==================== HALTER & PLAKA HESAPLAMA MODALI ==================== -->
     <div id="daylightPlateModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) closePlateModal()">
         <div class="modal-box" style="max-width: 500px; background:#FFFFFF; border-radius:20px; border:1.5px solid #E2E8F0; padding:20px; box-shadow:0 10px 30px rgba(15,23,42,0.15);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -2567,42 +2394,7 @@
         </div>
     </div>
 
-    <!-- ==================== DAYLIGHT HIZLI ANTRENMAN SEÇİCİ MODALI ==================== -->
-    <div id="daylightQuickWorkoutModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) closeQuickWorkoutModal()">
-        <div class="modal-box" style="max-width: 560px; max-height:85vh; display:flex; flex-direction:column; background:#FFFFFF; border-radius:20px; border:1.5px solid #E2E8F0; padding:16px; box-shadow:0 10px 30px rgba(15,23,42,0.15);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <div>
-                    <h3 style="font-size:17px; font-weight:900; color:#FFFFFF; margin:0;">Hızlı Antrenman Başlat</h3>
-                    <p style="font-size:12px; color:#CBD5E1; margin:2px 0 0;">Tek hareketle hemen başla veya hareketleri seçip seans kur</p>
-                </div>
-                <button type="button" class="modal-close-btn" onclick="closeQuickWorkoutModal()" style="font-size:20px; background:none; border:none; cursor:pointer; color:#CBD5E1;">✕</button>
-            </div>
-
-            <!-- Arama Kutusu -->
-            <div style="margin-bottom:10px;">
-                <input type="text" id="quickWorkoutSearchInput" name="quick_workout_search" class="form-input" style="padding:10px 14px; font-size:14px; font-weight:800; border-radius:12px; background:#0B0A14; border:1px solid rgba(167,139,250,0.3); color:#FFFFFF; width:100%;" placeholder="Egzersiz adı veya kas grubu yazın..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true" oninput="onQuickWorkoutSearch(this.value)">
-            </div>
-
-            <!-- Kategori Hapları -->
-            <div id="quickWorkoutCategoryRow" style="display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:10px; -webkit-overflow-scrolling:touch;">
-                <!-- Populated dynamically -->
-            </div>
-
-            <!-- Egzersiz Listesi -->
-            <div id="quickWorkoutListContainer" style="flex:1; overflow-y:auto; max-height:48vh; padding-right:4px;">
-                <!-- Populated dynamically -->
-            </div>
-
-            <!-- Seçilenlerle Başlat Alt Barı -->
-            <div id="quickWorkoutBottomActionBar" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid rgba(167,139,250,0.2);">
-                <button type="button" class="daylight-primary-cta" id="btnStartSelectedQuickWorkout" onclick="startSelectedQuickWorkout()">
-                    Seçilenlerle Başlat (0 Hareket)
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== STITCH 6-TAB BOTTOM NAVIGATION BAR ==================== -->
+    <!-- ==================== 6-TAB BOTTOM NAVIGATION BAR ==================== -->
     <div class="bottom-nav-wrapper" id="bottomNavWrapper">
         <div class="bottom-pull-handle" onclick="toggleBottomBar()" title="Menüyü Gizle/Göster"></div>
         <div class="bottom-nav-bar">
@@ -2682,14 +2474,14 @@
         </div>
     </div>
 
-    <!-- ==================== FIREBASE CLOUD DATABASE SDK (COMPAT) ==================== -->
+    <!-- ==================== CLOUD SDK (COMPAT) ==================== -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <!-- ==================== GOOGLE IDENTITY SERVICES (GIS) ==================== -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-    <!-- ==================== PDF.JS & TESSERACT.JS (FOR UNIQUE HEALTH BIA REPORTS & IMAGES) ==================== -->
+    <!-- ==================== PDF.JS & TESSERACT.JS (FOR BIA REPORTS & IMAGES) ==================== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script>
@@ -2698,18 +2490,18 @@
         }
     </script>
 
-    <!-- ==================== JAVASCRIPT APPLICATION CORE (7 BAĞIMSIZ ŞEF ODASI + ORKESTRA) ==================== -->
-    <script src="js/exercises-db.js?v=346"></script>
-    <script src="js/chiefs/shared-core.js?v=346"></script>
-    <script src="js/chiefs/bridge-customs.js?v=346"></script>
-    <script src="js/chiefs/liaison-subchiefs.js?v=346"></script>
-    <script src="js/chiefs/profile-chief.js?v=346"></script>
-    <script src="js/chiefs/library-chief.js?v=346"></script>
-    <script src="js/chiefs/history-chief.js?v=346"></script>
-    <script src="js/chiefs/analytics-chief.js?v=346"></script>
-    <script src="js/chiefs/generator-chief.js?v=346"></script>
-    <script src="js/chiefs/workout-chief.js?v=346"></script>
-    <script src="js/app.js?v=346"></script>
+    <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
+    <script src="js/exercises-db.js?v=347"></script>
+    <script src="js/chiefs/shared-core.js?v=347"></script>
+    <script src="js/chiefs/bridge-customs.js?v=347"></script>
+    <script src="js/chiefs/liaison-subchiefs.js?v=347"></script>
+    <script src="js/chiefs/profile-chief.js?v=347"></script>
+    <script src="js/chiefs/library-chief.js?v=347"></script>
+    <script src="js/chiefs/history-chief.js?v=347"></script>
+    <script src="js/chiefs/analytics-chief.js?v=347"></script>
+    <script src="js/chiefs/generator-chief.js?v=347"></script>
+    <script src="js/chiefs/workout-chief.js?v=347"></script>
+    <script src="js/app.js?v=347"></script>
     <script>
         function getNotifStorageKey() {
             const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';
@@ -2759,7 +2551,7 @@
                 const isGarmin = item.category === 'garmin' || /garmin|tredict|saat/i.test(item.text || '');
                 const badgeBg = isGarmin ? '#14532D' : (item.type === 'warn' ? '#7C2D12' : '#0C4A6E');
                 const badgeFg = isGarmin ? '#BBF7D0' : (item.type === 'warn' ? '#FDE68A' : '#BAE6FD');
-                const badgeLabel = isGarmin ? '⌚ Garmin' : (item.type === 'warn' ? '⚠️ Uyarı' : '🔔 Bildirim');
+                const badgeLabel = isGarmin ? 'Saat' : (item.type === 'warn' ? 'Uyarı' : 'Bildirim');
                 return `
                     <div style="background:${item.read ? '#121024' : '#1E1B3A'};border:1px solid ${item.read ? 'rgba(167, 139, 250, 0.2)' : 'rgba(167, 139, 250, 0.45)'};border-radius:10px;padding:9px 11px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
                         <div style="min-width:0;flex:1;">
@@ -2869,19 +2661,23 @@
         function toggleAiTelemetryAccordion() {
             const body = document.getElementById('aiTelemetryAccordionBody');
             const label = document.getElementById('aiTelemetryToggleLabel');
+            const btn = document.getElementById('btnToggleReadinessSummary');
             if (body && label) {
                 if (body.style.display === 'none') {
+                    if (typeof renderInlineReadinessSummary === 'function') renderInlineReadinessSummary();
                     body.style.display = 'block';
                     label.innerText = 'Gizle';
+                    if (btn) btn.setAttribute('aria-expanded', 'true');
                 } else {
                     body.style.display = 'none';
                     label.innerText = 'Göster';
+                    if (btn) btn.setAttribute('aria-expanded', 'false');
                 }
             }
         }
     </script>
 
-    <!-- AKADEMİK SPOR BİLİMİ RAPOR MODALI -->
+    <!-- SPOR BİLİMİ RAPOR MODALI -->
     <div class="modal-overlay" id="academicReportModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
         <div style="background:#FFFFFF; border:1.5px solid #E2E8F0; border-radius:16px; width:92%; max-width:640px; max-height:85vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 60px rgba(15,23,42,0.16);">
             <div style="padding:16px 20px; border-bottom:1.5px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC;">
@@ -2902,6 +2698,6 @@
             </div>
         </div>
     </div>
-    <script src="js/garmin-tredict-bridge.js?v=346" defer></script>
+    <script src="js/garmin-tredict-bridge.js?v=347" defer></script>
 </body>
 </html>
