@@ -3994,6 +3994,28 @@
         }
         window.normalizeExerciseTargetSpec = normalizeExerciseTargetSpec;
 
+        /** Hareketin kart/liste/önizleme gösterimi için kanonik set, hedef metin ve dinlenme bilgisi üretir. */
+        function resolveExerciseDisplayTarget(ex, fallbackScheme = null) {
+            const fbSets = (fallbackScheme && Number(fallbackScheme.sets)) || 3;
+            const fbReps = (fallbackScheme && fallbackScheme.reps) || '8-12';
+            const fbRest = (fallbackScheme && Number(fallbackScheme.rest)) || 60;
+            const norm = normalizeExerciseTargetSpec(ex, fbSets, fbReps);
+            const repsStr = String(norm.reps || fbReps || '8-12');
+            const repsSuffix = /sn|dk|metre|tur|ad[ıi]m|tekrar/i.test(repsStr) ? '' : ' Tekrar';
+            const rest = (ex && ex.customRest !== undefined && ex.customRest !== null) ? ex.customRest : fbRest;
+            return {
+                sets: norm.sets,
+                reps: repsStr,
+                repsLabel: `${repsStr}${repsSuffix}`,
+                rest,
+                metricMode: norm.metricMode,
+                isTimeBased: norm.isTimeBased,
+                isCardioMinutes: norm.isCardioMinutes,
+                isBodyweight: norm.isBodyweight
+            };
+        }
+        window.resolveExerciseDisplayTarget = resolveExerciseDisplayTarget;
+
         function recalculateWorkoutLogMetrics(rawLog) {
             if (!rawLog || typeof rawLog !== 'object' || !Array.isArray(rawLog.exercises)) {
                 return { log: rawLog, changed: false, unitCorruptionFixed: false, bodyweightVolumeUpdated: false };

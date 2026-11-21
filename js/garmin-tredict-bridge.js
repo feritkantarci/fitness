@@ -2719,14 +2719,21 @@
         ? EXERCISES_DB.find(x => x.id === (item.id || item.exerciseId) || x.name === item.name)
         : null;
       const exName = (exObj && exObj.name) || item.name || item.id || 'Hareket';
-      const setsCount = Math.max(1, Number(item.sets || 3));
-      const repsVal = parseSingleRepCount(item.reps, 10);
+      const exMode = (typeof window !== 'undefined' && typeof window.getExerciseMetricMode === 'function')
+        ? window.getExerciseMetricMode(exObj || item)
+        : (exObj && exObj.isTimeBased ? 'time_sec' : (exObj && exObj.isCardioMinutes ? 'cardio_min' : 'reps'));
+      const setsCount = exMode === 'cardio_min' ? 1 : Math.max(1, Number(item.sets || 3));
+      const repsVal = parseSingleRepCount(item.reps, exMode === 'time_sec' ? 30 : (exMode === 'cardio_min' ? 20 : 10));
       const weightVal = Number(item.weight || item.targetWeight || 12);
       const restSec = Math.max(15, Number(item.rest || item.restSec || 60));
-      const activeSec = Math.max(25, repsVal * 4);
-      const loadSuffix = (weightVal > 0 && (!exObj || exObj.equipment !== 'bodyweight'))
-        ? `${repsVal}x${weightVal}kg`
-        : `${repsVal} Tekrar`;
+      const activeSec = exMode === 'time_sec'
+        ? Math.max(15, repsVal)
+        : (exMode === 'cardio_min' ? Math.max(60, repsVal * 60) : Math.max(25, repsVal * 4));
+      const loadSuffix = exMode === 'time_sec'
+        ? `${repsVal} sn`
+        : (exMode === 'cardio_min'
+          ? `${repsVal} dk`
+          : ((weightVal > 0 && (!exObj || exObj.equipment !== 'bodyweight')) ? `${repsVal}x${weightVal}kg` : `${repsVal} Tekrar`));
 
       blocks.push(
         `${exName}\n` +

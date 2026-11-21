@@ -7,7 +7,7 @@ description: Çelik Kodu Üretici sekmesini (#generatorTab, js/chiefs/generator-
 
 - **Fiziksel Oda Dosyası:** `js/chiefs/generator-chief.js`
 - **Zorunlu Sınav Maddeleri:** `T13` (Gizli hareket filtresi + günlük ardışık seans 31 alt kas ayrımı), `T14` (Haftalık ardışık gün 31 alt kas ayrımı + 3 modlu hedef ataması), `T30` (Finisher ekipman/gizleme uyumu & hazır program ikamesi), `T31` (5-kademe sıralama, B2 sinerjist matrisi, gerçek sırt zorunluluğu & Çelik Akışı), `T32` (34s/46s kalibreli yorgunluk & 72s tekrar soğuması), `T33` (10-kas 0-set telafisi, bölgesel ağrı dışlaması & Slot 0 bileşik kilidi), `T34` (Kural önceliği: boş + uyarılı dönüş & Köprü Gümrüğü), `T35` (Haftalık plan 31-alt-kas ayrımı & önizleme izolasyonu), `T43`–`T45` (Üretici koyu tema bütünlüğü), `T47`–`T49` (İç liste kayma sabitleme & video merkezleme), `T53` (Üretici tam koyu kabuk, yetim numarasız başlıklar, kutu içi kutu iptali & sıfır emoji), `T54` (Program sonrası Planlama Kontrolü, Kart & Liste pencereleri yalın koyu standart), `T58` (3-modlu hedef/birim normalizasyonu, kondisyon yanlış alarm sıfırlama & 7 günlük bayat taslak/saat önbelleği budama)
-  - Bağlı sınavlar: `T36` (`library-guard` kapsamlı dışlama önbelleği + gerçek geçmiş), `T37` (`analytics-guard` ID öncelikli biyomekanik & piramit muafiyeti)
+  - Bağlı sınavlar: `T36` (`library-guard` kapsamlı dışlama önbelleği + gerçek geçmiş), `T37` (`analytics-guard` ID öncelikli biyomekanik & piramit muafiyeti), `T60` (`workout-guard` Üretici Liste/Kart hedef birim eşitliği & canlı/resmi/saat görünüm bütünlüğü)
 
 ## Görev Kapsamı (`#generatorTab`)
 1. Kullanıcının seviyesine, ekipmanına, hedef kas dengesine ve seçtiği güne göre günlük/haftalık antrenman üretir.

@@ -2306,6 +2306,23 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
         }
         window.toggleWeeklyPreviewExDetail = toggleWeeklyPreviewExDetail;
 
+        function resolveGenDisplayTarget(ex, scheme) {
+            if (typeof resolveExerciseDisplayTarget === 'function') {
+                return resolveExerciseDisplayTarget(ex, scheme);
+            }
+            const fbSets = (scheme && scheme.sets) || 3;
+            const fbReps = (scheme && scheme.reps) || '8-12';
+            const fbRest = (scheme && scheme.rest) || 60;
+            const normT = normalizeExerciseTargetByMetricMode(ex, fbSets, fbReps);
+            const rs = String(normT.reps || fbReps);
+            return {
+                sets: normT.sets || ex.targetSets || fbSets,
+                reps: rs,
+                repsLabel: `${rs}${/sn|dk|metre|tur|ad[ıi]m|tekrar/i.test(rs) ? '' : ' Tekrar'}`,
+                rest: (ex && ex.customRest !== undefined && ex.customRest !== null) ? ex.customRest : fbRest
+            };
+        }
+
         function buildTimelineStationsHtml(structuredList, baseScheme, weights, mode) {
             const list = Array.isArray(structuredList) ? structuredList : [];
             const toggleFn = mode === 'weekly_preview' ? 'toggleWeeklyPreviewExDetail' : 'toggleGeneratedExDetail';
@@ -2313,13 +2330,14 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
             const renderCleanExItem = (ex, idx) => {
                 const label = ex.blockLabel || String(idx + 1);
+                const disp = resolveGenDisplayTarget(ex, baseScheme);
                 const exScheme = Object.assign({}, baseScheme || { sets: 3, reps: '8-12', rest: 60 }, {
-                    rest: ex.customRest || (baseScheme ? baseScheme.rest : 60)
+                    rest: disp.rest,
+                    sets: disp.sets,
+                    reps: disp.reps
                 });
                 const targetW = typeof getExerciseRememberedWeight === 'function' ? getExerciseRememberedWeight(ex) : '';
                 const isExpanded = expandedIdx === idx;
-                const repsStr = String(exScheme.reps || '8-12');
-                const repsSuffix = /sn|dk|metre|tur|ad[ıi]m|tekrar/i.test(repsStr) ? '' : ' Tekrar';
                 const detailCardHtml = isExpanded
                     ? `<div class="wk-ex-detail-drawer" onclick="event.stopPropagation();">${renderSingleExerciseCard(ex, String(label), exScheme, weights, mode)}</div>`
                     : '';
@@ -2332,7 +2350,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                                 <span class="wk-ex-expand-hint ${isExpanded ? 'is-open' : ''}" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
                             </div>
                             <div class="wk-ex-row-submeta">
-                                <span>${exScheme.sets} Set × ${escapeHTML(repsStr)}${repsSuffix}</span>
+                                <span>${exScheme.sets} Set × ${escapeHTML(disp.repsLabel)}</span>
                                 ${targetW ? `<span style="color:#CBD5E1; font-weight:600;"> • Son: ${targetW} kg</span>` : ''}
                             </div>
                         </div>
@@ -2510,14 +2528,13 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             // Cards for each exercise
             const cardsHtml = list.map((ex, idx) => {
                 const label = ex.blockLabel || String(idx + 1);
+                const disp = resolveGenDisplayTarget(ex, w.scheme);
                 const exScheme = Object.assign({}, w.scheme || { sets: 3, reps: '8-12', rest: 60 }, {
-                    rest: ex.customRest || (w.scheme ? w.scheme.rest : 60),
-                    sets: ex.targetSets || (w.scheme ? w.scheme.sets : 3),
-                    reps: ex.targetReps || (w.scheme ? w.scheme.reps : '8-12')
+                    rest: disp.rest,
+                    sets: disp.sets,
+                    reps: disp.reps
                 });
                 const targetW = typeof getExerciseRememberedWeight === 'function' ? getExerciseRememberedWeight(ex) : '';
-                const repsStr = String(exScheme.reps || '8-12');
-                const repsSuffix = /sn|dk|metre|tur|ad[ıi]m|tekrar/i.test(repsStr) ? '' : ' Tekrar';
 
                 // Get visual media
                 let mediaHtml = '';
@@ -2556,7 +2573,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             </div>
 
                             <div class="wk-card-submeta">
-                                ${exScheme.sets} Set × ${escapeHTML(repsStr)}${repsSuffix} • ${exScheme.rest} sn dinlenme${targetW ? ` • Son: ${targetW} kg` : ''}
+                                ${exScheme.sets} Set × ${escapeHTML(disp.repsLabel)} • ${exScheme.rest} sn dinlenme${targetW ? ` • Son: ${targetW} kg` : ''}
                             </div>
 
                             <div class="wk-card-media-box">
@@ -9966,12 +9983,23 @@ KESİN KURALLAR:
 
             // 3. Canlı antrenman (active) ise set verilerini (activeWorkoutSetsData) ve bugünün takvim programını senkronize et
             if (scope === 'active' && activeWorkoutSession) {
+                const sFbSets = (activeWorkoutSession.scheme && activeWorkoutSession.scheme.sets) || 3;
+                const sFbReps = (activeWorkoutSession.scheme && activeWorkoutSession.scheme.reps) || '8-12';
+                if (newEx && typeof normalizeExerciseTargetByMetricMode === 'function') {
+                    const normNew = normalizeExerciseTargetByMetricMode(newEx, newEx.targetSets || sFbSets, newEx.targetReps || sFbReps);
+                    newEx.targetSets = normNew.sets;
+                    newEx.targetReps = normNew.reps;
+                    newEx.metricMode = normNew.metricMode;
+                    newEx.isCardioMinutes = normNew.isCardioMinutes;
+                    newEx.isTimeBased = normNew.isTimeBased;
+                    newEx.isBodyweight = normNew.isBodyweight;
+                }
                 if (oldExId && newEx && oldExId !== newEx.id) {
                     const prevSets = activeWorkoutSetsData[oldExId];
-                    const numSets = (Array.isArray(prevSets) && prevSets.length > 0)
-                        ? prevSets.length
-                        : ((newEx.targetSets || (activeWorkoutSession.scheme && activeWorkoutSession.scheme.sets)) || 3);
-                    const repsSpec = newEx.targetReps || (activeWorkoutSession.scheme && activeWorkoutSession.scheme.reps);
+                    const numSets = isExerciseCardioMinutes(newEx)
+                        ? 1
+                        : ((Array.isArray(prevSets) && prevSets.length > 0) ? prevSets.length : (newEx.targetSets || sFbSets));
+                    const repsSpec = newEx.targetReps || sFbReps;
                     const defaultReps = resolveDefaultExerciseSetTarget(newEx, repsSpec);
                     const defaultWeight = isExerciseCardioMinutes(newEx) ? '' : getExerciseRememberedWeight(newEx);
                     activeWorkoutSetsData[newEx.id] = [];
@@ -9986,8 +10014,8 @@ KESİN KURALLAR:
                     }
                     delete activeWorkoutSetsData[oldExId];
                 } else if (!oldExId && newEx && !activeWorkoutSetsData[newEx.id]) {
-                    const numSets = (newEx.targetSets || (activeWorkoutSession.scheme && activeWorkoutSession.scheme.sets)) || 3;
-                    const repsSpec = newEx.targetReps || (activeWorkoutSession.scheme && activeWorkoutSession.scheme.reps);
+                    const numSets = newEx.targetSets || sFbSets;
+                    const repsSpec = newEx.targetReps || sFbReps;
                     const defaultReps = resolveDefaultExerciseSetTarget(newEx, repsSpec);
                     const defaultWeight = isExerciseCardioMinutes(newEx) ? '' : getExerciseRememberedWeight(newEx);
                     activeWorkoutSetsData[newEx.id] = [];

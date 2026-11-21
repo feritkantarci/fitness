@@ -3695,6 +3695,78 @@ function runAcademicMathSuite(moduleSources, dbText) {
           && res.garminNotices === 0;
         return { ok, actual: JSON.stringify(res) };
       }
+    },
+    {
+      id: 'T60',
+      owner: 'workout-guard',
+      title: 'Hata Hafızası Sicili: Liste/Kart Görünümü, Canlı Liste, Dinlenme, Resmi Plan & Saat Aktarımı 3-Modlu Birim Bütünlüğü',
+      expected: 'EMOM Liste & Kart eşleşir (Butt Kicks=4x30 sn, Kürek=1x20 dk), Canlı Liste & Dinlenme=30 sn/20 dk, la_forja_day2 Farmer=30 sn',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const w = {
+            id: 't60_gen',
+            title: 'Tüm Vücut Antrenmanı',
+            scheme: { sets: 4, reps: '10 - 12', rest: 25 },
+            exercises: [
+              Object.assign({}, EXERCISES_DB.find(e => e.id === 'bw_butt_kicks'), { targetSets: 4, targetReps: '30 sn', customRest: 25 }),
+              Object.assign({}, EXERCISES_DB.find(e => e.id === 'cond_indoor_row'), { targetSets: 1, targetReps: '20 dk', customRest: 25 }),
+              Object.assign({}, EXERCISES_DB.find(e => e.id === 'bw_skater_jumps'), { targetSets: 4, targetReps: '10 - 12', customRest: 25 })
+            ]
+          };
+          window.generatedWorkoutViewMode = 'list';
+          const listHtml = buildTimelineStationsHtml(w.exercises, w.scheme, {}, 'generated');
+          window.generatedWorkoutViewMode = 'cards';
+          const cardHtml = buildWorkoutCardsCarouselHtml(w, 'generated');
+
+          activeWorkoutSession = Object.assign({}, w, { id: 't60_act' });
+          activeWorkoutSetsData = {
+            bw_butt_kicks: [{ setNo: 1, weight: 0, reps: 30, completed: false }],
+            cond_indoor_row: [{ setNo: 1, weight: '', reps: 20, completed: false }],
+            bw_skater_jumps: [{ setNo: 1, weight: 0, reps: 10, completed: false }]
+          };
+          activeWorkoutViewMode = 'list';
+          renderActiveWorkout();
+          const activeHtml = document.getElementById('activeWorkoutContainer').innerHTML;
+
+          const restTimeHtml = renderDaylightRestScreenHtml(w.exercises[0], 0, activeWorkoutSession);
+          const restCardioHtml = renderDaylightRestScreenHtml(w.exercises[1], 1, activeWorkoutSession);
+
+          const offPlan = getWorkoutDetailsForPlan({ id: 'la_forja_day2' });
+          const farmerEx = offPlan && offPlan.exercises ? offPlan.exercises.find(e => e.id === 'db_farmers_walk') : null;
+          const ev = window.GarminTredictChief.buildIntervalsWorkoutEvent('2026-11-21', 'Kondisyon', [
+            { id: 'bw_butt_kicks', name: 'Topuk Kalçaya Koşu (Butt Kicks)', sets: 4, reps: '30 sn', rest: 25 },
+            { id: 'cond_indoor_row', name: 'Kürek Çekme', sets: 1, reps: '20 dk', rest: 25 }
+          ]);
+
+          return {
+            listSub: (listHtml.match(/<div class="wk-ex-row-submeta">[\\s\\S]*?<\\/div>/g) || []).map(s => s.replace(/\\s+/g, ' ').trim()),
+            cardSub: (cardHtml.match(/<div class="wk-card-submeta">[\\s\\S]*?<\\/div>/g) || []).map(s => s.replace(/\\s+/g, ' ').trim()),
+            activeTargets: activeHtml.match(/🎯 <strong>.*?<\\/strong>/g) || [],
+            restTimeOk: restTimeHtml.includes('30 sn') && !restTimeHtml.includes('30 tekrar'),
+            restCardioOk: restCardioHtml.includes('20 dk') && !restCardioHtml.includes('20 tekrar'),
+            farmerReps: farmerEx ? farmerEx.targetReps : null,
+            evDesc: ev ? ev.description : ''
+          };
+        })()`, ctx);
+        const ok = res.listSub.length === 3
+          && res.listSub[0].includes('4 Set × 30 sn')
+          && res.listSub[1].includes('1 Set × 20 dk')
+          && res.listSub[2].includes('4 Set × 10 - 12 Tekrar')
+          && res.cardSub.length === 3
+          && res.cardSub[0].includes('4 Set × 30 sn')
+          && res.cardSub[1].includes('1 Set × 20 dk')
+          && res.cardSub[2].includes('4 Set × 10 - 12 Tekrar')
+          && res.activeTargets[0] === '🎯 <strong>1 Set × 30 sn</strong>'
+          && res.activeTargets[1] === '🎯 <strong>1 Set × 20 dk</strong>'
+          && res.activeTargets[2] === '🎯 <strong>1 Set × 10 - 12 Tekrar</strong>'
+          && res.restTimeOk
+          && res.restCardioOk
+          && res.farmerReps === '30 sn'
+          && res.evDesc.includes('(30 sn)')
+          && res.evDesc.includes('(20 dk)');
+        return { ok, actual: JSON.stringify(res) };
+      }
     }
   ];
 
