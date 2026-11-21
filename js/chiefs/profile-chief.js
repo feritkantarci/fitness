@@ -59,6 +59,11 @@
                 }
             });
             if (typeof document !== 'undefined') {
+                const verEl = document.getElementById('headerPopupVersionLabel');
+                const appVerEl = document.getElementById('appVersionBadge');
+                if (verEl && appVerEl && appVerEl.textContent) {
+                    verEl.textContent = String(appVerEl.textContent).trim();
+                }
                 const reauthBtn = document.getElementById('headerReauthCloudBtn');
                 if (reauthBtn) reauthBtn.style.display = (status === 'auth-required') ? 'flex' : 'none';
                 const profileBanner = document.getElementById('profileCloudAuthBanner');
@@ -532,7 +537,7 @@
             try {
                 const ver = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAppVersion === 'function')
                     ? window.CelikKaraKutu.getAppVersion()
-                    : 'v352';
+                    : 'v353';
                 const keys = payload && typeof payload === 'object' ? Object.keys(payload) : [];
                 const undefKeys = [];
                 const overLimit = [];
@@ -3817,7 +3822,7 @@
                 _adminPortalScriptLoadingPromise = new Promise((resolve) => {
                     try {
                         const script = document.createElement('script');
-                        script.src = 'js/chiefs/admin-portal.js?v=352';
+                        script.src = 'js/chiefs/admin-portal.js?v=353';
                         script.async = false;
                         script.onload = () => resolve(true);
                         script.onerror = () => {
