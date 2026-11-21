@@ -553,7 +553,7 @@
             'bw_skater_jumps': { id: '3361', name: "Skater Jumps (Paten Sıçraması)", clip: 'assets/opengym/clips/bw_skater_jumps.mp4', still: 'assets/opengym/stills/bw_skater_jumps.webp' },
             'bw_plank_jacks': { id: '1478', name: "Plank Jacks (Plank Bacak Aç-Kapa)", clip: 'assets/opengym/clips/bw_plank_jacks.mp4', still: 'assets/opengym/stills/bw_plank_jacks.webp' },
             'bw_squat_thrust': { id: '3705', name: "Squat Thrust (Yarım Burpee)", clip: 'assets/opengym/clips/bw_squat_thrust.mp4', still: 'assets/opengym/stills/bw_squat_thrust.webp' },
-            'bw_lateral_shuffle': { id: '4241', name: "Lateral Shuffle (Yanal Hızlı Adımlama)", clip: 'assets/opengym/clips/bw_lateral_shuffle.mp4', still: 'assets/opengym/stills/bw_lateral_shuffle.webp' },
+            'bw_lateral_shuffle': { id: '4241', name: "Lateral Shuffle (Kısa Bantlı Yanal Adımlama)", clip: 'assets/opengym/clips/bw_lateral_shuffle.mp4', still: 'assets/opengym/stills/bw_lateral_shuffle.webp' },
             'bw_dead_bug': { id: '0276', name: "Dead Bug", clip: 'assets/opengym/clips/0276.mp4', still: 'assets/opengym/stills/0276.webp' },
             'bw_bicycle_crunch': { id: '0443', name: "Bicycle Crunch (Bisiklet Mekik)", clip: 'assets/opengym/clips/0443.mp4', still: 'assets/opengym/stills/0443.webp' },
             'bw_reverse_crunch': { id: '0872', name: "Reverse Crunch (Ters Mekik)", clip: 'assets/opengym/clips/0872.mp4', still: 'assets/opengym/stills/0872.webp' },

@@ -539,7 +539,7 @@
             try {
                 const ver = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAppVersion === 'function')
                     ? window.CelikKaraKutu.getAppVersion()
-                    : 'v354';
+                    : 'v355';
                 const keys = payload && typeof payload === 'object' ? Object.keys(payload) : [];
                 const undefKeys = [];
                 const overLimit = [];
@@ -3876,7 +3876,7 @@
                 _adminPortalScriptLoadingPromise = new Promise((resolve) => {
                     try {
                         const script = document.createElement('script');
-                        script.src = 'js/chiefs/admin-portal.js?v=354';
+                        script.src = 'js/chiefs/admin-portal.js?v=355';
                         script.async = false;
                         script.onload = () => resolve(true);
                         script.onerror = () => {

@@ -523,12 +523,25 @@ function runAcademicMathSuite(moduleSources, dbText) {
             ]
           }]
         }]).items[0];
+        const latShuffle = vm.runInContext(`(() => {
+          const ex = EXERCISES_DB.find(e => e.id === 'bw_lateral_shuffle');
+          return {
+            equip: ex && ex.equipment,
+            reqs: ex ? getExerciseRequiredEquipments(ex) : [],
+            availWithoutBand: ex ? isExerciseEquipmentAvailable(ex, ['bodyweight', 'dumbbell']) : true,
+            availWithBand: ex ? isExerciseEquipmentAvailable(ex, ['bodyweight', 'mini_band']) : false
+          };
+        })()`, ctx);
         const ok = counts.cardio_min === 3 && counts.time_sec === 8 && counts.reps === 145
           && eng.getExerciseMetricMode({ id: 'bw_butt_kicks', name: 'Topuk Kalçaya Koşu (Butt Kicks)' }) === 'time_sec'
+          && latShuffle.equip === 'mini_band'
+          && latShuffle.reqs.includes('mini_band')
+          && latShuffle.availWithoutBand === false
+          && latShuffle.availWithBand === true
           && hMode === 'time_sec'
           && Boolean(h1 && h1.category === 'normal_fatigue' && String(h1.setChainText).includes('sn') && !String(h1.adviceText).includes('kiloya'))
           && Boolean(h2 && h2.category === 'early_drop' && String(h2.badgeText).includes('Süre Düşüşü'));
-        return { ok, actual: `DB=${counts.cardio_min}/${counts.time_sec}/${counts.reps}, H1=${h1?.category}, H2=${h2?.category}(${h2?.badgeText})` };
+        return { ok, actual: `DB=${counts.cardio_min}/${counts.time_sec}/${counts.reps}, LatShuffle=${latShuffle.equip}, H1=${h1?.category}, H2=${h2?.category}(${h2?.badgeText})` };
       }
     },
     {
@@ -3248,6 +3261,31 @@ function runAcademicMathSuite(moduleSources, dbText) {
             calHtml.includes('Program Üret') &&
             calHtml.includes('Seans Ekle');
 
+          openScheduleDayModal(today.getDay(), todayYMD);
+          const restModalHtml = String((document.getElementById('schedAssignedWorkoutSection') && document.getElementById('schedAssignedWorkoutSection').innerHTML) || '');
+          const restModalTwoOptionsOk = restModalHtml.includes('Manuel Ekle') &&
+            restModalHtml.includes('Otomatik Üret') &&
+            !restModalHtml.includes('Başka Günden Buraya Taşı');
+          closeScheduleDayModal();
+
+          const assignedPlan = {
+            id: 'custom_test_del',
+            title: 'Test Silinecek Program',
+            type: 'custom_saved',
+            rest: false,
+            exercises: [EXERCISES_DB[0]],
+            customWorkout: { id: 'custom_test_del', title: 'Test Silinecek Program', exercises: [EXERCISES_DB[0]] }
+          };
+          syncDayPlanToDateAndWeek(today.getDay(), todayYMD, assignedPlan, uid, false);
+          renderCalendarScreen();
+          const assignedCalHtml = String((document.getElementById('calendarMainContainer') && document.getElementById('calendarMainContainer').innerHTML) || '');
+          openScheduleDayModal(today.getDay(), todayYMD);
+          const assignedModalHtml = String((document.getElementById('schedAssignedWorkoutSection') && document.getElementById('schedAssignedWorkoutSection').innerHTML) || '');
+          const deleteBtnEverywhereOk = assignedCalHtml.includes('Programı Sil') && assignedModalHtml.includes('Programı Sil');
+          setDayAsRest(today.getDay(), todayYMD);
+          const deletedPlan = getPlanForDate(today);
+          const deleteExecOk = Boolean(deletedPlan && deletedPlan.rest === true);
+
           const otherDate = new Date(today);
           const dow = otherDate.getDay();
           otherDate.setDate(otherDate.getDate() + (dow === 1 ? 1 : -1));
@@ -3269,7 +3307,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
           toggleStudioAccordion(false);
           const studioClosed = Boolean(sBody && sBody.style.display === 'none' && sArrow && sArrow.dataset && sArrow.dataset.open === '0');
 
-          return { hiddenOnToday, restActionable, shownAway, hiddenAfterJump, monthClean, studioOpened, studioClosed };
+          return { hiddenOnToday, restActionable, restModalTwoOptionsOk, deleteBtnEverywhereOk, deleteExecOk, shownAway, hiddenAfterJump, monthClean, studioOpened, studioClosed };
         })()`, localCtx);
 
         const ok = Boolean(
@@ -3278,6 +3316,9 @@ function runAcademicMathSuite(moduleSources, dbText) {
           htmlCleanOk &&
           vmRes.hiddenOnToday &&
           vmRes.restActionable &&
+          vmRes.restModalTwoOptionsOk &&
+          vmRes.deleteBtnEverywhereOk &&
+          vmRes.deleteExecOk &&
           vmRes.shownAway &&
           vmRes.hiddenAfterJump &&
           vmRes.monthClean &&

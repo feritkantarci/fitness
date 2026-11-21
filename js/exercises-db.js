@@ -7048,28 +7048,28 @@
   },
   {
     "category": "conditioning",
-    "cue": "Dizleri büküp alçak atletik pozisyon al, ayakları birbirine çaprazlamadan yana seri adımlarla kay.",
-    "diagram": "assets/diagrams/seq_escalera.svg",
-    "equipment": "bodyweight",
+    "cue": "Kısa direnç bandını ayak bileklerinin veya dizlerinin etrafına geçir; alçak atletik pozisyonda bant gerginliğini kaybetmeden yana seri adımlarla kay.",
+    "diagram": "assets/exercises/bw_lateral_shuffle.webp",
+    "equipment": "mini_band",
     "id": "bw_lateral_shuffle",
     "isComplex": false,
     "mechanic": "compound",
     "muscle": "Yan Kalça, Dış Ön Bacak, İç Ön Bacak",
-    "name": "Lateral Shuffle (Yanal Hızlı Adımlama)",
+    "name": "Lateral Shuffle (Kısa Bantlı Yanal Adımlama)",
     "positions": [
       {
         "badge": "setup",
-        "desc": "Çeyrek squat derinliğinde alçak atletik duruş, göğüs açık, eller hazır.",
-        "phase": "1. Alçak Savunma Duruşu"
+        "desc": "Kısa direnç bandı bileklerde gergin, çeyrek squat derinliğinde alçak atletik duruş.",
+        "phase": "1. Bant Kurulumu & Duruş"
       },
       {
         "badge": "action",
-        "desc": "Sağa doğru adımlarken ayakları çaprazlamadan seri yanal kayma adımları at.",
-        "phase": "2. Yanal Hızlı Kayma"
+        "desc": "Bandın tamamen gevşemesine izin vermeden sağa doğru seri yanal adımlarla kay.",
+        "phase": "2. Bantlı Yanal Kayma"
       },
       {
         "badge": "finish",
-        "desc": "Dıştaki ayakla zemine fren basıp hemen sola doğru aynı hızla kaymaya geç.",
+        "desc": "Dıştaki ayakla zemine fren basıp hemen sola doğru aynı gerginlikle kaymaya geç.",
         "phase": "3. Fren & Yön Değiştirme"
       }
     ],
@@ -7084,16 +7084,16 @@
     "tags": [
       "legs",
       "conditioning",
-      "bodyweight",
+      "mini_band",
       "agility"
     ],
     "weightKey": "",
     "primarySubMuscles": "Yan Kalça, Dış Ön Bacak, İç Ön Bacak",
     "secondarySubMuscles": "Üst Baldır, Ön Kaval & Bilek, Derin İç Karın",
-    "biomechanicalProof": "Dizler hafif bükülü alçak duruşta sağa sola hızlı adımlamak; sürekli bükülü kalan ön bacağı, yana itiş yapan yan kalçayı ve iç bacakları çalıştırır.",
+    "biomechanicalProof": "Ayak bileklerindeki kısa direnç bandına karşı alçak atletik duruşta sağa sola hızlı adımlamak; yan kalça (gluteus medius) ve dış ön bacak kaslarını sürekli elastik gerilim altında çalıştırır.",
     "fitCategory": "plyo",
     "fitName": "side_to_side_shuffle_jump",
-    "fitNote": "Shuffle",
+    "fitNote": "Mini Band Lateral Shuffle",
     "garminPrimaryMuscles": [
       "QUADS",
       "CALVES"

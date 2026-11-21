@@ -456,7 +456,7 @@
             bw_skater_jumps: "skater jumps paten sicramasi yanal sicrama",
             bw_plank_jacks: "plank jacks plank bacak ac kapa karin kardiyo",
             bw_squat_thrust: "squat thrust yarim burpee kondisyon",
-            bw_lateral_shuffle: "lateral shuffle yanal kayma hizli adimlama ceviklik",
+            bw_lateral_shuffle: "lateral shuffle yanal kayma hizli adimlama ceviklik kisa bant mini band",
             cond_indoor_row: "kurek cekme indoor row rowing ergometre kardiyo kondisyon isinma",
             cond_walking: "yuruyus walking doga yuruyusu hiking kardiyo kondisyon",
             cond_running: "kosu kosu bandi running treadmill jog sprint kardiyo kondisyon"

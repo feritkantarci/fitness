@@ -2833,7 +2833,7 @@
                               "legs_quad_inner"
                     ],
                     "isComplex": false,
-                    "proof": "Dizler hafif bükülü alçak duruşta sağa sola hızlı adımlamak; sürekli bükülü kalan ön bacağı, yana itiş yapan yan kalçayı ve iç bacakları çalıştırır."
+                    "proof": "Ayak bileklerindeki kısa direnç bandına karşı alçak atletik duruşta sağa sola hızlı adımlamak; yan kalça (gluteus medius) ve dış ön bacak kaslarını sürekli elastik gerilim altında çalıştırır."
           },
           "cond_indoor_row": {
                     "primary": "Kanatlar, Orta Sırt, Dış Ön Bacak, Ana Kalça",

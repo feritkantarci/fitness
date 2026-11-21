@@ -5012,11 +5012,14 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     let exercisesHtml = '';
                     if (exercises.length === 0) {
                         exercisesHtml = `
-                            <div style="text-align:center; padding:16px 12px; font-size:12px; color:#475569; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px;">
+                            <div style="text-align:center; padding:16px 12px; font-size:12px; color:#CBD5E1; background:#121024; border:1px solid rgba(167,139,250,0.24); border-radius:10px;">
                                 Bu programda henüz hareket yok.
-                                <div style="margin-top:8px;">
-                                    <button type="button" class="wk-btn-primary-compact" style="width:100%;" onclick="editProgramForDay(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))">
-                                        + Hareket Ekle
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;">
+                                    <button type="button" class="wk-btn-primary-compact" style="width:100%;" onclick="startNewStudioProgramForDay(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))">
+                                        Manuel Ekle
+                                    </button>
+                                    <button type="button" class="wk-btn-utility-compact" style="width:100%;" onclick="openGeneratorForScheduledDay(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))">
+                                        Otomatik Üret
                                     </button>
                                 </div>
                             </div>
@@ -5055,8 +5058,8 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                                 <button type="button" class="wk-chip-action highlight-orange" id="btnToggleSchedMoveStrip" onclick="toggleSchedMoveDayDrawer()">
                                     Gün Değiştir
                                 </button>
-                                <button type="button" class="wk-chip-action" style="color:#B91C1C; border-color:#FECACA; background:#FEF2F2;" onclick="setDayAsRest()">
-                                    Dinlenmeye Al
+                                <button type="button" class="wk-chip-action" style="color:#FECACA; border-color:rgba(239,68,68,0.45); background:rgba(127,29,29,0.55);" onclick="setDayAsRest(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))">
+                                    Programı Sil
                                 </button>
                             </div>
 
@@ -5076,11 +5079,16 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     `;
                 } else {
                     templatePlanHtml = `
-                        <div style="background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:12px; padding:18px; text-align:center;">
-                            <div style="font-size:14px; font-weight:800; color:#0F172A;">${dayName} Günü Dinlenme</div>
-                            <button type="button" class="wk-btn-primary-compact" style="margin-top:10px; width:100%;" onclick="editProgramForDay(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))">
-                                + Başka Günden Buraya Taşı
-                            </button>
+                        <div style="background:#121024; border:1px dashed rgba(167,139,250,0.32); border-radius:12px; padding:18px 14px; text-align:center;">
+                            <div style="font-size:14px; font-weight:800; color:#F8FAFC;">${dayName} Günü Dinlenme</div>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
+                                <button type="button" class="wk-btn-primary-compact" style="width:100%;" onclick="startNewStudioProgramForDay(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))">
+                                    Manuel Ekle
+                                </button>
+                                <button type="button" class="wk-btn-utility-compact" style="width:100%;" onclick="openGeneratorForScheduledDay(${dayIdx}, decodeURIComponent('${encodeURIComponent(activeSchedulingDateStr || '')}'))">
+                                    Otomatik Üret
+                                </button>
+                            </div>
                         </div>
                     `;
                 }
@@ -5974,6 +5982,8 @@ KURALLAR:
             }, 100);
         }
 
+        window.startNewStudioProgramForDay = startNewStudioProgramForDay;
+
         function saveEditingRoutineToDay() {
             if (customRoutineState.editingDayIdx === null || customRoutineState.editingDayIdx === undefined) {
                 saveCustomRoutineToLibrary();
@@ -6675,12 +6685,19 @@ KURALLAR:
             openAssignWorkoutCalendarModal(workoutToAssign);
         }
 
-        function setDayAsRest() {
-            if (activeSchedulingDayIdx === null) return;
-            const isNext = activePlannerWeek === 'next';
+        function setDayAsRest(targetDayIdx = null, targetDateStr = null) {
+            const effDayIdx = (targetDayIdx !== null && targetDayIdx !== undefined) ? Number(targetDayIdx) : activeSchedulingDayIdx;
+            if (effDayIdx === null || effDayIdx === undefined) return;
+            const effDateStr = (targetDateStr !== null && targetDateStr !== undefined && String(targetDateStr).trim())
+                ? String(targetDateStr).trim()
+                : activeSchedulingDateStr;
+            const isNext = effDateStr
+                ? (typeof isDateInNextWeek === 'function' ? isDateInNextWeek(effDateStr) : (activePlannerWeek === 'next'))
+                : (activePlannerWeek === 'next');
             const user = getActiveUser();
-            const schedule = isNext ? getNextWeeklySchedule(user.id) : getWeeklySchedule(user.id);
-            const oldPlan = schedule[activeSchedulingDayIdx];
+            const uid = user ? user.id : 'default';
+            const schedule = isNext ? getNextWeeklySchedule(uid) : getWeeklySchedule(uid);
+            const oldPlan = schedule[effDayIdx];
             if (oldPlan && oldPlan.googleEventId && typeof deleteCalendarEventQuiet === 'function') {
                 deleteCalendarEventQuiet(oldPlan.googleEventId);
             }
@@ -6692,12 +6709,31 @@ KURALLAR:
                 rest: true,
                 _explicitCardioUpdate: true
             };
-            syncDayPlanToDateAndWeek(activeSchedulingDayIdx, activeSchedulingDateStr, restPlan, user.id, isNext);
+            syncDayPlanToDateAndWeek(effDayIdx, effDateStr, restPlan, uid, isNext);
 
             closeScheduleDayModal();
             renderActiveWorkout();
             if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
+            if (typeof showToast === 'function') {
+                const dayLabel = (typeof DAY_NAMES_TR !== 'undefined' && DAY_NAMES_TR[effDayIdx]) ? DAY_NAMES_TR[effDayIdx] : 'Seçili gün';
+                showToast(`${dayLabel} günündeki atanmış program silindi.`);
+            }
         }
+        window.setDayAsRest = setDayAsRest;
+
+        function openGeneratorForScheduledDay(dayIdx = null, targetDateStr = null) {
+            const effDayIdx = (dayIdx !== null && dayIdx !== undefined) ? Number(dayIdx) : activeSchedulingDayIdx;
+            const effDateStr = (targetDateStr !== null && targetDateStr !== undefined && String(targetDateStr).trim())
+                ? String(targetDateStr).trim()
+                : activeSchedulingDateStr;
+            window._pendingGeneratorAssignDayIdx = effDayIdx;
+            window._pendingGeneratorAssignDateStr = effDateStr || null;
+            closeScheduleDayModal();
+            if (typeof switchTab === 'function') {
+                switchTab('generatorTab');
+            }
+        }
+        window.openGeneratorForScheduledDay = openGeneratorForScheduledDay;
 
         function resetWeeklyScheduleTemplate(templateType = 'standard_3day') {
             let sched;
@@ -8937,13 +8973,16 @@ KURALLAR:
                                 Düzenle
                             </button>
                         </div>
-                        ${!selDay.isToday ? `
-                            <div style="margin-top:6px;">
+                        <div style="margin-top:6px; display:grid; grid-template-columns:${!selDay.isToday ? '1fr 1fr' : '1fr'}; gap:6px;">
+                            ${!selDay.isToday ? `
                                 <button type="button" class="wk-btn-utility-compact" style="width:100%;" onclick="copyDayProgramToToday(${selDay.dayIdx}, '${selDay.dayYMD}', true)">
                                     Bugüne Taşı
                                 </button>
-                            </div>
-                        ` : ''}
+                            ` : ''}
+                            <button type="button" class="wk-btn-utility-compact" style="width:100%; color:#FECACA; border-color:rgba(239,68,68,0.45); background:rgba(127,29,29,0.55);" onclick="setDayAsRest(${selDay.dayIdx}, '${selDay.dayYMD}')">
+                                Programı Sil
+                            </button>
+                        </div>
                     `;
                 }
 
@@ -9059,6 +9098,7 @@ KURALLAR:
                                 <div class="wk-carousel-top-actions">
                                     <button type="button" class="wk-card-btn-action" style="padding:4px 8px; font-size:11px; flex:0 0 auto; min-width:0;" onclick="openScheduleDayModal(${selDay.dayIdx}, '${selDay.dayYMD}')">Düzenle</button>
                                     ${!selDay.isToday ? `<button type="button" class="wk-card-btn-action" style="padding:4px 8px; font-size:11px; flex:0 0 auto; min-width:0;" onclick="copyDayProgramToToday(${selDay.dayIdx}, '${selDay.dayYMD}', true)">Bugüne Taşı</button>` : ''}
+                                    <button type="button" class="wk-card-btn-action" style="padding:4px 8px; font-size:11px; flex:0 0 auto; min-width:0; color:#FECACA; border-color:rgba(239,68,68,0.45); background:rgba(127,29,29,0.55);" onclick="setDayAsRest(${selDay.dayIdx}, '${selDay.dayYMD}')">Programı Sil</button>
                                 </div>
                             </div>
                         </div>
