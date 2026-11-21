@@ -532,7 +532,7 @@
             try {
                 const ver = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAppVersion === 'function')
                     ? window.CelikKaraKutu.getAppVersion()
-                    : 'v350';
+                    : 'v351';
                 const keys = payload && typeof payload === 'object' ? Object.keys(payload) : [];
                 const undefKeys = [];
                 const overLimit = [];
@@ -572,70 +572,78 @@
             } catch {}
         }
 
+        let _firestoreQuotaExhaustedUntil = 0;
+        const _lastCloudWritePayloadSig = {};
+
+        function isFirestoreQuotaError(err) {
+            if (!err) return false;
+            const code = String(err.code || '').toLowerCase();
+            const msg = String(err.message || err || '').toLowerCase();
+            return code.includes('resource-exhausted') || msg.includes('resource-exhausted') || msg.includes('quota exceeded');
+        }
+
+        function isFirestoreQuotaCircuitOpen() {
+            return Date.now() < _firestoreQuotaExhaustedUntil;
+        }
+
+        function tripFirestoreQuotaCircuitIfNeeded(err) {
+            if (isFirestoreQuotaError(err)) {
+                _firestoreQuotaExhaustedUntil = Date.now() + 15 * 60 * 1000;
+                updateCloudSyncBadge('offline', 'Bulut Kotası Doldu (Yerel Aktif)');
+                return true;
+            }
+            return false;
+        }
+
         async function writeAthleteDocWithSealHeal(colName, uid, buildPayloadFn) {
+            if (isFirestoreQuotaCircuitOpen()) {
+                const qErr = new Error('Firestore quota circuit open');
+                qErr.code = 'resource-exhausted';
+                qErr._k4Recorded = true;
+                throw qErr;
+            }
             const docRef = fbDb.collection(colName).doc(uid);
             const firstSeal = getAthleteCloudSeal(uid, colName);
             const isTelCol = colName === 'system_telemetry';
             let attemptLabel = 'İlkYazım';
             let usedSeal = firstSeal;
             let lastPayload = buildPayloadFn(firstSeal);
-            const allowedKeysMap = {
-                workout_logs: new Set(['logs', 'updatedAt', 'clientUpdatedAt', 'lastUpdatedBy', 'syncSeal']),
-                scale_logs: new Set(['logs', 'updatedAt', 'clientUpdatedAt', 'syncSeal']),
-                measurement_logs: new Set(['logs', 'updatedAt', 'clientUpdatedAt', 'syncSeal']),
-                user_state: new Set([
-                    'weeklySchedule', 'nextWeeklySchedule', 'dateSchedule', 'rememberedWeights',
-                    'excludedExercises', 'excludedExercisesUpdatedAt', 'customPrograms',
-                    'deletedCustomProgramIds', 'deletedWorkoutLogIds', 'mobilityTests',
-                    'selectedEquipments', 'customGyms', 'aiDoctrine', 'aiCoachSummary',
-                    'lastGeneratedWorkout', 'activeWorkoutDraft', 'garminManifests',
-                    'updatedAt', 'clientUpdatedAt', 'syncSeal'
-                ]),
-                system_telemetry: new Set(['uid', 'userName', 'events', 'openErrorCount', 'openWarnCount', 'clientUpdatedAt', 'updatedAt', 'syncSeal'])
-            };
             try {
-                await docRef.set(lastPayload, { merge: true });
+                // Tam şema yazımı ({ merge: true } yerine): garminManifests gibi iç haritalarda budanan eski anahtarların bulutta da silinmesini sağlar
+                await docRef.set(lastPayload);
                 if (!IS_LOCAL_DEV && !isTelCol) clearResolvedCloudErrors(colName, uid);
                 return true;
             } catch (err) {
+                if (tripFirestoreQuotaCircuitIfNeeded(err)) {
+                    if (err && typeof err === 'object') err._k4Recorded = true;
+                    throw err;
+                }
                 const isPermErr = err && (err.code === 'permission-denied' || /permission|insufficient/i.test(String(err.message || '')));
                 if (isPermErr) {
                     try {
-                        const snap = (typeof fetchCloudDocPreferServer === 'function')
-                            ? await fetchCloudDocPreferServer(docRef)
-                            : await docRef.get();
+                        const snap = await docRef.get();
                         const snapData = (snap && snap.exists && typeof snap.data === 'function') ? (snap.data() || {}) : null;
                         const remoteSeal = snapData ? adoptCloudSyncSealIfPresent(colName, uid, snapData) : '';
-                        const allowedSet = allowedKeysMap[colName];
-                        const extraLegacyKeys = (snapData && allowedSet)
-                            ? Object.keys(snapData).filter(k => !allowedSet.has(k))
-                            : [];
-                        const hasFieldDelete = typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore.FieldValue && typeof firebase.firestore.FieldValue.delete === 'function';
 
-                        if ((remoteSeal && remoteSeal !== firstSeal) || (extraLegacyKeys.length > 0 && hasFieldDelete)) {
-                            attemptLabel = extraLegacyKeys.length > 0 ? 'ŞemaVeMühürOnarımı' : 'MühürYenileme';
-                            usedSeal = remoteSeal || firstSeal;
+                        if (remoteSeal && remoteSeal !== firstSeal) {
+                            attemptLabel = 'MühürYenileme';
+                            usedSeal = remoteSeal;
                             lastPayload = buildPayloadFn(usedSeal);
-                            const healPayload = Object.assign({}, lastPayload);
-                            if (extraLegacyKeys.length > 0 && hasFieldDelete) {
-                                extraLegacyKeys.forEach(k => {
-                                    healPayload[k] = firebase.firestore.FieldValue.delete();
-                                });
-                            }
-                            await docRef.set(healPayload, { merge: true });
+                            await docRef.set(lastPayload);
                             if (!IS_LOCAL_DEV && !isTelCol) {
                                 clearResolvedCloudErrors(colName, uid);
-                                recordCloudGateTelemetry('warn', `${colName} Mühür Onarımı`, uid, extraLegacyKeys.length > 0 ? 'Eski şema alanları ve mühür onarıldı' : 'Bulut mühür uyuşmazlığı otomatik onarıldı', uid);
+                                recordCloudGateTelemetry('warn', `${colName} Mühür Onarımı`, uid, 'Bulut mühür uyuşmazlığı otomatik onarıldı', uid);
                             }
                             return true;
                         }
                     } catch (healErr) {
+                        tripFirestoreQuotaCircuitIfNeeded(healErr);
                         err = healErr;
                     }
                 }
                 const finalIsPerm = Boolean(isPermErr || (err && (err.code === 'permission-denied' || /permission|insufficient/i.test(String(err.message || '')))));
                 if (err && typeof err === 'object') err._k4IsPerm = finalIsPerm;
-                if (!IS_LOCAL_DEV && !isTelCol) {
+                if (!IS_LOCAL_DEV && !isTelCol && !isFirestoreQuotaCircuitOpen()) {
                     const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
                     const diagSummary = diagnoseCloudPayloadPreFlight(colName, lastPayload, usedSeal);
                     recordCloudGateTelemetry(offline ? 'warn' : 'error', `${colName} Bulut Yazımı`, `${uid} (${diagSummary} | Deneme:${attemptLabel})`, String((err && err.message) || err || 'Bulut yazım hatası'), uid);
@@ -781,7 +789,7 @@
         }
 
         async function flushPendingCloudOutbox() {
-            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || !navigator.onLine) return;
+            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || !navigator.onLine || isFirestoreQuotaCircuitOpen()) return;
             if (!isDemoGuestSession() && fbAuth && _firebaseInitialAuthResolved && !fbAuth.currentUser) return;
             const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
             if (!uid) return;
@@ -793,7 +801,7 @@
                 if (localStorage.getItem(`celik_kodu_pending_state_sync_${uid}`) === '1') {
                     await syncUserStateToCloud(uid);
                 }
-                if (localStorage.getItem(`celik_kodu_pending_telemetry_sync_${uid}`) === '1') {
+                if (localStorage.getItem(`celik_kodu_pending_telemetry_sync_${uid}`) === '1' && !isFirestoreQuotaCircuitOpen()) {
                     await syncSystemTelemetryToCloud(uid);
                 }
             } catch {}
@@ -844,12 +852,12 @@
         let foregroundCloudRefreshPromise = null;
 
         function triggerForegroundCloudRefresh() {
-            if (IS_LOCAL_DEV || navigator.onLine === false) return Promise.resolve();
+            if (IS_LOCAL_DEV || navigator.onLine === false || isFirestoreQuotaCircuitOpen()) return Promise.resolve();
             const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
             if (!uid) return Promise.resolve();
             const now = Date.now();
             if (foregroundCloudRefreshPromise) return foregroundCloudRefreshPromise;
-            if (now - lastForegroundCloudRefreshAt < 8000) return Promise.resolve();
+            if (now - lastForegroundCloudRefreshAt < 120000) return Promise.resolve();
             lastForegroundCloudRefreshAt = now;
             foregroundCloudRefreshPromise = (async () => {
                 try {
@@ -1012,12 +1020,17 @@
 
         async function fetchCloudDocPreferServer(docRef) {
             if (!docRef || typeof docRef.get !== 'function') return null;
-            if (typeof navigator === 'undefined' || navigator.onLine !== false) {
-                try {
-                    return await docRef.get({ source: 'server' });
-                } catch (e) {}
+            if (isFirestoreQuotaCircuitOpen()) {
+                const qErr = new Error('Firestore quota circuit open');
+                qErr.code = 'resource-exhausted';
+                throw qErr;
             }
-            return await docRef.get();
+            try {
+                return await withAuthTimeout(docRef.get(), 3500, null);
+            } catch (e) {
+                tripFirestoreQuotaCircuitIfNeeded(e);
+                throw e;
+            }
         }
 
         // Buluttan verileri çekme ve birleştirme (Merge)
@@ -1212,7 +1225,7 @@
                 updateCloudSyncBadge('synced', 'Demo Modu');
                 return;
             }
-            if (!isFirebaseReady || !fbDb) return;
+            if (!isFirebaseReady || !fbDb || isFirestoreQuotaCircuitOpen()) return;
             _cloudSyncLastIssue = null;
             updateCloudSyncBadge('syncing', 'Eşitleniyor...');
 
@@ -1231,6 +1244,11 @@
                     }
                     updateCloudSyncBadge(uid ? 'auth-required' : 'offline', uid ? 'Bulut Girişi Gerekli' : 'Bulut Hazır');
                     return;
+                }
+
+                // Vücut ağırlığı tonaj fırtınasını önlemek için önce tartı verisi çekilir
+                if (uid) {
+                    await syncUserScaleLogsFromCloud(uid);
                 }
 
                 const priorityTasks = [];
@@ -1253,9 +1271,8 @@
                     }
                 }
 
-                // 3. Kalan aktif kullanıcı verilerini eşitle (otomatik direktif/program dinleme stabilite için kapalıdır)
+                // 3. Kalan aktif kullanıcı verilerini eşitle
                 if (uid) {
-                    await syncUserScaleLogsFromCloud(uid);
                     await syncUserMeasurementsFromCloud(uid);
                     await syncUserStateFromCloud(uid);
                 }
@@ -1642,12 +1659,13 @@
                 });
 
                 // localLogs taban, cloudLogs öncelikli: eşit zaman damgasında güncel bulut kazanır
+                const isFromRealtimeSnapshot = Array.isArray(opts.snapshotLogs);
                 const { mergedLogs, filteredCloudDeletion } = mergeWorkoutLogCollections(localLogs, cloudLogs, uid);
                 let normalizedCloudLogs = false;
                 if (typeof window.recalculateWorkoutLogMetrics === 'function') {
                     mergedLogs.forEach(logItem => {
                         const rec = window.recalculateWorkoutLogMetrics(logItem);
-                        if (rec && rec.changed) normalizedCloudLogs = true;
+                        if (rec && rec.unitCorruptionFixed) normalizedCloudLogs = true;
                     });
                 }
 
@@ -1657,7 +1675,7 @@
                     if (window.GarminTredictChief && typeof window.GarminTredictChief.syncWatchTitlesFromWorkoutLogs === 'function') {
                         window.GarminTredictChief.syncWatchTitlesFromWorkoutLogs(mergedLogs, uid);
                     }
-                    if (window.GarminTredictChief && typeof window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs === 'function') {
+                    if (!isFromRealtimeSnapshot && window.GarminTredictChief && typeof window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs === 'function') {
                         window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs();
                     }
                     if (typeof renderHistory === 'function') renderHistory();
@@ -1666,7 +1684,8 @@
                     }
                     applyWednesdayHammerCurlPatch();
 
-                    if (!IS_LOCAL_DEV && cloudFetchOk && (mergedLogs.length !== cloudLogs.length || hasLocalEditNewerThanCloud || filteredCloudDeletion || normalizedCloudLogs)) {
+                    // onSnapshot tetiklemesinden gelen çağrılarda buluta geri yazım yapılmaz (sonsuz ping-pong döngüsünü önler)
+                    if (!isFromRealtimeSnapshot && !IS_LOCAL_DEV && cloudFetchOk && (mergedLogs.length !== cloudLogs.length || hasLocalEditNewerThanCloud || filteredCloudDeletion || normalizedCloudLogs)) {
                         await syncWorkoutLogsToCloud(mergedLogs, uid);
                     }
                 }
@@ -1680,42 +1699,56 @@
                 updateCloudSyncBadge('synced', 'Yerel Test (İzole)');
                 return;
             }
-            if (!uid) return;
+            if (!uid || isFirestoreQuotaCircuitOpen()) return;
             try {
                 updateCloudSyncBadge('syncing', 'Kaydediliyor...');
                 if (isFirebaseReady && fbDb && navigator.onLine !== false) {
                     const docRef = fbDb.collection('workout_logs').doc(uid);
                     let logsToWrite = Array.isArray(logs) ? logs : [];
-                    try {
-                        const remoteDoc = await fetchCloudDocPreferServer(docRef);
-                        if (remoteDoc && remoteDoc.exists) {
-                            const remoteData = remoteDoc.data() || {};
-                            adoptCloudSyncSealIfPresent('workout_logs', uid, remoteData);
-                            const remoteLogs = Array.isArray(remoteData.logs) ? remoteData.logs : [];
-                            if (remoteLogs.length > 0) {
-                                const merged = mergeWorkoutLogCollections(remoteLogs, logsToWrite, uid);
-                                logsToWrite = merged.mergedLogs;
-                                if (JSON.stringify(logsToWrite) !== JSON.stringify(logs || [])) {
-                                    try { localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(logsToWrite)); } catch {}
-                                    if (window.GarminTredictChief && typeof window.GarminTredictChief.syncWatchTitlesFromWorkoutLogs === 'function') {
-                                        window.GarminTredictChief.syncWatchTitlesFromWorkoutLogs(logsToWrite, uid);
+                    if (!window._initialWorkoutLogsCloudSyncDone) {
+                        try {
+                            const remoteDoc = await fetchCloudDocPreferServer(docRef);
+                            if (remoteDoc && remoteDoc.exists) {
+                                const remoteData = remoteDoc.data() || {};
+                                adoptCloudSyncSealIfPresent('workout_logs', uid, remoteData);
+                                const remoteLogs = Array.isArray(remoteData.logs) ? remoteData.logs : [];
+                                if (remoteLogs.length > 0) {
+                                    const merged = mergeWorkoutLogCollections(remoteLogs, logsToWrite, uid);
+                                    logsToWrite = merged.mergedLogs;
+                                    if (JSON.stringify(logsToWrite) !== JSON.stringify(logs || [])) {
+                                        try { localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(logsToWrite)); } catch {}
+                                        if (window.GarminTredictChief && typeof window.GarminTredictChief.syncWatchTitlesFromWorkoutLogs === 'function') {
+                                            window.GarminTredictChief.syncWatchTitlesFromWorkoutLogs(logsToWrite, uid);
+                                        }
+                                        if (typeof renderHistory === 'function') renderHistory();
                                     }
-                                    if (typeof renderHistory === 'function') renderHistory();
                                 }
                             }
+                        } catch (preMergeErr) {
+                            console.warn("Bulut ön birleştirme atlandı, yerel kayıt yazılıyor:", preMergeErr);
                         }
-                    } catch (preMergeErr) {
-                        console.warn("Bulut ön birleştirme atlandı, yerel kayıt yazılıyor:", preMergeErr);
                     }
 
-                    // T24: JSON temizliği — undefined alanlar yazımdan önce düşürülür
-                    try { logsToWrite = JSON.parse(JSON.stringify(logsToWrite)); } catch {}
+                    // T24: JSON temizliği ve mükerrer yazım engeli
+                    let cleanJsonStr = '[]';
+                    try {
+                        cleanJsonStr = JSON.stringify(logsToWrite);
+                        logsToWrite = JSON.parse(cleanJsonStr);
+                    } catch {}
+                    const sigKey = `workout_logs:${uid}`;
+                    if (_lastCloudWritePayloadSig[sigKey] === cleanJsonStr) {
+                        localStorage.removeItem(`celik_kodu_pending_workout_sync_${uid}`);
+                        _cloudSyncLastIssue = null;
+                        updateCloudSyncBadge('synced', 'Bulut Aktif');
+                        return;
+                    }
                     await writeAthleteDocWithSealHeal('workout_logs', uid, (seal) => ({
                         logs: logsToWrite,
                         clientUpdatedAt: Date.now(),
                         syncSeal: seal,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     }));
+                    _lastCloudWritePayloadSig[sigKey] = cleanJsonStr;
                     localStorage.removeItem(`celik_kodu_pending_workout_sync_${uid}`);
                     _cloudSyncLastIssue = null;
                     updateCloudSyncBadge('synced', 'Bulut Aktif');
@@ -2522,7 +2555,7 @@
         }
 
         async function syncUserStateToCloud(targetUid) {
-            if (IS_LOCAL_DEV) return;
+            if (IS_LOCAL_DEV || isFirestoreQuotaCircuitOpen()) return;
             const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
             if (!uid || uid === DEMO_GUEST_UID || isDemoGuestSession()) return;
             if (!isFirebaseReady || !fbDb || navigator.onLine === false) {
@@ -2743,12 +2776,20 @@
                         activeWorkoutDraft: ensureMapOr(safeParse(`celik_kodu_active_state_${uid}`, null), 100, null),
                         garminManifests: ensureMapOr(leanManifests, 1500, {})
                     });
+                    let stateSig = '';
+                    try { stateSig = JSON.stringify(statePayloadCore); } catch {}
+                    const sigKey = `user_state:${uid}`;
+                    if (stateSig && _lastCloudWritePayloadSig[sigKey] === stateSig) {
+                        localStorage.removeItem(`celik_kodu_pending_state_sync_${uid}`);
+                        return;
+                    }
                     diagForCatch = `${uid} (${diagnoseCloudPayloadPreFlight('user_state', statePayloadCore, '')})`;
                     await writeAthleteDocWithSealHeal('user_state', uid, (seal) => Object.assign({}, statePayloadCore, {
                         clientUpdatedAt,
                         syncSeal: seal,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     }));
+                    if (stateSig) _lastCloudWritePayloadSig[sigKey] = stateSig;
                     localStorage.removeItem(`celik_kodu_pending_state_sync_${uid}`);
                 } catch (innerErr) {
                     if (innerErr && typeof innerErr === 'object' && !innerErr._k4DiagSummary) innerErr._k4DiagSummary = diagForCatch;
@@ -3760,7 +3801,7 @@
                 _adminPortalScriptLoadingPromise = new Promise((resolve) => {
                     try {
                         const script = document.createElement('script');
-                        script.src = 'js/chiefs/admin-portal.js?v=350';
+                        script.src = 'js/chiefs/admin-portal.js?v=351';
                         script.async = false;
                         script.onload = () => resolve(true);
                         script.onerror = () => {
