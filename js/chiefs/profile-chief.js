@@ -1569,6 +1569,13 @@
 
                 // localLogs taban, cloudLogs öncelikli: eşit zaman damgasında güncel bulut kazanır
                 const { mergedLogs, filteredCloudDeletion } = mergeWorkoutLogCollections(localLogs, cloudLogs, uid);
+                let normalizedCloudLogs = false;
+                if (typeof window.recalculateWorkoutLogMetrics === 'function') {
+                    mergedLogs.forEach(logItem => {
+                        const rec = window.recalculateWorkoutLogMetrics(logItem);
+                        if (rec && rec.changed) normalizedCloudLogs = true;
+                    });
+                }
 
                 if (mergedLogs.length > 0 || (cloudLogs.length > 0 && filteredCloudDeletion)) {
                     localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(mergedLogs));
@@ -1585,7 +1592,7 @@
                     }
                     applyWednesdayHammerCurlPatch();
 
-                    if (!IS_LOCAL_DEV && cloudFetchOk && (mergedLogs.length !== cloudLogs.length || hasLocalEditNewerThanCloud || filteredCloudDeletion)) {
+                    if (!IS_LOCAL_DEV && cloudFetchOk && (mergedLogs.length !== cloudLogs.length || hasLocalEditNewerThanCloud || filteredCloudDeletion || normalizedCloudLogs)) {
                         await syncWorkoutLogsToCloud(mergedLogs, uid);
                     }
                 }
@@ -2252,25 +2259,160 @@
             return cleaned;
         }
 
+        const SEVEN_DAYS_RETENTION_MS = 7 * 86400000;
+
+        function isGeneratedWorkoutDraftExpired(workout, nowMs = Date.now()) {
+            if (!workout || typeof workout !== 'object' || Array.isArray(workout)) return false;
+            const rawTs = Number(workout.updatedAt || workout.createdAt || 0);
+            const idTsMatch = (typeof workout.id === 'string') ? workout.id.match(/^gen_(\d{12,14})$/) : null;
+            const ts = (Number.isFinite(rawTs) && rawTs > 0) ? rawTs : (idTsMatch ? Number(idTsMatch[1]) : 0);
+            return Boolean(ts > 0 && (nowMs - ts) > SEVEN_DAYS_RETENTION_MS);
+        }
+
+        function isWatchRecordStale7d(isoOrDate, nowMs = Date.now()) {
+            if (!isoOrDate) return false;
+            const iso = String(isoOrDate).slice(0, 10);
+            if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+                const dMs = Date.parse(iso + 'T12:00:00Z');
+                return Boolean(Number.isFinite(dMs) && (nowMs - dMs) > SEVEN_DAYS_RETENTION_MS);
+            }
+            const parsed = Date.parse(String(isoOrDate));
+            return Boolean(Number.isFinite(parsed) && (nowMs - parsed) > SEVEN_DAYS_RETENTION_MS);
+        }
+
+        function pruneStaleWatchTelemetryAndDrafts(uidOverride, options = {}) {
+            const uid = uidOverride || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            if (!uid) return { prunedDraft: false, prunedWatch: false, prunedManifests: false, changed: false };
+            const nowMs = Number(options.nowMs) || Date.now();
+            let prunedDraft = false;
+            let prunedWatch = false;
+            let prunedManifests = false;
+
+            try {
+                const scopedKey = getLastGeneratedWorkoutStorageKey(uid);
+                const rawScoped = localStorage.getItem(scopedKey);
+                if (rawScoped) {
+                    const parsed = JSON.parse(rawScoped);
+                    if (isGeneratedWorkoutDraftExpired(parsed, nowMs)) {
+                        localStorage.removeItem(scopedKey);
+                        prunedDraft = true;
+                    }
+                }
+                const rawGlobal = localStorage.getItem('celik_kodu_last_generated_workout');
+                if (rawGlobal) {
+                    const parsedG = JSON.parse(rawGlobal);
+                    if (parsedG && (!parsedG.userId || parsedG.userId === uid) && isGeneratedWorkoutDraftExpired(parsedG, nowMs)) {
+                        localStorage.removeItem('celik_kodu_last_generated_workout');
+                        if (typeof currentGeneratedWorkout !== 'undefined' && currentGeneratedWorkout && (!currentGeneratedWorkout.userId || currentGeneratedWorkout.userId === uid)) {
+                            currentGeneratedWorkout = null;
+                            window.currentGeneratedWorkout = null;
+                        }
+                        prunedDraft = true;
+                    }
+                }
+            } catch {}
+
+            try {
+                const tKey = `celik_garmin_telemetry_v2_${uid}`;
+                const rawActs = localStorage.getItem(tKey);
+                if (rawActs) {
+                    const arr = JSON.parse(rawActs);
+                    if (Array.isArray(arr)) {
+                        const fresh = arr.filter(a => a && typeof a === 'object' && !isWatchRecordStale7d(a.date, nowMs));
+                        if (fresh.length !== arr.length) {
+                            localStorage.setItem(tKey, JSON.stringify(fresh));
+                            prunedWatch = true;
+                        }
+                    }
+                }
+            } catch {}
+
+            try {
+                const mKey = `celik_garmin_sent_manifests_v1_${uid}`;
+                const rawMan = localStorage.getItem(mKey);
+                if (rawMan) {
+                    const manObj = JSON.parse(rawMan);
+                    if (manObj && typeof manObj === 'object' && !Array.isArray(manObj)) {
+                        const entries = Object.entries(manObj);
+                        const freshEntries = entries.filter(([k, v]) => {
+                            if (!v || typeof v !== 'object') return false;
+                            if (k === '__lastSent') return true;
+                            const mDate = String(k).match(/^date_(\d{4}-\d{2}-\d{2})$/);
+                            const iso = mDate ? mDate[1] : String(v.sentAt || '');
+                            return !isWatchRecordStale7d(iso, nowMs);
+                        });
+                        if (freshEntries.length !== entries.length) {
+                            localStorage.setItem(mKey, JSON.stringify(Object.fromEntries(freshEntries)));
+                            prunedManifests = true;
+                        }
+                    }
+                }
+            } catch {}
+
+            return {
+                prunedDraft,
+                prunedWatch,
+                prunedManifests,
+                changed: prunedDraft || prunedWatch || prunedManifests
+            };
+        }
+        window.pruneStaleWatchTelemetryAndDrafts = pruneStaleWatchTelemetryAndDrafts;
+
+        function refreshWorkoutLogsForCurrentBodyweight(uidOverride, options = {}) {
+            const uid = uidOverride || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            if (!uid || typeof window.recalculateWorkoutLogMetrics !== 'function') return false;
+            try {
+                const historyKey = `celik_kodu_history_${uid}`;
+                const raw = localStorage.getItem(historyKey);
+                if (!raw) return false;
+                const logs = JSON.parse(raw);
+                if (!Array.isArray(logs) || logs.length === 0) return false;
+                let anyChanged = false;
+                logs.forEach(log => {
+                    const res = window.recalculateWorkoutLogMetrics(log);
+                    if (res && res.changed) anyChanged = true;
+                });
+                if (!anyChanged) return false;
+                localStorage.setItem(historyKey, JSON.stringify(logs));
+                if (options.syncToCloud !== false && !IS_LOCAL_DEV && typeof syncWorkoutLogsToCloud === 'function') {
+                    syncWorkoutLogsToCloud(logs, uid);
+                }
+                if (!options.skipRender) {
+                    if (typeof renderHistory === 'function') renderHistory();
+                }
+                return true;
+            } catch {
+                return false;
+            }
+        }
+        window.refreshWorkoutLogsForCurrentBodyweight = refreshWorkoutLogsForCurrentBodyweight;
+
         function readActiveLastGeneratedWorkout(uid) {
             const targetUid = uid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
-            const parseValid = (raw) => {
+            const parseValid = (raw, keyToClearIfExpired) => {
                 if (!raw) return null;
                 try {
                     const obj = JSON.parse(raw);
                     if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return null;
                     if (obj.userId && targetUid && obj.userId !== targetUid) return null;
                     if (obj.userId && !targetUid) return null;
+                    if (isGeneratedWorkoutDraftExpired(obj)) {
+                        if (keyToClearIfExpired) {
+                            try { localStorage.removeItem(keyToClearIfExpired); } catch {}
+                        }
+                        return null;
+                    }
                     return obj;
                 } catch (e) {
                     return null;
                 }
             };
             if (targetUid) {
-                const scoped = parseValid(localStorage.getItem(getLastGeneratedWorkoutStorageKey(targetUid)));
+                const sKey = getLastGeneratedWorkoutStorageKey(targetUid);
+                const scoped = parseValid(localStorage.getItem(sKey), sKey);
                 if (scoped) return scoped;
             }
-            return parseValid(localStorage.getItem('celik_kodu_last_generated_workout'));
+            return parseValid(localStorage.getItem('celik_kodu_last_generated_workout'), 'celik_kodu_last_generated_workout');
         }
 
         function scheduleHasActiveWorkoutContent(sched) {
@@ -2360,6 +2502,13 @@
                         lastGenVal = activeGen;
                     }
                 }
+                if (lastGenVal && isGeneratedWorkoutDraftExpired(lastGenVal)) {
+                    try {
+                        localStorage.removeItem(`celik_kodu_last_generated_workout_${uid}`);
+                        if (activeUid === uid) localStorage.removeItem('celik_kodu_last_generated_workout');
+                    } catch {}
+                    lastGenVal = null;
+                }
                 const cleanLastGen = lastGenVal ? stripWatchBridgeSecretsFromObj(lastGenVal, 0) : null;
                 const safeLastGen = (
                     cleanLastGen &&
@@ -2416,7 +2565,7 @@
                 };
                 if (Array.isArray(localHistoryLogs)) localHistoryLogs.forEach(l => considerRefDate(l?.date));
                 if (Array.isArray(rawWatchTelemetry)) rawWatchTelemetry.forEach(a => considerRefDate(a?.date));
-                if (!Number.isFinite(refDayMs)) refDayMs = Date.now();
+                refDayMs = Math.max(Date.now(), Number.isFinite(refDayMs) ? refDayMs : 0);
 
                 const prunedManifestEntries = Object.entries(manifestsMerged)
                     .filter(([k, v]) => {
@@ -2426,7 +2575,7 @@
                         const iso = mDate ? mDate[1] : String(v.sentAt || '').slice(0, 10);
                         if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
                             const dMs = Date.parse(iso + 'T12:00:00Z');
-                            if (Number.isFinite(dMs) && (refDayMs - dMs) > 10 * 86400000) return false;
+                            if (Number.isFinite(dMs) && (refDayMs - dMs) > SEVEN_DAYS_RETENTION_MS) return false;
                         }
                         return true;
                     })
@@ -2765,27 +2914,52 @@
                     localStorage.setItem(`celik_kodu_ai_program_${uid}`, JSON.stringify(data.aiCoachSummary));
                 }
 
-                // Merge lastGeneratedWorkout with timestamp comparison and memory isolation
+                // Merge lastGeneratedWorkout with timestamp comparison, 7-day expiry, and repair writeback
                 const rawLocalGen = safeParseCloud(`celik_kodu_last_generated_workout_${uid}`, null)
                     || (activeUid === uid ? safeParseCloud('celik_kodu_last_generated_workout', null) : null);
-                const localGenValid = (rawLocalGen && typeof rawLocalGen === 'object' && (!rawLocalGen.userId || rawLocalGen.userId === uid))
+                let localGenValid = (rawLocalGen && typeof rawLocalGen === 'object' && (!rawLocalGen.userId || rawLocalGen.userId === uid))
                     ? rawLocalGen
                     : null;
+                if (localGenValid && isGeneratedWorkoutDraftExpired(localGenValid)) {
+                    persistLastGeneratedWorkout(null, uid, { clearIfNull: true, skipCloudSync: true });
+                    localGenValid = null;
+                    hasUnsyncedLocalDiff = true;
+                }
                 if (data.lastGeneratedWorkout && typeof data.lastGeneratedWorkout === 'object') {
-                    const cloudGenTs = Number(data.lastGeneratedWorkout.updatedAt || data.lastGeneratedWorkout.createdAt || cloudUpdatedAt || 0);
-                    const localGenTs = Number(localGenValid?.updatedAt || localGenValid?.createdAt || localUpdatedAt || 0);
-                    if (!localGenValid || (!hasPendingLocalState && cloudGenTs >= localGenTs)) {
-                        const savedGen = persistLastGeneratedWorkout(data.lastGeneratedWorkout, uid, {
-                            fromCloud: true,
-                            skipCloudSync: true,
-                            preserveUpdatedAt: true
-                        });
-                        if (activeUid === uid && savedGen && typeof currentGeneratedWorkout !== 'undefined') {
-                            currentGeneratedWorkout = savedGen;
-                            window.currentGeneratedWorkout = savedGen;
+                    if (isGeneratedWorkoutDraftExpired(data.lastGeneratedWorkout)) {
+                        persistLastGeneratedWorkout(null, uid, { clearIfNull: true, skipCloudSync: true });
+                        if (activeUid === uid && typeof currentGeneratedWorkout !== 'undefined') {
+                            currentGeneratedWorkout = null;
+                            window.currentGeneratedWorkout = null;
                         }
-                    } else if (localGenValid && localGenTs > cloudGenTs) {
                         hasUnsyncedLocalDiff = true;
+                    } else {
+                        const cloudGenTs = Number(data.lastGeneratedWorkout.updatedAt || data.lastGeneratedWorkout.createdAt || cloudUpdatedAt || 0);
+                        const localGenTs = Number(localGenValid?.updatedAt || localGenValid?.createdAt || localUpdatedAt || 0);
+                        if (!localGenValid || (!hasPendingLocalState && cloudGenTs >= localGenTs)) {
+                            const beforeSig = JSON.stringify((data.lastGeneratedWorkout.exercises || []).map(e => [
+                                e && e.id, e && e.targetSets, e && e.targetReps, e && e.metricMode, e && e.isCardioMinutes, e && e.isTimeBased
+                            ]));
+                            const savedGen = persistLastGeneratedWorkout(data.lastGeneratedWorkout, uid, {
+                                fromCloud: true,
+                                skipCloudSync: true,
+                                preserveUpdatedAt: true
+                            });
+                            if (savedGen) {
+                                const afterSig = JSON.stringify((savedGen.exercises || []).map(e => [
+                                    e && e.id, e && e.targetSets, e && e.targetReps, e && e.metricMode, e && e.isCardioMinutes, e && e.isTimeBased
+                                ]));
+                                if (beforeSig !== afterSig) {
+                                    hasUnsyncedLocalDiff = true;
+                                }
+                            }
+                            if (activeUid === uid && savedGen && typeof currentGeneratedWorkout !== 'undefined') {
+                                currentGeneratedWorkout = savedGen;
+                                window.currentGeneratedWorkout = savedGen;
+                            }
+                        } else if (localGenValid && localGenTs > cloudGenTs) {
+                            hasUnsyncedLocalDiff = true;
+                        }
                     }
                 } else if (localGenValid) {
                     hasUnsyncedLocalDiff = true;
@@ -2899,6 +3073,10 @@
                         cloudWatchActivities.forEach(a => {
                             if (!a || !a.id) return;
                             const aid = String(a.id);
+                            if (isWatchRecordStale7d(a.date)) {
+                                hasUnsyncedLocalDiff = true;
+                                return;
+                            }
                             if (mergedDismissedSet.has(aid) || mergedDeletedLogsSet.has(aid) || mergedDeletedLogsSet.has(`garmin_${aid}`)) return;
                             actMap.set(aid, a);
                         });
@@ -2906,6 +3084,10 @@
                             localActs.forEach(a => {
                                 if (!a || !a.id) return;
                                 const aid = String(a.id);
+                                if (isWatchRecordStale7d(a.date)) {
+                                    hasUnsyncedLocalDiff = true;
+                                    return;
+                                }
                                 if (mergedDismissedSet.has(aid) || mergedDeletedLogsSet.has(aid) || mergedDeletedLogsSet.has(`garmin_${aid}`)) return;
                                 actMap.set(aid, pickPreferredWatchAct(actMap.get(aid), a));
                             });
@@ -2943,7 +3125,17 @@
                     delete localM.__approvedWatchIds;
                     delete localM.__dismissedWatchIds;
                     const combinedManifestEntries = Object.entries(Object.assign({}, cloudManifests, localM))
-                        .filter(([, v]) => v && typeof v === 'object')
+                        .filter(([k, v]) => {
+                            if (!v || typeof v !== 'object') return false;
+                            if (k === '__lastSent') return true;
+                            const mDate = String(k).match(/^date_(\d{4}-\d{2}-\d{2})$/);
+                            const iso = mDate ? mDate[1] : String(v.sentAt || '');
+                            if (isWatchRecordStale7d(iso)) {
+                                hasUnsyncedLocalDiff = true;
+                                return false;
+                            }
+                            return true;
+                        })
                         .sort((a, b) => {
                             if (a[0] === '__lastSent') return -1;
                             if (b[0] === '__lastSent') return 1;
@@ -2956,9 +3148,15 @@
                         try { window.GarminTredictChief.refreshFromCentralVault(uid); } catch {}
                     }
                 }
+                if (pruneStaleWatchTelemetryAndDrafts(uid).changed) {
+                    hasUnsyncedLocalDiff = true;
+                }
                 if (!hasPendingLocalState && cloudUpdatedAt > localUpdatedAt && !hasUnsyncedLocalDiff) {
                     localStorage.setItem(`celik_kodu_state_updated_at_${uid}`, String(cloudUpdatedAt));
                 } else if (!IS_LOCAL_DEV && (hasPendingLocalState || localUpdatedAt > cloudUpdatedAt || hasUnsyncedLocalDiff)) {
+                    if (hasUnsyncedLocalDiff && cloudUpdatedAt >= localUpdatedAt) {
+                        localStorage.setItem(`celik_kodu_state_updated_at_${uid}`, String(Date.now()));
+                    }
                     await syncUserStateToCloud(uid);
                 }
 
@@ -3529,7 +3727,7 @@
                 _adminPortalScriptLoadingPromise = new Promise((resolve) => {
                     try {
                         const script = document.createElement('script');
-                        script.src = 'js/chiefs/admin-portal.js?v=346';
+                        script.src = 'js/chiefs/admin-portal.js?v=347';
                         script.async = false;
                         script.onload = () => resolve(true);
                         script.onerror = () => {

@@ -73,6 +73,9 @@
                 : (Array.isArray(liaisonInput) ? liaisonInput : []);
             localStorage.setItem(`celik_kodu_scale_${uid}`, JSON.stringify(cleanLogs));
             syncScaleLogsToCloud(cleanLogs, uid);
+            if (typeof window.refreshWorkoutLogsForCurrentBodyweight === 'function') {
+                window.refreshWorkoutLogsForCurrentBodyweight(uid, { syncToCloud: true, skipRender: true });
+            }
         }
 
         // ----- UNIQUE HEALTH SMART PDF EXTRACTION ENGINE -----

@@ -1142,6 +1142,27 @@
                 const found = saved.find(p => p && p.id === progId);
                 if (found) {
                     const cloned = JSON.parse(JSON.stringify(found));
+                    let programHealed = false;
+                    if (Array.isArray(cloned.exercises) && typeof normalizeExerciseTargetSpec === 'function') {
+                        cloned.exercises = cloned.exercises.map(ex => {
+                            if (!ex || typeof ex !== 'object') return ex;
+                            const norm = normalizeExerciseTargetSpec(ex, ex.targetSets || ex.sets || 3, ex.targetReps || ex.reps || '8-12');
+                            if (norm.repsCorrected || norm.setsCorrected) {
+                                programHealed = true;
+                            }
+                            return Object.assign({}, ex, {
+                                targetSets: norm.sets,
+                                targetReps: norm.reps,
+                                sets: norm.metricMode === 'cardio_min' ? 1 : ex.sets,
+                                metricMode: norm.metricMode,
+                                isCardioMinutes: norm.isCardioMinutes,
+                                isTimeBased: norm.isTimeBased
+                            });
+                        });
+                    }
+                    if (programHealed && typeof upsertUserCustomProgram === 'function') {
+                        try { upsertUserCustomProgram(cloned, uid, { preserveUpdatedAt: true }); } catch {}
+                    }
                     currentGeneratedWorkout = cloned;
                     window.currentGeneratedWorkout = cloned;
                     if (typeof persistLastGeneratedWorkout === 'function') {

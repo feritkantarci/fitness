@@ -6,7 +6,7 @@ description: Çelik Kodu Geçmiş sekmesini (#historyTab, js/chiefs/history-chie
 # 🗂️ 4. Oda — Geçmiş & Kayıt Şefi (`history-guard`)
 
 - **Fiziksel Oda Dosyası:** `js/chiefs/history-chief.js` + Gümrük: `js/chiefs/bridge-customs.js`
-- **Zorunlu Sınav Maddeleri:** `T7` (Geçmiş kayıt düzenlemede kanonik birim ve vücut ağırlığı tonajı), `T17` (Köprü Gümrüğü: bozuk/eksik birimleri otomatik onarma ve içi boş kaydı reddetme), `T56` (Geçmiş sekmesi üst `⋮` menüsü, beyaz özet rakamları, scrollbar gizli harf-duyarsız mor mekan filtresi, tek satır başlık+tarih, ara çizgisiz tek satır istatistik, mükerrer gün temizliği ve akıllı kardiyo metrikleri)
+- **Zorunlu Sınav Maddeleri:** `T7` (Geçmiş kayıt düzenlemede kanonik birim ve vücut ağırlığı tonajı), `T17` (Köprü Gümrüğü: bozuk/eksik birimleri otomatik onarma ve içi boş kaydı reddetme), `T56` (Geçmiş sekmesi üst `⋮` menüsü, beyaz özet rakamları, scrollbar gizli harf-duyarsız mor mekan filtresi, tek satır başlık+tarih, ara çizgisiz tek satır istatistik, mükerrer gün temizliği ve akıllı kardiyo metrikleri), `T59` (Güncel tartı değişiminde vücut ağırlığı tonajını alarmsız/sessiz eşitleme & kanonik log metrik yeniden hesabı)
 
 ## Görev Kapsamı (`#historyTab`)
 1. Tamamlanan antrenmanların günlük, egzersiz bazlı set geçmişi ve tonaj özetlerini doğru birimlerle (`dk` / `sn` / `tk`) sunar.

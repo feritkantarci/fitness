@@ -1492,12 +1492,22 @@
             if (typeof EXERCISES_DB === 'undefined') return;
             const dbEx = EXERCISES_DB.find(e => e.id === exId);
             if (!dbEx) return;
+            const normT = (typeof normalizeExerciseTargetSpec === 'function')
+                ? normalizeExerciseTargetSpec(dbEx, 3, '8-12')
+                : { sets: 3, reps: '8-12', metricMode: 'reps', isCardioMinutes: false, isTimeBased: false };
+            const normalizedEx = Object.assign({}, dbEx, {
+                targetSets: normT.sets,
+                targetReps: normT.reps,
+                metricMode: normT.metricMode,
+                isCardioMinutes: normT.isCardioMinutes,
+                isTimeBased: normT.isTimeBased
+            });
 
             currentGeneratedWorkout = {
                 id: 'quick_' + Date.now(),
                 title: dbEx.name + ' (Hızlı Seans)',
-                scheme: { sets: 3, reps: '8-12', rest: 60 },
-                exercises: [dbEx]
+                scheme: { sets: normT.sets, reps: normT.reps, rest: 60 },
+                exercises: [normalizedEx]
             };
             startActiveWorkoutFromGenerated();
         }
@@ -1506,7 +1516,20 @@
             closeQuickWorkoutModal();
             if (quickWorkoutSelectedIds.size === 0 || typeof EXERCISES_DB === 'undefined') return;
 
-            const list = Array.from(quickWorkoutSelectedIds).map(id => EXERCISES_DB.find(e => e.id === id)).filter(Boolean);
+            const list = Array.from(quickWorkoutSelectedIds).map(id => {
+                const dbEx = EXERCISES_DB.find(e => e.id === id);
+                if (!dbEx) return null;
+                const normT = (typeof normalizeExerciseTargetSpec === 'function')
+                    ? normalizeExerciseTargetSpec(dbEx, 3, '8-12')
+                    : { sets: 3, reps: '8-12', metricMode: 'reps', isCardioMinutes: false, isTimeBased: false };
+                return Object.assign({}, dbEx, {
+                    targetSets: normT.sets,
+                    targetReps: normT.reps,
+                    metricMode: normT.metricMode,
+                    isCardioMinutes: normT.isCardioMinutes,
+                    isTimeBased: normT.isTimeBased
+                });
+            }).filter(Boolean);
             if (list.length === 0) return;
 
             currentGeneratedWorkout = {
@@ -3463,7 +3486,7 @@
                     if (st.interSet && st.interSet.completed) {
                         const isExtraTime = st.interSet.metricType === 'time';
                         const extraVal = parseInt(st.interSet.value, 10) || 0;
-                        const extraVol = calculateExerciseSetVolume({ id: st.interSet.id, equipment: st.interSet.equipment || 'bodyweight' }, 0, extraVal);
+                        const extraVol = calculateExerciseSetVolume({ id: st.interSet.id, name: st.interSet.name, equipment: st.interSet.equipment || 'bodyweight', isTimeBased: isExtraTime }, 0, extraVal);
                         totalCompletedSets++;
                         exCompletedSets++;
                         if (isExtraTime) {
@@ -3648,7 +3671,7 @@
                         const extra = st.interSet;
                         const isExtraTime = extra.metricType === 'time';
                         const extraVal = parseInt(extra.value, 10) || 0;
-                        const extraVol = calculateExerciseSetVolume({ id: extra.id, equipment: extra.equipment || 'bodyweight' }, 0, extraVal);
+                        const extraVol = calculateExerciseSetVolume({ id: extra.id, name: extra.name, equipment: extra.equipment || 'bodyweight', isTimeBased: isExtraTime }, 0, extraVal);
                         totalCompletedSets++;
                         if (isExtraTime) {
                             totalIsometricSeconds += extraVal;

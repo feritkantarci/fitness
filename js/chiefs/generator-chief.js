@@ -4149,7 +4149,10 @@ Aşağıdaki JSON şemasında çıktı ver:
         }
 
         function normalizeExerciseTargetByMetricMode(ex, fallbackSets = 3, fallbackReps = '8-12') {
-            if (!ex) return { sets: fallbackSets || 3, reps: fallbackReps || '8-12', metricMode: 'reps' };
+            if (typeof normalizeExerciseTargetSpec === 'function') {
+                return normalizeExerciseTargetSpec(ex, fallbackSets, fallbackReps);
+            }
+            if (!ex) return { sets: fallbackSets || 3, reps: fallbackReps || '8-12', metricMode: 'reps', isCardioMinutes: false, isTimeBased: false, isBodyweight: false };
             const exMode = (typeof getExerciseMetricMode === 'function') ? getExerciseMetricMode(ex) : 'reps';
             let sets = Number(ex.targetSets || ex.sets || fallbackSets) || 3;
             let reps = String(ex.targetReps !== undefined && ex.targetReps !== null && ex.targetReps !== '' ? ex.targetReps : (ex.reps || fallbackReps || '8-12')).trim();
@@ -4157,13 +4160,13 @@ Aşağıdaki JSON şemasında çıktı ver:
                 const defMin = (typeof resolveDefaultExerciseSetTarget === 'function') ? resolveDefaultExerciseSetTarget(ex, '') : 20;
                 sets = 1;
                 const numM = parseFloat(reps);
-                if (!/\b(dk|dak|min)\b/i.test(reps) || isNaN(numM) || numM < 5) {
+                if (!/\b(dk|dak|min)\b/i.test(reps) || isNaN(numM) || numM < 3) {
                     reps = `${defMin || 20} dk`;
                 }
             } else if (exMode === 'time_sec') {
                 const defSec = (typeof resolveDefaultExerciseSetTarget === 'function') ? resolveDefaultExerciseSetTarget(ex, '') : 30;
                 const numS = parseFloat(reps);
-                if (/^\d+\s*-\s*\d+$/.test(reps) || /\b(dk|dak|min|maks|max)\b/i.test(reps) || (!/\b(sn|saniye|sec)\b/i.test(reps) && (isNaN(numS) || numS < 15))) {
+                if (/^\d+\s*[-–—]\s*\d+$/.test(reps) || /\b(dk|dak|min|maks|max|tk|tekrar|rep)\b/i.test(reps) || (!/\b(sn|saniye|sec)\b/i.test(reps) && (isNaN(numS) || numS < 15))) {
                     reps = `${defSec || 30} sn`;
                 }
             } else {
@@ -4171,7 +4174,14 @@ Aşağıdaki JSON şemasında çıktı ver:
                     reps = (fallbackReps && !/\b(sn|saniye|sec|dk|dak|min)\b/i.test(String(fallbackReps))) ? String(fallbackReps) : '8-12';
                 }
             }
-            return { sets, reps, metricMode: exMode };
+            return {
+                sets,
+                reps,
+                metricMode: exMode,
+                isCardioMinutes: exMode === 'cardio_min',
+                isTimeBased: exMode === 'time_sec',
+                isBodyweight: typeof isExerciseBodyweight === 'function' ? isExerciseBodyweight(ex) : Boolean(ex.isBodyweight)
+            };
         }
         window.normalizeExerciseTargetByMetricMode = normalizeExerciseTargetByMetricMode;
 
@@ -4322,6 +4332,11 @@ Aşağıdaki JSON şemasında çıktı ver:
                     (baseScheme && baseScheme.reps) || '8-12'
                 );
                 ex.metricMode = normTarget.metricMode;
+                ex.isCardioMinutes = Boolean(normTarget.isCardioMinutes);
+                ex.isTimeBased = Boolean(normTarget.isTimeBased);
+                if (normTarget.isBodyweight !== undefined) {
+                    ex.isBodyweight = Boolean(normTarget.isBodyweight);
+                }
                 ex.targetSets = normTarget.sets;
                 if (normTarget.metricMode === 'cardio_min') {
                     ex.sets = 1;

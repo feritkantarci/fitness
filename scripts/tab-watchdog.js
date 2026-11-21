@@ -3538,6 +3538,163 @@ function runAcademicMathSuite(moduleSources, dbText) {
           && res.hasBothInDom;
         return { ok, actual: JSON.stringify(res) };
       }
+    },
+    {
+      id: 'T58',
+      owner: 'generator-guard',
+      title: 'Hata Hafızası Sicili: Üretici Alt Şefi Sıfır Sahte Alarm, Süre Birimi & 7 Günlük Taslak/Saat Önbellek Temizliği',
+      expected: 'kondisyon üretiminde customs/liaison onarım=0, 8-12/15 tk/en-dash onarılır, >7 gün taslak & saat önbelleği silinir (geçmiş korunur)',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const uid = 'usr_exam';
+          selectedSplits = ['full_body'];
+          selectedSplit = 'full_body';
+          document.getElementById('paramStyle').value = 'emom_conditioning';
+          document.getElementById('paramGoal').value = 'endurance';
+          window.CelikBridgeCustoms.resetStats();
+          window.CelikLiaisonSubChiefs.clearNotices();
+          handleGenerateWorkout('bb_hybrid', 'kondisyon butt kicks plank');
+          const condCustoms = window.CelikBridgeCustoms.getStats();
+          const condLiaison = window.CelikLiaisonSubChiefs.getNotices();
+
+          const badGen = window.CelikLiaisonSubChiefs.inspectGeneratedWorkoutForReceivers({
+            id: 'gen_t58_edge',
+            exercises: [
+              { id: 'bw_butt_kicks', name: 'Butt Kicks', targetSets: 3, targetReps: '8-12' },
+              { id: 'bw_plank', name: 'Plank', targetSets: 3, targetReps: '15 tk' },
+              { id: 'bw_side_plank', name: 'Side Plank', targetSets: 3, targetReps: '8–12' },
+              { id: 'bw_hollow_body', name: 'Hollow Body', targetSets: 3, targetReps: '25' },
+              { id: 'cond_indoor_row', name: 'Kürek', targetSets: 1, targetReps: '20 dk' }
+            ]
+          });
+
+          const oldTs = Date.now() - 9 * 86400000;
+          const oldIso = new Date(oldTs).toISOString().slice(0, 10);
+          const freshIso = new Date(Date.now() - 2 * 86400000).toISOString().slice(0, 10);
+          localStorage.setItem('celik_kodu_last_generated_workout_' + uid, JSON.stringify({ id: 'gen_' + oldTs, userId: uid, updatedAt: oldTs, exercises: [{ id: 'bw_plank', targetReps: '30 sn' }] }));
+          localStorage.setItem('celik_kodu_last_generated_workout', JSON.stringify({ id: 'gen_' + oldTs, userId: uid, updatedAt: oldTs, exercises: [{ id: 'bw_plank', targetReps: '30 sn' }] }));
+          localStorage.setItem('celik_garmin_telemetry_v2_' + uid, JSON.stringify([
+            { id: 'old_w', date: oldIso + 'T10:00:00Z', title: 'Eski' },
+            { id: 'fresh_w', date: freshIso + 'T10:00:00Z', title: 'Yeni' }
+          ]));
+          setWorkoutLogs([{ id: 'garmin_keep_old', date: oldIso, exercises: [{ id: 'db_bench_press', sets: [{ setNo: 1, weight: 20, reps: 10, completed: true }] }] }]);
+          const pruneOut = window.pruneStaleWatchTelemetryAndDrafts(uid);
+          const draftAfter = readActiveLastGeneratedWorkout(uid);
+          const watchAfter = JSON.parse(localStorage.getItem('celik_garmin_telemetry_v2_' + uid) || '[]');
+          const logsAfter = getWorkoutLogs();
+
+          return {
+            condCustomsRepairs: condCustoms.repairedCount,
+            condLiaisonNotices: condLiaison.length,
+            repairedReps: badGen.exercises.map(e => e.targetReps),
+            cardioClean: badGen.exercises[4].isCardioMinutes === true && badGen.exercises[4].isTimeBased === false,
+            pruneChanged: pruneOut.changed,
+            draftNull: draftAfter === null,
+            watchIds: watchAfter.map(w => w.id),
+            historyKept: logsAfter.some(l => l && l.id === 'garmin_keep_old')
+          };
+        })()`, ctx);
+        const ok = res.condCustomsRepairs === 0
+          && res.condLiaisonNotices === 0
+          && res.repairedReps[0] === '30 sn'
+          && res.repairedReps[1] === '30 sn'
+          && res.repairedReps[2] === '30 sn'
+          && res.repairedReps[3] === '25 sn'
+          && res.repairedReps[4] === '20 dk'
+          && res.cardioClean
+          && res.pruneChanged
+          && res.draftNull
+          && res.watchIds.length === 1 && res.watchIds[0] === 'fresh_w'
+          && res.historyKept;
+        return { ok, actual: JSON.stringify(res) };
+      }
+    },
+    {
+      id: 'T59',
+      owner: 'history-guard',
+      title: 'Hata Hafızası Sicili: Güncel Tartıyla Sessiz Vücut Ağırlığı Tonajı & Garmin Birim Doğruluğu',
+      expected: 'tartı 75->78 olunca eski vücut ağırlığı tonajı sessiz güncellenir (alarm=0), Garmin pushup+plank+butt_kicks temiz doğar',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const uid = 'usr_exam';
+          setScaleLogs([{ id: 's75', weight: 75, date: '2026-11-09', timestamp: Date.now() - 86400000 }]);
+          setWorkoutLogs([{
+            id: 'bw_hist_1',
+            date: '2026-11-09',
+            timestamp: Date.now() - 86400000,
+            totalVolumeKg: 2025,
+            totalSetsCompleted: 3,
+            totalRepsCompleted: 45,
+            exercises: [{
+              id: 'bw_mountain_climber',
+              name: 'Mountain Climber',
+              equipment: 'bodyweight',
+              category: 'core',
+              isBodyweight: true,
+              sets: [
+                { setNo: 1, weight: 0, reps: 15, completed: true, volume: 675 },
+                { setNo: 2, weight: 0, reps: 15, completed: true, volume: 675 },
+                { setNo: 3, weight: 0, reps: 15, completed: true, volume: 675 }
+              ]
+            }]
+          }]);
+          window.CelikLiaisonSubChiefs.clearNotices();
+          setScaleLogs([
+            { id: 's78', weight: 78, date: '2026-11-21', timestamp: Date.now() },
+            { id: 's75', weight: 75, date: '2026-11-09', timestamp: Date.now() - 86400000 }
+          ]);
+          const vol78 = getWorkoutLogs()[0]?.totalVolumeKg;
+          const setVol78 = getWorkoutLogs()[0]?.exercises?.[0]?.sets?.[0]?.volume;
+          setWorkoutLogs(getWorkoutLogs());
+          const scaleNotices = window.CelikLiaisonSubChiefs.getNotices().length;
+
+          localStorage.setItem('celik_garmin_enabled_' + uid, 'true');
+          const gt = window.GarminTredictChief;
+          const exPlank = EXERCISES_DB.find(e => e.id === 'bw_plank');
+          const exButt = EXERCISES_DB.find(e => e.id === 'bw_butt_kicks');
+          gt.saveSentWorkoutManifest('Saat Birim Testi', [
+            Object.assign({}, exPlank, { sets: 1, targetReps: '30 sn' }),
+            Object.assign({}, exButt, { sets: 1, targetReps: '30 sn' })
+          ], 'g_t59');
+          localStorage.setItem('celik_garmin_telemetry_v2_' + uid, JSON.stringify([{
+            id: 'g_t59',
+            date: new Date().toISOString(),
+            title: 'Saat Birim Testi',
+            sportType: 'fitness_equipment',
+            sportSubType: 'strength_training',
+            summary: { duration: 600, durationTotal: 600, calories: 80, heartrate: 120, heartrateMax: 140 },
+            rounds: [
+              { roundIndex: 0, type: 'active', exerciseCategory: 'PLANK', exerciseName: 'PLANK', repetitions: 30, weight: 0, duration: 30, heartrate: 118, heartrateMax: 130 },
+              { roundIndex: 1, type: 'active', exerciseCategory: 'CARDIO', exerciseName: 'JUMP_ROPE_JOG', repetitions: 30, weight: 0, duration: 30, heartrate: 125, heartrateMax: 140 }
+            ]
+          }]));
+          window.CelikLiaisonSubChiefs.clearNotices();
+          gt.approveGarminStrengthActivity('g_t59');
+          const gLog = getWorkoutLogs().find(l => l && l.id === 'garmin_g_t59');
+          setWorkoutLogs(getWorkoutLogs());
+          const garminNotices = window.CelikLiaisonSubChiefs.getNotices().length;
+
+          return {
+            vol78,
+            setVol78,
+            scaleNotices,
+            gVol: gLog?.totalVolumeKg,
+            gReps: gLog?.totalRepsCompleted,
+            gIso: gLog?.totalIsometricSecsCompleted,
+            garminNotices
+          };
+        })()`, ctx);
+        const ok = res.vol78 === 2106
+          && res.setVol78 === 702
+          && res.scaleNotices === 0
+          && res.gVol > 0
+          && res.gReps === 0
+          && res.gIso === 60
+          && res.garminNotices === 0;
+        return { ok, actual: JSON.stringify(res) };
+      }
     }
   ];
 

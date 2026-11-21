@@ -316,7 +316,37 @@
             }
             const mode = (typeof getExerciseMetricMode === 'function') ? getExerciseMetricMode(ex) : 'reps';
             ex.metricMode = mode;
-            if (mode === 'cardio_min') {
+            ex.isCardioMinutes = mode === 'cardio_min';
+            ex.isTimeBased = mode === 'time_sec';
+            if (typeof isExerciseBodyweight === 'function') {
+                ex.isBodyweight = isExerciseBodyweight(ex);
+            }
+            if (typeof normalizeExerciseTargetSpec === 'function') {
+                const norm = normalizeExerciseTargetSpec(ex, ex.targetSets || ex.sets || 3, ex.targetReps || ex.reps || '8-12');
+                if (mode === 'cardio_min') {
+                    if (norm.setsCorrected) {
+                        repaired = true;
+                        repairReasons.add('kardiyo seti 1 yapıldı');
+                    }
+                    ex.targetSets = 1;
+                    ex.sets = 1;
+                    if (norm.repsCorrected) {
+                        ex.targetReps = norm.reps;
+                        repaired = true;
+                        repairReasons.add('kardiyo süresi düzeltildi');
+                    }
+                } else if (mode === 'time_sec') {
+                    if (norm.repsCorrected) {
+                        ex.targetReps = norm.reps;
+                        repaired = true;
+                        repairReasons.add('süre birimi düzeltildi');
+                    }
+                } else if (norm.repsCorrected) {
+                    ex.targetReps = norm.reps;
+                    repaired = true;
+                    repairReasons.add('tekrar birimi düzeltildi');
+                }
+            } else if (mode === 'cardio_min') {
                 const defMin = (typeof resolveDefaultExerciseSetTarget === 'function') ? resolveDefaultExerciseSetTarget(ex, '') : 20;
                 if (Number(ex.targetSets) !== 1 && ex.targetSets !== undefined) {
                     repaired = true;
@@ -333,7 +363,7 @@
                 const defSec = (typeof resolveDefaultExerciseSetTarget === 'function') ? resolveDefaultExerciseSetTarget(ex, '') : 30;
                 const rawRepsStr = String(ex.targetReps || '').trim();
                 const numS = parseFloat(rawRepsStr);
-                if (!rawRepsStr || /^\d+\s*-\s*\d+$/.test(rawRepsStr) || /\b(dk|dak|min|maks|max)\b/i.test(rawRepsStr) || (!/\b(sn|saniye|sec)\b/i.test(rawRepsStr) && (isNaN(numS) || numS < 15))) {
+                if (!rawRepsStr || /^\d+\s*[-–—]\s*\d+$/.test(rawRepsStr) || /\b(dk|dak|min|maks|max|tk|tekrar|rep)\b/i.test(rawRepsStr) || (!/\b(sn|saniye|sec)\b/i.test(rawRepsStr) && (isNaN(numS) || numS < 15))) {
                     ex.targetReps = `${defSec} sn`;
                     repaired = true;
                     repairReasons.add('süre birimi düzeltildi');
