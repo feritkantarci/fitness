@@ -389,11 +389,13 @@
                         cloudPayload = catSnap.data();
                     }
                 }
-                if (!cloudPayload) {
+                if (!cloudPayload && !isFirestoreQuotaCircuitOpen()) {
                     const apiKeyParam = (typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG.apiKey) ? `?key=${encodeURIComponent(FIREBASE_CONFIG.apiKey)}` : '';
                     const restUrl = `https://firestore.googleapis.com/v1/projects/fitness-4f427/databases/(default)/documents/app_system/master_catalog${apiKeyParam}`;
-                    const restRes = await fetch(restUrl);
-                    if (restRes.ok) {
+                    const restRes = await withAuthTimeout(fetch(restUrl), 2500, null);
+                    if (restRes && restRes.status === 429) {
+                        tripFirestoreQuotaCircuitIfNeeded({ code: 'resource-exhausted', message: 'Quota exceeded (REST 429)' });
+                    } else if (restRes && restRes.ok) {
                         const docJson = await restRes.json();
                         cloudPayload = {};
                         for (const [k, v] of Object.entries(docJson?.fields || {})) {
@@ -537,7 +539,7 @@
             try {
                 const ver = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAppVersion === 'function')
                     ? window.CelikKaraKutu.getAppVersion()
-                    : 'v353';
+                    : 'v354';
                 const keys = payload && typeof payload === 'object' ? Object.keys(payload) : [];
                 const undefKeys = [];
                 const overLimit = [];
@@ -615,7 +617,13 @@
             let lastPayload = buildPayloadFn(firstSeal);
             try {
                 // Tam şema yazımı ({ merge: true } yerine): garminManifests gibi iç haritalarda budanan eski anahtarların bulutta da silinmesini sağlar
-                await docRef.set(lastPayload);
+                const writeRes = await withAuthTimeout(docRef.set(lastPayload), 2200, '__FIRESTORE_TIMEOUT__');
+                if (writeRes === '__FIRESTORE_TIMEOUT__') {
+                    const tErr = new Error('Firestore write timeout (quota/backoff)');
+                    tErr.code = 'resource-exhausted';
+                    tripFirestoreQuotaCircuitIfNeeded(tErr);
+                    throw tErr;
+                }
                 if (!IS_LOCAL_DEV && !isTelCol) clearResolvedCloudErrors(colName, uid);
                 return true;
             } catch (err) {
@@ -626,7 +634,7 @@
                 const isPermErr = err && (err.code === 'permission-denied' || /permission|insufficient/i.test(String(err.message || '')));
                 if (isPermErr) {
                     try {
-                        const snap = await docRef.get();
+                        const snap = await fetchCloudDocPreferServer(docRef);
                         const snapData = (snap && snap.exists && typeof snap.data === 'function') ? (snap.data() || {}) : null;
                         const remoteSeal = snapData ? adoptCloudSyncSealIfPresent(colName, uid, snapData) : '';
 
@@ -634,7 +642,13 @@
                             attemptLabel = 'MühürYenileme';
                             usedSeal = remoteSeal;
                             lastPayload = buildPayloadFn(usedSeal);
-                            await docRef.set(lastPayload);
+                            const retryRes = await withAuthTimeout(docRef.set(lastPayload), 2200, '__FIRESTORE_TIMEOUT__');
+                            if (retryRes === '__FIRESTORE_TIMEOUT__') {
+                                const tErr = new Error('Firestore retry write timeout (quota/backoff)');
+                                tErr.code = 'resource-exhausted';
+                                tripFirestoreQuotaCircuitIfNeeded(tErr);
+                                throw tErr;
+                            }
                             if (!IS_LOCAL_DEV && !isTelCol) {
                                 clearResolvedCloudErrors(colName, uid);
                                 recordCloudGateTelemetry('warn', `${colName} Mühür Onarımı`, uid, 'Bulut mühür uyuşmazlığı otomatik onarıldı', uid);
@@ -728,26 +742,35 @@
         async function fetchAllCloudSystemTelemetryForAdmin() {
             const session = typeof getSession === 'function' ? getSession() : null;
             if (typeof isVerifiedAdminSession === 'function' ? !isVerifiedAdminSession(session) : (!session || session.role !== 'admin' || session.authVerified !== true)) return false;
-            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || (typeof navigator !== 'undefined' && navigator.onLine === false)) return false;
+            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || isFirestoreQuotaCircuitOpen() || (typeof navigator !== 'undefined' && navigator.onLine === false)) return false;
             if (typeof window === 'undefined' || !window.CelikKaraKutu) return false;
 
             try {
                 const docEntries = [];
                 try {
-                    const snap = await fbDb.collection('system_telemetry').get();
+                    const snap = await withAuthTimeout(fbDb.collection('system_telemetry').get(), 2200, '__FIRESTORE_TIMEOUT__');
+                    if (snap === '__FIRESTORE_TIMEOUT__') {
+                        const tErr = new Error('Firestore admin telemetry read timeout');
+                        tErr.code = 'resource-exhausted';
+                        tripFirestoreQuotaCircuitIfNeeded(tErr);
+                        return false;
+                    }
                     if (snap && typeof snap.forEach === 'function') {
                         snap.forEach(doc => {
                             if (doc && doc.exists) docEntries.push({ id: doc.id, data: doc.data() || {} });
                         });
                     }
-                } catch {
+                } catch (telErr) {
+                    if (tripFirestoreQuotaCircuitIfNeeded(telErr)) return false;
                     const users = typeof getAuthUsers === 'function' ? getAuthUsers() : [];
                     for (const u of users) {
-                        if (!u || !u.id) continue;
+                        if (!u || !u.id || isFirestoreQuotaCircuitOpen()) continue;
                         try {
-                            const d = await fbDb.collection('system_telemetry').doc(u.id).get();
+                            const d = await fetchCloudDocPreferServer(fbDb.collection('system_telemetry').doc(u.id));
                             if (d && d.exists) docEntries.push({ id: d.id, data: d.data() || {} });
-                        } catch {}
+                        } catch (uErr) {
+                            if (tripFirestoreQuotaCircuitIfNeeded(uErr)) break;
+                        }
                     }
                 }
 
@@ -934,7 +957,9 @@
                                     unmountAdminPortalFromDOM();
                                 }
                                 if (_bootCloudSyncTriggered && navigator.onLine !== false && curSess && !isDemoGuestSession(curSess)) {
-                                    flushPendingCloudOutbox().then(() => syncAllFromCloud()).catch(() => {});
+                                    syncAllFromCloud().then(() => {
+                                        if (!isFirestoreQuotaCircuitOpen()) return flushPendingCloudOutbox();
+                                    }).catch(() => {});
                                 }
                             } else {
                                 await refreshVerifiedAdminClaim(null);
@@ -970,6 +995,29 @@
                 updateCloudSyncBadge('syncing', 'Bağlanıyor...');
                 console.log("Firebase Firestore başarıyla bağlandı.");
 
+                const settleStuckCloudBadgeIfNeeded = () => {
+                    const headerBadge = typeof document !== 'undefined' ? document.getElementById('headerCloudSyncBadge') : null;
+                    const txt = headerBadge ? String(headerBadge.textContent || '').trim() : '';
+                    if (txt && !/bağlanıyor|eşitleniyor/i.test(txt)) return;
+                    if (isFirestoreQuotaCircuitOpen()) {
+                        updateCloudSyncBadge('offline', 'Bulut Kotası Doldu (Yerel Aktif)');
+                    } else if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+                        updateCloudSyncBadge('offline', 'Çevrimdışı (Yerel Aktif)');
+                    } else if (fbAuth && fbAuth.currentUser) {
+                        updateCloudSyncBadge('synced', 'Bulut Aktif');
+                    } else {
+                        const curSess = typeof getSession === 'function' ? getSession() : null;
+                        if (curSess && isDemoGuestSession(curSess)) {
+                            updateCloudSyncBadge('synced', 'Demo Modu');
+                        } else if (curSess) {
+                            updateCloudSyncBadge('auth-required', 'Bulut Girişi Gerekli');
+                        } else {
+                            updateCloudSyncBadge('offline', 'Bulut Hazır');
+                        }
+                    }
+                };
+                setTimeout(settleStuckCloudBadgeIfNeeded, 6500);
+
                 // İlk bulut veri senkronizasyonunu Firebase Auth durumu netleştikten sonra başlat
                 (async () => {
                     try {
@@ -990,8 +1038,10 @@
                         }
                         _bootCloudSyncTriggered = true;
                         if (fbAuth && fbAuth.currentUser) {
-                            await flushPendingCloudOutbox();
                             await syncAllFromCloud();
+                            if (!isFirestoreQuotaCircuitOpen()) {
+                                await flushPendingCloudOutbox();
+                            }
                         } else {
                             if (typeof window !== 'undefined') window._initialWorkoutLogsCloudSyncDone = true;
                             if (typeof syncMasterCatalogFromCloud === 'function') {
@@ -1006,7 +1056,11 @@
                                 updateCloudSyncBadge('offline', 'Bulut Hazır');
                             }
                         }
-                    } catch {}
+                    } catch (bootErr) {
+                        tripFirestoreQuotaCircuitIfNeeded(bootErr);
+                    } finally {
+                        settleStuckCloudBadgeIfNeeded();
+                    }
                 })();
 
             } catch (err) {
@@ -3822,7 +3876,7 @@
                 _adminPortalScriptLoadingPromise = new Promise((resolve) => {
                     try {
                         const script = document.createElement('script');
-                        script.src = 'js/chiefs/admin-portal.js?v=353';
+                        script.src = 'js/chiefs/admin-portal.js?v=354';
                         script.async = false;
                         script.onload = () => resolve(true);
                         script.onerror = () => {

@@ -444,7 +444,12 @@
 
             // 1. Bireysel kullanıcı profillerini (user_profiles) çek (yeni kayıt başvuruları dahil)
             try {
-                const profilesSnap = await fbDb.collection('user_profiles').get();
+                if (typeof isFirestoreQuotaCircuitOpen === 'function' && isFirestoreQuotaCircuitOpen()) {
+                    return getAuthUsers();
+                }
+                const profilesSnap = typeof withAuthTimeout === 'function'
+                    ? await withAuthTimeout(fbDb.collection('user_profiles').get(), 2200, null)
+                    : await fbDb.collection('user_profiles').get();
                 if (profilesSnap && typeof profilesSnap.forEach === 'function') {
                     profilesSnap.forEach(doc => {
                         if (doc && doc.exists) {
@@ -454,18 +459,19 @@
                     });
                 }
             } catch (profErr) {
+                if (typeof tripFirestoreQuotaCircuitIfNeeded === 'function') tripFirestoreQuotaCircuitIfNeeded(profErr);
                 console.warn("user_profiles listesi çekilemedi:", profErr);
             }
 
             // 2. Yönetici toplu listesini (app_system/users) birleştir
             try {
-                const docRef = fbDb.collection('app_system').doc('users');
-                let doc;
-                try {
-                    doc = await docRef.get({ source: 'server' });
-                } catch {
-                    doc = await docRef.get();
+                if (typeof isFirestoreQuotaCircuitOpen === 'function' && isFirestoreQuotaCircuitOpen()) {
+                    return getAuthUsers();
                 }
+                const docRef = fbDb.collection('app_system').doc('users');
+                const doc = typeof fetchCloudDocPreferServer === 'function'
+                    ? await fetchCloudDocPreferServer(docRef)
+                    : await docRef.get();
                 if (doc && doc.exists) {
                     const data = doc.data() || {};
                     if (Array.isArray(data.users)) {
@@ -473,6 +479,7 @@
                     }
                 }
             } catch (sysErr) {
+                if (typeof tripFirestoreQuotaCircuitIfNeeded === 'function') tripFirestoreQuotaCircuitIfNeeded(sysErr);
                 console.warn("app_system/users listesi çekilemedi:", sysErr);
             }
 
