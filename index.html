@@ -8,11 +8,11 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <meta name="theme-color" content="#F8FAFC">
-    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#0B0A14">
+    <meta name="color-scheme" content="dark">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Çelik Kodu">
     
     <title>Çelik Kodu | Akıllı Antrenman Mimarı & Program Oluşturucu</title>
@@ -27,10 +27,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=317">
+    <link rel="stylesheet" href="css/style.css?v=345">
     <style>
-        /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH (CANVA MODERN ATHLETIC LIGHT V229) */
-        html, body { background-color: #F8FAFC; color: #0F172A; color-scheme: light; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
+        /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH */
+        html, body { background-color: #0B0A14; color: #F8FAFC; color-scheme: dark; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
         button, input, select, textarea { font-family: inherit; }
     </style>
 </head>
@@ -260,7 +260,7 @@
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" style="display:none;">v335</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" style="display:none;">v345</span>
                         </div>
                     </div>
                 </div>
@@ -279,10 +279,10 @@
                     </button>
 
                     <!-- HEADER NOTIFICATION CENTER (SAĞ ÜST TOPLU BİLDİRİM MERKEZİ) -->
-                    <div id="headerNotificationCenter" class="header-popup-menu" style="display:none;width:360px;max-width:calc(100vw - 24px);max-height:440px;overflow-y:auto;padding:12px;background:#FFFFFF;color:#0F172A;border:1px solid #CBD5E1;border-radius:14px;box-shadow:0 14px 32px rgba(15,23,42,0.22);">
-                        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid #E2E8F0;">
-                            <strong style="font-size:13.5px;color:#0F172A;">Bildirim Merkezi</strong>
-                            <button type="button" onclick="clearAllAppNotifications(event)" style="background:#F1F5F9;color:#475569;border:1px solid #CBD5E1;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;">Tümünü Temizle</button>
+                    <div id="headerNotificationCenter" class="header-popup-menu" style="display:none;width:360px;max-width:calc(100vw - 24px);max-height:440px;overflow-y:auto;padding:12px;background:#181530;color:#F8FAFC;border:1px solid rgba(167, 139, 250, 0.28);border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,0.65);">
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid rgba(167, 139, 250, 0.18);">
+                            <strong style="font-size:13.5px;color:#FFFFFF;">Bildirim Merkezi</strong>
+                            <button type="button" onclick="clearAllAppNotifications(event)" style="background:#121024;color:#CBD5E1;border:1px solid rgba(167, 139, 250, 0.28);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;">Tümünü Temizle</button>
                         </div>
                         <div id="headerNotificationList" style="display:flex;flex-direction:column;gap:8px;"></div>
                     </div>
@@ -574,7 +574,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             <!-- B. Set Düzeni, EMOM Döngüsü & Hedef -->
                             <div class="gen-adv-block" id="paramSection">
                                 <div class="gen-adv-title">Set Düzeni, EMOM Döngüsü &amp; Hedef</div>
@@ -654,11 +653,13 @@
 
                     <!-- TEK VE BELİRGİN ANA AKSİYON BUTONU (PRIMARY CTA) -->
                     <div class="ai-prep-actions-row ai-unified-cta-row">
-                        <button type="button" class="btn-ai-create-primary btn-ai-unified-cta" id="btnUnifiedAiGenerate" style="width:100%;" onclick="handleQuickAiGenerate()">
-                            <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg> Program Oluştur
-                        </button>
+                        <div class="ai-primary-cta-col" style="width:100%; display:flex; flex-direction:column; align-items:center;">
+                            <button type="button" class="btn-ai-create-primary btn-ai-unified-cta" id="btnUnifiedAiGenerate" style="width:100%;" onclick="handleQuickAiGenerate()">
+                                <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg> Program Oluştur
+                            </button>
+                            <div class="ai-prep-hint" id="aiQuickPreviewHint">Onaylamadan takvime eklenmez</div>
+                        </div>
                     </div>
-                    <div class="ai-prep-hint" id="aiQuickPreviewHint">Onaylamadan takvime eklenmez</div>
                 </div>
 
                 <!-- GENERATED WORKOUT CONTAINER -->
@@ -739,14 +740,13 @@
                             <div class="stitch-cal-controls">
                                 <div class="stitch-cal-nav-arrows">
                                     <button type="button" class="stitch-cal-arrow-btn" onclick="navigateCalendar(-1)" title="Önceki Dönem">&lsaquo;</button>
-                                    <button type="button" class="stitch-cal-today-btn" onclick="jumpCalendarToToday()">Bugün</button>
+                                    <button type="button" class="stitch-cal-today-btn" id="calJumpTodayBtn" style="display:none;" onclick="jumpCalendarToToday()">Bugün</button>
                                     <button type="button" class="stitch-cal-arrow-btn" onclick="navigateCalendar(1)" title="Sonraki Dönem">&rsaquo;</button>
                                 </div>
                                 <div class="cal-view-pills stitch-cal-view-pills">
                                     <button type="button" class="cal-pill-btn active" id="calViewWeeklyBtn" onclick="setCalendarViewMode('weekly')">Hafta</button>
                                     <button type="button" class="cal-pill-btn" id="calViewMonthlyBtn" onclick="setCalendarViewMode('monthly')">Ay</button>
                                 </div>
-                                <button type="button" class="wk-ex-i-btn" onclick="openCalendarToolsModal()" title="Takvim Araçları ve Şablonlar">i</button>
                             </div>
                         </div>
 
@@ -779,26 +779,26 @@
 
                 <!-- EMBEDDED PROGRAM ATÖLYESİ (MANUEL PROGRAM OLUŞTURUCU & HIZLI ANTRENMAN) -->
                 <div id="studioSectionInWorkout" style="display:block; margin-top:0; margin-bottom:12px;">
-                    <div class="generator-card" style="border:1.5px solid #E2E8F0; padding:14px 16px;">
+                    <div class="generator-card" id="studioCardShell" style="border:1.5px solid #E2E8F0; padding:14px 16px; cursor:pointer;" onclick="toggleStudioAccordion()">
                         
                         <!-- ACCORDION HEADER -->
-                        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; gap:8px;" onclick="toggleStudioAccordion()">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                             <div style="min-width:0; flex:1;">
                                 <h3 style="font-size:14.5px; font-weight:900; color:#FFFFFF; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Manuel Program & Hızlı Antrenman</h3>
                                 <p style="font-size:11.5px; color:#CBD5E1; margin:2px 0 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Özel program kurun veya anlık seans başlatın</p>
                             </div>
-                            <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
-                                <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:6px 10px; font-weight:800; border-color:rgba(167,139,250,0.35); color:#F3E8FF; background:#121024; flex-shrink:0; white-space:nowrap;" onclick="event.stopPropagation(); openQuickWorkoutModal()">
-                                    Hızlı Başlat
+                            <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                                <button type="button" class="btn studio-quick-btn" id="btnQuickStudioLaunch" onclick="event.stopPropagation(); openQuickWorkoutModal()">
+                                    + Anlık Seans
                                 </button>
-                                <button type="button" class="btn btn-outline" id="btnToggleStudioAccordion" style="font-size:11.5px; padding:6px 10px; font-weight:800; border-color:rgba(167,139,250,0.35); color:#FFFFFF; background:#121024; flex-shrink:0; white-space:nowrap;">
-                                    <span id="studioAccordionArrow">▼ Aç</span>
-                                </button>
+                                <span id="studioAccordionArrow" class="studio-accordion-chevron" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </span>
                             </div>
                         </div>
 
                         <!-- ACCORDION BODY -->
-                        <div id="studioAccordionBody" style="display:none; margin-top:14px; border-top:1px solid #E2E8F0; padding-top:14px;">
+                        <div id="studioAccordionBody" onclick="event.stopPropagation()" style="display:none; margin-top:14px; border-top:1px solid rgba(255,255,255,0.06); padding-top:14px; cursor:default;">
                             <!-- DYNAMIC EDITING DAY BANNER -->
                             <div id="studioEditingBannerContainer"></div>
 
@@ -1003,43 +1003,39 @@
             <!-- ==================== TAB 4: WORKOUT HISTORY & LOGS ==================== -->
             <div id="historyTab" class="tab-content">
                 <div class="generator-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                        <h2 style="font-size:16px; font-weight:800; color:#FFFFFF;">Antrenman Geçmişi</h2>
-                        <div style="display:flex; gap:6px;">
-                            <button class="btn btn-outline" style="font-size:12px; padding:6px 12px; display:flex; align-items:center; gap:6px;" onclick="exportCSV()" title="CSV Olarak Dışa Aktar">
-                                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--cyan);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line></svg>
-                                <span>CSV</span>
-                            </button>
-                            <button class="btn btn-outline" style="font-size:12px; padding:6px 12px; display:flex; align-items:center; gap:6px;" onclick="exportData()" title="Yedeği İndir">
-                                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                <span>Yedek</span>
-                            </button>
-                            <label class="btn btn-outline" style="font-size:12px; padding:6px 12px; cursor:pointer; display:flex; align-items:center; gap:6px;" title="Veri Yükle">
-                                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--green-success);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                                <span>Yükle</span>
-                                <input type="file" onchange="importData(event)" accept=".json" style="display:none;">
-                            </label>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <h2 style="font-size:16px; font-weight:800; color:#FFFFFF; margin:0;">Antrenman Geçmişi</h2>
+                        <div style="position:relative; display:inline-block;">
+                            <button type="button" id="btnHistoryTopMenu" onclick="window.toggleHistoryTopMenu(event)" title="Veri İşlemleri" aria-label="Veri İşlemleri" style="height:32px; width:32px; background:#121024; border:1px solid rgba(167, 139, 250, 0.25); color:#CBD5E1; border-radius:8px; font-size:16px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;">⋮</button>
+                            <div id="historyTopDropdownMenu" style="display:none; position:absolute; right:0; top:calc(100% + 6px); z-index:9999; background:#181530; border:1px solid rgba(167, 139, 250, 0.28); border-radius:12px; padding:6px; box-shadow:0 12px 28px rgba(0,0,0,0.6); min-width:155px;">
+                                <button type="button" class="history-top-menu-item" onclick="window.closeHistoryTopMenu(); exportCSV();">CSV Dışa Aktar</button>
+                                <button type="button" class="history-top-menu-item" onclick="window.closeHistoryTopMenu(); exportData();">Yedek İndir</button>
+                                <label class="history-top-menu-item" style="margin:0;">
+                                    <span>Yedek Yükle</span>
+                                    <input type="file" onchange="window.closeHistoryTopMenu(); importData(event)" accept=".json" style="display:none;">
+                                </label>
+                            </div>
                         </div>
                     </div>
 
                     <!-- STATS ROW -->
-                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:16px;">
-                        <div style="background:#121024; padding:12px; border-radius:10px; text-align:center; border:1px solid rgba(167, 139, 250, 0.25);">
-                            <div style="font-size:12px; color:#CBD5E1;">Toplam Seans</div>
-                            <div style="font-size:22px; font-weight:900; color:#FCD34D;" id="statTotalWorkouts">0</div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
+                        <div style="background:#121024; padding:8px 10px; border-radius:10px; text-align:center; border:1px solid rgba(255, 255, 255, 0.06);">
+                            <div style="font-size:11px; color:#94A3B8;">Toplam Seans</div>
+                            <div class="tabular-nums" style="font-size:19px; font-weight:900; color:#FFFFFF;" id="statTotalWorkouts">0</div>
                         </div>
-                        <div style="background:#121024; padding:12px; border-radius:10px; text-align:center; border:1px solid rgba(167, 139, 250, 0.25);">
-                            <div style="font-size:12px; color:#CBD5E1;">Bu Hafta</div>
-                            <div style="font-size:22px; font-weight:900; color:#7DD3FC;" id="statWeekWorkouts">0/3</div>
+                        <div style="background:#121024; padding:8px 10px; border-radius:10px; text-align:center; border:1px solid rgba(255, 255, 255, 0.06);">
+                            <div style="font-size:11px; color:#94A3B8;">Bu Hafta</div>
+                            <div class="tabular-nums" style="font-size:19px; font-weight:900; color:#FFFFFF;" id="statWeekWorkouts">0/3</div>
                         </div>
-                        <div style="background:#121024; padding:12px; border-radius:10px; text-align:center; border:1px solid rgba(167, 139, 250, 0.25);">
-                            <div style="font-size:12px; color:#CBD5E1;">Seri (Gün)</div>
-                            <div style="font-size:22px; font-weight:900; color:#4ADE80;" id="statStreak">0</div>
+                        <div style="background:#121024; padding:8px 10px; border-radius:10px; text-align:center; border:1px solid rgba(255, 255, 255, 0.06);">
+                            <div style="font-size:11px; color:#94A3B8;">Seri (Gün)</div>
+                            <div class="tabular-nums" style="font-size:19px; font-weight:900; color:#FFFFFF;" id="statStreak">0</div>
                         </div>
                     </div>
 
                     <!-- GARMIN & SAAT KAPSÜLÜ EŞLEME & ONAY PANELİ -->
-                    <div id="garminHistorySyncContainer" style="margin-bottom:16px;"></div>
+                    <div id="garminHistorySyncContainer" style="margin-bottom:10px;"></div>
 
                     <div id="logHistoryContainer">
                         <!-- Populated dynamically -->
@@ -2051,54 +2047,52 @@
         </div>
     </div>
 
-    <!-- ==================== QUICK PRE-CHECK POPUP MODAL (FİGMA ATHLETIQ MOR STANDARDI) ==================== -->
+    <!-- ==================== QUICK PRE-CHECK POPUP MODAL ==================== -->
     <div id="aiQuickPrecheckModal" class="modal-overlay" style="overscroll-behavior:contain; background:rgba(6,5,12,0.85); backdrop-filter:blur(14px);" onclick="if(event.target === this) closeQuickAiPrecheckModal()">
-        <div class="modal-box" style="max-width:440px; width:92%; padding:22px; border-radius:24px; background:linear-gradient(165deg, #181530 0%, #100E22 100%); border:1.5px solid rgba(167,139,250,0.3); box-shadow:0 25px 60px -10px rgba(0,0,0,0.9), 0 0 30px rgba(139,92,246,0.25); overscroll-behavior:contain;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(167,139,250,0.18);">
-                <span style="font-size:16px; font-weight:900; color:#FFFFFF; letter-spacing:0.2px;">Program Planlama Kontrolü</span>
-                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeQuickAiPrecheckModal()" style="font-size:14px; color:#F3E8FF; background:rgba(167,139,250,0.14); border:1px solid rgba(167,139,250,0.25); width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">✕</button>
+        <div class="modal-box" style="max-width:440px; width:92%; padding:22px; border-radius:20px; background:#181530; border:1px solid rgba(167,139,250,0.2); box-shadow:0 20px 50px rgba(0,0,0,0.7); overscroll-behavior:contain;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.06);">
+                <span style="font-size:16px; font-weight:800; color:#FFFFFF; letter-spacing:-0.01em;">Program Planlama Kontrolü</span>
+                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeQuickAiPrecheckModal()" style="font-size:14px; color:#94A3B8; background:transparent; border:1px solid rgba(167,139,250,0.22); width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">✕</button>
             </div>
 
             <!-- SORU 1: BUGÜN İÇİN Mİ, HAFTALIK MI? -->
             <div style="margin-bottom:16px;">
-                <div style="font-size:12px; font-weight:800; color:#94A3B8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">Program Kapsamı</div>
+                <div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;">Program Kapsamı</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;" id="aiPrecheckScopeGroup">
-                    <button type="button" data-val="single" onclick="selectQuickPrecheckScope('single')" style="padding:12px 10px; border-radius:12px; font-size:13px; font-weight:800; cursor:pointer; border:1.5px solid #8B5CF6; background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color:#FFFFFF; box-shadow:0 4px 14px rgba(139,92,246,0.35);">Bugün İçin</button>
-                    <button type="button" data-val="weekly" onclick="selectQuickPrecheckScope('weekly')" style="padding:12px 10px; border-radius:12px; font-size:13px; font-weight:700; cursor:pointer; border:1.5px solid rgba(167,139,250,0.2); background:rgba(24,21,48,0.7); color:#94A3B8;">Haftalık (Kalan Günler)</button>
+                    <button type="button" data-val="single" class="is-selected" onclick="selectQuickPrecheckScope('single')" style="padding:11px 10px; border-radius:12px; font-size:13px; font-weight:800; cursor:pointer; border:1.5px solid #A78BFA; background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color:#FFFFFF;">Bugün İçin</button>
+                    <button type="button" data-val="weekly" onclick="selectQuickPrecheckScope('weekly')" style="padding:11px 10px; border-radius:12px; font-size:13px; font-weight:700; cursor:pointer; border:1px solid rgba(167,139,250,0.2); background:#121024; color:#94A3B8;">Haftalık (Kalan Günler)</button>
                 </div>
-                <div id="aiPrecheckWeekProgressNote" style="display:none; margin-top:8px; padding:10px 12px; border-radius:10px; background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.25); border-left:3px solid #38BDF8; font-size:12px; font-weight:700; color:#38BDF8; line-height:1.4;"></div>
+                <div id="aiPrecheckWeekProgressNote" style="display:none; margin-top:6px; padding:0; background:transparent; border:none; font-size:11.5px; font-weight:500; color:#94A3B8; line-height:1.35; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
             </div>
 
             <!-- SORU 2: YORGUN KAS GRUBU -->
             <div style="margin-bottom:16px;">
-                <div style="font-size:12px; font-weight:800; color:#94A3B8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">Yorgun Kas Grubu</div>
+                <div style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;">Yorgun Kas Grubu</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px;" id="aiPrecheckFatigueGroup">
-                    <button type="button" data-val="none" onclick="selectQuickPrecheckFatigue('none')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer; border:1.5px solid #8B5CF6; background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color:#FFFFFF;">Yok</button>
-                    <button type="button" data-val="legs" onclick="selectQuickPrecheckFatigue('legs')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; border:1.5px solid rgba(167,139,250,0.2); background:rgba(24,21,48,0.7); color:#94A3B8;">Bacak</button>
-                    <button type="button" data-val="upper" onclick="selectQuickPrecheckFatigue('upper')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; border:1.5px solid rgba(167,139,250,0.2); background:rgba(24,21,48,0.7); color:#94A3B8;">Üst Vücut</button>
-                    <button type="button" data-val="back" onclick="selectQuickPrecheckFatigue('back')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; border:1.5px solid rgba(167,139,250,0.2); background:rgba(24,21,48,0.7); color:#94A3B8;">Sırt / Bel</button>
+                    <button type="button" data-val="none" class="is-selected" onclick="selectQuickPrecheckFatigue('none')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer; border:1.5px solid #A78BFA; background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color:#FFFFFF;">Yok</button>
+                    <button type="button" data-val="legs" onclick="selectQuickPrecheckFatigue('legs')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; border:1px solid rgba(167,139,250,0.2); background:#121024; color:#94A3B8;">Bacak</button>
+                    <button type="button" data-val="upper" onclick="selectQuickPrecheckFatigue('upper')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; border:1px solid rgba(167,139,250,0.2); background:#121024; color:#94A3B8;">Üst Vücut</button>
+                    <button type="button" data-val="back" onclick="selectQuickPrecheckFatigue('back')" style="padding:10px 6px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; border:1px solid rgba(167,139,250,0.2); background:#121024; color:#94A3B8;">Sırt / Bel</button>
                 </div>
             </div>
 
-            <!-- TARTI GÜNCELSE BİLGİ SATIRI -->
-            <div id="aiPrecheckScaleFreshNotice" style="display:none; margin-bottom:16px; padding:10px 14px; border-radius:12px; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.3); font-size:12px; font-weight:700; color:#34D399;">
-                Tartı verisi güncel (son 30 gün), programa otomatik dahil edildi.
-            </div>
+            <!-- TARTI GÜNCELSE TEK SATIR SİLİK BİLGİ METNİ -->
+            <div id="aiPrecheckScaleFreshNotice" style="display:none; margin:-4px 0 14px 0; padding:0; background:transparent; border:none; font-size:11.5px; font-weight:500; color:#94A3B8; line-height:1.35; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Tartı verisi güncel (son 30 gün), programa dahil edildi.</div>
 
             <!-- SORU 3: SADECE TARTI 30 GÜNDEN ESKİYSE AÇILIR -->
             <div id="aiPrecheckScaleStaleRow" style="display:none; margin-bottom:16px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <span style="font-size:12px; font-weight:800; color:#94A3B8; text-transform:uppercase;">Son 1 Ay Vücut Yönü</span>
-                    <span id="aiPrecheckScaleStaleBadge" style="font-size:10.5px; font-weight:800; color:#FCD34D; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.35); padding:2px 7px; border-radius:6px;">Tartı 30+ Gün Eski</span>
+                    <span style="font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase;">Son 1 Ay Vücut Yönü</span>
+                    <span id="aiPrecheckScaleStaleBadge" style="font-size:10.5px; font-weight:700; color:#FCD34D;">Tartı 30+ Gün Eski</span>
                 </div>
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;" id="aiPrecheckScaleGroup">
-                    <button type="button" data-val="stable" onclick="selectQuickPrecheckScale('stable')" style="padding:10px 8px; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer; border:1.5px solid #8B5CF6; background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color:#FFFFFF;">Sabit</button>
-                    <button type="button" data-val="gained" onclick="selectQuickPrecheckScale('gained')" style="padding:10px 8px; border-radius:10px; font-size:12.5px; font-weight:700; cursor:pointer; border:1.5px solid rgba(167,139,250,0.2); background:rgba(24,21,48,0.7); color:#94A3B8;">Kilo Arttı</button>
-                    <button type="button" data-val="lost" onclick="selectQuickPrecheckScale('lost')" style="padding:10px 8px; border-radius:10px; font-size:12.5px; font-weight:700; cursor:pointer; border:1.5px solid rgba(167,139,250,0.2); background:rgba(24,21,48,0.7); color:#94A3B8;">Kilo Düştü</button>
+                    <button type="button" data-val="stable" class="is-selected" onclick="selectQuickPrecheckScale('stable')" style="padding:10px 8px; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer; border:1.5px solid #A78BFA; background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color:#FFFFFF;">Sabit</button>
+                    <button type="button" data-val="gained" onclick="selectQuickPrecheckScale('gained')" style="padding:10px 8px; border-radius:10px; font-size:12.5px; font-weight:700; cursor:pointer; border:1px solid rgba(167,139,250,0.2); background:#121024; color:#94A3B8;">Kilo Arttı</button>
+                    <button type="button" data-val="lost" onclick="selectQuickPrecheckScale('lost')" style="padding:10px 8px; border-radius:10px; font-size:12.5px; font-weight:700; cursor:pointer; border:1px solid rgba(167,139,250,0.2); background:#121024; color:#94A3B8;">Kilo Düştü</button>
                 </div>
             </div>
 
-            <button type="button" onclick="confirmQuickAiPrecheckAndGenerate()" style="width:100%; padding:14px 16px; border-radius:14px; border:none; background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color:#FFFFFF; font-size:14px; font-weight:900; cursor:pointer; letter-spacing:0.3px; box-shadow:0 8px 24px rgba(139,92,246,0.45);">
+            <button type="button" onclick="confirmQuickAiPrecheckAndGenerate()" style="width:100%; height:48px; padding:0 16px; border-radius:14px; border:none; background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color:#FFFFFF; font-size:14px; font-weight:800; cursor:pointer; box-shadow:none;">
                 Programı Hazırla
             </button>
         </div>
@@ -2151,11 +2145,14 @@
         <div class="modal-box" style="max-width: 520px; max-height: 92vh; display: flex; flex-direction: column; padding: 14px;">
             <div class="modal-header" style="margin-bottom: 10px; align-items: center;">
                 <div style="min-width:0; flex:1;">
-                    <span style="display:inline-block; font-size:9.5px; font-weight:900; letter-spacing:0.6px; text-transform:uppercase; color:#FDBA74; margin-bottom:2px;">HAREKET SEÇİCİ</span>
-                    <div class="modal-title" id="pickerModalTitle" style="font-size:16px; font-weight:900; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Alternatif Seç</div>
+                    <span style="display:inline-block; font-size:9.5px; font-weight:900; letter-spacing:0.6px; text-transform:uppercase; color:#94A3B8; margin-bottom:2px;">HAREKET SEÇİCİ</span>
+                    <div class="modal-title" id="pickerModalTitle" style="font-size:16px; font-weight:900; color:#FFFFFF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Alternatif Seç</div>
                     <div id="pickerModalSubtitle" style="display:none;"></div>
                 </div>
-                <button type="button" class="wk-info-modal-close" aria-label="Kapat" onclick="closeExercisePickerModal()">✕</button>
+                <div style="display:inline-flex; align-items:center; flex-shrink:0;">
+                    <button type="button" id="pickerRandomSwapBtn" onclick="if(typeof pickerContext!=='undefined'&&pickerContext&&pickerContext.mode==='replace'&&pickerContext.targetExId){const tid=pickerContext.targetExId,sc=pickerContext.scope;closeExercisePickerModal();swapSingleExercise(tid,sc);}" style="background:transparent; border:1px solid rgba(167,139,250,0.24); color:#CBD5E1; border-radius:8px; padding:5px 10px; font-size:11.5px; font-weight:700; cursor:pointer; margin-right:6px;">Rastgele</button>
+                    <button type="button" class="wk-info-modal-close" aria-label="Kapat" onclick="closeExercisePickerModal()">✕</button>
+                </div>
             </div>
 
             <!-- CURRENT EXERCISE CONTEXT BANNER (HIDDEN FOR ZERO CLUTTER) -->
@@ -2646,7 +2643,7 @@
         <div class="more-sheet-handle"></div>
         <div class="more-sheet-header">
             <div class="more-sheet-title">Menü & Ayarlar</div>
-            <button type="button" aria-label="Menüyü kapat" onclick="closeMoreSheet()" style="background:none; border:none; color:#0F172A; font-size:20px; font-weight:700; cursor:pointer;">&times;</button>
+            <button type="button" aria-label="Menüyü kapat" onclick="closeMoreSheet()" style="background:none; border:none; color:#F8FAFC; font-size:20px; font-weight:700; cursor:pointer;">&times;</button>
         </div>
         <div class="more-sheet-grid" id="moreSheetGrid">
             <div class="more-sheet-btn" onclick="closeMoreSheet(); openExerciseLibraryTab();">
@@ -2689,17 +2686,17 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE (7 BAĞIMSIZ ŞEF ODASI + ORKESTRA) ==================== -->
-    <script src="js/exercises-db.js?v=327"></script>
-    <script src="js/chiefs/shared-core.js?v=327"></script>
-    <script src="js/chiefs/bridge-customs.js?v=327"></script>
-    <script src="js/chiefs/liaison-subchiefs.js?v=327"></script>
-    <script src="js/chiefs/profile-chief.js?v=327"></script>
-    <script src="js/chiefs/library-chief.js?v=327"></script>
-    <script src="js/chiefs/history-chief.js?v=327"></script>
-    <script src="js/chiefs/analytics-chief.js?v=327"></script>
-    <script src="js/chiefs/generator-chief.js?v=327"></script>
-    <script src="js/chiefs/workout-chief.js?v=327"></script>
-    <script src="js/app.js?v=327"></script>
+    <script src="js/exercises-db.js?v=345"></script>
+    <script src="js/chiefs/shared-core.js?v=345"></script>
+    <script src="js/chiefs/bridge-customs.js?v=345"></script>
+    <script src="js/chiefs/liaison-subchiefs.js?v=345"></script>
+    <script src="js/chiefs/profile-chief.js?v=345"></script>
+    <script src="js/chiefs/library-chief.js?v=345"></script>
+    <script src="js/chiefs/history-chief.js?v=345"></script>
+    <script src="js/chiefs/analytics-chief.js?v=345"></script>
+    <script src="js/chiefs/generator-chief.js?v=345"></script>
+    <script src="js/chiefs/workout-chief.js?v=345"></script>
+    <script src="js/app.js?v=345"></script>
     <script>
         function getNotifStorageKey() {
             const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';
@@ -2742,24 +2739,24 @@
             }
             if (!listEl) return;
             if (items.length === 0) {
-                listEl.innerHTML = '<div style="padding:18px 10px;text-align:center;font-size:12.5px;color:#475569;">Henüz bildirim yok.</div>';
+                listEl.innerHTML = '<div style="padding:18px 10px;text-align:center;font-size:12.5px;color:#CBD5E1;">Henüz bildirim yok.</div>';
                 return;
             }
             listEl.innerHTML = items.map(item => {
                 const isGarmin = item.category === 'garmin' || /garmin|tredict|saat/i.test(item.text || '');
-                const badgeBg = isGarmin ? '#DCFCE7' : (item.type === 'warn' ? '#FEF3C7' : '#DBEAFE');
-                const badgeFg = isGarmin ? '#15803D' : (item.type === 'warn' ? '#B45309' : '#0369A1');
+                const badgeBg = isGarmin ? '#14532D' : (item.type === 'warn' ? '#7C2D12' : '#0C4A6E');
+                const badgeFg = isGarmin ? '#BBF7D0' : (item.type === 'warn' ? '#FDE68A' : '#BAE6FD');
                 const badgeLabel = isGarmin ? '⌚ Garmin' : (item.type === 'warn' ? '⚠️ Uyarı' : '🔔 Bildirim');
                 return `
-                    <div style="background:${item.read ? '#F8FAFC' : '#EFF6FF'};border:1px solid ${item.read ? '#E2E8F0' : '#93C5FD'};border-radius:10px;padding:9px 11px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                    <div style="background:${item.read ? '#121024' : '#1E1B3A'};border:1px solid ${item.read ? 'rgba(167, 139, 250, 0.2)' : 'rgba(167, 139, 250, 0.45)'};border-radius:10px;padding:9px 11px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
                         <div style="min-width:0;flex:1;">
                             <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
                                 <span style="background:${badgeBg};color:${badgeFg};padding:2px 6px;border-radius:5px;font-size:10.5px;font-weight:800;">${badgeLabel}</span>
-                                <span style="font-size:11px;color:#475569;font-weight:600;">${escNotifHtml(item.timeLabel || '')}</span>
+                                <span style="font-size:11px;color:#CBD5E1;font-weight:600;">${escNotifHtml(item.timeLabel || '')}</span>
                             </div>
-                            <div style="font-size:12.5px;font-weight:700;color:#0F172A;line-height:1.4;word-break:break-word;">${escNotifHtml(item.text || '')}</div>
+                            <div style="font-size:12.5px;font-weight:700;color:#F8FAFC;line-height:1.4;word-break:break-word;">${escNotifHtml(item.text || '')}</div>
                         </div>
-                        <button type="button" onclick="deleteAppNotificationItem(event, decodeURIComponent('${encodeURIComponent(item.id)}'))" style="background:transparent;border:none;color:#475569;font-size:14px;cursor:pointer;padding:2px 4px;line-height:1;" title="Sil">✕</button>
+                        <button type="button" onclick="deleteAppNotificationItem(event, decodeURIComponent('${encodeURIComponent(item.id)}'))" style="background:transparent;border:none;color:#CBD5E1;font-size:14px;cursor:pointer;padding:2px 4px;line-height:1;" title="Sil">✕</button>
                     </div>
                 `;
             }).join('');
@@ -2892,6 +2889,6 @@
             </div>
         </div>
     </div>
-    <script src="js/garmin-tredict-bridge.js?v=327" defer></script>
+    <script src="js/garmin-tredict-bridge.js?v=345" defer></script>
 </body>
 </html>

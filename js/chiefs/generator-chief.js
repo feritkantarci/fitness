@@ -1294,18 +1294,25 @@
         }
         window.evaluateScaleFreshness30Days = evaluateScaleFreshness30Days;
 
+        function applyQuickPrecheckGroupStyle(groupId, selectedVal) {
+            const grp = document.getElementById(groupId);
+            if (!grp) return;
+            grp.querySelectorAll('button[data-val]').forEach(btn => {
+                const isSel = btn.getAttribute('data-val') === selectedVal;
+                if (btn.classList && typeof btn.classList.toggle === 'function') {
+                    btn.classList.toggle('is-selected', isSel);
+                }
+                btn.style.background = isSel ? 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)' : '#121024';
+                btn.style.backgroundColor = isSel ? '#7C3AED' : '#121024';
+                btn.style.color = isSel ? '#FFFFFF' : '#94A3B8';
+                btn.style.borderColor = isSel ? '#A78BFA' : 'rgba(167, 139, 250, 0.2)';
+                btn.style.fontWeight = isSel ? '800' : '700';
+            });
+        }
+
         function selectQuickPrecheckScope(val) {
             window.activePrecheckState.scope = (val === 'weekly') ? 'weekly' : 'single';
-            const grp = document.getElementById('aiPrecheckScopeGroup');
-            if (grp) {
-                grp.querySelectorAll('button[data-val]').forEach(btn => {
-                    const isSel = btn.getAttribute('data-val') === window.activePrecheckState.scope;
-                    btn.style.background = isSel ? 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)' : 'rgba(24, 21, 48, 0.7)';
-                    btn.style.color = isSel ? '#FFFFFF' : '#94A3B8';
-                    btn.style.borderColor = isSel ? '#8B5CF6' : 'rgba(167, 139, 250, 0.2)';
-                    btn.style.fontWeight = isSel ? '800' : '700';
-                });
-            }
+            applyQuickPrecheckGroupStyle('aiPrecheckScopeGroup', window.activePrecheckState.scope);
             const noteEl = document.getElementById('aiPrecheckWeekProgressNote');
             if (noteEl) {
                 const wkStatus = typeof getWeeklyTrainingStatus === 'function' ? getWeeklyTrainingStatus() : { completedThisWeekCount: 0, isThisWeekComplete: false };
@@ -1313,16 +1320,16 @@
                     noteEl.style.display = 'block';
                     if (wkStatus.completedThisWeekCount > 0 && !wkStatus.isThisWeekComplete) {
                         const rem = Math.max(1, 3 - wkStatus.completedThisWeekCount);
-                        noteEl.textContent = `Bu hafta ${wkStatus.completedThisWeekCount} gün yaptın; kalan ${rem} gün yapılan güne ve geçmiş eksiklere göre tamamlanacak.`;
+                        noteEl.textContent = `Bu hafta ${wkStatus.completedThisWeekCount} gün tamamlandı; kalan ${rem} gün eksiklere göre kurulur.`;
                     } else if (wkStatus.completedThisWeekCount >= 3) {
-                        noteEl.textContent = `Bu hafta ${wkStatus.completedThisWeekCount} gün tamamlandı; gelecek haftanın planı geçmiş eksiklere göre hazırlanacak.`;
+                        noteEl.textContent = `Bu hafta ${wkStatus.completedThisWeekCount} gün tamamlandı; gelecek hafta planı hazırlanır.`;
                     } else {
-                        noteEl.textContent = `Bu hafta yapılan gün yok; geçmiş hafta eksiklerini kapatan tam haftalık plan hazırlanacak.`;
+                        noteEl.textContent = `Geçmiş eksikleri kapatan haftalık plan hazırlanır.`;
                     }
                 } else {
                     if (wkStatus.completedThisWeekCount > 0) {
                         noteEl.style.display = 'block';
-                        noteEl.textContent = `Bu hafta yapılan ${wkStatus.completedThisWeekCount} antrenman ve önceki haftaların eksikleri baz alınarak bugünkü seans kurulacak.`;
+                        noteEl.textContent = `Bu haftaki ${wkStatus.completedThisWeekCount} seans ve geçmiş eksikler baz alınır.`;
                     } else {
                         noteEl.style.display = 'none';
                     }
@@ -1333,29 +1340,13 @@
 
         function selectQuickPrecheckFatigue(val) {
             window.activePrecheckState.fatigue = val || 'none';
-            const grp = document.getElementById('aiPrecheckFatigueGroup');
-            if (!grp) return;
-            grp.querySelectorAll('button[data-val]').forEach(btn => {
-                const isSel = btn.getAttribute('data-val') === window.activePrecheckState.fatigue;
-                btn.style.background = isSel ? '#0F172A' : '#F8FAFC';
-                btn.style.color = isSel ? '#FFFFFF' : '#0F172A';
-                btn.style.borderColor = isSel ? '#0F172A' : '#CBD5E1';
-                btn.style.fontWeight = isSel ? '800' : '700';
-            });
+            applyQuickPrecheckGroupStyle('aiPrecheckFatigueGroup', window.activePrecheckState.fatigue);
         }
         window.selectQuickPrecheckFatigue = selectQuickPrecheckFatigue;
 
         function selectQuickPrecheckScale(val) {
             window.activePrecheckState.scaleTrend = val || 'stable';
-            const grp = document.getElementById('aiPrecheckScaleGroup');
-            if (!grp) return;
-            grp.querySelectorAll('button[data-val]').forEach(btn => {
-                const isSel = btn.getAttribute('data-val') === window.activePrecheckState.scaleTrend;
-                btn.style.background = isSel ? '#0F172A' : '#F8FAFC';
-                btn.style.color = isSel ? '#FFFFFF' : '#0F172A';
-                btn.style.borderColor = isSel ? '#0F172A' : '#CBD5E1';
-                btn.style.fontWeight = isSel ? '800' : '700';
-            });
+            applyQuickPrecheckGroupStyle('aiPrecheckScaleGroup', window.activePrecheckState.scaleTrend);
         }
         window.selectQuickPrecheckScale = selectQuickPrecheckScale;
 
@@ -2337,15 +2328,12 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     <div class="wk-ex-item-wrap ${isExpanded ? 'is-expanded' : ''}">
                         <div class="wk-ex-row-clean" onclick="${toggleFn}(${idx})" title="Detaylı hareket kartını ${isExpanded ? 'kapatmak' : 'açmak'} için dokunun">
                             <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-                                <span style="font-weight:800; font-size:14.5px; color:#0F172A; line-height:1.3;">${escapeHTML(ex.name)}</span>
-                                <div style="display:inline-flex; align-items:center; gap:6px; flex-shrink:0;">
-                                    <button type="button" class="wk-i-badge" style="border:none; cursor:pointer; width:22px; height:22px; font-size:12px;" onclick="event.stopPropagation(); openExerciseQuickInfoModal(decodeURIComponent('${encodeURIComponent(ex.id)}'))" title="Ekipman ve Kas Bilgisi">i</button>
-                                    <span class="wk-ex-expand-hint" aria-hidden="true">${isExpanded ? '▴' : '▾'}</span>
-                                </div>
+                                <span class="wk-ex-row-title">${escapeHTML(ex.name)}</span>
+                                <span class="wk-ex-expand-hint ${isExpanded ? 'is-open' : ''}" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
                             </div>
-                            <div style="font-size:12px; font-weight:600; color:#64748B; margin-top:2px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                                <span>🎯 ${exScheme.sets} Set × ${escapeHTML(repsStr)}${repsSuffix}</span>
-                                ${targetW ? `<span style="color:#B45309; font-weight:700;">🏋️ Son: ${targetW} kg</span>` : ''}
+                            <div class="wk-ex-row-submeta">
+                                <span>${exScheme.sets} Set × ${escapeHTML(repsStr)}${repsSuffix}</span>
+                                ${targetW ? `<span style="color:#CBD5E1; font-weight:600;"> • Son: ${targetW} kg</span>` : ''}
                             </div>
                         </div>
                         ${detailCardHtml}
@@ -2369,19 +2357,19 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     stationsHtml += `
                         <div class="timeline-station-item">
                             <div style="display:flex; flex-direction:column; align-items:center;">
-                                <div class="timeline-station-num" style="background:#FF5A36; box-shadow:0 2px 6px rgba(255,90,54,0.28);">${stationNumStr}</div>
+                                <div class="timeline-station-num">${stationNumStr}</div>
                                 <div class="timeline-station-line"></div>
                             </div>
                             <div class="timeline-station-card is-superset">
                                 ${renderCleanExItem(ex, i)}
                                 <div class="timeline-transition-divider">
                                     <div class="timeline-transition-line"></div>
-                                    <span class="timeline-transition-badge">⚡ GEÇİŞ (0 SN)</span>
+                                    <span class="timeline-transition-label">Süperset • Ara yok</span>
                                     <div class="timeline-transition-line"></div>
                                 </div>
                                 ${renderCleanExItem(secondEx, i + 1)}
-                                <div style="margin-top:10px; padding-top:8px; border-top:1px solid #F1F5F9;">
-                                    <span class="timeline-rest-pill">⏱️ ${roundRest} sn Dinlenme</span>
+                                <div class="timeline-rest-row">
+                                    <span class="timeline-rest-text">${roundRest} sn dinlenme</span>
                                 </div>
                             </div>
                         </div>
@@ -2397,8 +2385,8 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             </div>
                             <div class="timeline-station-card">
                                 ${renderCleanExItem(ex, i)}
-                                <div style="margin-top:10px; padding-top:8px; border-top:1px solid #F1F5F9;">
-                                    <span class="timeline-rest-pill">⏱️ ${exRest} sn Dinlenme</span>
+                                <div class="timeline-rest-row">
+                                    <span class="timeline-rest-text">${exRest} sn dinlenme</span>
                                 </div>
                             </div>
                         </div>
@@ -2413,7 +2401,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
         // ==================== WORKOUT CARDS CAROUSEL ENGINE (HORIZONTAL SWIPEABLE CARDS) ====================
         window.activeWorkoutCarouselIndex = 0;
-        window.generatedWorkoutViewMode = 'cards';
+        window.generatedWorkoutViewMode = 'list';
 
         function toggleGeneratedWorkoutViewMode() {
             window.generatedWorkoutViewMode = window.generatedWorkoutViewMode === 'list' ? 'cards' : 'list';
@@ -2547,12 +2535,12 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 } else if (ex.diagram) {
                     mediaHtml = `<img src="${escapeHTML(ex.diagram)}" alt="${escapeHTML(ex.name)}" class="wk-card-media-el" loading="lazy">`;
                 } else {
-                    mediaHtml = `<div style="font-size:46px; opacity:0.6;">🏋️</div>`;
+                    mediaHtml = `<div style="font-size:12px; color:#94A3B8; font-weight:600;">Görsel Yok</div>`;
                 }
 
-                const blockBadgeText = ex.blockLabel 
-                    ? `⚔️ ${escapeHTML(ex.blockLabel)} • ${ex.blockType === 'superset' ? 'SÜPERSET' : 'DÜZ SET'}`
-                    : `⚔️ ${idx + 1}. İSTASYON`;
+                const blockBadgeText = ex.blockLabel
+                    ? `${escapeHTML(ex.blockLabel)} • ${ex.blockType === 'superset' ? 'SÜPERSET' : 'DÜZ SET'}`
+                    : `${idx + 1}. İSTASYON`;
                 const muscleText = ex.primarySubMuscles || ex.muscle || 'Hedef Kas';
 
                 return `
@@ -2565,32 +2553,26 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
                             <div class="wk-card-title-row">
                                 <h3 class="wk-card-exercise-name">${escapeHTML(ex.name)}</h3>
-                                <button type="button" class="wk-i-badge" style="border:none; cursor:pointer;" onclick="event.stopPropagation(); openExerciseQuickInfoModal(decodeURIComponent('${encodeURIComponent(ex.id)}'))" title="Ekipman ve Kas Detayı">i</button>
+                            </div>
+
+                            <div class="wk-card-submeta">
+                                ${exScheme.sets} Set × ${escapeHTML(repsStr)}${repsSuffix} • ${exScheme.rest} sn dinlenme${targetW ? ` • Son: ${targetW} kg` : ''}
                             </div>
 
                             <div class="wk-card-media-box">
                                 ${mediaHtml}
                             </div>
-
-                            <div class="wk-card-chips-row">
-                                <div class="wk-card-chip">🎯 <strong>${exScheme.sets} Set × ${escapeHTML(repsStr)}${repsSuffix}</strong></div>
-                                <div class="wk-card-chip">⏱️ <strong>${exScheme.rest} sn</strong> Dinlenme</div>
-                                ${targetW ? `<div class="wk-card-chip highlight-gold">🏋️ Son: <strong>${targetW} kg</strong></div>` : ''}
-                            </div>
                         </div>
 
                         <div class="wk-card-actions-row">
-                            <button type="button" class="wk-card-btn-action" onclick="openAlternativeModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), '${mode}')" title="Alternatif hareket seç">
-                                🔄 Alternatif
+                            <button type="button" class="wk-card-btn-action" onclick="openAlternativeModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), '${mode}')">
+                                Değiştir
                             </button>
-                            <button type="button" class="wk-card-btn-action" onclick="swapSingleExercise(decodeURIComponent('${encodeURIComponent(ex.id)}'), '${mode}')" title="Rastgele değiştir">
-                                🎲 Rastgele
+                            <button type="button" class="wk-card-btn-action" onclick="openExerciseDetailModal(decodeURIComponent('${encodeURIComponent(ex.id)}'))">
+                                Form
                             </button>
-                            <button type="button" class="wk-card-btn-action" onclick="openExerciseDetailModal(decodeURIComponent('${encodeURIComponent(ex.id)}'))" title="3 Aşamalı Form Rehberi">
-                                📸 Form
-                            </button>
-                            <button type="button" class="wk-card-btn-action text-danger" onclick="removeExerciseFromWorkout(decodeURIComponent('${encodeURIComponent(ex.id)}'), '${mode}')" title="Listeden çıkar">
-                                🗑️ Kaldır
+                            <button type="button" class="wk-card-btn-action text-danger" onclick="removeExerciseFromWorkout(decodeURIComponent('${encodeURIComponent(ex.id)}'), '${mode}')">
+                                Kaldır
                             </button>
                         </div>
                     </div>
@@ -2620,44 +2602,42 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     <div class="wk-carousel-card wk-finisher-card" id="wkCard_${fIdx}" data-card-index="${fIdx}">
                         <div>
                             <div class="wk-card-meta-row">
-                                <span class="wk-card-block-badge wk-finisher-badge">🔥 BALİSTİK BİTİŞ</span>
+                                <span class="wk-card-block-badge wk-finisher-badge">BİTİŞ BLOĞU</span>
                                 <span class="wk-card-muscle-badge">Tüm Vücut / Core</span>
                             </div>
 
                             <div class="wk-card-title-row">
-                                <h3 class="wk-card-exercise-name" style="color:#FDA4AF;">${escapeHTML(fName)}</h3>
-                                ${resolvedId ? `<button type="button" class="wk-card-btn-action" style="padding:4px 8px; font-size:11px;" onclick="openExerciseDetailModal(decodeURIComponent('${encodeURIComponent(resolvedId)}'))">📸 Form</button>` : ''}
+                                <h3 class="wk-card-exercise-name">${escapeHTML(fName)}</h3>
+                                ${resolvedId ? `<button type="button" class="wk-card-btn-action" style="padding:4px 10px; font-size:11px; flex:0 0 auto;" onclick="openExerciseDetailModal(decodeURIComponent('${encodeURIComponent(resolvedId)}'))">Form</button>` : ''}
+                            </div>
+
+                            <div class="wk-card-submeta">
+                                ~${w.duration || 45} Dk • ${list.length} İstasyon • ${w.style === 'superset' ? 'Süperset' : (w.style === 'complex' ? 'Kompleks' : 'Düz Set')}
                             </div>
 
                             <div class="wk-finisher-desc-box">
                                 ${escapeHTML(fDesc)}
                             </div>
 
-                            <div class="wk-card-chips-row">
-                                <div class="wk-card-chip">⏱️ <strong>~${w.duration || 45} Dk</strong> Süre</div>
-                                <div class="wk-card-chip">📊 <strong>${list.length} İstasyon</strong></div>
-                                <div class="wk-card-chip">⚡ <strong>${w.style === 'superset' ? 'Süperset' : (w.style === 'complex' ? 'Kompleks' : 'Düz Set')}</strong></div>
-                            </div>
-
                             <div class="wk-finisher-calendar-grid">
-                                <button type="button" class="wk-card-btn-action" style="color:#FBBF24; font-weight:800;" onclick="assignGeneratedToToday()">
-                                    ⚡ Bugüne Ata
+                                <button type="button" class="wk-card-btn-action" onclick="assignGeneratedToToday()">
+                                    Bugüne Ata
                                 </button>
                                 <button type="button" class="wk-card-btn-action" onclick="scheduleTomorrowFromGenerated()">
-                                    📅 Yarına Ata
+                                    Yarına Ata
                                 </button>
                                 <button type="button" class="wk-card-btn-action" onclick="promptAssignGeneratedToAnyDay()">
-                                    🗓️ Gün Seç
+                                    Gün Seç
                                 </button>
                                 <button type="button" class="wk-card-btn-action" onclick="saveGeneratedToLibrary()">
-                                    💾 Kaydet
+                                    Kaydet
                                 </button>
                             </div>
                         </div>
 
-                        <div style="text-align:center; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.12);">
-                            <button type="button" class="btn btn-outline" style="border:1px dashed rgba(167, 139, 250, 0.4); color:#C4B5FD; font-size:11.5px; padding:7px 12px; border-radius:10px; font-weight:700;" onclick="openAddExerciseModal('${mode}')">
-                                ➕ Listeye Hareket Ekle
+                        <div style="text-align:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
+                            <button type="button" class="btn btn-outline" style="border:1px solid rgba(167, 139, 250, 0.3); color:#CBD5E1; background:#121024; font-size:12px; padding:8px 14px; border-radius:10px; font-weight:700;" onclick="openAddExerciseModal('${mode}')">
+                                Listeye Hareket Ekle
                             </button>
                         </div>
                     </div>
@@ -2669,8 +2649,8 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 : `Bitiş • ${totalCards} / ${totalCards}`;
 
             const backToWeeklyBtn = window.pendingAiWeeklyPlan ? `
-                <button type="button" class="btn-action-secondary" style="padding:4px 8px; font-size:11px; border-color:#15803D; color:#15803D; font-weight:800;" onclick="renderPendingWeeklyPlanPreview()">
-                    ⬅️ Haftalık Plan
+                <button type="button" class="btn-action-secondary" style="padding:4px 9px; font-size:11px; border-color:rgba(167,139,250,0.28); color:#CBD5E1; background:transparent; font-weight:700;" onclick="renderPendingWeeklyPlanPreview()">
+                    Haftalık Plan
                 </button>
             ` : '';
 
@@ -2690,39 +2670,37 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     </div>`;
             const dockHtml = listModeActive
                 ? `<div class="wk-carousel-dock">
-                        <button type="button" class="wk-dock-nav-btn is-disabled" aria-label="Kart yok">—</button>
-                        <button type="button" class="wk-dock-start-btn" onclick="startActiveWorkoutFromGenerated()">
+                        <button type="button" class="wk-dock-start-btn" style="width:100%;" onclick="startActiveWorkoutFromGenerated()">
                             <span>Seansı Başlat</span>
                         </button>
-                        <button type="button" class="wk-dock-nav-btn is-disabled" aria-label="Kart yok">—</button>
                     </div>`
                 : `<div class="wk-carousel-dock">
                         <button type="button" class="wk-dock-nav-btn ${currentIdx === 0 ? 'is-disabled' : ''}" id="wkDockPrevBtn" onclick="stepWorkoutCarousel(-1)" aria-label="Önceki Hareket">
-                            ◀
+                            ‹
                         </button>
                         <button type="button" class="wk-dock-start-btn" onclick="startActiveWorkoutFromGenerated()">
                             <span>Seansı Başlat</span>
                         </button>
                         <button type="button" class="wk-dock-nav-btn ${currentIdx >= totalCards - 1 ? 'is-disabled' : ''}" id="wkDockNextBtn" onclick="stepWorkoutCarousel(1)" aria-label="Sonraki Hareket">
-                            ▶
+                            ›
                         </button>
                     </div>`;
 
+            const headerInfoIconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+
             return `
-                <div class="wk-carousel-wrap" id="wkCarouselWrap">
+                <div class="wk-carousel-wrap ${listModeActive ? 'is-list-mode' : ''}" id="wkCarouselWrap">
                     <!-- TOP STORY BAR & CONTROLS -->
                     <div class="wk-carousel-topbar">
-                        <div class="wk-story-bars-wrap" id="wkStoryBarsWrap">
-                            ${storyBarsHtml}
-                        </div>
+                        ${listModeActive ? '' : `<div class="wk-story-bars-wrap" id="wkStoryBarsWrap">${storyBarsHtml}</div>`}
                         <div class="wk-carousel-header-row">
-                            <span class="wk-carousel-counter-badge" id="wkCarouselCounter">${counterLabel}</span>
-                            <span class="wk-carousel-title-strip" title="${escapeHTML(cleanWorkoutTitle)}">${escapeHTML(cleanWorkoutTitle)}</span>
+                            ${listModeActive ? '' : `<span class="wk-carousel-counter-badge" id="wkCarouselCounter">${counterLabel}</span>`}
+                            <span class="wk-carousel-title-strip" style="${listModeActive ? 'text-align:left;' : ''}" title="${escapeHTML(cleanWorkoutTitle)}">${escapeHTML(cleanWorkoutTitle)}</span>
                             <div class="wk-carousel-top-actions">
                                 ${backToWeeklyBtn}
                                 ${viewToggleBtn}
-                                <button type="button" class="wk-i-badge" style="border:none; cursor:pointer;" onclick="openWorkoutInfoModal('coach')" title="Koç Özeti & Isınma">i</button>
-                                <button type="button" class="wk-carousel-close-btn" onclick="dismissGeneratedWorkoutView()" title="Vazgeç / Düzenle" aria-label="Kapat">✕</button>
+                                <button type="button" class="wk-header-info-btn" onclick="openWorkoutInfoModal('coach')" title="Koç Özeti ve Isınma" aria-label="Koç Özeti ve Isınma">${headerInfoIconSvg}</button>
+                                <button type="button" class="wk-carousel-close-btn" onclick="dismissGeneratedWorkoutView()" title="Kapat" aria-label="Kapat">✕</button>
                             </div>
                         </div>
                     </div>
@@ -2778,24 +2756,25 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const auditContainerId = scope === 'weekly_preview' ? 'aiAcademicWeeklyAuditContainer' : 'aiAcademicAuditContainer';
             const warmupsList = (workout && Array.isArray(workout.warmups)) ? workout.warmups : [];
             const warmupsBodyHtml = warmupsList.length > 0
-                ? warmupsList.map(wm => `
-                    <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:10px 12px; margin-bottom:8px;">
+                ? warmupsList.map((wm, wmIdx) => `
+                    <div style="padding:10px 0; ${wmIdx > 0 ? 'border-top:1px solid rgba(255,255,255,0.06);' : ''}">
                         <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:3px;">
-                            <strong style="color:#0F172A; font-size:13px;">${escapeHTML(wm.name)}</strong>
-                            <span style="font-size:11px; font-weight:800; color:#B52603; background:#FFF1EE; border:1px solid #FFDAD2; padding:1px 7px; border-radius:999px;">${escapeHTML(wm.dur || '')}</span>
+                            <strong style="color:#F8FAFC; font-size:13px;">${escapeHTML(wm.name)}</strong>
+                            <span style="font-size:11px; font-weight:700; color:#94A3B8;">${escapeHTML(wm.dur || '')}</span>
                         </div>
-                        <div style="font-size:12px; color:#475569; line-height:1.45;">${escapeHTML(wm.cue || '')}</div>
+                        <div style="font-size:12px; color:#94A3B8; line-height:1.45;">${escapeHTML(wm.cue || '')}</div>
                     </div>
                 `).join('')
-                : `<div style="font-size:12.5px; color:#64748B;">5 dakika eklem mobilizasyonu ve hafif dinamik ısınma uygulayın.</div>`;
+                : `<div style="font-size:12.5px; color:#94A3B8;">5 dakika eklem mobilizasyonu ve hafif dinamik ısınma uygulayın.</div>`;
+            const smallInfoSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
 
             return `
                 <div id="wkCoachSummaryModalOverlay" class="wk-info-modal-overlay" style="display:none;" onclick="if(event.target===this)closeWorkoutInfoModal('coach')">
                     <div class="wk-info-modal-box">
                         <div class="wk-info-modal-header">
                             <div style="display:flex; align-items:center; gap:7px;">
-                                <span class="wk-i-badge">i</span>
-                                <strong style="font-size:14px; font-weight:800; color:#0F172A;">Koç Özeti & Eksik Telafisi</strong>
+                                ${smallInfoSvg}
+                                <strong style="font-size:14px; font-weight:800; color:#FFFFFF;">Koç Özeti & Eksik Telafisi</strong>
                             </div>
                             <button type="button" class="wk-info-modal-close" onclick="closeWorkoutInfoModal('coach')" aria-label="Kapat">✕</button>
                         </div>
@@ -2811,8 +2790,8 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                     <div class="wk-info-modal-box">
                         <div class="wk-info-modal-header">
                             <div style="display:flex; align-items:center; gap:7px;">
-                                <span class="wk-i-badge">i</span>
-                                <strong style="font-size:14px; font-weight:800; color:#0F172A;">Dinamik Isınma & Mobilite (5 Dk)</strong>
+                                ${smallInfoSvg}
+                                <strong style="font-size:14px; font-weight:800; color:#FFFFFF;">Dinamik Isınma & Mobilite (5 Dk)</strong>
                             </div>
                             <button type="button" class="wk-info-modal-close" onclick="closeWorkoutInfoModal('warmup')" aria-label="Kapat">✕</button>
                         </div>
@@ -2855,18 +2834,12 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
             const nextRangeStr = (nextMonDate && nextFriDate) ? ` (${fmtShort(nextMonDate)} - ${fmtShort(nextFriDate)})` : '';
 
             const timingBannerHtml = isNextWeekRecommended ? `
-                <div class="wk-timing-banner" style="padding:8px 12px; align-items:center;">
-                    <span style="color:#15803D; display:flex; align-items:center;">${CANVA_ICONS.calendar}</span>
-                    <div style="font-size:12px;">
-                        <strong style="color:#15803D;">Gelecek Hafta${escapeHTML(nextRangeStr)}</strong> • Bu hafta ${wkStatus.completedThisWeekCount} antrenman tamamlandı
-                    </div>
+                <div class="wk-timing-banner" style="padding:0 2px; margin-bottom:12px; background:transparent; border:none;">
+                    <span style="font-size:11.5px; color:#94A3B8; font-weight:500;">Gelecek Hafta${escapeHTML(nextRangeStr)} • Bu hafta ${wkStatus.completedThisWeekCount} antrenman tamamlandı</span>
                 </div>
             ` : `
-                <div class="wk-timing-banner" style="background:rgba(56,189,248,0.08); border-color:rgba(56,189,248,0.28); padding:8px 12px; align-items:center;">
-                    <span style="color:#0369A1; display:flex; align-items:center;">${CANVA_ICONS.calendar}</span>
-                    <div style="font-size:12px;">
-                        <strong style="color:#0369A1;">Taslak Hazır</strong> • Günleri inceleyip takvime ekleyin
-                    </div>
+                <div class="wk-timing-banner" style="padding:0 2px; margin-bottom:12px; background:transparent; border:none;">
+                    <span style="font-size:11.5px; color:#94A3B8; font-weight:500;">Taslak hazır • Günleri inceleyip takvime ekleyin</span>
                 </div>
             `;
 
@@ -2913,20 +2886,20 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                                 <h3 class="wk-day-title">${escapeHTML(activeCleanTitle)}</h3>
                             </div>
                             <div style="display:flex; align-items:center; gap:8px;">
-                                <button type="button" class="btn-action-secondary" style="padding:7px 11px; font-size:12px; border-color:rgba(182,240,89,0.35); color:#15803D;" onclick="inspectDayFromPendingWeeklyPlan(${activeIdx})">
-                                    ${CANVA_ICONS.sliders} Düzenle
+                                <button type="button" class="btn-action-secondary" style="padding:7px 11px; font-size:12px; border-color:rgba(167,139,250,0.28); color:#CBD5E1; background:#121024;" onclick="inspectDayFromPendingWeeklyPlan(${activeIdx})">
+                                    Düzenle
                                 </button>
                             </div>
                         </div>
 
                         ${timelineStationsHtml}
 
-                        <div style="display:flex; align-items:center; gap:10px; margin-top:14px; padding-top:12px; border-top:1px solid #E2E8F0;">
-                            <button type="button" class="btn-action-secondary" style="padding:12px 20px; font-size:13.5px; font-weight:800; color:#0F172A; background:#F1F5F9; border:1px solid #E2E8F0; border-radius:14px; justify-content:center;" onclick="dismissPendingWeeklyPlan()">
+                        <div style="display:flex; align-items:center; gap:10px; margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06);">
+                            <button type="button" class="btn-action-secondary" style="padding:12px 20px; font-size:13.5px; font-weight:700; color:#E2E8F0; background:#121024; border:1px solid rgba(167,139,250,0.24); border-radius:14px; justify-content:center;" onclick="dismissPendingWeeklyPlan()">
                                 Vazgeç
                             </button>
-                            <button type="button" class="btn-start-workout" style="flex:1; padding:12px 20px; font-size:14px; font-weight:800; background:#FF5A36; color:#FFFFFF; border:none; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 6px 18px rgba(255,90,54,0.28);" onclick="startSingleDayFromPendingWeeklyPlan(${activeIdx})">
-                                <span>▶️ Seansı Başlat</span>
+                            <button type="button" class="btn-start-workout" style="flex:1; padding:12px 20px; font-size:14px; font-weight:800; background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); color:#FFFFFF; border:none; border-radius:14px; display:inline-flex; align-items:center; justify-content:center; gap:8px; box-shadow:none;" onclick="startSingleDayFromPendingWeeklyPlan(${activeIdx})">
+                                <span>Seansı Başlat</span>
                             </button>
                         </div>
                     </div>
@@ -2935,21 +2908,23 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
             const wishNoticeHtml = plan.userWish ? `
                 <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
-                    <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.38); color:#92400E; font-size:11.5px; font-weight:800; padding:4px 11px; border-radius:999px; width:fit-content;">
-                        ${CANVA_ICONS.sparkle} İsteğiniz: "${escapeHTML(plan.userWish)}"
+                    <div style="font-size:11.5px; font-weight:600; color:#94A3B8;">
+                        İsteğiniz: "${escapeHTML(plan.userWish)}"
                     </div>
                     ${(plan.aiAnalysis && plan.aiAnalysis.summary) ? `
-                    <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(168,85,247,0.12); border:1px solid rgba(168,85,247,0.35); color:#7E22CE; font-size:11.5px; font-weight:600; padding:5px 12px; border-radius:8px; line-height:1.4;">
-                        <span>🤖 <strong>Gemini AI Biyomekanik Uyarlaması:</strong> ${escapeHTML(plan.aiAnalysis.summary)}</span>
+                    <div style="font-size:11.5px; font-weight:500; color:#CBD5E1; line-height:1.4;">
+                        <strong>AI Uyarlaması:</strong> ${escapeHTML(plan.aiAnalysis.summary)}
                     </div>` : ''}
                 </div>
             ` : '';
+
+            const smallInfoSvgWeekly = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
 
             container.innerHTML = `
                 <div class="wk-preview-shell">
                     <div class="wk-preview-top-bar">
                         <div>
-                            <div class="wk-preview-pill">${CANVA_ICONS.sparkle} HAFTALIK PROGRAM</div>
+                            <div class="wk-preview-pill">HAFTALIK PROGRAM</div>
                             <h2 class="wk-preview-title">${escapeHTML(plan.templateName)}</h2>
                             ${wishNoticeHtml}
                         </div>
@@ -2957,11 +2932,11 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                             <select class="wk-tpl-select" onchange="handleQuickAiGenerate(this.value)" aria-label="Haftalık Şablon Seç">
                                 ${tplOptionsHtml}
                             </select>
-                            <button type="button" class="btn-action-secondary" style="padding:7px 11px; font-size:12px; border-color:#283548;" onclick="handleQuickAiGenerate('${plan.templateKey}')" title="Farklı hareketlerle yeniden üret">
-                                ${CANVA_ICONS.refresh} Yenile
+                            <button type="button" class="btn-action-secondary" style="padding:7px 11px; font-size:12px; border-color:rgba(167,139,250,0.24); color:#CBD5E1; background:#121024;" onclick="handleQuickAiGenerate('${plan.templateKey}')" title="Farklı hareketlerle yeniden üret">
+                                Yenile
                             </button>
-                            <button type="button" class="btn-action-secondary" style="padding:7px 11px; font-size:12px; border-color:#283548; color:#94A3B8;" onclick="switchQuickAiToSingleDay()" title="Tek günlük antrenman üret">
-                                ${CANVA_ICONS.bolt} Tek Gün
+                            <button type="button" class="btn-action-secondary" style="padding:7px 11px; font-size:12px; border-color:rgba(167,139,250,0.24); color:#94A3B8; background:#121024;" onclick="switchQuickAiToSingleDay()" title="Tek günlük antrenman üret">
+                                Tek Gün
                             </button>
                         </div>
                     </div>
@@ -2974,11 +2949,11 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
                     <div class="wk-info-triggers-row" style="margin:10px 0 12px 0;">
                         <button type="button" class="wk-info-i-btn" onclick="openWorkoutInfoModal('coach')" title="Koç Özeti ve Eksik Telafisi">
-                            <span class="wk-i-badge">i</span>
+                            ${smallInfoSvgWeekly}
                             <span>Koç Özeti</span>
                         </button>
                         <button type="button" class="wk-info-i-btn" onclick="openWorkoutInfoModal('warmup')" title="Dinamik Isınma ve Mobilite">
-                            <span class="wk-i-badge">i</span>
+                            ${smallInfoSvgWeekly}
                             <span>Dinamik Isınma</span>
                         </button>
                     </div>
@@ -2989,10 +2964,10 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
 
                     <div class="wk-confirm-bar" style="flex-wrap:wrap; gap:8px;">
                         <button type="button" class="btn-ai-create-primary" style="flex:1; min-width:170px;" onclick="confirmPendingAiWeeklyPlan('next')">
-                            ${CANVA_ICONS.calendar} Gelecek Haftaya Ekle
+                            Gelecek Haftaya Ekle
                         </button>
-                        <button type="button" class="btn-action-secondary" style="flex:1; min-width:160px; padding:12px 14px; font-size:13px; border-color:rgba(56,189,248,0.4); color:#0369A1; font-weight:800; justify-content:center;" onclick="confirmPendingAiWeeklyPlan('current_safe')">
-                            ${CANVA_ICONS.bolt} Bu Haftaya Ekle
+                        <button type="button" class="btn-action-secondary" style="flex:1; min-width:160px; padding:12px 14px; font-size:13px; border-color:rgba(167,139,250,0.28); color:#E2E8F0; background:#121024; font-weight:700; justify-content:center;" onclick="confirmPendingAiWeeklyPlan('current_safe')">
+                            Bu Haftaya Ekle
                         </button>
                     </div>
                 </div>
@@ -3035,6 +3010,7 @@ Türkçe, son derece motive edici, akademik temelli ve net yaz.`;
                 selectSplit(currentGeneratedWorkout.split);
             }
             window.expandedGeneratedExIndex = null;
+            window.generatedWorkoutViewMode = 'list';
             window.generatedWorkoutNeedsPreview = true;
             renderGeneratedWorkout();
         }
@@ -7257,6 +7233,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 } catch(e) {}
 
                 window.expandedGeneratedExIndex = null;
+                window.generatedWorkoutViewMode = 'list';
                 window.generatedWorkoutNeedsPreview = true;
                 renderGeneratedWorkout();
                 playAlertSound();
@@ -7326,19 +7303,21 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             w.title = cleanWorkoutTitle;
 
             const warnHtml = w.equipmentWarning
-                ? `<div style="margin:0 0 10px 0;padding:10px 12px;border-radius:10px;background:#FEF3C7;border:1.5px solid #F59E0B;color:#92400E;font-size:12.5px;font-weight:700;line-height:1.4;">⚠️ ${escapeHTML(w.equipmentWarning)}</div>`
+                ? `<div style="margin:0 0 10px 0;padding:8px 12px;border-radius:12px;background:#181530;border:1px solid rgba(167,139,250,0.22);color:#FDE68A;font-size:12px;font-weight:600;line-height:1.4;">${escapeHTML(w.equipmentWarning)}</div>`
                 : '';
             container.innerHTML = hasExercises
                 ? (warnHtml + buildWorkoutCardsCarouselHtml(w, 'generated'))
-                : (warnHtml || `<div style="padding:12px;border-radius:10px;background:#FEF3C7;color:#92400E;font-size:12.5px;font-weight:700;">⚠️ Uygun hareket bulunamadı</div>`);
+                : (warnHtml || `<div style="padding:12px;border-radius:12px;background:#181530;border:1px solid rgba(167,139,250,0.22);color:#FDE68A;font-size:12.5px;font-weight:600;">Uygun hareket bulunamadı</div>`);
 
-            // Restore or reset carousel card index
-            const preserveIdx = (options && (options.preserveScroll || options.preserveCardIndex) && window.activeWorkoutCarouselIndex !== undefined)
-                ? window.activeWorkoutCarouselIndex
-                : 0;
-            setTimeout(() => {
-                goToWorkoutCarouselCard(preserveIdx, { instant: true });
-            }, 30);
+            // Restore or reset carousel card index only when card view is active
+            if (window.generatedWorkoutViewMode === 'cards') {
+                const preserveIdx = (options && (options.preserveScroll || options.preserveCardIndex) && window.activeWorkoutCarouselIndex !== undefined)
+                    ? window.activeWorkoutCarouselIndex
+                    : 0;
+                setTimeout(() => {
+                    goToWorkoutCarouselCard(preserveIdx, { instant: true });
+                }, 30);
+            }
 
             if (w && !w._aiAutoAudited && typeof getGeminiApiKey === 'function' && getGeminiApiKey()) {
                 w._aiAutoAudited = true;
@@ -7428,7 +7407,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             if (!el) return;
             if (el.classList.contains('collapsed')) {
                 el.classList.remove('collapsed');
-                if (btn) btn.innerText = '📖 Formu Gizle ▲';
+                if (btn) btn.innerText = 'Gizle';
                 el.querySelectorAll('video').forEach(v => {
                     v.muted = true;
                     v.defaultMuted = true;
@@ -7437,7 +7416,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 });
             } else {
                 el.classList.add('collapsed');
-                if (btn) btn.innerText = '📖 Formu Gör ▼';
+                if (btn) btn.innerText = 'Göster';
             }
         }
 
@@ -7449,11 +7428,11 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             if (isHidden) {
                 body.style.display = 'block';
                 body.classList.remove('collapsed');
-                if (arrow) arrow.innerHTML = '▲ Gizle';
+                if (arrow) arrow.innerHTML = 'Gizle';
             } else {
                 body.style.display = 'none';
                 body.classList.add('collapsed');
-                if (arrow) arrow.innerHTML = '▼ Göster';
+                if (arrow) arrow.innerHTML = 'Göster';
             }
         }
 
@@ -7824,25 +7803,22 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
 
             const isComplex = !!ex.isComplex;
             const badgeType = isComplex ? 'pos-badge-complex' : 'pos-badge-standard';
-            const typeLabel = isComplex 
-                ? `🔥 Kompleks Hareket (${ex.positions.length} Aşama)` 
-                : `📐 3 Aşamalı Form Kılavuzu`;
 
             const collapseId = `posGuide_${uniquePrefix}_${ex.id}`.replace(/[^a-zA-Z0-9_-]/g, '_');
 
             const badgeStyles = {
-                setup: { bg: 'rgba(56, 189, 248, 0.15)', text: '#38bdf8', border: 'rgba(56, 189, 248, 0.35)', icon: '🟢' },
-                action: { bg: 'rgba(245, 158, 11, 0.15)', text: '#fbbf24', border: 'rgba(245, 158, 11, 0.35)', icon: '⚡' },
-                trans: { bg: 'rgba(236, 72, 153, 0.15)', text: '#f472b6', border: 'rgba(236, 72, 153, 0.35)', icon: '🔄' },
-                finish: { bg: 'rgba(16, 185, 129, 0.15)', text: '#34d399', border: 'rgba(16, 185, 129, 0.35)', icon: '🏁' }
+                setup: { bg: 'rgba(56, 189, 248, 0.15)', text: '#7DD3FC', border: 'rgba(56, 189, 248, 0.35)' },
+                action: { bg: 'rgba(245, 158, 11, 0.15)', text: '#FDE68A', border: 'rgba(245, 158, 11, 0.35)' },
+                trans: { bg: 'rgba(236, 72, 153, 0.15)', text: '#F9A8D4', border: 'rgba(236, 72, 153, 0.35)' },
+                finish: { bg: 'rgba(16, 185, 129, 0.15)', text: '#6EE7B7', border: 'rgba(16, 185, 129, 0.35)' }
             };
 
-            const stepsHtml = ex.positions.map((p, idx) => {
+            const stepsHtml = ex.positions.map((p) => {
                 const style = badgeStyles[p.badge] || badgeStyles.setup;
                 return `
                     <div class="pos-step-card">
                         <div class="pos-step-header" style="background:${style.bg}; border-color:${style.border}; color:${style.text};">
-                            <span>${style.icon} ${escapeHTML(p.phase)}</span>
+                            <span>${escapeHTML(p.phase)}</span>
                         </div>
                         <div class="pos-step-desc">
                             ${escapeHTML(p.desc)}
@@ -7869,20 +7845,20 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             const extraInfoHtml = `
                 <div class="pos-extra-info-container">
                     <button type="button" class="btn-toggle-pos-info" onclick="event.stopPropagation(); togglePosExtraInfo('${extraInfoId}')" id="btn_${extraInfoId}">
-                        <span>ℹ️ Kas Grupları &amp; Form / Güvenlik İpuçları</span>
-                        <span class="pos-info-arrow" id="arrow_${extraInfoId}">▼ Göster</span>
+                        <span>Kas Grupları &amp; Form İpuçları</span>
+                        <span class="pos-info-arrow" id="arrow_${extraInfoId}">Göster</span>
                     </button>
                     <div class="pos-extra-info-body" id="body_${extraInfoId}" style="display:none; margin-top:8px;">
-                        <div style="background:#F8FAFC; border:1px solid var(--border); border-radius:8px; padding:8px 10px; margin-bottom:8px;">
-                            <div style="font-size:10.5px; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:5px;">🎯 Çalıştırılan Kas Grupları:</div>
+                        <div style="border-top:1px solid rgba(255,255,255,0.06); padding:8px 0; margin-bottom:4px;">
+                            <div style="font-size:10.5px; font-weight:700; color:#94A3B8; text-transform:uppercase; margin-bottom:5px;">Çalıştırılan Kas Grupları</div>
                             <div style="display:flex; flex-wrap:wrap; gap:5px;">
-                                ${(ex.primaryMuscles || []).map(m => `<span style="background:rgba(245,158,11,0.2); color:var(--gold); border:1px solid rgba(245,158,11,0.4); padding:2px 7px; border-radius:10px; font-size:10.5px; font-weight:800;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].icon + ' ' + STUDIO_REGION_MAP[m].name : m)} (Primer)</span>`).join('')}
-                                ${(ex.secondaryMuscles || []).map(m => `<span style="background:rgba(56,189,248,0.15); color:var(--cyan); border:1px solid rgba(56,189,248,0.35); padding:2px 7px; border-radius:10px; font-size:10.5px; font-weight:700;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].icon + ' ' + STUDIO_REGION_MAP[m].name : m)} (Sekonder)</span>`).join('')}
+                                ${(ex.primaryMuscles || []).map(m => `<span style="background:rgba(139,92,246,0.18); color:#DDD6FE; border:1px solid rgba(167,139,250,0.3); padding:2px 8px; border-radius:999px; font-size:10.5px; font-weight:700;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].name : m)}</span>`).join('')}
+                                ${(ex.secondaryMuscles || []).map(m => `<span style="background:rgba(255,255,255,0.05); color:#94A3B8; border:1px solid rgba(255,255,255,0.1); padding:2px 8px; border-radius:999px; font-size:10.5px; font-weight:600;">${(typeof STUDIO_REGION_MAP !== 'undefined' && STUDIO_REGION_MAP[m] ? STUDIO_REGION_MAP[m].name : m)}</span>`).join('')}
                             </div>
                         </div>
                         ${ex.cue ? `
-                            <div style="font-size:11.5px; color:#92400E; background:rgba(234,179,8,0.12); border-left:3px solid #eab308; padding:7px 10px; border-radius:6px; margin-bottom:6px; line-height:1.4;">
-                                ⚠️ <strong>Kritik Form &amp; Güvenlik Uyarısı:</strong> ${escapeHTML(ex.cue)}
+                            <div style="font-size:11.5px; color:#CBD5E1; border-top:1px solid rgba(255,255,255,0.06); padding:7px 0; line-height:1.4;">
+                                <strong>Form Notu:</strong> ${escapeHTML(ex.cue)}
                             </div>
                         ` : ''}
                     </div>
@@ -7892,23 +7868,23 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             let formVisualHtml = '';
             if (hasVisual) {
                 const visualTitle = isSvgDiagram ? `${escapeHTML(ex.name)} - Form Diyagramı` : `${escapeHTML(ex.name)} - Form Rehberi`;
-                const scrollText = isSvgDiagram ? '↔️ Akış diyagramını sağa/sola kaydırarak inceleyin' : '↔️ Adımları yakından incelemek için sağa/sola kaydırın';
+                const scrollText = isSvgDiagram ? 'Diyagramı sağa/sola kaydırarak inceleyin' : 'Adımları yakından incelemek için sağa/sola kaydırın';
                 formVisualHtml = `
                     <div class="pos-diagram-wrap" id="wrap_form_${collapseId}">
                         <div class="pos-diagram-toolbar">
-                            <button type="button" class="btn-diagram-tool btn-scroll-toggle" onclick="event.stopPropagation(); toggleDiagramScroll('wrap_form_${collapseId}')" title="Genişlet ve parmakla sağa-sola kaydırarak incele">
-                                <span class="tool-icon">↔️</span> <span class="tool-text">Kaydırarak Büyüt</span>
+                            <button type="button" class="btn-diagram-tool btn-scroll-toggle" onclick="event.stopPropagation(); toggleDiagramScroll('wrap_form_${collapseId}')" title="Genişlet ve kaydırarak incele">
+                                <span class="tool-text">Büyüt</span>
                             </button>
                             <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(visualSrc)}'), decodeURIComponent('${encodeURIComponent(visualTitle)}'))" title="Tam ekran mod">
-                                <span class="tool-icon">⛶</span> <span class="tool-text">Tam Ekran</span>
+                                <span class="tool-text">Tam Ekran</span>
                             </button>
-                            <button type="button" class="btn-diagram-tool btn-report-bug" onclick="event.stopPropagation(); openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'), decodeURIComponent('${encodeURIComponent(visualSrc || '')}'), decodeURIComponent('${encodeURIComponent(ex.equipment || '')}'), decodeURIComponent('${encodeURIComponent(ex.muscle || '')}'))" title="Görsel veya hareket hatalıysa Firebase hata havuzuna bildir">
-                                <span class="tool-icon">⚠️</span> <span class="tool-text">Hata Bildir</span>
+                            <button type="button" class="btn-diagram-tool btn-report-bug" onclick="event.stopPropagation(); openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'), decodeURIComponent('${encodeURIComponent(visualSrc || '')}'), decodeURIComponent('${encodeURIComponent(ex.equipment || '')}'), decodeURIComponent('${encodeURIComponent(ex.muscle || '')}'))" title="Görsel veya hareket hatalıysa bildir">
+                                <span class="tool-text">Hata Bildir</span>
                             </button>
                         </div>
                         <div class="pos-diagram-img-box" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(visualSrc)}'), decodeURIComponent('${encodeURIComponent(visualTitle)}'))">
                             <img src="${visualSrc}" alt="${visualTitle}" class="pos-diagram-img" loading="lazy">
-                            <div class="pos-diagram-zoom-hint">🔍 Dokun: Büyüt</div>
+                            <div class="pos-diagram-zoom-hint">Dokun: Büyüt</div>
                         </div>
                         <div class="pos-diagram-scroll-indicator">
                             ${scrollText}
@@ -7926,25 +7902,25 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     <div class="pos-diagram-wrap" id="wrap_anatomi_${collapseId}">
                         <div class="pos-diagram-toolbar">
                             <button type="button" class="btn-diagram-tool btn-scroll-toggle" onclick="event.stopPropagation(); toggleDiagramScroll('wrap_anatomi_${collapseId}')" title="Genişlet ve incele">
-                                <span class="tool-icon">↔️</span> <span class="tool-text">Kaydırarak Büyüt</span>
+                                <span class="tool-text">Büyüt</span>
                             </button>
                             <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(exactPhoto.anatomi)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Hedef Kas Anatomisi')}'))" title="Tam ekran mod">
-                                <span class="tool-icon">⛶</span> <span class="tool-text">Tam Ekran</span>
+                                <span class="tool-text">Tam Ekran</span>
                             </button>
                         </div>
                         <div class="pos-diagram-img-box" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(exactPhoto.anatomi)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Hedef Kas Anatomisi')}'))">
                             <img src="${exactPhoto.anatomi}" alt="${escapeHTML(ex.name)} Hedef Kaslar" class="pos-diagram-img" loading="lazy">
-                            <div class="pos-diagram-zoom-hint">🔍 Dokun: Büyüt</div>
+                            <div class="pos-diagram-zoom-hint">Dokun: Büyüt</div>
                         </div>
                         <div class="pos-diagram-scroll-indicator">
-                            ↔️ Kas gruplarını incelemek için sağa/sola kaydırın
+                            Kas gruplarını incelemek için sağa/sola kaydırın
                         </div>
                     </div>
                 `;
             } else {
                 anatomiVisualHtml = `
-                    <div style="background:#F8FAFC; border-radius:8px; padding:16px; text-align:center; color:var(--text-secondary); font-size:12px;">
-                        🎯 <strong>Hedeflenen Kas Grubu:</strong> <span style="color:var(--gold); font-weight:800;">${escapeHTML(ex.muscle || '')}</span>
+                    <div style="border-radius:8px; padding:12px; text-align:center; color:#94A3B8; font-size:12px;">
+                        <strong>Hedef Kas Grubu:</strong> <span style="color:#E2E8F0; font-weight:700;">${escapeHTML(ex.muscle || '')}</span>
                     </div>
                 `;
             }
@@ -7953,58 +7929,53 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             const hasOpenGym = !!openGymMedia;
 
             const contentClass = defaultCollapsed ? 'pos-guide-content collapsed' : 'pos-guide-content';
-            const btnText = defaultCollapsed ? '📖 Formu Gör ▼' : '📖 Formu Gizle ▲';
+            const btnText = defaultCollapsed ? 'Göster' : 'Gizle';
 
             return `
                 <div class="pos-guide-wrapper">
                     <div class="pos-guide-header" onclick="event.stopPropagation(); togglePosGuide('${collapseId}')" style="padding:6px 10px;">
-                        <span class="pos-type-badge ${badgeType}" style="padding:3px 8px; font-size:11px;">📐 Form Kılavuzu</span>
-                        <button type="button" class="btn-toggle-guide" id="btn_${collapseId}" onclick="event.stopPropagation(); togglePosGuide('${collapseId}')" style="padding:3px 8px; font-size:11.5px;">
+                        <span class="pos-type-badge ${badgeType}" style="padding:2px 6px; font-size:11px; color:#94A3B8; background:transparent; border:none;">Form Kılavuzu</span>
+                        <button type="button" class="btn-toggle-guide" id="btn_${collapseId}" onclick="event.stopPropagation(); togglePosGuide('${collapseId}')" style="padding:3px 8px; font-size:11.5px; color:#A78BFA;">
                             <span id="icon_${collapseId}">${btnText}</span>
                         </button>
                     </div>
                     <div class="${contentClass}" id="${collapseId}">
-                        <!-- TABS SWITCHER (BASİT İKONLAR) -->
                         <div class="guide-toggle-tabs" style="display:flex; justify-content:center; gap:6px; padding:4px;">
                             ${hasOpenGym ? `
-                                <button type="button" class="btn-guide-tab active" id="tab_btn_animasyon_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'animasyon')" title="Canlı Hareket Animasyonu" style="padding:5px 12px; font-size:12px; font-weight:800; background:rgba(56,189,248,0.15); color:var(--cyan); border:1px solid rgba(56,189,248,0.35);">
-                                    🎬 Animasyon
+                                <button type="button" class="btn-guide-tab active" id="tab_btn_animasyon_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'animasyon')" title="Canlı Hareket Animasyonu" style="padding:5px 12px; font-size:12px; font-weight:700;">
+                                    Animasyon
                                 </button>
                             ` : ''}
                             ${hasVisual ? `
-                                <button type="button" class="btn-guide-tab ${!hasOpenGym ? 'active' : ''}" id="tab_btn_form_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'form')" title="${isSvgDiagram ? 'Form Diyagramı' : 'Form Rehberi'}" style="padding:5px 12px; font-size:12px; font-weight:800;">
-                                    ${isSvgDiagram ? '📐 Diyagram' : (hasOpenGym ? '📸 Fotoğraf' : '📸 Form')}
+                                <button type="button" class="btn-guide-tab ${!hasOpenGym ? 'active' : ''}" id="tab_btn_form_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'form')" title="${isSvgDiagram ? 'Form Diyagramı' : 'Form Rehberi'}" style="padding:5px 12px; font-size:12px; font-weight:700;">
+                                    ${isSvgDiagram ? 'Diyagram' : (hasOpenGym ? 'Fotoğraf' : 'Form')}
                                 </button>
                             ` : ''}
-                            <button type="button" class="btn-guide-tab ${(!hasOpenGym && !hasVisual) ? 'active' : ''}" id="tab_btn_anatomi_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'anatomi')" title="Çalışan Kaslar" style="padding:5px 12px; font-size:12px; font-weight:800;">
-                                🧬 Kaslar
+                            <button type="button" class="btn-guide-tab ${(!hasOpenGym && !hasVisual) ? 'active' : ''}" id="tab_btn_anatomi_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'anatomi')" title="Çalışan Kaslar" style="padding:5px 12px; font-size:12px; font-weight:700;">
+                                Kaslar
                             </button>
-                            <button type="button" class="btn-guide-tab" id="tab_btn_adimlar_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'adimlar')" title="Adım Adım Talimatlar" style="padding:5px 12px; font-size:12px; font-weight:800;">
-                                📝 Adımlar
+                            <button type="button" class="btn-guide-tab" id="tab_btn_adimlar_${collapseId}" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'adimlar')" title="Adım Adım Talimatlar" style="padding:5px 12px; font-size:12px; font-weight:700;">
+                                Adımlar
                             </button>
                         </div>
 
                         ${hasOpenGym ? `
                             <!-- PANEL 0: OPENGYM ANIMATION -->
                             <div class="guide-tab-panel active" id="panel_animasyon_${collapseId}">
-                                <div class="pos-diagram-wrap" id="wrap_anim_${collapseId}" style="position:relative; background:#000; border-radius:12px; overflow:hidden; border:1px solid rgba(56,189,248,0.3); padding:4px;">
+                                <div class="pos-diagram-wrap" id="wrap_anim_${collapseId}" style="position:relative; background:#0E0B1F; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.08); padding:4px;">
                                     <div class="pos-diagram-toolbar">
                                         <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(openGymMedia.clip)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Canlı Animasyon')}'))" title="Tam ekran oynat">
-                                            <span class="tool-icon">⛶</span> <span class="tool-text">Büyüt</span>
+                                            <span class="tool-text">Tam Ekran</span>
                                         </button>
                                         ${hasPhotoGuide ? `
                                             <button type="button" class="btn-diagram-tool" onclick="event.stopPropagation(); switchGuideTab('${collapseId}', 'form')" title="Fotoğraf rehberine bak">
-                                                <span class="tool-icon">📸</span> <span class="tool-text">Fotoğrafa Geç</span>
+                                                <span class="tool-text">Fotoğrafa Geç</span>
                                             </button>
                                         ` : ''}
                                     </div>
                                     <div class="pos-animation-stage" style="cursor:pointer;" onclick="event.stopPropagation(); openImageLightbox(decodeURIComponent('${encodeURIComponent(openGymMedia.clip)}'), decodeURIComponent('${encodeURIComponent((ex.name || '') + ' - Canlı Animasyon')}'))">
                                         <video class="pos-animation-video" src="${openGymMedia.clip}" poster="${openGymMedia.still}" autoplay loop muted playsinline onerror="this.style.display='none'; const st=document.getElementById('still_fallback_${collapseId}'); if(st) st.style.display='block';"></video>
                                         <img id="still_fallback_${collapseId}" src="${openGymMedia.still}" alt="${escapeHTML(ex.name)}" style="display:none; width:auto; max-width:100%; height:auto; max-height:260px; object-fit:contain; margin:auto;">
-                                    </div>
-                                    <div style="font-size:11px; color:#0369A1; font-weight:700; padding:6px 10px; background:#F1F5F9; display:flex; justify-content:space-between; align-items:center; border-top:1px solid #CBD5E1;">
-                                        <span>⚡ OpenGym Doğrulanmış Animasyon</span>
-                                        <span style="color:var(--text-secondary); font-size:10px;">🔍 Dokun: Büyüt</span>
                                     </div>
                                 </div>
                                 ${extraInfoHtml}
@@ -8062,37 +8033,39 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 document.body.appendChild(overlay);
             }
 
+            const smallInfoSvgQuick = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
             overlay.innerHTML = `
                 <div class="wk-info-modal-box">
                     <div class="wk-info-modal-header">
                         <div style="display:flex; align-items:center; gap:7px; min-width:0;">
-                            <span class="wk-i-badge">i</span>
-                            <strong style="font-size:14px; font-weight:800; color:#0F172A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(ex.name)}</strong>
+                            ${smallInfoSvgQuick}
+                            <strong style="font-size:14px; font-weight:800; color:#FFFFFF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(ex.name)}</strong>
                         </div>
                         <button type="button" class="wk-info-modal-close" onclick="closeExerciseQuickInfoModal()" aria-label="Kapat">✕</button>
                     </div>
                     <div class="wk-info-modal-body" style="display:flex; flex-direction:column; gap:8px;">
-                        <div style="display:flex; flex-wrap:wrap; gap:6px;">
-                            <span class="wk-drawer-pill equip">🏋️ ${escapeHTML(equipText)}</span>
-                            <span class="wk-drawer-pill primary">🎯 ${escapeHTML(primaryText)}</span>
-                            ${secondaryText ? `<span class="wk-drawer-pill secondary">⚡ ${escapeHTML(secondaryText)}</span>` : ''}
+                        <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:12px; color:#CBD5E1;">
+                            <span>${escapeHTML(equipText)}</span>
+                            <span style="color:#64748B;">•</span>
+                            <span style="color:#DDD6FE; font-weight:700;">${escapeHTML(primaryText)}</span>
+                            ${secondaryText ? `<span style="color:#64748B;">•</span><span style="color:#94A3B8;">${escapeHTML(secondaryText)}</span>` : ''}
                         </div>
                         ${ex.cue ? `
-                            <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-left:3px solid #FF5A36; border-radius:8px; padding:9px 11px; font-size:12px; color:#0F172A; line-height:1.45;">
-                                💡 <strong>Altın Kural:</strong> ${escapeHTML(ex.cue)}
+                            <div style="border-top:1px solid rgba(255,255,255,0.06); padding-top:8px; font-size:12px; color:#CBD5E1; line-height:1.45;">
+                                <strong>Altın Kural:</strong> ${escapeHTML(ex.cue)}
                             </div>
                         ` : ''}
-                        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-top:4px; flex-wrap:wrap;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-top:4px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06); flex-wrap:wrap;">
                             <div style="display:flex; gap:6px;">
                                 <button type="button" class="wk-chip-action" style="padding:5px 10px; font-size:11px;" onclick="closeExerciseQuickInfoModal(); openExerciseDetailModal('${ex.id}')">
-                                    🎥 Tam Rehber
+                                    Tam Rehber
                                 </button>
-                                <button type="button" class="wk-chip-action" style="padding:5px 10px; font-size:11px; color:#64748B;" onclick="closeExerciseQuickInfoModal(); toggleExerciseExclusionAndRefresh('${ex.id}')">
-                                    ${(typeof isExerciseExcluded === 'function' && isExerciseExcluded(ex.id)) ? '🔄 Havuza Geri Al' : '👁️ Havuzdan Gizle'}
+                                <button type="button" class="wk-chip-action" style="padding:5px 10px; font-size:11px; color:#94A3B8;" onclick="closeExerciseQuickInfoModal(); toggleExerciseExclusionAndRefresh('${ex.id}')">
+                                    ${(typeof isExerciseExcluded === 'function' && isExerciseExcluded(ex.id)) ? 'Havuza Geri Al' : 'Havuzdan Gizle'}
                                 </button>
                             </div>
                             <button type="button" class="btn-report-mini" style="padding:5px 10px; font-size:11px; height:auto;" onclick="closeExerciseQuickInfoModal(); openExerciseBugReportModal(decodeURIComponent('${encodeURIComponent(ex.id)}'), decodeURIComponent('${encodeURIComponent(ex.name || '')}'), '', decodeURIComponent('${encodeURIComponent(ex.equipment || '')}'), decodeURIComponent('${encodeURIComponent(ex.muscle || '')}'), 'Kütüphane')">
-                                ⚠️ Bildir
+                                Bildir
                             </button>
                         </div>
                     </div>
@@ -8113,18 +8086,13 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 <div class="ex-card wk-drawer-clean-card" id="card_${ex.id}">
                     ${renderExercisePositionsHtml(ex, `${scope}_${label}`, false)}
 
-                    <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap; margin-top:8px; padding-top:8px; border-top:1px dashed #E2E8F0;">
-                        <button class="btn-swap-ex" style="color:#DC2626; border-color:rgba(239,68,68,0.3); padding:5px 9px; font-size:11.5px;" onclick="removeExerciseFromWorkout('${ex.id}', '${scope}')" title="Bu hareketi kaldır">
-                            🗑️ Kaldır
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
+                        <button type="button" class="btn-swap-ex" style="color:#FCA5A5; border-color:rgba(239,68,68,0.28); background:#121024; padding:6px 12px; font-size:11.5px;" onclick="removeExerciseFromWorkout('${ex.id}', '${scope}')">
+                            Kaldır
                         </button>
-                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                            <button class="btn-swap-ex" style="padding:5px 9px; font-size:11.5px;" onclick="openAlternativeModal('${ex.id}', '${scope}')" title="Listeden alternatif seç">
-                                📋 Alternatif Seç
-                            </button>
-                            <button class="btn-swap-ex" style="padding:5px 9px; font-size:11.5px;" onclick="swapSingleExercise('${ex.id}', '${scope}')" title="Rastgele başka hareket ver">
-                                🎲 Rastgele
-                            </button>
-                        </div>
+                        <button type="button" class="btn-swap-ex" style="color:#E2E8F0; border-color:rgba(167,139,250,0.25); background:#121024; padding:6px 14px; font-size:11.5px;" onclick="openAlternativeModal('${ex.id}', '${scope}')">
+                            Değiştir
+                        </button>
                     </div>
                 </div>
             `;
@@ -9003,18 +8971,15 @@ KURALLAR:
             const line3 = `${firstEx} setlerinde kontrollü negatif tempo koru; ${finisherName} bloğunda formu bozmadan hızlan.`;
 
             return `
-                <div style="background:#F8FAFC; border:1.5px solid #CBD5E1; border-left:4px solid #7E22CE; border-radius:12px; padding:12px 14px;">
-                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-                        <div style="display:flex; align-items:center; gap:6px;">
-                            <span style="font-size:15px;">🧠</span>
-                            <strong style="color:#0F172A; font-size:12.5px; font-weight:900; letter-spacing:0.3px;">KOÇ ÖZETİ & EKSİK TELAFİSİ</strong>
-                        </div>
-                        <span style="font-size:10.5px; background:#F3E8FF; color:#6B21A8; border:1px solid #D8B4FE; padding:2px 8px; border-radius:6px; font-weight:800;">3 Katmanlı Analiz</span>
+                <div style="padding:2px 0;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                        <strong style="color:#F8FAFC; font-size:11.5px; font-weight:700; letter-spacing:0.05em;">KOÇ ÖZETİ &amp; EKSİK TELAFİSİ</strong>
+                        <span style="font-size:11px; color:#94A3B8; font-weight:600;">3 Katmanlı Analiz</span>
                     </div>
-                    <div style="display:flex; flex-direction:column; gap:5px; font-size:12px; color:#0F172A; line-height:1.45;">
-                        <div>🛡️ <strong style="color:#0F172A;">Kas Koruması:</strong> <span style="color:#334155;">${escapeHTML(line1)}</span></div>
-                        <div>🎯 <strong style="color:#0F172A;">Eksik Telafisi:</strong> <span style="color:#334155;">${escapeHTML(line2)}</span></div>
-                        <div>💡 <strong style="color:#0F172A;">Seans Notu:</strong> <span style="color:#334155;">${escapeHTML(line3)}</span></div>
+                    <div style="display:flex; flex-direction:column; gap:8px; font-size:12px; color:#CBD5E1; line-height:1.45;">
+                        <div style="padding-top:6px; border-top:1px solid rgba(255,255,255,0.06);"><strong style="color:#F8FAFC;">Kas Koruması:</strong> <span>${escapeHTML(line1)}</span></div>
+                        <div style="padding-top:6px; border-top:1px solid rgba(255,255,255,0.06);"><strong style="color:#F8FAFC;">Eksik Telafisi:</strong> <span>${escapeHTML(line2)}</span></div>
+                        <div style="padding-top:6px; border-top:1px solid rgba(255,255,255,0.06);"><strong style="color:#F8FAFC;">Seans Notu:</strong> <span>${escapeHTML(line3)}</span></div>
                     </div>
                 </div>
             `;
@@ -9433,6 +9398,10 @@ KESİN KURALLAR:
             const badgesEl = document.getElementById('pickerCurrentExBadges');
             const muscleGrid = document.getElementById('pickerMuscleGrid');
 
+            const randBtn = document.getElementById('pickerRandomSwapBtn');
+            if (randBtn) {
+                randBtn.style.display = (pickerContext.mode === 'replace') ? 'inline-flex' : 'none';
+            }
             if (pickerContext.mode === 'replace' && currentEx) {
                 if (titleEl) titleEl.innerText = currentEx.name;
                 if (subEl) subEl.style.display = 'none';
@@ -10205,11 +10174,7 @@ KESİN KURALLAR:
                         }
                     }
 
-                    // 2. Also persist in custom programs library
-                    upsertUserCustomProgram(updatedWorkout, user.id);
-                    if (typeof renderLibrary === 'function') renderLibrary();
-
-                    // 3. Update active day and calendar view
+                    // 2. Update active day and calendar view
                     renderActiveWorkout();
                     if (typeof renderCalendarScreen === 'function') renderCalendarScreen();
                 }

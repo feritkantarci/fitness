@@ -3326,7 +3326,7 @@
                 _adminPortalScriptLoadingPromise = new Promise((resolve) => {
                     try {
                         const script = document.createElement('script');
-                        script.src = 'js/chiefs/admin-portal.js?v=335';
+                        script.src = 'js/chiefs/admin-portal.js?v=345';
                         script.async = false;
                         script.onload = () => resolve(true);
                         script.onerror = () => {

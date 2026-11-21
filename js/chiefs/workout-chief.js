@@ -823,11 +823,12 @@
                 if (typeof showToast === 'function') showToast(`⚡ ${flowTitle.replace(/^⚔️\s*/, '')} Başlatıldı!`);
             } else {
                 window.expandedGeneratedExIndex = null;
+                window.generatedWorkoutViewMode = 'list';
                 renderGeneratedWorkout();
                 const hintEl = document.getElementById('aiQuickPreviewHint');
                 if (hintEl) {
-                    hintEl.textContent = '✅ 20 Dk Çelik Akışı hazırlandı • İnceleyip başlatabilir veya takvime ekleyebilirsiniz';
-                    hintEl.style.color = '#15803D';
+                    hintEl.textContent = '20 Dk Çelik Akışı hazırlandı • İnceleyip başlatabilir veya takvime ekleyebilirsiniz';
+                    hintEl.style.color = '#86EFAC';
                 }
                 if (typeof showToast === 'function') showToast("⚡ 20 Dk Çelik Akışı oluşturuldu!");
             }
@@ -948,7 +949,10 @@
             const isCurrentlyOpen = body.style.display !== 'none';
             const shouldOpen = (forceOpen !== undefined) ? forceOpen : !isCurrentlyOpen;
             body.style.display = shouldOpen ? 'block' : 'none';
-            if (arrow) arrow.innerText = shouldOpen ? '▲ Kapat' : '▼ Aç';
+            if (arrow) {
+                if (arrow.classList) arrow.classList.toggle('is-open', shouldOpen);
+                if (arrow.dataset) arrow.dataset.open = shouldOpen ? '1' : '0';
+            }
             if (shouldOpen) {
                 initStudioTab();
             }
@@ -5537,13 +5541,6 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     saveDateScheduleOverride(targetDateStr, updatedPlanObj, uid);
                 }
 
-                try {
-                    if (updatedWorkout && typeof upsertUserCustomProgram === 'function') {
-                        const withId = updatedWorkout.id ? updatedWorkout : Object.assign({}, updatedWorkout, { id: 'moved_' + Date.now() });
-                        upsertUserCustomProgram(withId, uid);
-                    }
-                } catch (e) {}
-
                 window.lastScheduleMoveSummary = summaryObj;
                 return summaryObj;
             };
@@ -5965,11 +5962,6 @@ KURALLAR:
             const targetDateStr = customRoutineState.editingDateStr || resolveScheduleDateStr(dayIdx, null, activePlannerWeek === 'next' ? 1 : 0) || (dayIdx === todayIdx ? todayYMD : null);
             const user = getActiveUser();
             syncDayPlanToDateAndWeek(dayIdx, targetDateStr, planObj, user ? user.id : null, activePlannerWeek === 'next');
-
-            // Also update or add to custom programs in library
-            if (user && typeof upsertUserCustomProgram === 'function') {
-                upsertUserCustomProgram(updatedWorkout, user.id);
-            }
 
             // Clear editing state cleanly without prompt
             cancelStudioEditingSilent();
@@ -6554,14 +6546,6 @@ KURALLAR:
                 activePlannerWeek = 'current';
             }
 
-            if (workout.isCustom || workout.type === 'custom' || workout.type === 'custom_saved' || workout.type === 'custom_generated') {
-                try {
-                    if (planObj && planObj.customWorkout && typeof upsertUserCustomProgram === 'function') {
-                        upsertUserCustomProgram(planObj.customWorkout, uid);
-                    }
-                } catch(e) {}
-            }
-
             if (isAssigningToToday) {
                 currentGeneratedWorkout = planObj.customWorkout;
                 window.currentGeneratedWorkout = planObj.customWorkout;
@@ -6865,13 +6849,6 @@ KURALLAR:
                     exercises: workout.exercises
                 };
                 saveWeeklySchedule(schedule);
-
-                // Kütüphaneye de kaydet
-                const user = getActiveUser();
-                if (user && typeof upsertUserCustomProgram === 'function') {
-                    const progEntry = workout.id ? workout : Object.assign({}, workout, { id: schedule[todayIdx].id, isCustom: true });
-                    upsertUserCustomProgram(progEntry, user.id);
-                }
 
                 renderActiveWorkout();
                 playAlertSound();
@@ -8536,7 +8513,9 @@ KURALLAR:
         }
 
         function jumpCalendarToToday() {
-            calendarScreenState.anchorDate = new Date();
+            const now = new Date();
+            calendarScreenState.anchorDate = now;
+            calendarScreenState.selectedDayYMD = formatDateYMD(now);
             renderCalendarScreen();
         }
 
@@ -8795,6 +8774,10 @@ KURALLAR:
             }
 
             const selDay = weekDays.find(d => d.dayYMD === selectedYMD) || weekDays[0];
+            const todayBtnEl = document.getElementById('calJumpTodayBtn');
+            if (todayBtnEl) {
+                todayBtnEl.style.display = (selDay.dayYMD === todayYMD) ? 'none' : 'inline-flex';
+            }
 
             // 1. 7-Day Horizontal Strip
             const stripHtml = `
@@ -8816,24 +8799,33 @@ KURALLAR:
             // 2. Selected Day Focus Card
             let statusBadgeHtml = '';
             if (selDay.hasCompleted) {
-                statusBadgeHtml = `<span class="stitch-day-status-pill done">✓ Tamamlandı</span>`;
-            } else if (selDay.isToday) {
-                statusBadgeHtml = `<span class="stitch-day-status-pill today">BUGÜN</span>`;
+                statusBadgeHtml = `<span class="stitch-day-status-text done">Tamamlandı</span>`;
             } else if (selDay.isPast && !selDay.isRest) {
-                statusBadgeHtml = `<span class="stitch-day-status-pill missed">Yapılmadı</span>`;
-            } else if (selDay.isRest) {
-                statusBadgeHtml = `<span class="stitch-day-status-pill rest">Dinlenme</span>`;
-            } else {
-                statusBadgeHtml = `<span class="stitch-day-status-pill planned">Planlandı</span>`;
+                statusBadgeHtml = `<span class="stitch-day-status-text missed">Yapılmadı</span>`;
+            } else if (!selDay.isRest) {
+                statusBadgeHtml = `<span class="stitch-day-status-text planned">Planlandı</span>`;
             }
 
             const cleanWorkoutTitle = (raw) => {
                 if (!raw) return 'Antrenman Seansı';
-                return String(raw)
+                const stripped = String(raw)
                     .replace(/^BB-Dominant Hibrit\s*•\s*/i, '')
                     .replace(/\s*\([^)]*\)\s*/g, ' ')
                     .replace(/\s+/g, ' ')
-                    .trim() || 'Antrenman Seansı';
+                    .trim();
+                if (typeof window !== 'undefined' && typeof window.cleanHistorySessionTitle === 'function') {
+                    return window.cleanHistorySessionTitle(stripped);
+                }
+                const parts = stripped.split(/\s*:\s*/);
+                if (parts.length >= 2) {
+                    const deduped = [];
+                    parts.forEach(p => {
+                        const t = p.trim();
+                        if (t && (!deduped.length || deduped[deduped.length - 1].toLowerCase() !== t.toLowerCase())) deduped.push(t);
+                    });
+                    return deduped.join(': ') || 'Antrenman Seansı';
+                }
+                return stripped || 'Antrenman Seansı';
             };
 
             const isStandaloneCardioLog = (logItem) => {
@@ -8856,7 +8848,7 @@ KURALLAR:
                         </div>
                         <div class="stitch-sel-action-grid">
                             <button type="button" class="wk-btn-primary-compact" onclick="startScheduledWorkoutForDay(${selDay.dayIdx}, '${selDay.dayYMD}')">
-                                ▶️ Seansı Başlat
+                                Seansı Başlat
                             </button>
                             <button type="button" class="wk-btn-utility-compact" onclick="openScheduleDayModal(${selDay.dayIdx}, '${selDay.dayYMD}')">
                                 Düzenle
@@ -8917,12 +8909,12 @@ KURALLAR:
                     } else if (exObj.diagram) {
                         mediaHtml = `<img src="${escapeHTML(exObj.diagram)}" alt="${escapeHTML(exObj.name || 'Hareket')}" class="wk-card-media-el" loading="lazy">`;
                     } else {
-                        mediaHtml = `<div style="font-size:46px; opacity:0.6; color:#0F172A;">🏋️</div>`;
+                        mediaHtml = `<div style="font-size:12px; font-weight:600; color:#64748B;">Görsel Yok</div>`;
                     }
 
                     const blockBadge = exObj.blockLabel
-                        ? `⚔️ ${escapeHTML(exObj.blockLabel)} • ${exObj.blockType === 'superset' ? 'SÜPERSET' : 'DÜZ SET'}`
-                        : `⚔️ ${idx + 1}. İSTASYON`;
+                        ? `${escapeHTML(exObj.blockLabel)} • ${exObj.blockType === 'superset' ? 'SÜPERSET' : 'DÜZ SET'}`
+                        : `${idx + 1}. İSTASYON`;
                     const muscleBadge = getTurkishMuscleBadge(exObj.muscle || (exObj.primaryMuscles && exObj.primaryMuscles[0]) || 'Hedef Kas');
                     const setsCnt = exObj.targetSets || (planDetails && planDetails.scheme && planDetails.scheme.sets) || 3;
                     const repsStr = String(exObj.targetReps || (planDetails && planDetails.scheme && planDetails.scheme.reps) || '8-12');
@@ -8939,24 +8931,24 @@ KURALLAR:
                                 </div>
                                 <div class="wk-card-title-row">
                                     <h3 class="wk-card-exercise-name">${escapeHTML(exObj.name || 'Hareket')}</h3>
-                                    ${exObj.id ? `<button type="button" class="wk-i-badge" style="border:none; cursor:pointer;" onclick="event.stopPropagation(); openExerciseQuickInfoModal('${escapeHTML(String(exObj.id))}')" title="Ekipman ve Kas Detayı">i</button>` : ''}
+                                </div>
+                                <div class="wk-card-submeta">
+                                    <span>${setsCnt} Set × ${escapeHTML(repsStr)}${repsSuffix}</span>
+                                    <span>•</span>
+                                    <span>${restVal} sn dinlenme</span>
+                                    ${targetW ? `<span>•</span><span style="color:#E9D5FF;">Son: ${targetW} kg</span>` : ''}
                                 </div>
                                 <div class="wk-card-media-box">
                                     ${mediaHtml}
                                 </div>
-                                <div class="wk-card-chips-row">
-                                    <div class="wk-card-chip">🎯 <strong>${setsCnt} Set × ${escapeHTML(repsStr)}${repsSuffix}</strong></div>
-                                    <div class="wk-card-chip">⏱️ <strong>${restVal} sn</strong> Dinlenme</div>
-                                    ${targetW ? `<div class="wk-card-chip highlight-gold">🏋️ Son: <strong>${targetW} kg</strong></div>` : ''}
-                                </div>
                             </div>
                             <div class="wk-card-actions-row">
                                 <button type="button" class="wk-card-btn-action" onclick="event.stopPropagation(); openScheduleExerciseAlternativeModal(${selDay.dayIdx}, decodeURIComponent('${targetExParam}'), ${idx}, '${selDay.dayYMD}')" title="Başka Hareketle Değiştir">
-                                    🔄 Alternatif
+                                    Değiştir
                                 </button>
                                 ${exObj.id ? `
                                     <button type="button" class="wk-card-btn-action" onclick="event.stopPropagation(); openExerciseDetailModal(decodeURIComponent('${targetExParam}'))" title="Form Rehberi">
-                                        📸 Form
+                                        Form
                                     </button>
                                 ` : ''}
                             </div>
@@ -8984,13 +8976,13 @@ KURALLAR:
                         </div>
                         <div class="wk-carousel-dock">
                             <button type="button" class="wk-dock-nav-btn ${activeCalIdx === 0 ? 'is-disabled' : ''}" id="calDockPrevBtn" onclick="stepCalCarousel(-1)" aria-label="Önceki Hareket">
-                                ◀
+                                ‹
                             </button>
                             <button type="button" class="wk-dock-start-btn" onclick="startScheduledWorkoutForDay(${selDay.dayIdx}, '${selDay.dayYMD}')">
-                                <span>▶️ Seansı Başlat</span>
+                                <span>Seansı Başlat</span>
                             </button>
                             <button type="button" class="wk-dock-nav-btn ${activeCalIdx >= exCount - 1 ? 'is-disabled' : ''}" id="calDockNextBtn" onclick="stepCalCarousel(1)" aria-label="Sonraki Hareket">
-                                ▶
+                                ›
                             </button>
                         </div>
                         ${garminSendHtml}
@@ -9004,13 +8996,13 @@ KURALLAR:
                     const logVol = log.totalVolumeKg ? `${Math.round(log.totalVolumeKg).toLocaleString('tr-TR')} kg` : '';
                     const logDur = log.durationFormatted || (log.duration ? `${log.duration} Dk` : '');
                     return `
-                        <div style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid #E2E8F0;">
+                        <div style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid rgba(255, 255, 255, 0.06);">
                             <div class="stitch-sel-title-row">
                                 <h3 class="stitch-sel-workout-title">${escapeHTML(cleanWorkoutTitle(log.program || log.title || 'Antrenman'))}</h3>
                                 ${log.totalSetsCompleted ? `<span class="stitch-sel-count-badge">${log.totalSetsCompleted} Set</span>` : ''}
                             </div>
-                            <div class="stitch-sel-meta-line" style="color:#15803D;">
-                                ✓ Tamamlandı${logDur ? ` • ${logDur}` : ''}${logVol ? ` • ${logVol} Toplam Hacim` : ''}
+                            <div class="stitch-sel-meta-line" style="color:#86EFAC;">
+                                Tamamlandı${logDur ? ` • ${logDur}` : ''}${logVol ? ` • ${logVol} Toplam Hacim` : ''}
                             </div>
                         </div>
                     `;
@@ -9023,7 +9015,7 @@ KURALLAR:
                 `;
                 if (!selDay.isRest && !hasCompletedFitnessSession) {
                     focusBodyHtml += `
-                        <div style="margin-top:12px; padding-top:12px; border-top:1.5px dashed #CBD5E1;">
+                        <div style="margin-top:12px; padding-top:12px; border-top:1px solid rgba(255, 255, 255, 0.06);">
                             ${buildPendingFitnessPlanHtml()}
                         </div>
                     `;
@@ -9034,6 +9026,12 @@ KURALLAR:
                 focusBodyHtml = `
                     <div class="stitch-sel-rest-box">
                         <div class="stitch-sel-workout-title" style="font-size:15px;">Dinlenme ve Toparlanma Günü</div>
+                        <div class="stitch-sel-rest-sub">
+                            <span>Yine de çalışmak ister misin?</span>
+                            <button type="button" class="stitch-rest-link-btn" onclick="switchTab('generatorTab')">Program Üret</button>
+                            <span class="stitch-rest-sep">•</span>
+                            <button type="button" class="stitch-rest-link-btn" onclick="openScheduleDayModal(${selDay.dayIdx}, '${selDay.dayYMD}')">Seans Ekle</button>
+                        </div>
                     </div>
                 `;
             }
@@ -9042,17 +9040,17 @@ KURALLAR:
                 focusBodyHtml += selDay.plan.extraCardioSessions.map(c => {
                     const isCardioDone = selDay.completedLogs.some(l => Array.isArray(l.exercises) && l.exercises.some(ex => (ex.id || ex.exId) === c.id));
                     return `
-                        <div style="margin-top:8px; background:#F0F9FF; border:1px solid #BAE6FD; color:#0369A1; border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
-                            <div style="font-size:12px; font-weight:800; color:#0F172A;">
-                                🚣 ${escapeHTML((c.name || 'Kardiyo').split('(')[0].trim())} • <span style="color:#0369A1;">${Number(c.durationMin || 20)} Dk</span>
+                        <div style="margin-top:8px; padding:8px 0; border-top:1px solid rgba(255, 255, 255, 0.06); display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <div style="font-size:12.5px; font-weight:700; color:#F8FAFC;">
+                                ${escapeHTML((c.name || 'Kardiyo').split('(')[0].trim())} • <span style="color:#F59E0B;">${Number(c.durationMin || 20)} Dk</span>
                             </div>
-                            <div style="display:flex; align-items:center; gap:6px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
                                 ${isCardioDone ? `
-                                    <span style="font-size:10.5px; font-weight:800; color:#15803D; background:#DCFCE7; border:1px solid #86EFAC; padding:3px 8px; border-radius:6px;">✓ Tamamlandı</span>
+                                    <span style="font-size:11.5px; font-weight:700; color:#86EFAC;">Tamamlandı</span>
                                 ` : `
-                                    <button type="button" style="background:#0369A1; color:#FFFFFF; border:none; border-radius:6px; padding:5px 10px; font-size:11px; font-weight:800; cursor:pointer;" onclick="startQuickWorkoutWithExercise('${c.id}')">▶️ Başlat</button>
+                                    <button type="button" style="background:rgba(139, 92, 246, 0.18); color:#E9D5FF; border:1px solid rgba(167, 139, 250, 0.32); border-radius:6px; padding:4px 10px; font-size:11px; font-weight:700; cursor:pointer;" onclick="startQuickWorkoutWithExercise('${c.id}')">Başlat</button>
                                 `}
-                                <button type="button" style="background:#FFFFFF; color:#B91C1C; border:1px solid #FECACA; border-radius:6px; padding:4px 8px; font-size:11px; font-weight:800; cursor:pointer;" onclick="removeExtraCardioSessionFromDay(${selDay.dayIdx}, '${c.id}', '${selDay.dayYMD}')" title="Kardiyo seansını kaldır">✕</button>
+                                <button type="button" style="background:transparent; color:#94A3B8; border:none; padding:4px 6px; font-size:12px; font-weight:700; cursor:pointer;" onclick="removeExtraCardioSessionFromDay(${selDay.dayIdx}, '${c.id}', '${selDay.dayYMD}')" title="Kardiyo seansını kaldır">✕</button>
                             </div>
                         </div>
                     `;
@@ -9080,7 +9078,14 @@ KURALLAR:
 
             const titleEl = document.getElementById('calPeriodTitle');
             if (titleEl) {
-                titleEl.innerHTML = `🗓️ <span>${CAL_MONTH_NAMES_TR[month]} ${year}</span>`;
+                titleEl.innerHTML = `<span>${CAL_MONTH_NAMES_TR[month]} ${year}</span>`;
+            }
+
+            const todayBtnEl = document.getElementById('calJumpTodayBtn');
+            if (todayBtnEl) {
+                const nowDate = new Date();
+                const isCurrMonth = (year === nowDate.getFullYear() && month === nowDate.getMonth());
+                todayBtnEl.style.display = isCurrMonth ? 'none' : 'inline-flex';
             }
 
             const firstDay = new Date(year, month, 1);
@@ -9137,19 +9142,18 @@ KURALLAR:
                 let pillHtml = '';
                 if (hasCompleted) {
                     const titleShort = (completedLogs[0].program || completedLogs[0].title || 'Tamamlandı').slice(0, 11);
-                    pillHtml = `<div class="cal-tag-pill completed" title="${escapeHTML(completedLogs[0].program || completedLogs[0].title)}">✅ ${escapeHTML(titleShort)}</div>`;
+                    pillHtml = `<div class="cal-tag-pill completed" title="${escapeHTML(completedLogs[0].program || completedLogs[0].title)}">${escapeHTML(titleShort)}</div>`;
                 } else if (!isRest) {
                     const cleanTitle = (plan.title || 'Plan').replace(/⚔️/g, '').trim().slice(0, 11);
-                    pillHtml = `<div class="cal-tag-pill scheduled" title="${escapeHTML(plan.title)}">⚔️ ${escapeHTML(cleanTitle)}</div>`;
+                    pillHtml = `<div class="cal-tag-pill scheduled" title="${escapeHTML(plan.title)}">${escapeHTML(cleanTitle)}</div>`;
                 } else {
-                    pillHtml = `<div class="cal-tag-pill rest">🧘 Dinlenme</div>`;
+                    pillHtml = `<div class="cal-tag-pill rest">Dinlenme</div>`;
                 }
 
                 html += `
                     <div class="cal-month-cell ${isToday ? 'is-today' : ''}" onclick="openScheduleDayModal(${dayIdx}, '${dayYMD}')">
                         <div class="cal-month-cell-header">
-                            <span style="${isToday ? 'font-weight:900; color:var(--gold);' : ''}">${d}</span>
-                            ${isToday ? '<span style="font-size:8px; color:var(--gold); font-weight:900;">BUGÜN</span>' : ''}
+                            <span style="${isToday ? 'font-weight:900; color:#C4B5FD;' : ''}">${d}</span>
                         </div>
                         ${pillHtml}
                     </div>
