@@ -532,7 +532,7 @@
             try {
                 const ver = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAppVersion === 'function')
                     ? window.CelikKaraKutu.getAppVersion()
-                    : 'v349';
+                    : 'v350';
                 const keys = payload && typeof payload === 'object' ? Object.keys(payload) : [];
                 const undefKeys = [];
                 const overLimit = [];
@@ -3664,6 +3664,16 @@
 
         let _adminPortalScriptLoadingPromise = null;
 
+        function withAuthTimeout(promise, ms = 2200, fallbackValue = null) {
+            let timerId = null;
+            return Promise.race([
+                Promise.resolve(promise).finally(() => { if (timerId) clearTimeout(timerId); }),
+                new Promise((resolve) => {
+                    timerId = setTimeout(() => resolve(fallbackValue), ms);
+                })
+            ]);
+        }
+
         const {
             refreshVerifiedAdminClaim,
             isVerifiedAdminSession
@@ -3676,7 +3686,7 @@
                     return false;
                 }
                 try {
-                    const tokenRes = await fbUser.getIdTokenResult();
+                    const tokenRes = await withAuthTimeout(fbUser.getIdTokenResult(), 3000, null);
                     const claims = (tokenRes && tokenRes.claims) || {};
                     const isAdminClaim = Boolean(claims.admin === true || claims.role === 'admin');
                     _verifiedAdminFirebaseUid = isAdminClaim && fbUser.uid ? String(fbUser.uid) : null;
@@ -3750,7 +3760,7 @@
                 _adminPortalScriptLoadingPromise = new Promise((resolve) => {
                     try {
                         const script = document.createElement('script');
-                        script.src = 'js/chiefs/admin-portal.js?v=349';
+                        script.src = 'js/chiefs/admin-portal.js?v=350';
                         script.async = false;
                         script.onload = () => resolve(true);
                         script.onerror = () => {
@@ -4413,7 +4423,7 @@
                 const unameKey = toUsernameDocId(rawIdentity);
                 if (unameKey && /^[a-z0-9._-]{2,40}$/.test(unameKey)) {
                     try {
-                        const uSnap = await fbDb.collection('usernames').doc(unameKey).get();
+                        const uSnap = await withAuthTimeout(fbDb.collection('usernames').doc(unameKey).get(), 2200, null);
                         if (uSnap && uSnap.exists) {
                             const uData = uSnap.data() || {};
                             if (uData.authEmail) targetEmail = String(uData.authEmail).trim().toLowerCase();
@@ -4902,7 +4912,7 @@
                         const unameDocKey = toUsernameDocId(rawInput);
                         if (unameDocKey && /^[a-z0-9._-]{2,40}$/.test(unameDocKey)) {
                             try {
-                                const unameSnap = await fbDb.collection('usernames').doc(unameDocKey).get();
+                                const unameSnap = await withAuthTimeout(fbDb.collection('usernames').doc(unameDocKey).get(), 2200, null);
                                 if (unameSnap && unameSnap.exists) {
                                     const unameData = unameSnap.data() || {};
                                     if (unameData.authEmail) {
@@ -4925,11 +4935,11 @@
                             let cloudRoleDoc = null;
                             if (isFirebaseReady && fbDb && !IS_LOCAL_DEV) {
                                 try {
-                                    const profSnap = await fbDb.collection('user_profiles').doc(fbUser.uid).get();
+                                    const [profSnap, roleSnap] = await Promise.all([
+                                        withAuthTimeout(fbDb.collection('user_profiles').doc(fbUser.uid).get().catch(() => null), 2200, null),
+                                        withAuthTimeout(fbDb.collection('user_roles').doc(fbUser.uid).get().catch(() => null), 2200, null)
+                                    ]);
                                     if (profSnap && profSnap.exists) cloudProfile = profSnap.data() || null;
-                                } catch {}
-                                try {
-                                    const roleSnap = await fbDb.collection('user_roles').doc(fbUser.uid).get();
                                     if (roleSnap && roleSnap.exists) cloudRoleDoc = roleSnap.data() || null;
                                 } catch {}
                             }
@@ -4987,7 +4997,7 @@
                                 passwordUpdatedAt: Date.now()
                             });
 
-                            try { await syncUserRoleDocument(fbUser, mergedMatched); } catch {}
+                            try { syncUserRoleDocument(fbUser, mergedMatched).catch(() => {}); } catch {}
                             matched = mergedMatched;
                         }
                     } catch (fbErr) {

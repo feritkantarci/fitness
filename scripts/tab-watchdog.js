@@ -3845,7 +3845,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
         );
 
         const swCode = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
-        const swOk = swCode.includes("celik-kodu-cache-v349") && !swCode.includes('admin-portal.js');
+        const swOk = /celik-kodu-cache-v(349|3[5-9]\d|[4-9]\d{2})/.test(swCode) && !swCode.includes('admin-portal.js');
 
         const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
         const loginStart = indexHtml.indexOf('id="loginScreen"');

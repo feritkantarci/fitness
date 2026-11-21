@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v349';
+const CACHE_NAME = 'celik-kodu-cache-v350';
 const ASSETS = [
   './',
   './index.html',
@@ -290,8 +290,9 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // POST istekleri, yerel Garmin/Tredict köprüsü, Firebase Firestore, Google API ve OCR CDN çağrılarını doğrudan ağa yönlendir
+  // POST istekleri, uzantı (chrome-extension://) istekleri, yerel köprü ve harici API çağrılarını doğrudan ağa yönlendir
   if (event.request.method !== 'GET' ||
+      !/^https?:\/\//i.test(event.request.url) ||
       event.request.url.includes('127.0.0.1') ||
       event.request.url.includes('localhost') ||
       event.request.url.includes('garmin.kantarci.io') ||
