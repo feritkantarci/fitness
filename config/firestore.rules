@@ -4,20 +4,28 @@ rules_version = '2';
 // Assumed Data Model — Çelik Kodu (fitness-4f427)
 // ===============================================================
 //
+// Collection: user_roles/{authUid}
+// Document ID: Firebase Auth UID
+// Fields:
+//   - role: string (required, 'athlete' | 'admin') - server-checked authority role
+//   - appUid: string | null (optional, 1..128 chars) - mapped athlete doc ID (^usr_... or authUid)
+//   - email: string | null (optional, <= 254 chars) - normalized auth email
+//   - updatedAt: timestamp | string | number | null (optional) - sync timestamp
+//
 // Collection: workout_logs/{uid}
 // Document ID: Athlete ID (^usr_[a-zA-Z0-9_-]{1,64}$)
 // Fields:
-//   - logs: list (required, max 500 items) - workout session history entries
-//   - updatedAt: timestamp | string | number (optional) - server/ISO sync timestamp
+//   - logs: list (required, max 500 workout session maps, zero secrets)
+//   - updatedAt: timestamp | string | number | null (optional) - server/ISO sync timestamp
 //   - clientUpdatedAt: number (optional, >= 0) - client epoch ms
-//   - lastUpdatedBy: string (optional, <= 120 chars) - actor identifier
-//   - syncSeal: string (optional, 10..120 chars) - offline-fallback integrity seal
+//   - lastUpdatedBy: string | null (optional, <= 120 chars) - actor identifier
+//   - syncSeal: string (optional, 10..120 chars) - integrity seal
 //
 // Collection: scale_logs/{uid} & measurement_logs/{uid}
 // Document ID: Athlete ID (^usr_[a-zA-Z0-9_-]{1,64}$)
 // Fields:
-//   - logs: list (required, max 500 items) - body weight / tape measurement entries
-//   - updatedAt: timestamp | string | number (optional)
+//   - logs: list (required, max 500 body weight / tape measurement maps, zero secrets)
+//   - updatedAt: timestamp | string | number | null (optional)
 //   - clientUpdatedAt: number (optional, >= 0)
 //   - syncSeal: string (optional, 10..120 chars)
 //
@@ -33,26 +41,26 @@ rules_version = '2';
 //   - deletedWorkoutLogIds: list | null (optional, <= 500 items)
 //   - mobilityTests: map | null (optional, <= 20 keys, zero credentials/API keys/watch tokens)
 //   - selectedEquipments, customGyms: list | null (optional, <= 200 items)
-//   - aiDoctrine: string (optional, <= 120 chars)
+//   - aiDoctrine: string | null (optional, <= 120 chars)
 //   - aiCoachSummary, lastGeneratedWorkout, activeWorkoutDraft: map | null (optional, <= 100 keys)
-//   - updatedAt: timestamp | string | number (optional)
+//   - updatedAt: timestamp | string | number | null (optional)
 //   - clientUpdatedAt: number (optional, >= 0)
 //   - syncSeal: string (optional, 10..120 chars)
 //
 // Collection: coach_directives/{uid} & custom_programs/{uid}
 // Document ID: Athlete ID (^usr_[a-zA-Z0-9_-]{1,64}$)
-// Fields: Admin-authored coaching directives and custom programs (read by athlete/admin, write by admin only).
+// Fields: Admin-authored coaching directives and custom programs (read by owner/admin, write by admin only).
 //
 // Collection: exercise_bug_reports/{docId}
 // Document ID: string (<= 120 chars, non-relay)
-// Fields: Genuine exercise bug report payload (strictly non-relay; exerciseId != 'garmin_outbox_relay').
+// Fields: Genuine exercise bug report payload (strictly non-relay; exerciseId != 'garmin_outbox_relay'; read/create by authenticated users, update/delete by admin only).
 //
 // Collection: app_system/{docId}
 // Document ID: 'users' | 'ai_config' | 'master_catalog'
 // Fields:
-//   - 'users': { users: list (1..200 sanitized user profiles, zero plaintext passwords/hashes/salts/API keys), updatedAt }
-//   - 'ai_config': Admin-managed AI configuration (write restricted strictly to isAdmin()).
-//   - 'master_catalog': Non-sensitive static exercise catalog metadata/JSON (version, updatedAt, exerciseCount, totalCatalogIds, opengymCount, guideCount, exercisesJson, opengymCatalogJson, exerciseGuideMapJson; read public/athlete, write restricted strictly to isAdmin() via isValidAdminSystemDoc()).
+//   - 'users': { users: list (1..200 sanitized user profiles, zero plaintext passwords/hashes/salts/API keys/watch tokens), updatedAt }
+//   - 'ai_config': Admin-managed non-secret AI bridge & catalog metadata (strictly zero geminiApiKey/sealedAiKey).
+//   - 'master_catalog': Non-sensitive static exercise catalog metadata/JSON (read by app/athletes, write restricted strictly to isAdmin()).
 //
 // Collection: system_telemetry/{uid}
 // Document ID: Athlete ID (^usr_[a-zA-Z0-9_-]{1,64}$)
@@ -84,20 +92,36 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isOwner(uid) {
-      return isAuthenticated() && (
-        request.auth.uid == uid ||
-        ('usr_' + request.auth.uid) == uid ||
-        ('appUid' in request.auth.token && request.auth.token.appUid == uid)
+    function isAdmin() {
+      return request.auth != null && (
+        ('role' in request.auth.token && request.auth.token.role == 'admin') ||
+        ('admin' in request.auth.token && request.auth.token.admin == true) ||
+        (
+          exists(/databases/$(database)/documents/user_roles/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/user_roles/$(request.auth.uid)).data.get('role', '') == 'admin'
+        ) ||
+        (
+          'email' in request.auth.token &&
+          request.auth.token.email == 'feritkantarci@gmail.com'
+        )
       );
     }
 
-    function isAdmin() {
-      return isAuthenticated() && (
-        request.auth.uid == 'usr_admin' ||
-        ('admin' in request.auth.token && request.auth.token.admin == true) ||
-        ('role' in request.auth.token && request.auth.token.role == 'admin') ||
-        ('email' in request.auth.token && 'email_verified' in request.auth.token && request.auth.token.email_verified == true && request.auth.token.email == 'feritkantarci@gmail.com')
+    function isOwner(uid) {
+      return request.auth != null && (
+        request.auth.uid == uid ||
+        ('usr_' + request.auth.uid) == uid ||
+        ('appUid' in request.auth.token && request.auth.token.appUid == uid) ||
+        (
+          uid != 'usr_admin' &&
+          'email' in request.auth.token &&
+          request.auth.token.email == (uid + '@auth.celikkodu.app')
+        ) ||
+        (
+          exists(/databases/$(database)/documents/user_roles/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/user_roles/$(request.auth.uid)).data.get('appUid', '') == uid
+        ) ||
+        (uid == 'usr_admin' && isAdmin())
       );
     }
 
@@ -107,46 +131,16 @@ service cloud.firestore {
 
     function uidUnchanged() {
       return !('uid' in request.resource.data) ||
-        (isAuthenticated() && request.resource.data.uid == request.auth.uid);
+        (request.auth != null && request.resource.data.uid == request.auth.uid);
     }
 
     function uidNotModified() {
       return !('uid' in request.resource.data) ||
-        request.resource.data.uid == resource.data.uid;
+        ('uid' in resource.data && request.resource.data.uid == resource.data.uid);
     }
 
     function hasOnlyAllowedFields(data, fields) {
       return data.keys().hasOnly(fields);
-    }
-
-    function isValidOptionalString(data, field, minLen, maxLen) {
-      return !(field in data)
-        || data[field] == null
-        || (
-          data[field] is string
-          && data[field].size() >= minLen
-          && data[field].size() <= maxLen
-        );
-    }
-
-    function isValidOptionalTimestampOrIso(data, field) {
-      return !(field in data)
-        || data[field] == null
-        || data[field] is timestamp
-        || (data[field] is string && data[field].size() <= 64)
-        || (data[field] is number && data[field] >= 0);
-    }
-
-    function isValidOptionalMapOrNull(data, field, maxKeys) {
-      return !(field in data)
-        || data[field] == null
-        || (data[field] is map && data[field].keys().size() <= maxKeys);
-    }
-
-    function isValidOptionalListOrNull(data, field, maxItems) {
-      return !(field in data)
-        || data[field] == null
-        || (data[field] is list && data[field].size() <= maxItems);
     }
 
     function isValidOptionalSyncSeal(data) {
@@ -162,9 +156,6 @@ service cloud.firestore {
       return isValidOptionalSyncSeal(request.resource.data);
     }
 
-    // Şifre değişimi (password rotation) sonrası gerçek Firebase Auth sahibi (isOwner) veya
-    // yönetici (isAdmin) yeni syncSeal mührünü sorunsuzca döndürebilir; çevrimdışı (offline outbox)
-    // yedek senkronizasyonlar ise mevcut syncSeal eşleşmesini korur.
     function isSealValidForWrite(uid) {
       return isValidOptionalSyncSeal(request.resource.data) && (
         isOwner(uid)
@@ -184,54 +175,93 @@ service cloud.firestore {
     // Şema Doğrulayıcılar (Domain Validators — Create & Update ortak)
     // ===============================================================
 
-    function isValidWorkoutLogPayload(data) {
-      return hasOnlyAllowedFields(data, ['logs', 'updatedAt', 'clientUpdatedAt', 'lastUpdatedBy', 'syncSeal'])
-        && 'logs' in data
-        && data.logs is list
-        && data.logs.size() <= 500
-        && isValidOptionalTimestampOrIso(data, 'updatedAt')
-        && (!('clientUpdatedAt' in data) || (data.clientUpdatedAt is number && data.clientUpdatedAt >= 0))
-        && isValidOptionalString(data, 'lastUpdatedBy', 0, 120)
-        && isValidOptionalSyncSeal(data);
-    }
-
-    function isValidMetricLogPayload(data) {
-      return hasOnlyAllowedFields(data, ['logs', 'updatedAt', 'clientUpdatedAt', 'syncSeal'])
-        && 'logs' in data
-        && data.logs is list
-        && data.logs.size() <= 500
-        && isValidOptionalTimestampOrIso(data, 'updatedAt')
-        && (!('clientUpdatedAt' in data) || (data.clientUpdatedAt is number && data.clientUpdatedAt >= 0))
-        && isValidOptionalSyncSeal(data);
-    }
-
-    function hasNoWatchBridgeTokens(obj) {
-      return !(obj is map)
-        || (!('tredictToken' in obj) && !('intervalsToken' in obj));
-    }
-
-    function hasNoWatchBridgeTokensInField(data, field) {
-      return !(field in data) || hasNoWatchBridgeTokens(data[field]);
-    }
-
-    function hasNoSensitiveSecrets(obj) {
-      return !(obj is map)
-        || (
-          !('password' in obj)
-          && !('passwordHash' in obj)
-          && !('salt' in obj)
-          && !('geminiApiKey' in obj)
-          && !('tredictToken' in obj)
-          && !('intervalsToken' in obj)
+    function isValidUserRolePayload(data) {
+      return hasOnlyAllowedFields(data, ['role', 'appUid', 'email', 'updatedAt'])
+        && 'role' in data
+        && data.role is string
+        && data.role in ['athlete', 'admin']
+        && (
+          !('appUid' in data)
+          || data.appUid == null
+          || (data.appUid is string && data.appUid.size() >= 1 && data.appUid.size() <= 128)
+        )
+        && (
+          !('email' in data)
+          || data.email == null
+          || (data.email is string && data.email.size() <= 254)
+        )
+        && (
+          !('updatedAt' in data)
+          || data.updatedAt == null
+          || data.updatedAt is timestamp
+          || (data.updatedAt is string && data.updatedAt.size() <= 64)
+          || (data.updatedAt is number && data.updatedAt >= 0)
         );
     }
 
-    function hasNoSensitiveSecretsInField(data, field) {
-      return !(field in data) || hasNoSensitiveSecrets(data[field]);
+    function isValidWorkoutLogPayload(data) {
+      let secretKeys = ['password', 'passwordHash', 'salt', 'geminiApiKey', 'tredictToken', 'intervalsToken'];
+      return hasOnlyAllowedFields(data, ['logs', 'updatedAt', 'clientUpdatedAt', 'lastUpdatedBy', 'syncSeal'])
+        && !data.keys().hasAny(secretKeys)
+        && 'logs' in data
+        && data.logs is list
+        && data.logs.size() <= 500
+        && (
+          data.logs.size() == 0
+          || (
+            data.logs[0] is map
+            && !data.logs[0].keys().hasAny(secretKeys)
+            && data.logs[data.logs.size() - 1] is map
+            && !data.logs[data.logs.size() - 1].keys().hasAny(secretKeys)
+          )
+        )
+        && (
+          !('updatedAt' in data)
+          || data.updatedAt == null
+          || data.updatedAt is timestamp
+          || (data.updatedAt is string && data.updatedAt.size() <= 64)
+          || (data.updatedAt is number && data.updatedAt >= 0)
+        )
+        && (!('clientUpdatedAt' in data) || (data.clientUpdatedAt is number && data.clientUpdatedAt >= 0))
+        && (
+          !('lastUpdatedBy' in data)
+          || data.lastUpdatedBy == null
+          || (data.lastUpdatedBy is string && data.lastUpdatedBy.size() <= 120)
+        )
+        && (
+          !('syncSeal' in data)
+          || (data.syncSeal is string && data.syncSeal.size() >= 10 && data.syncSeal.size() <= 120)
+        );
     }
 
-    function isValidCustomProgramSample(p) {
-      return p is map && hasNoSensitiveSecrets(p);
+    function isValidMetricLogPayload(data) {
+      let secretKeys = ['password', 'passwordHash', 'salt', 'geminiApiKey', 'tredictToken', 'intervalsToken'];
+      return hasOnlyAllowedFields(data, ['logs', 'updatedAt', 'clientUpdatedAt', 'syncSeal'])
+        && !data.keys().hasAny(secretKeys)
+        && 'logs' in data
+        && data.logs is list
+        && data.logs.size() <= 500
+        && (
+          data.logs.size() == 0
+          || (
+            data.logs[0] is map
+            && !data.logs[0].keys().hasAny(secretKeys)
+            && data.logs[data.logs.size() - 1] is map
+            && !data.logs[data.logs.size() - 1].keys().hasAny(secretKeys)
+          )
+        )
+        && (
+          !('updatedAt' in data)
+          || data.updatedAt == null
+          || data.updatedAt is timestamp
+          || (data.updatedAt is string && data.updatedAt.size() <= 64)
+          || (data.updatedAt is number && data.updatedAt >= 0)
+        )
+        && (!('clientUpdatedAt' in data) || (data.clientUpdatedAt is number && data.clientUpdatedAt >= 0))
+        && (
+          !('syncSeal' in data)
+          || (data.syncSeal is string && data.syncSeal.size() >= 10 && data.syncSeal.size() <= 120)
+        );
     }
 
     function isValidUserStatePayload(data) {
@@ -476,33 +506,40 @@ service cloud.firestore {
     }
 
     function isValidUserRecordSample(u) {
+      let secretKeys = ['password', 'passwordHash', 'salt', 'geminiApiKey', 'tredictToken', 'intervalsToken'];
+      let tokenKeys = ['tredictToken', 'intervalsToken'];
       return u is map
-        && !('password' in u)
-        && !('passwordHash' in u)
-        && !('salt' in u)
-        && !('geminiApiKey' in u)
-        && !('tredictToken' in u)
-        && !('intervalsToken' in u)
-        && hasNoWatchBridgeTokensInField(u, 'weights')
-        && hasNoWatchBridgeTokensInField(u, 'settings')
-        && hasNoWatchBridgeTokensInField(u, 'preferences')
-        && hasNoWatchBridgeTokensInField(u, 'integrations')
-        && hasNoWatchBridgeTokensInField(u, 'garmin')
-        && hasNoWatchBridgeTokensInField(u, 'tredict')
-        && hasNoWatchBridgeTokensInField(u, 'intervals')
-        && hasNoWatchBridgeTokensInField(u, 'bridge')
-        && hasNoWatchBridgeTokensInField(u, 'watch')
-        && hasNoWatchBridgeTokensInField(u, 'tokens');
+        && u.keys().size() <= 30
+        && !u.keys().hasAny(secretKeys)
+        && (!('id' in u) || (u.id is string && u.id.size() >= 1 && u.id.size() <= 80))
+        && (!('username' in u) || u.username == null || (u.username is string && u.username.size() <= 80))
+        && (!('name' in u) || u.name == null || (u.name is string && u.name.size() <= 120))
+        && (!('email' in u) || u.email == null || (u.email is string && u.email.size() <= 254))
+        && (!('fbAuthEmail' in u) || u.fbAuthEmail == null || (u.fbAuthEmail is string && u.fbAuthEmail.size() <= 254))
+        && (!('role' in u) || u.role == null || (u.role is string && u.role in ['athlete', 'admin']))
+        && (!('status' in u) || u.status == null || (u.status is string && u.status in ['pending', 'approved', 'rejected']))
+        && (!('avatar' in u) || u.avatar == null || (u.avatar is string && u.avatar.size() <= 32))
+        && (!('theme' in u) || u.theme == null || (u.theme is string && u.theme.size() <= 32))
+        && (!('level' in u) || u.level == null || (u.level is string && u.level.size() <= 64))
+        && (!('gender' in u) || u.gender == null || (u.gender is string && u.gender.size() <= 32))
+        && (!('passwordStrengthLevel' in u) || u.passwordStrengthLevel == null || (u.passwordStrengthLevel is string && u.passwordStrengthLevel.size() <= 64))
+        && (!('aliases' in u) || u.aliases == null || (u.aliases is list && u.aliases.size() <= 20))
+        && (!('weights' in u) || !(u.weights is map) || !u.weights.keys().hasAny(tokenKeys))
+        && (!('settings' in u) || !(u.settings is map) || !u.settings.keys().hasAny(tokenKeys))
+        && (!('preferences' in u) || !(u.preferences is map) || !u.preferences.keys().hasAny(tokenKeys))
+        && (!('integrations' in u) || !(u.integrations is map) || !u.integrations.keys().hasAny(tokenKeys))
+        && (!('garmin' in u) || !(u.garmin is map) || !u.garmin.keys().hasAny(tokenKeys))
+        && (!('tredict' in u) || !(u.tredict is map) || !u.tredict.keys().hasAny(tokenKeys))
+        && (!('intervals' in u) || !(u.intervals is map) || !u.intervals.keys().hasAny(tokenKeys))
+        && (!('bridge' in u) || !(u.bridge is map) || !u.bridge.keys().hasAny(tokenKeys))
+        && (!('watch' in u) || !(u.watch is map) || !u.watch.keys().hasAny(tokenKeys))
+        && (!('tokens' in u) || !(u.tokens is map) || !u.tokens.keys().hasAny(tokenKeys));
     }
 
     function isValidUsersSystemPayload(data) {
+      let secretKeys = ['password', 'passwordHash', 'salt', 'geminiApiKey', 'tredictToken', 'intervalsToken'];
       return hasOnlyAllowedFields(data, ['users', 'updatedAt'])
-        && !('password' in data)
-        && !('passwordHash' in data)
-        && !('salt' in data)
-        && !('geminiApiKey' in data)
-        && !('tredictToken' in data)
-        && !('intervalsToken' in data)
+        && !data.keys().hasAny(secretKeys)
         && 'users' in data
         && data.users is list
         && data.users.size() >= 1
@@ -510,19 +547,61 @@ service cloud.firestore {
         && isValidUserRecordSample(data.users[0])
         && (data.users.size() <= 2 || isValidUserRecordSample(data.users[1]))
         && isValidUserRecordSample(data.users[data.users.size() - 1])
-        && isValidOptionalTimestampOrIso(data, 'updatedAt');
+        && (
+          !('updatedAt' in data)
+          || data.updatedAt == null
+          || data.updatedAt is timestamp
+          || (data.updatedAt is string && data.updatedAt.size() <= 64)
+          || (data.updatedAt is number && data.updatedAt >= 0)
+        );
+    }
+
+    function isSafeNonAdminUsersCreate() {
+      let users = request.resource.data.users;
+      return isAdmin() || (
+        users.size() == 1
+        && (!('role' in users[0]) || users[0].role == 'athlete')
+        && (!('status' in users[0]) || users[0].status == 'pending')
+        && (!('id' in users[0]) || users[0].id != 'usr_admin')
+      );
     }
 
     function isSafeNonAdminUsersUpdate() {
-      return !(
-          'users' in resource.data
-          && resource.data.users is list
-          && request.resource.data.users.size() > resource.data.users.size()
+      let oldUsers = resource.data.users;
+      let newUsers = request.resource.data.users;
+      let lastIdx = newUsers.size() - 1;
+      return 'users' in resource.data
+        && oldUsers is list
+        && newUsers.size() == oldUsers.size() + 1
+        && (
+          oldUsers.size() == 0
+          || (
+            newUsers[0].get('id', '') == oldUsers[0].get('id', '')
+            && newUsers[0].get('role', 'athlete') == oldUsers[0].get('role', 'athlete')
+            && newUsers[0].get('status', 'pending') == oldUsers[0].get('status', 'pending')
+            && newUsers[0].get('email', '') == oldUsers[0].get('email', '')
+            && newUsers[0].get('fbAuthEmail', '') == oldUsers[0].get('fbAuthEmail', '')
+            && (
+              oldUsers.size() <= 1
+              || (
+                newUsers[1].get('id', '') == oldUsers[1].get('id', '')
+                && newUsers[1].get('role', 'athlete') == oldUsers[1].get('role', 'athlete')
+                && newUsers[1].get('status', 'pending') == oldUsers[1].get('status', 'pending')
+                && newUsers[1].get('email', '') == oldUsers[1].get('email', '')
+                && newUsers[1].get('fbAuthEmail', '') == oldUsers[1].get('fbAuthEmail', '')
+              )
+            )
+            && newUsers[oldUsers.size() - 1].get('id', '') == oldUsers[oldUsers.size() - 1].get('id', '')
+            && newUsers[oldUsers.size() - 1].get('role', 'athlete') == oldUsers[oldUsers.size() - 1].get('role', 'athlete')
+            && newUsers[oldUsers.size() - 1].get('status', 'pending') == oldUsers[oldUsers.size() - 1].get('status', 'pending')
+            && newUsers[oldUsers.size() - 1].get('email', '') == oldUsers[oldUsers.size() - 1].get('email', '')
+            && newUsers[oldUsers.size() - 1].get('fbAuthEmail', '') == oldUsers[oldUsers.size() - 1].get('fbAuthEmail', '')
+          )
         )
-        || (
-          !('role' in request.resource.data.users[request.resource.data.users.size() - 1])
-          || request.resource.data.users[request.resource.data.users.size() - 1].role != 'admin'
-        );
+        && newUsers[lastIdx] is map
+        && newUsers[lastIdx].get('role', 'athlete') == 'athlete'
+        && newUsers[lastIdx].get('status', 'pending') == 'pending'
+        && newUsers[lastIdx].get('id', '') != 'usr_admin';
     }
 
     function isValidBugReportOrRelayPayload(data) {
@@ -552,24 +631,42 @@ service cloud.firestore {
           'serverTimestamp',
           'resolvedAt'
         ])
-        && isValidOptionalString(data, 'id', 0, 120)
-        && isValidOptionalString(data, 'exerciseName', 0, 200)
-        && isValidOptionalString(data, 'category', 0, 80)
-        && isValidOptionalString(data, 'categoryLabel', 0, 120)
-        && isValidOptionalString(data, 'userNote', 0, 2000)
-        && isValidOptionalString(data, 'currentImageSrc', 0, 500)
-        && isValidOptionalString(data, 'equipment', 0, 120)
-        && isValidOptionalString(data, 'muscle', 0, 300)
-        && isValidOptionalString(data, 'sourceScreen', 0, 160)
-        && isValidOptionalString(data, 'workoutTitle', 0, 200)
-        && isValidOptionalString(data, 'userId', 0, 80)
-        && isValidOptionalString(data, 'userName', 0, 120)
-        && isValidOptionalString(data, 'status', 0, 80)
-        && isValidOptionalString(data, 'aiResolutionNote', 0, 2000)
-        && isValidOptionalTimestampOrIso(data, 'createdAt')
-        && isValidOptionalString(data, 'createdAtFormatted', 0, 80)
-        && isValidOptionalTimestampOrIso(data, 'serverTimestamp')
-        && isValidOptionalTimestampOrIso(data, 'resolvedAt');
+        && (!('id' in data) || data.id == null || (data.id is string && data.id.size() <= 120))
+        && (!('exerciseName' in data) || data.exerciseName == null || (data.exerciseName is string && data.exerciseName.size() <= 200))
+        && (!('category' in data) || data.category == null || (data.category is string && data.category.size() <= 80))
+        && (!('categoryLabel' in data) || data.categoryLabel == null || (data.categoryLabel is string && data.categoryLabel.size() <= 120))
+        && (!('userNote' in data) || data.userNote == null || (data.userNote is string && data.userNote.size() <= 2000))
+        && (!('currentImageSrc' in data) || data.currentImageSrc == null || (data.currentImageSrc is string && data.currentImageSrc.size() <= 500))
+        && (!('equipment' in data) || data.equipment == null || (data.equipment is string && data.equipment.size() <= 120))
+        && (!('muscle' in data) || data.muscle == null || (data.muscle is string && data.muscle.size() <= 300))
+        && (!('sourceScreen' in data) || data.sourceScreen == null || (data.sourceScreen is string && data.sourceScreen.size() <= 160))
+        && (!('workoutTitle' in data) || data.workoutTitle == null || (data.workoutTitle is string && data.workoutTitle.size() <= 200))
+        && (!('userId' in data) || data.userId == null || (data.userId is string && data.userId.size() <= 80))
+        && (!('userName' in data) || data.userName == null || (data.userName is string && data.userName.size() <= 120))
+        && (!('status' in data) || data.status == null || (data.status is string && data.status.size() <= 80))
+        && (!('aiResolutionNote' in data) || data.aiResolutionNote == null || (data.aiResolutionNote is string && data.aiResolutionNote.size() <= 2000))
+        && (
+          !('createdAt' in data)
+          || data.createdAt == null
+          || data.createdAt is timestamp
+          || (data.createdAt is string && data.createdAt.size() <= 64)
+          || (data.createdAt is number && data.createdAt >= 0)
+        )
+        && (!('createdAtFormatted' in data) || data.createdAtFormatted == null || (data.createdAtFormatted is string && data.createdAtFormatted.size() <= 80))
+        && (
+          !('serverTimestamp' in data)
+          || data.serverTimestamp == null
+          || data.serverTimestamp is timestamp
+          || (data.serverTimestamp is string && data.serverTimestamp.size() <= 64)
+          || (data.serverTimestamp is number && data.serverTimestamp >= 0)
+        )
+        && (
+          !('resolvedAt' in data)
+          || data.resolvedAt == null
+          || data.resolvedAt is timestamp
+          || (data.resolvedAt is string && data.resolvedAt.size() <= 64)
+          || (data.resolvedAt is number && data.resolvedAt >= 0)
+        );
     }
 
     function isValidAdminManagedDoc(data) {
@@ -577,7 +674,10 @@ service cloud.firestore {
         && data.keys().size() <= 40
         && !('password' in data)
         && !('passwordHash' in data)
-        && !('salt' in data);
+        && !('salt' in data)
+        && !('geminiApiKey' in data)
+        && !('tredictToken' in data)
+        && !('intervalsToken' in data);
     }
 
     function isValidAdminSystemDoc(data) {
@@ -585,7 +685,10 @@ service cloud.firestore {
         && data.keys().size() <= 30
         && !('password' in data)
         && !('passwordHash' in data)
-        && !('salt' in data);
+        && !('salt' in data)
+        && !('geminiApiKey' in data)
+        && !('tredictToken' in data)
+        && !('intervalsToken' in data);
     }
 
     function isValidTelemetryEventSample(ev) {
@@ -710,13 +813,55 @@ service cloud.firestore {
     // Koleksiyon Kuralları (Collection Match Rules)
     // ===============================================================
 
+    // Firebase Auth UID -> Rol ve Sporcu ID Eşleme Tablosu
+    match /user_roles/{authUid} {
+      allow read: if isAuthenticated() && (request.auth.uid == authUid || isAdmin());
+      allow create: if isValidUserRolePayload(request.resource.data) && (
+        isAdmin() || (
+          isAuthenticated()
+          && request.auth.uid == authUid
+          && (
+            request.resource.data.role == 'athlete'
+            || (
+              'email' in request.auth.token
+              && request.auth.token.email == 'feritkantarci@gmail.com'
+              && request.resource.data.role == 'admin'
+            )
+          )
+          && (
+            !('appUid' in request.resource.data)
+            || request.resource.data.appUid == null
+            || request.resource.data.appUid == request.auth.uid
+            || request.resource.data.appUid == ('usr_' + request.auth.uid)
+            || ('appUid' in request.auth.token && request.auth.token.appUid == request.resource.data.appUid)
+            || (
+              request.resource.data.appUid != 'usr_admin'
+              && 'email' in request.auth.token
+              && request.auth.token.email == (request.resource.data.appUid + '@auth.celikkodu.app')
+            )
+          )
+        )
+      );
+      allow update: if isValidUserRolePayload(request.resource.data) && (
+        isAdmin() || (
+          isAuthenticated()
+          && request.auth.uid == authUid
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.get('appUid', null) == resource.data.get('appUid', null)
+        )
+      );
+      allow delete: if isAdmin();
+    }
+
     // Sporcu Antrenman Kayıtları
     match /workout_logs/{uid} {
-      allow read: if isOwner(uid) || isAdmin() || isValidAthleteId(uid);
-      allow create: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
+      allow read: if (isOwner(uid) || isAdmin()) && isValidAthleteId(uid);
+      allow create: if (isOwner(uid) || isAdmin())
+        && isValidAthleteId(uid)
         && isValidWorkoutLogPayload(request.resource.data)
         && isSealValidForCreate();
-      allow update: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
+      allow update: if (isOwner(uid) || isAdmin())
+        && isValidAthleteId(uid)
         && isValidWorkoutLogPayload(request.resource.data)
         && isSealValidForWrite(uid);
       allow delete: if isAdmin();
@@ -724,11 +869,13 @@ service cloud.firestore {
 
     // Vücut Kompozisyonu ve Tartı Geçmişi
     match /scale_logs/{uid} {
-      allow read: if isOwner(uid) || isAdmin() || isValidAthleteId(uid);
-      allow create: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
+      allow read: if (isOwner(uid) || isAdmin()) && isValidAthleteId(uid);
+      allow create: if (isOwner(uid) || isAdmin())
+        && isValidAthleteId(uid)
         && isValidMetricLogPayload(request.resource.data)
         && isSealValidForCreate();
-      allow update: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
+      allow update: if (isOwner(uid) || isAdmin())
+        && isValidAthleteId(uid)
         && isValidMetricLogPayload(request.resource.data)
         && isSealValidForWrite(uid);
       allow delete: if isAdmin();
@@ -736,11 +883,13 @@ service cloud.firestore {
 
     // Mezura ve Vücut Ölçü Geçmişi
     match /measurement_logs/{uid} {
-      allow read: if isOwner(uid) || isAdmin() || isValidAthleteId(uid);
-      allow create: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
+      allow read: if (isOwner(uid) || isAdmin()) && isValidAthleteId(uid);
+      allow create: if (isOwner(uid) || isAdmin())
+        && isValidAthleteId(uid)
         && isValidMetricLogPayload(request.resource.data)
         && isSealValidForCreate();
-      allow update: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
+      allow update: if (isOwner(uid) || isAdmin())
+        && isValidAthleteId(uid)
         && isValidMetricLogPayload(request.resource.data)
         && isSealValidForWrite(uid);
       allow delete: if isAdmin();
@@ -748,11 +897,13 @@ service cloud.firestore {
 
     // Sporcu Plan, Ekipman, Ağırlık Hafızası ve AI Koç Durumu Senkronizasyonu
     match /user_state/{uid} {
-      allow read: if isOwner(uid) || isAdmin() || isValidAthleteId(uid);
-      allow create: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
+      allow read: if (isOwner(uid) || isAdmin()) && isValidAthleteId(uid);
+      allow create: if (isOwner(uid) || isAdmin())
+        && isValidAthleteId(uid)
         && isValidUserStatePayload(request.resource.data)
         && isSealValidForCreate();
-      allow update: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
+      allow update: if (isOwner(uid) || isAdmin())
+        && isValidAthleteId(uid)
         && isValidUserStatePayload(request.resource.data)
         && isSealValidForWrite(uid);
       allow delete: if isAdmin();
@@ -760,8 +911,13 @@ service cloud.firestore {
 
     // Koç Direktifleri
     match /coach_directives/{uid} {
-      allow read: if isOwner(uid) || isAdmin() || isValidAthleteId(uid);
-      allow create, update: if isAdmin()
+      allow read: if (isOwner(uid) || isAdmin()) && isValidAthleteId(uid);
+      allow create: if isAdmin()
+        && isValidAthleteId(uid)
+        && isValidAdminManagedDoc(request.resource.data)
+        && (!('uid' in request.resource.data) || request.resource.data.uid == uid);
+      allow update: if isAdmin()
+        && isValidAthleteId(uid)
         && isValidAdminManagedDoc(request.resource.data)
         && uidNotModified();
       allow delete: if isAdmin();
@@ -769,8 +925,13 @@ service cloud.firestore {
 
     // Özel Akademik Programlar
     match /custom_programs/{uid} {
-      allow read: if isOwner(uid) || isAdmin() || isValidAthleteId(uid);
-      allow create, update: if isAdmin()
+      allow read: if (isOwner(uid) || isAdmin()) && isValidAthleteId(uid);
+      allow create: if isAdmin()
+        && isValidAthleteId(uid)
+        && isValidAdminManagedDoc(request.resource.data)
+        && (!('uid' in request.resource.data) || request.resource.data.uid == uid);
+      allow update: if isAdmin()
+        && isValidAthleteId(uid)
         && isValidAdminManagedDoc(request.resource.data)
         && uidNotModified();
       allow delete: if isAdmin();
@@ -778,8 +939,9 @@ service cloud.firestore {
 
     // Egzersiz Hata Bildirim Havuzu
     match /exercise_bug_reports/{docId} {
-      allow read: if isAuthenticated() || (docId is string && docId.size() <= 120);
-      allow create: if docId is string
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+        && docId is string
         && docId.size() <= 120
         && !docId.matches('^garmin_relay.*')
         && isValidBugReportOrRelayPayload(request.resource.data)
@@ -792,25 +954,51 @@ service cloud.firestore {
 
     // Sistem Konfigürasyonu, Ana Katalog ve Kullanıcı Listesi
     match /app_system/{docId} {
-      allow read: if docId == 'users' || docId == 'ai_config' || docId == 'master_catalog' || isAdmin();
-      allow create: if (docId == 'users' && isValidUsersSystemPayload(request.resource.data))
-        || (isAdmin() && isValidAdminSystemDoc(request.resource.data));
+      allow read: if docId == 'master_catalog' || docId == 'users' || docId == 'ai_config' || isAdmin();
+      allow create: if (docId == 'users' && isValidUsersSystemPayload(request.resource.data) && isSafeNonAdminUsersCreate())
+        || (
+          docId == 'ai_config'
+          && isAdmin()
+          && isValidAdminSystemDoc(request.resource.data)
+          && !('geminiApiKey' in request.resource.data)
+          && !('sealedAiKey' in request.resource.data)
+        )
+        || (
+          docId != 'users'
+          && docId != 'ai_config'
+          && isAdmin()
+          && isValidAdminSystemDoc(request.resource.data)
+        );
       allow update: if (
           docId == 'users'
           && isValidUsersSystemPayload(request.resource.data)
-          && isSafeNonAdminUsersUpdate()
+          && (isAdmin() || isSafeNonAdminUsersUpdate())
         )
-        || (isAdmin() && isValidAdminSystemDoc(request.resource.data));
+        || (
+          docId == 'ai_config'
+          && isAdmin()
+          && isValidAdminSystemDoc(request.resource.data)
+          && !('geminiApiKey' in request.resource.data)
+          && !('sealedAiKey' in request.resource.data)
+        )
+        || (
+          docId != 'users'
+          && docId != 'ai_config'
+          && isAdmin()
+          && isValidAdminSystemDoc(request.resource.data)
+        );
       allow delete: if isAdmin();
     }
 
     // Sistem Telemetrisi ve İstemci Hata/Uyarı İzleme Kayıtları
     match /system_telemetry/{uid} {
-      allow read: if isAdmin() || isOwner(uid);
-      allow create: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
+      allow read: if isAdmin() || (isOwner(uid) && isValidAthleteId(uid));
+      allow create: if (isOwner(uid) || isAdmin())
+        && isValidAthleteId(uid)
         && isValidSystemTelemetryPayload(request.resource.data, uid)
         && isSealValidForCreate();
-      allow update: if (isOwner(uid) || isAdmin() || isValidAthleteId(uid))
+      allow update: if (isOwner(uid) || isAdmin())
+        && isValidAthleteId(uid)
         && isValidSystemTelemetryPayload(request.resource.data, uid)
         && isSealValidForWrite(uid);
       allow delete: if isAdmin();

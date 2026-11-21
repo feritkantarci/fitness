@@ -54,10 +54,14 @@ window.CELIK_CHIEF_ROOMS = Object.freeze({
                     try {
                         navigator.serviceWorker.register('./sw.js?v=335')
                             .then(reg => {
-                                console.log('SW scope:', reg.scope);
-                                if (reg.update) reg.update();
+                                if (reg.update) reg.update().catch(() => {});
+                                document.addEventListener('visibilitychange', () => {
+                                    if (document.visibilityState === 'visible' && reg.update) {
+                                        reg.update().catch(() => {});
+                                    }
+                                });
                             })
-                            .catch(err => console.log('SW err:', err));
+                            .catch(() => {});
                     } catch (e) {}
                 });
 

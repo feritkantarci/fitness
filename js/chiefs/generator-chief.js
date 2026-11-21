@@ -1,33 +1,33 @@
 // ==================== ODA 1: PROGRAM ÜRETİCİ ŞEFİ (generator-guard) ====================
         // ==================== WORKOUT GENERATOR ENGINE ====================
         const SPLIT_METAS = {
-            full_body: { name: "Tüm Vücut", shortName: "Tüm Vücut", icon: "⚡" },
-            upper_push: { name: "Üst İtiş", shortName: "İtiş", icon: "🛡️" },
-            upper_pull: { name: "Üst Çekiş", shortName: "Çekiş", icon: "⚔️" },
-            lower: { name: "Alt Vücut", shortName: "Alt Vücut", icon: "🦵" },
-            upper: { name: "Tüm Üst Vücut", shortName: "Üst Vücut", icon: "🦅" },
-            core: { name: "Karın & Core", shortName: "Core", icon: "🧱" },
-            functional: { name: "Fonksiyonel & Kondisyon", shortName: "Fonksiyonel", icon: "⚡" },
-            flow_complex: { name: "⚔️ Çelik Akışı (Flow Kompleks)", shortName: "Çelik Akışı", icon: "⚔️" },
-            iso_chest: { name: "Göğüs", shortName: "Göğüs", icon: "🎯" },
-            iso_back: { name: "Sırt & Kanat", shortName: "Sırt", icon: "🎯" },
-            iso_shoulders: { name: "Omuz", shortName: "Omuz", icon: "🎯" },
-            iso_arms: { name: "Kol (Biceps & Triceps)", shortName: "Kol", icon: "🎯" },
-            iso_legs: { name: "Bacak & Kalça", shortName: "Bacak", icon: "🎯" },
-            iso_core: { name: "Karın & Core", shortName: "Karın", icon: "🎯" }
+            full_body: { name: "Tüm Vücut", shortName: "Tüm Vücut", icon: "" },
+            upper_push: { name: "Üst İtiş", shortName: "İtiş", icon: "" },
+            upper_pull: { name: "Üst Çekiş", shortName: "Çekiş", icon: "" },
+            lower: { name: "Alt Vücut", shortName: "Alt Vücut", icon: "" },
+            upper: { name: "Tüm Üst Vücut", shortName: "Üst Vücut", icon: "" },
+            core: { name: "Karın & Core", shortName: "Core", icon: "" },
+            functional: { name: "Fonksiyonel & Kondisyon", shortName: "Fonksiyonel", icon: "" },
+            flow_complex: { name: "Çelik Akışı (Flow Kompleks)", shortName: "Çelik Akışı", icon: "" },
+            iso_chest: { name: "Göğüs", shortName: "Göğüs", icon: "" },
+            iso_back: { name: "Sırt & Kanat", shortName: "Sırt", icon: "" },
+            iso_shoulders: { name: "Omuz", shortName: "Omuz", icon: "" },
+            iso_arms: { name: "Kol (Biceps & Triceps)", shortName: "Kol", icon: "" },
+            iso_legs: { name: "Bacak & Kalça", shortName: "Bacak", icon: "" },
+            iso_core: { name: "Karın & Core", shortName: "Karın", icon: "" }
         };
 
         function updateSelectedSplitLabel() {
             const el = document.getElementById('selectedSplitLabel');
             if (!el) return;
             if (window.aiGeneratorScope === 'flow_complex') {
-                el.innerText = '⚡ Çelik Akışı (20 Dk Dambıl Kompleksi)';
+                el.innerText = 'Çelik Akışı (20 Dk Dambıl Kompleksi)';
                 return;
             }
             if (window.aiGeneratorScope === 'weekly') {
                 const tplMap = {
-                    ai_auto: 'AI Otomatik',
-                    auto: 'AI Otomatik',
+                    ai_auto: 'Otomatik Haftalık Denge',
+                    auto: 'Otomatik Haftalık Denge',
                     upper_lower_full: '3 Gün • Üst / Alt / Tüm Vücut',
                     ppl_3day: '3 Gün • İtiş / Çekiş / Bacak',
                     fullbody_3day: '3 Gün • Tüm Vücut',
@@ -35,16 +35,16 @@
                     upper_lower_4day: '4 Gün • Üst / Alt',
                     flow_complex_3day: '3 Gün • Çelik Akışı'
                 };
-                el.innerText = tplMap[window.selectedAiWeeklyTemplate] || 'AI Otomatik';
+                el.innerText = tplMap[window.selectedAiWeeklyTemplate] || 'Otomatik Haftalık Denge';
                 return;
             }
             if (!selectedSplits || selectedSplits.length === 0) {
-                el.innerText = '⚠️ Seçilmedi';
+                el.innerText = 'Seçilmedi';
                 return;
             }
             if (selectedSplits.length === 1) {
                 const s = selectedSplits[0];
-                const meta = SPLIT_METAS[s] || { name: s, icon: "⚡" };
+                const meta = SPLIT_METAS[s] || { name: s, icon: "" };
                 el.innerText = meta.name;
             } else {
                 const names = selectedSplits.map(s => {
@@ -72,19 +72,18 @@
             };
             const labels = selectedEquipments.map(e => names[e] || e);
             if (labels.length === ALL_EQUIPMENT_KEYS.length) {
-                el.innerText = '🏢 Tüm Ekipmanlar (' + labels.length + ' Seçili)';
+                el.innerText = 'Tüm Ekipmanlar (' + labels.length + ' Seçili)';
             } else if (labels.length === 0) {
-                el.innerText = '⚠️ Seçilmedi';
+                el.innerText = 'Seçilmedi';
             } else if (labels.length === 1) {
-                el.innerText = `🏋️ ${labels[0]}`;
+                el.innerText = labels[0];
             } else {
-                el.innerText = `🏋️ ${labels.join(', ')} (${labels.length} Seçili)`;
+                el.innerText = `${labels.join(', ')} (${labels.length} Seçili)`;
             }
         }
 
         function updateSelectedParamLabel() {
             const el = document.getElementById('selectedParamLabel');
-            if (!el) return;
             const styleEl = document.getElementById('paramStyle');
             const goalEl = document.getElementById('paramGoal');
             const durEl = document.getElementById('paramDuration');
@@ -101,13 +100,51 @@
             } else {
                 if (goalGroup) goalGroup.style.display = '';
             }
-            
+
+            if (durEl) {
+                document.querySelectorAll('#genDurationQuickGrid .gen-dur-pill').forEach(btn => {
+                    const match = btn.getAttribute('data-dur') === String(durEl.value);
+                    btn.classList.toggle('active', match);
+                    btn.setAttribute('aria-pressed', match ? 'true' : 'false');
+                });
+            }
+
+            if (!el) return;
             const styleTxt = styleEl ? styleEl.options[styleEl.selectedIndex].text.replace(/^[^\w\sÇĞİÖŞÜçğıöşü]*\s*/, '').split('(')[0].trim() : 'Orta Süperset';
             const goalTxt = goalEl ? goalEl.options[goalEl.selectedIndex].text.replace(/^[^\w\sÇĞİÖŞÜçğıöşü]*\s*/, '').split('(')[0].trim() : 'Kas';
             const durTxt = durEl ? durEl.value + ' Dk' : '45 Dk';
 
-            el.innerText = isSplitEmom ? `⚡ ${styleTxt} • ⏱️ ${durTxt}` : `⚡ ${styleTxt} • 🛡️ ${goalTxt} • ⏱️ ${durTxt}`;
+            el.innerText = isSplitEmom ? `${styleTxt} • ${durTxt}` : `${styleTxt} • ${goalTxt} • ${durTxt}`;
         }
+
+        function setGeneratorDurationQuick(val) {
+            const cleanDur = String(val || '45');
+            const durEl = document.getElementById('paramDuration');
+            if (durEl) durEl.value = cleanDur;
+            document.querySelectorAll('#genDurationQuickGrid .gen-dur-pill').forEach(btn => {
+                const match = btn.getAttribute('data-dur') === cleanDur;
+                btn.classList.toggle('active', match);
+                btn.setAttribute('aria-pressed', match ? 'true' : 'false');
+            });
+            if (window.aiGeneratorScope === 'flow_complex' && cleanDur !== '20' && typeof setAiGeneratorScope === 'function') {
+                setAiGeneratorScope('single');
+            }
+            updateSelectedParamLabel();
+        }
+        window.setGeneratorDurationQuick = setGeneratorDurationQuick;
+
+        function toggleGenAdvancedAccordion(forceOpen) {
+            const body = document.getElementById('genAdvancedAccordionBody');
+            const arrow = document.getElementById('genAdvancedAccordionArrow');
+            const btn = document.getElementById('btnToggleGenAdvanced');
+            if (!body) return;
+            const isOpen = body.style.display !== 'none';
+            const shouldOpen = (typeof forceOpen === 'boolean') ? forceOpen : !isOpen;
+            body.style.display = shouldOpen ? 'block' : 'none';
+            if (arrow) arrow.textContent = shouldOpen ? '▲ Kapat' : '▼ Aç';
+            if (btn) btn.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+        }
+        window.toggleGenAdvancedAccordion = toggleGenAdvancedAccordion;
 
         function toggleGenSection(sectionId) {
             const sec = document.getElementById(sectionId);
@@ -943,12 +980,12 @@
             }
         }
 
-        window.aiGeneratorScope = 'weekly';
+        window.aiGeneratorScope = 'single';
         window.selectedAiWeeklyTemplate = 'ai_auto';
 
         const AI_WEEKLY_TPL_LABELS = {
-            ai_auto: 'AI Otomatik',
-            auto: 'AI Otomatik',
+            ai_auto: 'Otomatik Haftalık Denge',
+            auto: 'Otomatik Haftalık Denge',
             upper_lower_full: '3 Gün • Üst / Alt / Tüm Vücut',
             ppl_3day: '3 Gün • İtiş / Çekiş / Bacak',
             fullbody_3day: '3 Gün • Tüm Vücut',
@@ -984,12 +1021,13 @@
         }
 
         function setAiGeneratorScope(scope) {
-            window.aiGeneratorScope = (scope === 'single') ? 'single' : (scope === 'flow_complex' ? 'flow_complex' : 'weekly');
+            window.aiGeneratorScope = (scope === 'weekly') ? 'weekly' : (scope === 'flow_complex' ? 'flow_complex' : 'single');
             const btnW = document.getElementById('aiScopeBtnWeekly');
             const btnS = document.getElementById('aiScopeBtnSingle');
             const btnF = document.getElementById('aiScopeBtnFlow');
             const gridW = document.getElementById('aiWeeklyTemplateGrid');
-            const gridS = document.getElementById('splitGrid');
+            const splitPanel = document.getElementById('genStepPanelSplit');
+            const durPanel = document.getElementById('genStepPanelDuration');
             const flowSec = document.getElementById('flowConceptSection');
             const flowNotice = document.getElementById('flowParamNotice');
             const equipWrap = document.getElementById('equipChipsWrap');
@@ -1006,42 +1044,41 @@
                 gridW.style.display = (window.aiGeneratorScope === 'weekly') ? '' : 'none';
                 gridW.classList.toggle('is-hidden-grid', window.aiGeneratorScope !== 'weekly');
             }
-            if (gridS) {
-                gridS.style.display = (window.aiGeneratorScope === 'single') ? '' : 'none';
-                gridS.classList.toggle('is-hidden-grid', window.aiGeneratorScope !== 'single');
+            if (splitPanel) {
+                splitPanel.style.opacity = (window.aiGeneratorScope === 'single') ? '1' : '0.48';
+                splitPanel.style.pointerEvents = (window.aiGeneratorScope === 'single') ? 'auto' : 'none';
+            }
+            if (durPanel) {
+                durPanel.style.opacity = (window.aiGeneratorScope === 'flow_complex') ? '0.48' : '1';
+                durPanel.style.pointerEvents = (window.aiGeneratorScope === 'flow_complex') ? 'none' : 'auto';
             }
             if (flowSec) {
                 flowSec.style.display = (window.aiGeneratorScope === 'flow_complex') ? 'block' : 'none';
             }
 
             if (window.aiGeneratorScope === 'flow_complex') {
-                if (lblSplit) lblSplit.innerText = '⚡ Çelik Akışı (20 Dk Dambıl Kompleksi)';
+                if (lblSplit) lblSplit.innerText = 'Çelik Akışı (20 Dk Dambıl Kompleksi)';
 
-                // Diğer seçenekleri pasifleştir:
                 if (equipWrap) equipWrap.classList.add('is-flow-locked');
                 if (paramGrid) paramGrid.classList.add('is-flow-locked');
                 if (flowNotice) flowNotice.style.display = 'block';
 
-                // Ekipmanı dambıla sabitle
                 selectedEquipments = ['dumbbell'];
                 if (typeof renderEquipChips === 'function') renderEquipChips();
                 const equipLbl = document.getElementById('selectedEquipLabel');
-                if (equipLbl) equipLbl.innerText = '🏋️ Dambıl (Çelik Akışı için Sabit)';
+                if (equipLbl) equipLbl.innerText = 'Dambıl (Çelik Akışı için Sabit)';
 
-                // Parametreleri komplekse sabitle
                 const styleEl = document.getElementById('paramStyle');
                 const goalEl = document.getElementById('paramGoal');
                 const durEl = document.getElementById('paramDuration');
                 if (styleEl) styleEl.value = 'complex';
                 if (goalEl) goalEl.value = 'endurance';
                 if (durEl) durEl.value = '20';
-                const paramLbl = document.getElementById('selectedParamLabel');
-                if (paramLbl) paramLbl.innerText = '⚡ Birleşik Akış • 🛡️ Kondisyon • ⏱️ 20 Dk';
+                updateSelectedParamLabel();
 
-                if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} ⚡ Çelik Akışını Oluştur`;
-                if (hintEl) hintEl.textContent = '20 Dk kesintisiz akış taslağı hazırlanır • Onaylamadan takvime eklenmez';
+                if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} Çelik Akışını Oluştur`;
+                if (hintEl) hintEl.textContent = '20 dk kesintisiz akış taslağı hazırlanır • Onaylamadan takvime eklenmez';
             } else {
-                // Pasifliği kaldır
                 if (equipWrap) equipWrap.classList.remove('is-flow-locked');
                 if (paramGrid) paramGrid.classList.remove('is-flow-locked');
                 if (flowNotice) flowNotice.style.display = 'none';
@@ -1052,14 +1089,14 @@
 
                 if (window.aiGeneratorScope === 'weekly') {
                     if (lblSplit) {
-                        lblSplit.innerText = AI_WEEKLY_TPL_LABELS[window.selectedAiWeeklyTemplate] || 'Haftalık • AI Otomatik Teşhis';
+                        lblSplit.innerText = AI_WEEKLY_TPL_LABELS[window.selectedAiWeeklyTemplate] || 'Otomatik Haftalık Denge';
                     }
-                    if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} Programı Oluştur`;
+                    if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} Haftalık Program Oluştur`;
                     if (hintEl) hintEl.textContent = 'Onaylamadan takvime eklenmez';
                 } else {
                     if (typeof renderSplitCards === 'function') renderSplitCards();
                     if (typeof updateSelectedSplitLabel === 'function') updateSelectedSplitLabel();
-                    if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} Antrenmanı Oluştur`;
+                    if (ctaBtn) ctaBtn.innerHTML = `${CANVA_ICONS.bolt} Program Oluştur`;
                     if (hintEl) hintEl.textContent = 'Onaylamadan takvime eklenmez';
                 }
             }
@@ -1372,7 +1409,9 @@
         window.confirmQuickAiPrecheckAndGenerate = confirmQuickAiPrecheckAndGenerate;
 
         async function handleQuickAiGenerate(preferredTplKey = null, skipPrecheck = false) {
-            if (!skipPrecheck) {
+            const isDirectSingle = (window.aiGeneratorScope === 'single' && !preferredTplKey);
+            const isDirectFlow = (window.aiGeneratorScope === 'flow_complex' && !preferredTplKey);
+            if (!skipPrecheck && !isDirectSingle && !isDirectFlow) {
                 openQuickAiPrecheckModal(preferredTplKey, false);
                 return;
             }
@@ -1382,18 +1421,28 @@
             const scaleCheck = evaluateScaleFreshness30Days();
             const precheck = window.activePrecheckState || { fatigue: 'none', scaleTrend: 'stable' };
 
-            if (!scaleCheck.isFresh && precheck.scaleTrend === 'gained') {
-                currentSelectedDoctrine = 'func_hybrid';
-            } else if (!scaleCheck.isFresh && precheck.scaleTrend === 'lost') {
-                currentSelectedDoctrine = 'bb_hybrid';
-            } else if (goalVal === 'strength') {
-                currentSelectedDoctrine = 'bb_pure';
-            } else if (goalVal === 'endurance') {
-                currentSelectedDoctrine = 'func_hybrid';
-            } else if (telemetry && telemetry.recommendedDoctrine && AI_DOCTRINES[telemetry.recommendedDoctrine]) {
-                currentSelectedDoctrine = telemetry.recommendedDoctrine;
+            if (!isDirectSingle && !isDirectFlow) {
+                if (!scaleCheck.isFresh && precheck.scaleTrend === 'gained') {
+                    currentSelectedDoctrine = 'func_hybrid';
+                } else if (!scaleCheck.isFresh && precheck.scaleTrend === 'lost') {
+                    currentSelectedDoctrine = 'bb_hybrid';
+                } else if (goalVal === 'strength') {
+                    currentSelectedDoctrine = 'bb_pure';
+                } else if (goalVal === 'endurance') {
+                    currentSelectedDoctrine = 'func_hybrid';
+                } else if (telemetry && telemetry.recommendedDoctrine && AI_DOCTRINES[telemetry.recommendedDoctrine]) {
+                    currentSelectedDoctrine = telemetry.recommendedDoctrine;
+                } else {
+                    currentSelectedDoctrine = 'bb_hybrid';
+                }
             } else {
-                currentSelectedDoctrine = 'bb_hybrid';
+                if (goalVal === 'strength') currentSelectedDoctrine = 'bb_pure';
+                else if (goalVal === 'endurance') currentSelectedDoctrine = 'func_hybrid';
+                else if (telemetry && telemetry.recommendedDoctrine && AI_DOCTRINES[telemetry.recommendedDoctrine]) {
+                    currentSelectedDoctrine = telemetry.recommendedDoctrine;
+                } else {
+                    currentSelectedDoctrine = 'bb_hybrid';
+                }
             }
 
             const unifiedWishEl = document.getElementById('aiUnifiedWishInput');
@@ -1402,7 +1451,6 @@
                 ? unifiedWishEl.value.trim()
                 : (modalWishEl ? modalWishEl.value.trim() : '');
 
-            // 🤖 Gemini Yapay Zeka İstek Analizi: Kullanıcı özel bir not girdiyse Gemini API ile anında analiz et
             const btnEl = document.getElementById('btnUnifiedAiGenerate');
             const originalBtnHtml = btnEl ? btnEl.innerHTML : '';
             const hintEl = document.getElementById('aiQuickPreviewHint');
@@ -1410,11 +1458,11 @@
             if (userWish && typeof parseUserWishWithGemini === 'function') {
                 if (btnEl) {
                     btnEl.disabled = true;
-                    btnEl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:8px;">${CANVA_ICONS.sparkle || '✨'} Gemini AI İsteğinizi İnceliyor...</span>`;
+                    btnEl.innerHTML = `<span style="display:inline-flex; align-items:center; gap:8px;">İsteğiniz İnceleniyor...</span>`;
                 }
                 if (hintEl) {
-                    hintEl.textContent = '⏳ Gemini AI kısıtlamalarınızı ve odak tercihlerinizi inceliyor...';
-                    hintEl.style.color = '#0369A1';
+                    hintEl.textContent = 'Tercihleriniz analiz ediliyor...';
+                    hintEl.style.color = '#7DD3FC';
                 }
 
                 try {
@@ -1429,7 +1477,6 @@
                 }
             }
 
-            // ⚡ Eğer Çelik Akışı (Yeni Konsept) seçiliyse doğrudan kompleks akışını taslak olarak hazırla
             if (window.aiGeneratorScope === 'flow_complex') {
                 window.pendingAiWeeklyPlan = null;
                 loadCelikAkisiWorkout(false);
@@ -1446,46 +1493,53 @@
                 if (styleEl && styleEl.value !== 'complex') styleEl.value = 'complex';
             }
 
-            // Eğer birleşik akış/kompleks istenmişse ve haftalık 3 günlük kompleks şablonu özellikle seçilmemişse tek günlük flow üret
             if (isComplexRequested && window.selectedAiWeeklyTemplate !== 'flow_complex_3day' && !preferredTplKey) {
                 window.aiGeneratorScope = 'single';
-            } else if (!preferredTplKey && precheck.scope) {
+            } else if (!preferredTplKey && !isDirectSingle && precheck.scope) {
                 window.aiGeneratorScope = precheck.scope;
             }
 
-            // Eğer kullanıcı pop-up'tan "Bugün İçin" (single) seçtiyse, yorgun kas ve geçmiş eksiklere göre bugünün bölgesini otomatik belirle
             if (window.aiGeneratorScope === 'single' && !preferredTplKey) {
                 window.pendingAiWeeklyPlan = null;
-                const histCtx = typeof getRecentAndScheduledMuscleContext === 'function' ? getRecentAndScheduledMuscleContext() : null;
-                const hoursAgo = (histCtx && histCtx.lastSessionHoursAgo !== null && histCtx.lastSessionHoursAgo !== undefined)
-                    ? Number(histCtx.lastSessionHoursAgo)
-                    : 999;
-                const lastMap = (histCtx && histCtx.lastSessionMuscleSets) ? histCtx.lastSessionMuscleSets : {};
-                const lastWasBalancedFullBody = (Number(lastMap['Bacak']) || 0) >= 3 &&
-                    ((Number(lastMap['Göğüs']) || 0) + (Number(lastMap['Sırt']) || 0) + (Number(lastMap['Omuz']) || 0)) >= 6;
-                if (precheck.fatigue === 'legs') {
-                    selectSplit('upper');
-                } else if (precheck.fatigue === 'upper') {
-                    selectSplit('lower');
-                } else if (precheck.fatigue === 'back') {
-                    selectSplit('upper_push');
-                } else if (hoursAgo >= 40 && lastWasBalancedFullBody) {
-                    selectSplit('full_body');
-                } else if (histCtx && Array.isArray(histCtx.fatiguedMuscles48h)) {
-                    if (histCtx.fatiguedMuscles48h.includes('Bacak') && !histCtx.fatiguedMuscles48h.includes('Göğüs')) {
+                if (isDirectSingle && !skipPrecheck) {
+                    if (!Array.isArray(selectedSplits) || selectedSplits.length === 0) {
+                        selectedSplits = ['full_body'];
+                        selectedSplit = 'full_body';
+                        renderSplitCards();
+                        updateSelectedSplitLabel();
+                    }
+                } else {
+                    const histCtx = typeof getRecentAndScheduledMuscleContext === 'function' ? getRecentAndScheduledMuscleContext() : null;
+                    const hoursAgo = (histCtx && histCtx.lastSessionHoursAgo !== null && histCtx.lastSessionHoursAgo !== undefined)
+                        ? Number(histCtx.lastSessionHoursAgo)
+                        : 999;
+                    const lastMap = (histCtx && histCtx.lastSessionMuscleSets) ? histCtx.lastSessionMuscleSets : {};
+                    const lastWasBalancedFullBody = (Number(lastMap['Bacak']) || 0) >= 3 &&
+                        ((Number(lastMap['Göğüs']) || 0) + (Number(lastMap['Sırt']) || 0) + (Number(lastMap['Omuz']) || 0)) >= 6;
+                    if (precheck.fatigue === 'legs') {
                         selectSplit('upper');
-                    } else if ((histCtx.fatiguedMuscles48h.includes('Göğüs') || histCtx.fatiguedMuscles48h.includes('Sırt')) && !histCtx.fatiguedMuscles48h.includes('Bacak')) {
+                    } else if (precheck.fatigue === 'upper') {
                         selectSplit('lower');
+                    } else if (precheck.fatigue === 'back') {
+                        selectSplit('upper_push');
+                    } else if (hoursAgo >= 40 && lastWasBalancedFullBody) {
+                        selectSplit('full_body');
+                    } else if (histCtx && Array.isArray(histCtx.fatiguedMuscles48h)) {
+                        if (histCtx.fatiguedMuscles48h.includes('Bacak') && !histCtx.fatiguedMuscles48h.includes('Göğüs')) {
+                            selectSplit('upper');
+                        } else if ((histCtx.fatiguedMuscles48h.includes('Göğüs') || histCtx.fatiguedMuscles48h.includes('Sırt')) && !histCtx.fatiguedMuscles48h.includes('Bacak')) {
+                            selectSplit('lower');
+                        } else {
+                            selectSplit('full_body');
+                        }
                     } else {
                         selectSplit('full_body');
                     }
-                } else {
-                    selectSplit('full_body');
                 }
                 handleGenerateWorkout(currentSelectedDoctrine, userWish);
                 if (hintEl) {
-                    hintEl.textContent = '✅ Bugünün antrenmanı hazırlandı';
-                    hintEl.style.color = '#15803D';
+                    hintEl.textContent = 'Antrenman hazırlandı';
+                    hintEl.style.color = '#4ADE80';
                 }
                 const outEl = document.getElementById('generatedWorkoutOutput');
                 if (outEl) {
@@ -1505,8 +1559,8 @@
 
             applyAiWeeklySchedule(targetTplKey);
             if (hintEl) {
-                hintEl.textContent = '✅ Haftalık program hazırlandı';
-                hintEl.style.color = '#15803D';
+                hintEl.textContent = 'Haftalık program hazırlandı';
+                hintEl.style.color = '#4ADE80';
             }
         }
         window.handleQuickAiGenerate = handleQuickAiGenerate;
@@ -8152,8 +8206,6 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
 
         // ==================== GEMINI AI BIOMECHANICAL COACH ENGINE ====================
 
-        let isFetchingCloudAiConfig = false;
-
         function isCurrentUserAdmin() {
             const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
             return !!(user && user.role === 'admin');
@@ -8166,20 +8218,50 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             };
         }
 
-        function getGeminiApiKey() {
-            if (_inMemorySystemAiKey) return _inMemorySystemAiKey;
+        function getLocalGeminiStorageKeyForUser() {
+            const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : '';
+            return uid ? `${GEMINI_API_STORAGE_KEY}_${uid}` : GEMINI_API_STORAGE_KEY;
+        }
 
+        function getGeminiApiKey() {
+            const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : '';
             const codec = (typeof window !== 'undefined' && window.CelikVaultCodec) ? window.CelikVaultCodec : null;
-            const vaultKeyName = codec ? codec.SYSTEM_AI_VAULT_KEY : 'celik_kodu_sealed_ai_vault';
+            const baseVaultKey = codec ? codec.SYSTEM_AI_VAULT_KEY : 'celik_kodu_sealed_ai_vault';
+            const scopedVaultKey = uid ? `${baseVaultKey}_${uid}` : baseVaultKey;
+
             try {
-                const rawVault = localStorage.getItem(vaultKeyName);
-                if (rawVault) {
-                    const parsed = JSON.parse(rawVault);
+                const scopedPlain = (localStorage.getItem(getLocalGeminiStorageKeyForUser()) || '').trim();
+                if (scopedPlain) {
+                    _inMemorySystemAiKey = scopedPlain;
+                    return scopedPlain;
+                }
+
+                const rawScopedVault = localStorage.getItem(scopedVaultKey);
+                if (rawScopedVault) {
+                    const parsed = JSON.parse(rawScopedVault);
+                    if (parsed && parsed.sealedAiKey && codec) {
+                        const unsealed = codec.unsealSystemAiKey(parsed.sealedAiKey);
+                        if (unsealed) {
+                            _inMemorySystemAiKey = unsealed.trim();
+                            return _inMemorySystemAiKey;
+                        }
+                    }
+                }
+
+                const sharedPlain = (localStorage.getItem(GEMINI_API_STORAGE_KEY) || '').trim();
+                if (sharedPlain) {
+                    _inMemorySystemAiKey = sharedPlain;
+                    return sharedPlain;
+                }
+
+                const rawSharedVault = localStorage.getItem(baseVaultKey);
+                if (rawSharedVault) {
+                    const parsed = JSON.parse(rawSharedVault);
                     if (parsed && parsed.masterCatalogMeta && codec && typeof codec.applyMasterCatalogMeta === 'function') {
                         codec.applyMasterCatalogMeta(parsed.masterCatalogMeta);
                     }
-                    if (parsed && parsed.sealedAiKey) {
-                        const unsealed = codec ? codec.unsealSystemAiKey(parsed.sealedAiKey) : '';
+                    if (parsed && parsed.sealedAiKey && codec) {
+                        const unsealed = codec.unsealSystemAiKey(parsed.sealedAiKey);
                         if (unsealed) {
                             _inMemorySystemAiKey = unsealed.trim();
                             return _inMemorySystemAiKey;
@@ -8188,128 +8270,42 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 }
             } catch {}
 
-            // Tek seferlik miras temizliği: eski yerel açık metin anahtarı mühürlü kasaya taşınır
-            let legacyKey = (localStorage.getItem(GEMINI_API_STORAGE_KEY) || '').trim();
-            if (!legacyKey) {
-                legacyKey = (localStorage.getItem(`${GEMINI_API_STORAGE_KEY}_usr_admin`) || '').trim();
-            }
-            if (!legacyKey && typeof getAuthUsers === 'function') {
-                const users = getAuthUsers();
-                const adminUser = Array.isArray(users) ? users.find(u => u.role === 'admin' && u.geminiApiKey) : null;
-                if (adminUser && adminUser.geminiApiKey) {
-                    legacyKey = String(adminUser.geminiApiKey).trim();
-                }
-            }
-            if (legacyKey) {
-                _inMemorySystemAiKey = legacyKey;
-                try {
-                    if (codec) {
-                        localStorage.setItem(vaultKeyName, JSON.stringify({
-                            sealedAiKey: codec.sealSystemAiKey(legacyKey),
-                            updatedAt: Date.now()
-                        }));
-                    }
-                    localStorage.removeItem(GEMINI_API_STORAGE_KEY);
-                    localStorage.removeItem(`${GEMINI_API_STORAGE_KEY}_usr_admin`);
-                } catch {}
-                return _inMemorySystemAiKey;
-            }
-
-            if (!isFetchingCloudAiConfig) {
-                fastFetchCloudAiConfig();
-            }
-            return '';
+            return _inMemorySystemAiKey || '';
         }
 
         async function fastFetchCloudAiConfig() {
-            if (isFetchingCloudAiConfig) return '';
-            if (_inMemorySystemAiKey) return _inMemorySystemAiKey;
-
-            isFetchingCloudAiConfig = true;
-            try {
-                const endpoint = 'https://firestore.googleapis.com/v1/projects/fitness-4f427/databases/(default)/documents/app_system/ai_config?key=' + (typeof FIREBASE_CONFIG !== 'undefined' ? FIREBASE_CONFIG.apiKey : '');
-                const res = await fetch(endpoint);
-                if (res.ok) {
-                    const doc = await res.json();
-                    const codec = (typeof window !== 'undefined' && window.CelikVaultCodec) ? window.CelikVaultCodec : null;
-                    const vaultKeyName = codec ? codec.SYSTEM_AI_VAULT_KEY : 'celik_kodu_sealed_ai_vault';
-                    const sealedField = doc?.fields?.sealedAiKey?.stringValue?.trim() || '';
-                    const legacyField = doc?.fields?.geminiApiKey?.stringValue?.trim() || '';
-                    const cloudKey = sealedField
-                        ? (codec ? codec.unsealSystemAiKey(sealedField) : '')
-                        : legacyField;
-                    const sealedForVault = sealedField || (legacyField && codec ? codec.sealSystemAiKey(legacyField) : '');
-
-                    if (cloudKey) {
-                        _inMemorySystemAiKey = cloudKey;
-                        try {
-                            localStorage.removeItem(GEMINI_API_STORAGE_KEY);
-                            localStorage.removeItem(`${GEMINI_API_STORAGE_KEY}_usr_admin`);
-                            if (sealedForVault) {
-                                localStorage.setItem(vaultKeyName, JSON.stringify({
-                                    sealedAiKey: sealedForVault,
-                                    updatedAt: Date.now()
-                                }));
-                            }
-                        } catch {}
-                        if (typeof updateProfileGeminiStatusUI === 'function') updateProfileGeminiStatusUI();
-                        const curEx = (typeof pickerContext !== 'undefined' && pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
-                        if (typeof updateGeminiAiModalUI === 'function') updateGeminiAiModalUI(curEx);
-                        return cloudKey;
-                    }
-                }
-            } catch (e) {
-                console.warn("Hızlı AI anahtarı senkronu:", e);
-            } finally {
-                isFetchingCloudAiConfig = false;
-            }
-            return '';
+            return getGeminiApiKey() || '';
         }
 
-        function setGeminiApiKey(key, syncCloud = true) {
-            if (!isCurrentUserAdmin()) return;
+        function setGeminiApiKey(key, _syncCloud = false) {
             const cleanKey = (key || '').trim();
+            const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : '';
             const codec = (typeof window !== 'undefined' && window.CelikVaultCodec) ? window.CelikVaultCodec : null;
-            const vaultKeyName = codec ? codec.SYSTEM_AI_VAULT_KEY : 'celik_kodu_sealed_ai_vault';
+            const baseVaultKey = codec ? codec.SYSTEM_AI_VAULT_KEY : 'celik_kodu_sealed_ai_vault';
+            const scopedVaultKey = uid ? `${baseVaultKey}_${uid}` : baseVaultKey;
+            const scopedPlainKey = getLocalGeminiStorageKeyForUser();
             _inMemorySystemAiKey = cleanKey;
 
             try {
-                localStorage.removeItem(GEMINI_API_STORAGE_KEY);
-                localStorage.removeItem(`${GEMINI_API_STORAGE_KEY}_usr_admin`);
                 if (!cleanKey) {
-                    localStorage.removeItem(vaultKeyName);
-                } else if (codec) {
-                    localStorage.setItem(vaultKeyName, JSON.stringify({
-                        sealedAiKey: codec.sealSystemAiKey(cleanKey),
-                        updatedAt: Date.now()
-                    }));
-                }
-            } catch {}
-
-            if (syncCloud && typeof getActiveUser === 'function') {
-                const user = getActiveUser();
-                if (user && user.role === 'admin' && user.geminiApiKey) {
-                    delete user.geminiApiKey;
-                    const users = typeof getAuthUsers === 'function' ? getAuthUsers() : [];
-                    const idx = users.findIndex(u => u.id === user.id);
-                    if (idx !== -1) {
-                        users[idx] = user;
-                        if (typeof saveAuthUsers === 'function') saveAuthUsers(users);
-                        if (typeof syncUsersToCloud === 'function') syncUsersToCloud(users);
+                    localStorage.removeItem(scopedPlainKey);
+                    localStorage.removeItem(GEMINI_API_STORAGE_KEY);
+                    localStorage.removeItem(`${GEMINI_API_STORAGE_KEY}_usr_admin`);
+                    localStorage.removeItem(scopedVaultKey);
+                    localStorage.removeItem(baseVaultKey);
+                } else {
+                    localStorage.setItem(scopedPlainKey, cleanKey);
+                    localStorage.setItem(GEMINI_API_STORAGE_KEY, cleanKey);
+                    if (codec) {
+                        const sealedObj = JSON.stringify({
+                            sealedAiKey: codec.sealSystemAiKey(cleanKey),
+                            updatedAt: Date.now()
+                        });
+                        localStorage.setItem(scopedVaultKey, sealedObj);
+                        localStorage.setItem(baseVaultKey, sealedObj);
                     }
                 }
-                if (
-                    typeof isFirebaseReady !== 'undefined' && isFirebaseReady &&
-                    typeof fbDb !== 'undefined' && fbDb &&
-                    !(typeof IS_LOCAL_DEV !== 'undefined' && IS_LOCAL_DEV)
-                ) {
-                    const sealedPayload = cleanKey && codec ? codec.sealSystemAiKey(cleanKey) : '';
-                    fbDb.collection('app_system').doc('ai_config').set({
-                        sealedAiKey: sealedPayload,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true }).catch(() => {});
-                }
-            }
+            } catch {}
 
             updateProfileGeminiStatusUI();
             const curEx = (pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
@@ -8321,101 +8317,86 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             const input = document.getElementById('profileGeminiApiKeyInput');
             const adminControls = document.getElementById('profileGeminiAdminControls');
             const modalEditBtn = document.getElementById('btnEditGeminiKeyModal');
-            const isAdmin = isCurrentUserAdmin();
             const key = getGeminiApiKey();
 
             if (adminControls) {
-                adminControls.style.display = isAdmin ? 'block' : 'none';
+                adminControls.style.display = 'block';
             }
             if (modalEditBtn) {
-                modalEditBtn.style.display = isAdmin ? 'inline-block' : 'none';
+                modalEditBtn.style.display = 'inline-block';
             }
 
             if (input) {
-                if (isAdmin) {
-                    if (document.activeElement !== input) {
-                        input.value = '';
-                    }
-                    input.placeholder = key ? '•••••••• (Google Firebase Bulutunda Kilitli)' : 'AIzaSy… anahtarınızı girin';
-                } else {
-                    // Güvenlik: Yönetici olmayan sporcuların DOM'una API anahtarı asla yazılmaz
+                if (document.activeElement !== input) {
                     input.value = '';
                 }
+                input.placeholder = key ? '•••••••• (Bu Cihazda Kayıtlı)' : 'Kişisel anahtar (isteğe bağlı)';
             }
 
             if (badge) {
-                if (key) {
-                    badge.innerText = '🟢 API Aktif (Gemini 3.8 Flash)';
-                    badge.style.background = 'rgba(34, 197, 94, 0.15)';
-                    badge.style.color = '#15803D';
-                    badge.style.border = '1px solid rgba(34, 197, 94, 0.35)';
-                } else {
-                    badge.innerText = '⚪ Yapılandırılmadı';
-                    badge.style.background = 'rgba(255, 255, 255, 0.08)';
-                    badge.style.color = 'var(--text-secondary)';
-                    badge.style.border = '1px solid var(--border)';
-                }
+                badge.innerText = key ? '🟢 Kişisel Anahtar Aktif' : '🟢 Akıllı Koç Hazır';
+                badge.style.background = 'rgba(34, 197, 94, 0.15)';
+                badge.style.color = '#15803D';
+                badge.style.border = '1px solid rgba(34, 197, 94, 0.35)';
             }
         }
 
         async function testAndSaveGeminiKeyFromProfile() {
-            if (!isCurrentUserAdmin()) return;
             const input = document.getElementById('profileGeminiApiKeyInput');
             const key = input ? input.value.trim() : '';
             if (!key) {
-                if (getGeminiApiKey() && !confirm("Merkez kasadaki mevcut Gemini API anahtarı kaldırılsın mı?")) {
+                if (getGeminiApiKey() && !confirm("Bu cihazdaki kayıtlı kişisel bağlantı anahtarı kaldırılsın mı?")) {
                     return;
                 }
-                setGeminiApiKey('');
-                showToast("ℹ️ Gemini API anahtarı temizlendi.");
+                setGeminiApiKey('', false);
+                showToast("ℹ️ Kişisel bağlantı anahtarı bu cihazdan temizlendi.");
                 return;
             }
 
-            showToast("⏳ Gemini API anahtarı test ediliyor...");
+            showToast("⏳ Bağlantı test ediliyor...");
             try {
                 const testResp = await callGeminiAPI("Biyomekanik test mesajı. Tek kelimeyle 'Hazır' de.", "Sen fitness koçusun.", key);
                 if (testResp) {
-                    setGeminiApiKey(key);
+                    setGeminiApiKey(key, false);
                     if (input) input.value = '';
-                    showToast("✅ Gemini API başarıyla doğrulandı ve merkez kasaya mühürlendi!");
+                    showToast("✅ Kişisel bağlantı anahtarı doğrulandı ve yalnızca bu cihaza kaydedildi!");
                 }
             } catch (err) {
-                alert("Gemini API Bağlantı Hatası:\n" + (err.message || err));
+                alert("Bağlantı Hatası:\n" + (err.message || err));
             }
         }
 
         async function saveGeminiApiKeyFromModal() {
-            if (!isCurrentUserAdmin()) return;
             const input = document.getElementById('geminiApiKeyModalInput');
             const key = input ? input.value.trim() : '';
             if (!key) {
-                alert("Lütfen geçerli bir Gemini API anahtarı girin.");
+                alert("Lütfen geçerli bir bağlantı anahtarı girin.");
                 return;
             }
-            showToast("⏳ API anahtarı test ediliyor...");
+            showToast("⏳ Bağlantı test ediliyor...");
             try {
                 const testResp = await callGeminiAPI("Biyomekanik test mesajı. Tek kelimeyle 'Hazır' de.", "Sen fitness koçusun.", key);
                 if (testResp) {
-                    setGeminiApiKey(key);
-                    showToast("✅ Gemini API başarıyla doğrulandı ve merkez kasaya mühürlendi!");
+                    setGeminiApiKey(key, false);
+                    if (input) input.value = '';
+                    showToast("✅ Kişisel bağlantı anahtarı doğrulandı ve yalnızca bu cihaza kaydedildi!");
                     const curEx = (pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
                     updateGeminiAiModalUI(curEx);
                 }
             } catch (err) {
-                alert("Gemini API Bağlantı Hatası:\n" + (err.message || err));
+                alert("Bağlantı Hatası:\n" + (err.message || err));
             }
         }
 
         function editGeminiApiKey() {
-            if (!isCurrentUserAdmin()) return;
-            const newKey = prompt("Yeni Google Gemini API Anahtarınızı girin (Mevcut anahtarı silmek için boş bırakın):", "");
+            const newKey = prompt("İsteğe bağlı kişisel bağlantı anahtarınızı girin (mevcut anahtarı bu cihazdan silmek için boş bırakın):", "");
             if (newKey !== null) {
                 const clean = newKey.trim();
-                if (!clean && getGeminiApiKey() && !confirm("Mevcut Gemini API anahtarı merkez kasadan silinsin mi?")) {
+                if (!clean && getGeminiApiKey() && !confirm("Bu cihazdaki mevcut kişisel bağlantı anahtarı silinsin mi?")) {
                     return;
                 }
-                setGeminiApiKey(clean);
-                showToast(clean ? "✅ API Anahtarı merkez kasada güncellendi!" : "ℹ️ API Anahtarı silindi.");
+                setGeminiApiKey(clean, false);
+                showToast(clean ? "✅ Kişisel anahtar bu cihazda güncellendi!" : "ℹ️ Kişisel anahtar bu cihazdan silindi.");
             }
         }
 
@@ -8423,21 +8404,12 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             const missingBox = document.getElementById('geminiAiKeyMissingBox');
             const activeBox = document.getElementById('geminiAiActiveBox');
             const modalEditBtn = document.getElementById('btnEditGeminiKeyModal');
-            const isAdmin = isCurrentUserAdmin();
-            const key = getGeminiApiKey();
 
             if (modalEditBtn) {
-                modalEditBtn.style.display = isAdmin ? 'inline-block' : 'none';
+                modalEditBtn.style.display = 'inline-block';
             }
-
-            if (!key) {
-                if (missingBox) missingBox.style.display = isAdmin ? 'block' : 'none';
-                if (activeBox) activeBox.style.display = isAdmin ? 'none' : 'block';
-                fastFetchCloudAiConfig();
-            } else {
-                if (missingBox) missingBox.style.display = 'none';
-                if (activeBox) activeBox.style.display = 'block';
-            }
+            if (missingBox) missingBox.style.display = 'none';
+            if (activeBox) activeBox.style.display = 'block';
         }
 
         let cachedGeminiWorkingModel = null;
@@ -8685,7 +8657,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
             const candidates = EXERCISES_DB.filter(e => e.id !== currentEx.id && !isExerciseExcludedByUser(e.id));
             const candidateSummary = candidates.map(e => `ID:${e.id} | İsim:${e.name} | Ekipman:${e.equipment} | Patern:${e.category} | Kas:${e.muscle}`).join('\n');
 
-            const systemInstruction = `Sen "Çelik Kodu (El Código del Acero)" metodolojisinin uzman Biyomekanik Koçusun.
+            const systemInstruction = `Sen "Çelik Kodu" metodolojisinin uzman Biyomekanik Koçusun.
 Kullanıcı antrenman seansı sırasında, uzun metin okumadan hemen karar vermek istiyor.
 DEĞİŞTİRİLECEK HAREKET:
 - Adı: "${currentEx.name}"
@@ -10569,16 +10541,22 @@ KESİN KURALLAR:
 
             closeExerciseBugReportModal();
             playAlertSound();
-            alert(`✅ Bildiriminiz ${cloudSaved ? 'Firebase bulut havuzuna' : 'havuza'} kaydedildi!\n\nAI antrenörüne talimat verdiğinizde bu rapor doğrudan incelenecek ve siz onay verdikten sonra silinecektir.`);
+            alert("✅ Geri bildiriminiz incelenmek üzere kaydedildi. Teşekkür ederiz!");
         }
 
         async function openBugReportsPoolModal() {
             const modal = document.getElementById('bugReportsPoolModal');
             if (modal) modal.classList.add('active');
 
+            const copyAdminBtn = document.getElementById('btnCopyBugReportsAdmin');
+            if (copyAdminBtn) {
+                const isAdminUser = (typeof isVerifiedAdminSession === 'function') && isVerifiedAdminSession();
+                copyAdminBtn.style.display = isAdminUser ? 'inline-block' : 'none';
+            }
+
             const listEl = document.getElementById('bugReportsPoolList');
             const countEl = document.getElementById('bugPoolCountText');
-            if (listEl) listEl.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><span style="font-size:24px;">🔄</span><br>Firebase veritabanı taranıyor...</div>`;
+            if (listEl) listEl.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-secondary);"><span style="font-size:24px;">🔄</span><br>Geri bildirimler yükleniyor...</div>`;
 
             let reports = [];
 
@@ -10626,15 +10604,15 @@ KESİN KURALLAR:
 
             reports = (reports || []).filter(r => r && !String(r._docId || r.id || '').startsWith('garmin_relay_') && !r.payloadJson);
 
-            if (countEl) countEl.innerText = `${reports.length} Bildirim Havuzda`;
+            if (countEl) countEl.innerText = `${reports.length} Geri Bildirim`;
 
             if (reports.length === 0) {
                 if (listEl) {
                     listEl.innerHTML = `
                         <div style="text-align:center; padding:40px 20px; color:var(--text-secondary);">
                             <span style="font-size:36px;">🎉</span>
-                            <div style="font-size:14px; font-weight:800; color:#0F172A; margin-top:8px;">Hata Havuzu Tertemiz!</div>
-                            <p style="font-size:12px; margin-top:4px;">Şu an bekleyen veya bildirilmiş bir egzersiz hatası bulunmuyor.</p>
+                            <div style="font-size:14px; font-weight:800; color:#0F172A; margin-top:8px;">Henüz Bildirim Yok</div>
+                            <p style="font-size:12px; margin-top:4px;">Şu an incelenmeyi bekleyen bir geri bildirim bulunmuyor.</p>
                         </div>
                     `;
                 }
@@ -10646,7 +10624,7 @@ KESİN KURALLAR:
                     const docId = r._docId || r.id;
                     const isPending = r.status === 'pending_ai_review';
                     const isProcessed = r.status === 'ai_processed_awaiting_user_ok';
-                    const statusText = isPending ? '🟡 AI İncelemesi Bekliyor' : (isProcessed ? '🔵 AI Düzeltti (Onay Bekliyor)' : '🟢 Tamamlandı');
+                    const statusText = isPending ? '🟡 İnceleme Bekliyor' : (isProcessed ? '🔵 Güncellendi (Onay Bekliyor)' : '🟢 Tamamlandı');
 
                     return `
                         <div class="bug-pool-card ${isPending ? 'pending' : (isProcessed ? 'processed' : 'resolved')}">
@@ -10679,7 +10657,7 @@ KESİN KURALLAR:
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:10.5px; color:var(--text-secondary); flex-wrap:wrap; gap:6px;">
                                 <span>📅 ${escapeHTML(r.createdAtFormatted || (r.createdAt ? r.createdAt.substring(0, 16) : ''))}</span>
                                 <button type="button" class="btn btn-outline" style="border-color:#22c55e; color:#15803D; font-size:11px; padding:4px 10px; font-weight:800;" onclick="confirmAndDeleteBugReport(decodeURIComponent('${encodeURIComponent(docId)}'))">
-                                    ✅ Onayla & Havuzdan Sil
+                                    ✅ Listeden Kaldır
                                 </button>
                             </div>
                         </div>
@@ -10694,16 +10672,15 @@ KESİN KURALLAR:
         }
 
         async function confirmAndDeleteBugReport(docId) {
-            if (!confirm("Bu hata düzeltmesini onaylıyor musunuz? Kayıt Firebase Firestore havuzundan kalıcı olarak silinecektir.")) {
+            if (!confirm("Bu geri bildirimi listeden kaldırmak istiyor musunuz?")) {
                 return;
             }
 
             if (fbDb && isFirebaseReady) {
                 try {
                     await fbDb.collection('exercise_bug_reports').doc(docId).delete();
-                    console.log("🔥 Firebase dokümanı silindi:", docId);
                 } catch(e) {
-                    console.warn("Firestore silme hatası:", e);
+                    console.warn("Silme hatası:", e);
                 }
             }
 
@@ -10716,7 +10693,7 @@ KESİN KURALLAR:
                 }
             } catch(e) {}
 
-            alert("✅ Kayıt başarıyla silindi ve havuz güncellendi.");
+            alert("✅ Geri bildirim listeden kaldırıldı.");
             openBugReportsPoolModal();
         }
 

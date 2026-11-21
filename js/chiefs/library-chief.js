@@ -1292,7 +1292,7 @@
                         muscle: 'Genel Kas Gelişimi & Fonksiyonel Güç',
                         primaryMuscles: ['full_body'],
                         equipment: 'dumbbell',
-                        cue: 'FitLAB AI Koçu tarafından sporcuya özel reçete edilen egzersiz.',
+                        cue: 'Çelik Kodu AI Koçu tarafından sporcuya özel reçete edilen egzersiz.',
                         isCustomAi: true
                     };
                 }

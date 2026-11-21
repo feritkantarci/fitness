@@ -54,7 +54,7 @@
                     <path d="M34 25L26 36H33L30 46L39 34H32L34 25Z" fill="#FFFFFF"/>
                 </svg>
             </div>
-            <div class="badge-brand" translate="no" onclick="forceAppUpdate()" style="cursor:pointer;" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">LA FORJA • EL CÓDIGO DEL ACERO • v335</div>
+            <div class="badge-brand" translate="no">ÇELİK KODU</div>
             <h1 class="login-title">AKILLI ANTRENMAN PORTALI</h1>
             <p class="login-subtitle">Hedef Bölgeni Seç • Ekipmanını Belirle • Anında Üret</p>
 
@@ -96,44 +96,45 @@
                 <button type="submit" class="login-btn" id="loginSubmitBtn">GİRİŞ YAP</button>
             </form>
 
-            <!-- ŞİFREMİ UNUTTUM / ŞİFRE YENİLEME FORMU -->
-            <form id="forgotPasswordForm" onsubmit="handleForgotPasswordSubmit(event)" style="display:none;">
-                <div style="font-size:12px; color:#14532D; font-weight:600; margin-bottom:12px; text-align:left; line-height:1.45; background:#F0FDF4; border:1.5px solid #86EFAC; padding:9px 11px; border-radius:8px;">
-                    Kayıtlı e-posta adresinize sıfırlama bağlantısı gönderebilir veya kimlik doğrulamasıyla yeni şifre belirleyebilirsiniz.
+            <!-- ŞİFREMİ UNUTTUM / ŞİFRE YENİLEME FORMU (TEK ADIMLI KOD AKIŞI) -->
+            <form id="forgotPasswordForm" onsubmit="handleForgotPasswordSubmit(event)" novalidate style="display:none;">
+                <div id="forgotStepInfoBox" style="font-size:12px; color:#E2E8F0; font-weight:600; margin-bottom:12px; text-align:left; line-height:1.45; background:rgba(139, 92, 246, 0.12); border:1px solid rgba(167, 139, 250, 0.3); padding:9px 11px; border-radius:10px;">
+                    Kayıtlı e-posta adresinizi veya kullanıcı adınızı girin. Gönderilecek sıfırlama kodu ile yeni şifrenizi belirleyin.
                 </div>
 
+                <input type="hidden" id="forgotFullName" value="">
+
                 <div class="login-field" style="margin-bottom:12px;">
-                    <label class="login-label" for="forgotIdentity" style="color:#334155;">Kayıtlı E-Posta veya Kullanıcı Adı *</label>
+                    <label class="login-label" for="forgotIdentity" style="color:#CBD5E1;">Kayıtlı E-Posta veya Kullanıcı Adı *</label>
                     <input type="text" id="forgotIdentity" class="login-input" placeholder="ornek@gmail.com veya kullanıcı adı" required autocorrect="off" autocapitalize="none" spellcheck="false">
                 </div>
 
-                <button type="button" onclick="handleSendFirebaseResetLink()" style="width:100%; margin-bottom:12px; padding:10px 12px; background:#0F172A; border:1.5px solid #0F172A; border-radius:10px; color:#FFFFFF; font-size:12.5px; font-weight:800; cursor:pointer;">
-                    E-Postaya Sıfırlama Bağlantısı Gönder
-                </button>
-
-                <div class="login-field" style="margin-bottom:12px;">
-                    <label class="login-label" for="forgotFullName" style="color:#334155;">Kayıtlı Ad Soyad (Doğrudan Yenileme) *</label>
-                    <input type="text" id="forgotFullName" class="login-input" placeholder="Örn: Ahmet Yılmaz" required>
-                </div>
-
-                <div id="forgotOtpContainer" style="display:none; margin-bottom:12px; text-align:left;">
-                    <label class="login-label" for="forgotOtpCode" style="color:#0369A1;">E-Postanıza Gelen 6 Haneli Kod *</label>
-                    <input type="text" id="forgotOtpCode" class="login-input" placeholder="123456" maxlength="6" inputmode="numeric" style="letter-spacing:3px; font-weight:800; text-align:center;">
-                </div>
-
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; text-align:left; align-items:end;">
-                    <div>
-                        <label class="login-label" for="forgotNewPass" style="color:#334155; white-space:nowrap;">Yeni Şifre *</label>
-                        <input type="password" id="forgotNewPass" class="login-input" placeholder="En az 8 krk, Harf+Rakam" minlength="8" required autocomplete="new-password" style="padding:11px 12px; font-size:13px;">
+                <div id="forgotStep2Container" style="display:none;">
+                    <div id="forgotOtpContainer" style="display:block; margin-bottom:12px; text-align:left;">
+                        <label class="login-label" for="forgotOtpCode" style="color:#7DD3FC;">E-Postanıza Gelen Sıfırlama Kodu *</label>
+                        <input type="text" id="forgotOtpCode" class="login-input" placeholder="Doğrulama kodunu yazın" autocomplete="one-time-code" style="letter-spacing:1.5px; font-weight:800; text-align:center;">
                     </div>
-                    <div>
-                        <label class="login-label" for="forgotNewPassConfirm" style="color:#334155; white-space:nowrap;">Yeni Şifre (Tekrar) *</label>
-                        <input type="password" id="forgotNewPassConfirm" class="login-input" placeholder="••••••••" minlength="8" required autocomplete="new-password" style="padding:11px 12px; font-size:13px;">
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; text-align:left; align-items:end;">
+                        <div>
+                            <label class="login-label" for="forgotNewPass" style="color:#CBD5E1; white-space:nowrap;">Yeni Şifre *</label>
+                            <input type="password" id="forgotNewPass" class="login-input" placeholder="En az 8 krk, Harf+Rakam" minlength="8" autocomplete="new-password" style="padding:11px 12px; font-size:13px;">
+                        </div>
+                        <div>
+                            <label class="login-label" for="forgotNewPassConfirm" style="color:#CBD5E1; white-space:nowrap;">Yeni Şifre (Tekrar) *</label>
+                            <input type="password" id="forgotNewPassConfirm" class="login-input" placeholder="••••••••" minlength="8" autocomplete="new-password" style="padding:11px 12px; font-size:13px;">
+                        </div>
+                    </div>
+
+                    <div style="text-align:right; margin-bottom:10px;">
+                        <button type="button" onclick="resendForgotVerificationCode()" style="background:none; border:none; color:#A78BFA; font-size:11.5px; font-weight:700; cursor:pointer; padding:0; text-decoration:underline;">
+                            Kodu Tekrar Gönder
+                        </button>
                     </div>
                 </div>
 
-                <button type="submit" class="login-btn" id="forgotSubmitBtn">ŞİFREMİ YENİLE</button>
-                <button type="button" onclick="switchAuthScreenTab('login')" style="width:100%; margin-top:10px; padding:10px; background:#F8FAFC; border:1.5px solid #CBD5E1; border-radius:10px; color:#0F172A; font-size:12.5px; font-weight:800; cursor:pointer;">
+                <button type="submit" class="login-btn" id="forgotSubmitBtn">Sıfırlama Kodu Gönder</button>
+                <button type="button" onclick="switchAuthScreenTab('login')" style="width:100%; margin-top:10px; padding:10px; background:transparent; border:1px solid rgba(167, 139, 250, 0.3); border-radius:12px; color:#E2E8F0; font-size:12.5px; font-weight:700; cursor:pointer;">
                     ← Giriş Ekranına Dön
                 </button>
             </form>
@@ -220,8 +221,15 @@
                 </div>
             </form>
 
-            <div class="login-hint" style="color:var(--text-secondary); font-size:11.5px; margin-top:16px;">
-                🔒 Yetkili Girişi • Yönetici Onaylı Üyelik Sistemi
+            <!-- MİSAFİR DEMO ERİŞİMİ -->
+            <div id="demoAccessContainer" style="margin-top:14px; padding-top:14px; border-top:1px solid rgba(167, 139, 250, 0.2);">
+                <button type="button" id="btnEnterDemoMode" onclick="enterGuestDemoMode()" style="width:100%; padding:11px 14px; border-radius:12px; border:1px solid rgba(167, 139, 250, 0.35); background:rgba(24, 21, 48, 0.75); color:#E2E8F0; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s;">
+                    Kayıtsız Örnek Program İncele (Demo)
+                </button>
+            </div>
+
+            <div class="login-hint" style="color:#94A3B8; font-size:11.5px; margin-top:14px;">
+                Yetkili Girişi • Yönetici Onaylı Üyelik Sistemi
             </div>
         </div>
     </div>
@@ -252,13 +260,11 @@
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
-                            <span class="modern-brand-subdot" aria-hidden="true">•</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" onclick="event.stopPropagation(); forceAppUpdate();" title="Sürümü ve Önbelleği Yenilemek İçin Dokunun">v335</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" style="display:none;">v335</span>
                         </div>
                     </div>
                 </div>
-                <div class="modern-bar-actions">
-                    <button type="button" id="headerAdminTelemetryBtn" onclick="event.stopPropagation(); openAdminModal('telemetry');" style="display:none; align-items:center; gap:4px; height:30px; padding:0 9px; border-radius:999px; background:#DC2626; color:#FFFFFF; border:1px solid #FCA5A5; font-size:11px; font-weight:800; white-space:nowrap; cursor:pointer;" title="Sistem İzleme Kayıtları">İzleme <span id="headerAdminTelemetryBadge">0</span></button>
+                <div class="modern-bar-actions" id="headerBarActions">
                     <div class="modern-user-badge" onclick="if(window.innerWidth <= 768){ openMoreSheet(); } else { switchTab('profileTab'); }" title="Profil & Menü">
                         <span class="modern-user-avatar" id="headerUserAvatar">F</span>
                         <span class="modern-user-name" id="headerUserName">Sporcu</span>
@@ -275,7 +281,7 @@
                     <!-- HEADER NOTIFICATION CENTER (SAĞ ÜST TOPLU BİLDİRİM MERKEZİ) -->
                     <div id="headerNotificationCenter" class="header-popup-menu" style="display:none;width:360px;max-width:calc(100vw - 24px);max-height:440px;overflow-y:auto;padding:12px;background:#FFFFFF;color:#0F172A;border:1px solid #CBD5E1;border-radius:14px;box-shadow:0 14px 32px rgba(15,23,42,0.22);">
                         <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid #E2E8F0;">
-                            <strong style="font-size:13.5px;color:#0F172A;">🔔 Bildirim Merkezi</strong>
+                            <strong style="font-size:13.5px;color:#0F172A;">Bildirim Merkezi</strong>
                             <button type="button" onclick="clearAllAppNotifications(event)" style="background:#F1F5F9;color:#475569;border:1px solid #CBD5E1;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;">Tümünü Temizle</button>
                         </div>
                         <div id="headerNotificationList" style="display:flex;flex-direction:column;gap:8px;"></div>
@@ -289,16 +295,7 @@
                         </div>
                         <button type="button" class="header-popup-item" onclick="closeHeaderPopupMenu(); openBugReportsPoolModal();">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                            <span>Hata Bildirim Havuzu</span>
-                        </button>
-                        <button type="button" class="header-popup-item" id="btnAdminPanelPopup" onclick="closeHeaderPopupMenu(); openAdminModal();" style="display:none;">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
-                            <span>Sporcu Yönetimi (Admin)</span>
-                            <span id="popupAdminTelemetryBadge" style="display:none; margin-left:auto; background:#DC2626; color:#FFFFFF; font-size:10px; font-weight:800; padding:1px 6px; border-radius:999px;">0</span>
-                        </button>
-                        <button type="button" class="header-popup-item" onclick="closeHeaderPopupMenu(); forceAppUpdate();">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-                            <span>Sürümü / Önbelleği Yenile</span>
+                            <span>Geri Bildirimler</span>
                         </button>
                         <div class="header-popup-divider"></div>
                         <button type="button" class="header-popup-item logout" onclick="closeHeaderPopupMenu(); handleAuthLogout();">
@@ -313,7 +310,7 @@
             <div id="topFitnessCardioScoreStrip" class="top-fc-score-strip" onclick="openFitnessCardioScoreAnalytics()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openFitnessCardioScoreAnalytics();}" title="Detaylı Fitness & Kardiyo Puan Hesabını Gör">
                 <div class="top-fc-bar-col fitness-col">
                     <div class="top-fc-bar-head">
-                        <span class="top-fc-bar-label">🔴 FİTNESS</span>
+                        <span class="top-fc-bar-label">FİTNESS</span>
                         <span class="top-fc-bar-val tabular-nums" id="topFitnessScoreVal">0 / 100</span>
                     </div>
                     <div class="top-fc-track fitness-track">
@@ -322,7 +319,7 @@
                 </div>
                 <div class="top-fc-bar-col cardio-col">
                     <div class="top-fc-bar-head">
-                        <span class="top-fc-bar-label">🔵 KARDİYO</span>
+                        <span class="top-fc-bar-label">KARDİYO</span>
                         <span class="top-fc-bar-val tabular-nums" id="topCardioScoreVal">0 / 100</span>
                     </div>
                     <div class="top-fc-track cardio-track">
@@ -356,110 +353,31 @@
             <!-- ==================== TAB 1: WORKOUT GENERATOR ==================== -->
             <div id="generatorTab" class="tab-content active">
 
-                <!-- UNIFIED AI PROGRAM ARCHITECT CARD (CANVA DESIGN DAHYNdwI6Eo) -->
+                <!-- UNIFIED WORKOUT GENERATOR CARD -->
                 <div class="ai-hybrid-hero-banner ai-unified-architect-card" id="aiHybridHeroBanner">
                     <div class="ai-prep-top-row">
-                        <span class="ai-prep-pill"><span class="ai-pill-dot"></span>AI İLE HAZIRLA</span>
+                        <span class="ai-prep-pill"><span class="ai-pill-dot"></span>PROGRAM OLUŞTUR</span>
                     </div>
-                    <h2 class="ai-prep-title">Programını AI ile oluştur</h2>
-                    <p class="ai-prep-subtitle">Ekipmanını ve süreni kontrol et; kapsamı, geçmiş eksiklerini ve yorgun kas korumasını tek ekrandan seçerek programını hazırla.</p>
+                    <h2 class="ai-prep-title">Program Oluştur</h2>
+                    <p class="ai-prep-subtitle">Hedef bölgeni, süreni ve ekipmanını seçerek antrenmanını hemen hazırla.</p>
 
-                    <!-- STEP 1: PROGRAM KAPSAMI & BÖLÜNME (ANA EKRANDAN KALDIRILDI - POP-UP İÇİNDEN YÖNETİLİR) -->
-                    <div class="gen-step-panel" style="display:none;">
+                    <!-- 1. SEÇİM: HEDEF BÖLGE -->
+                    <div class="gen-step-panel gen-always-open" id="genStepPanelSplit">
                         <div class="gen-mobile-picker-bar" id="mobileSplitPickerBar" onclick="toggleGenSection('splitSection')">
                             <div class="picker-label-wrap">
                                 <span class="gen-step-badge">1</span>
-                                <span class="picker-step-title">Kapsam &amp; Bölünme:</span>
-                                <span class="picker-selected-val" id="selectedSplitLabel">Haftalık • AI Otomatik Teşhis</span>
+                                <span class="picker-step-title">Hedef Bölge:</span>
+                                <span class="picker-selected-val" id="selectedSplitLabel">Tüm Vücut</span>
                             </div>
                             <span class="picker-arrow" id="splitPickerArrow">▼</span>
                         </div>
-                        <div class="gen-step-title desktop-only-title">
+                        <div class="gen-step-title">
                             <span class="gen-step-badge">1</span>
-                            <span>PROGRAM KAPSAMI &amp; BÖLÜNME</span>
+                            <span>HEDEF BÖLGE</span>
                         </div>
                         <div class="gen-collapsible-section" id="splitSection">
-                            <!-- Kapsam Seçici (Haftalık Plan vs Tek Gün vs Çelik Akışı) -->
-                            <div class="ai-scope-toggle-bar" role="tablist" aria-label="Program Kapsamı">
-                                <button type="button" class="ai-scope-pill active" id="aiScopeBtnWeekly" onclick="setAiGeneratorScope('weekly')">
-                                    <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1.5v2.5M11 1.5v2.5M2 6.5h12"/><rect x="4.5" y="8.8" width="1.5" height="1.5" rx="0.3"/><rect x="7.2" y="8.8" width="1.5" height="1.5" rx="0.3"/><rect x="10" y="8.8" width="1.5" height="1.5" rx="0.3"/></svg> Haftalık Plan
-                                </button>
-                                <button type="button" class="ai-scope-pill" id="aiScopeBtnSingle" onclick="setAiGeneratorScope('single')">
-                                    <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg> Tek Gün
-                                </button>
-                                <button type="button" class="ai-scope-pill" id="aiScopeBtnFlow" onclick="setAiGeneratorScope('flow_complex')">
-                                    <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg> ⚡ Çelik Akışı (Yeni Konsept)
-                                </button>
-                            </div>
-
-                            <!-- 1C: Çelik Akışı Konsept Kartı (Yalnızca Çelik Akışı Seçildiğinde Açılır) -->
-                            <div id="flowConceptSection" style="display:none; margin-top:10px; margin-bottom:12px; background:linear-gradient(135deg, rgba(245,158,11,0.14) 0%, #FFFBEB 100%); border:1.5px solid rgba(245,158,11,0.45); border-radius:14px; padding:14px 16px;">
-                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-                                    <span style="font-size:11px; font-weight:900; color:#F59E0B; letter-spacing:0.05em; text-transform:uppercase;">⚡ KESİNTİSİZ AKIŞ • 4 TUR DAMBIL KOMPLEKSİ</span>
-                                    <span style="font-size:11px; font-weight:800; background:rgba(245,158,11,0.2); color:#92400E; padding:2px 8px; border-radius:8px;">⏱️ 20 Dk</span>
-                                </div>
-                                <div style="font-size:13.5px; font-weight:800; color:#0F172A; margin-bottom:5px;">
-                                    ⚔️ 5 Bileşik İstasyon (Hinge ➔ Squat ➔ Press ➔ Lunge ➔ Halo)
-                                </div>
-                                <div style="font-size:12px; color:#94A3B8; line-height:1.45;">
-                                    Dambıllar 4 tur boyunca yere bırakılmaz. İstasyonlar arasında dinlenme yoktur, tur sonlarında 90 sn toparlanma verilir.
-                                </div>
-                            </div>
-
-                            <!-- 1A: Haftalık Şablon Seçici Grid (Varsayılan Açık) -->
-                            <div class="split-grid ai-weekly-split-grid" id="aiWeeklyTemplateGrid">
-                                <div class="split-card selected" data-wk-tpl="ai_auto" onclick="selectAiWeeklyTemplateCard('ai_auto')">
-                                    <span class="split-radio" aria-hidden="true"></span>
-                                    <div class="split-card-content">
-                                        <span class="split-name"><svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 1.5L9.6 6.4L14.5 8L9.6 9.6L8 14.5L6.4 9.6L1.5 8L6.4 6.4L8 1.5Z"/><path d="M13 2v2M12 3h2M3 12v2M2 13h2"/></svg> AI Otomatik Teşhis</span>
-                                        <span class="split-sub-desc">Eksik kaslara göre 3 gün</span>
-                                    </div>
-                                    <button type="button" class="split-info-btn" onclick=" toggleSplitMusclePopover(event, 'ai_auto')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                                </div>
-                                <div class="split-card" data-wk-tpl="upper_lower_full" onclick="selectAiWeeklyTemplateCard('upper_lower_full')">
-                                    <span class="split-radio" aria-hidden="true"></span>
-                                    <div class="split-card-content">
-                                        <span class="split-name">Üst • Alt • Tüm Vücut</span>
-                                        <span class="split-sub-desc">3 gün dengeli dağılım</span>
-                                    </div>
-                                    <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'upper_lower_full')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                                </div>
-                                <div class="split-card" data-wk-tpl="ppl_3day" onclick="selectAiWeeklyTemplateCard('ppl_3day')">
-                                    <span class="split-radio" aria-hidden="true"></span>
-                                    <div class="split-card-content">
-                                        <span class="split-name">İtiş • Çekiş • Bacak</span>
-                                        <span class="split-sub-desc">3 gün bölgesel odak</span>
-                                    </div>
-                                    <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'ppl_3day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                                </div>
-                                <div class="split-card" data-wk-tpl="fullbody_3day" onclick="selectAiWeeklyTemplateCard('fullbody_3day')">
-                                    <span class="split-radio" aria-hidden="true"></span>
-                                    <div class="split-card-content">
-                                        <span class="split-name">3 Gün Tüm Vücut</span>
-                                        <span class="split-sub-desc">Her gün farklı hareketler</span>
-                                    </div>
-                                    <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'fullbody_3day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                                </div>
-                                <div class="split-card" data-wk-tpl="flow_complex_3day" onclick="selectAiWeeklyTemplateCard('flow_complex_3day')">
-                                    <span class="split-radio" aria-hidden="true"></span>
-                                    <div class="split-card-content">
-                                        <span class="split-name">⚔️ 3 Gün Çelik Akışı</span>
-                                        <span class="split-sub-desc">Birleşik dambıl serisi</span>
-                                    </div>
-                                    <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'flow_complex_3day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                                </div>
-                                <div class="split-card" data-wk-tpl="upper_lower_4day" onclick="selectAiWeeklyTemplateCard('upper_lower_4day')">
-                                    <span class="split-radio" aria-hidden="true"></span>
-                                    <div class="split-card-content">
-                                        <span class="split-name">4 Gün Üst / Alt</span>
-                                        <span class="split-sub-desc">Yüksek hacimli 4 gün</span>
-                                    </div>
-                                    <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'upper_lower_4day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                                </div>
-                            </div>
-
-                            <!-- 1B: Tek Günlük Bölge & İzole Kas Seçici (Tek Gün seçildiğinde açılır) -->
-                            <div class="split-grid is-hidden-grid" id="splitGrid" style="display:none;">
+                            <!-- Tek Günlük Bölge & İzole Kas Seçici -->
+                            <div class="split-grid" id="splitGrid">
                                 <div class="split-card selected" data-split-key="full_body" onclick="toggleSplit('full_body')">
                                     <span class="split-radio" aria-hidden="true"></span>
                                     <div class="split-card-content">
@@ -488,15 +406,8 @@
                                     </div>
                                     <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'lower')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
                                 </div>
-                                <div class="split-card" data-split-key="flow_complex" onclick="toggleSplit('flow_complex')">
-                                    <span class="split-radio" aria-hidden="true"></span>
-                                    <div class="split-card-content">
-                                        <span class="split-name">⚔️ Çelik Akışı (Kompleks)</span>
-                                    </div>
-                                    <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'flow_complex')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
-                                </div>
 
-                                <!-- İzole Kas Seçimi (Masaüstünde 6'lı tek satır, Mobilde 3x2 eşit grid) -->
+                                <!-- İzole Kas Seçimi -->
                                 <div class="iso-muscle-section" id="isoMuscleSection">
                                     <div class="iso-muscle-grid" id="isoMuscleGrid">
                                         <button type="button" class="iso-muscle-chip" data-iso-key="iso_chest" onclick="toggleIsolatedMuscle('iso_chest')">
@@ -523,19 +434,35 @@
                         </div>
                     </div>
 
-                    <!-- STEP 2: AVAILABLE EQUIPMENT -->
-                    <div class="gen-step-panel">
+                    <!-- 2. SEÇİM: SÜRE -->
+                    <div class="gen-step-panel gen-always-open" id="genStepPanelDuration">
+                        <div class="gen-step-title">
+                            <span class="gen-step-badge">2</span>
+                            <span>SÜRE</span>
+                        </div>
+                        <div class="gen-collapsible-section" id="durationQuickSection">
+                            <div class="gen-dur-pills-grid" id="genDurationQuickGrid" role="group" aria-label="Antrenman Süresi">
+                                <button type="button" class="gen-dur-pill" data-dur="20" onclick="setGeneratorDurationQuick('20')">20 dk</button>
+                                <button type="button" class="gen-dur-pill" data-dur="30" onclick="setGeneratorDurationQuick('30')">30 dk</button>
+                                <button type="button" class="gen-dur-pill active" data-dur="45" onclick="setGeneratorDurationQuick('45')">45 dk</button>
+                                <button type="button" class="gen-dur-pill" data-dur="60" onclick="setGeneratorDurationQuick('60')">60 dk</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. SEÇİM: MEVCUT EKİPMANLAR -->
+                    <div class="gen-step-panel gen-always-open" id="genStepPanelEquip">
                         <div class="gen-mobile-picker-bar" id="mobileEquipPickerBar" onclick="toggleGenSection('equipSection')">
                             <div class="picker-label-wrap">
-                                <span class="gen-step-badge">2</span>
+                                <span class="gen-step-badge">3</span>
                                 <span class="picker-step-title">Ekipmanlar:</span>
-                                <span class="picker-selected-val" id="selectedEquipLabel">Dambıl, KB, Vücut (3 Seçili)</span>
+                                <span class="picker-selected-val" id="selectedEquipLabel">Dambıl, Sehpa, KB, Vücut (4 Seçili)</span>
                             </div>
                             <span class="picker-arrow" id="equipPickerArrow">▼</span>
                         </div>
-                        <div class="gen-step-title desktop-only-title">
-                            <span class="gen-step-badge">2</span>
-                            <span>EKİPMAN SEÇİMİ</span>
+                        <div class="gen-step-title">
+                            <span class="gen-step-badge">3</span>
+                            <span>MEVCUT EKİPMANLAR</span>
                         </div>
                         <div class="gen-collapsible-section" id="equipSection">
                             <div class="equip-chips-wrap" id="equipChipsWrap">
@@ -573,70 +500,162 @@
                         </div>
                     </div>
 
-                    <!-- STEP 3: WORKOUT PARAMETERS & AI NOTE -->
-                    <div class="gen-step-panel">
-                        <div class="gen-mobile-picker-bar" id="mobileParamPickerBar" onclick="toggleGenSection('paramSection')">
-                            <div class="picker-label-wrap">
-                                <span class="gen-step-badge">3</span>
-                                <span class="picker-step-title">Yapı &amp; Süre:</span>
-                                <span class="picker-selected-val" id="selectedParamLabel">Süperset • Kas • 45 Dk</span>
-                            </div>
-                            <span class="picker-arrow" id="paramPickerArrow">▼</span>
-                        </div>
-                        <div class="gen-step-title desktop-only-title">
-                            <span class="gen-step-badge">3</span>
-                            <span>MODEL, HEDEF, SÜRE &amp; AI NOTU</span>
-                        </div>
-                        <div class="gen-collapsible-section" id="paramSection">
-                            <div class="param-grid">
-                                <div class="param-group">
-                                    <label for="paramStyle">MODEL &amp; SÜPERSET DÜZEYİ</label>
-                                    <select id="paramStyle" class="param-select" onchange="updateSelectedParamLabel()">
-                                        <option value="superset" selected>Orta Süperset (Dengeli)</option>
-                                        <option value="complex">⚔️ Birleşik Akış (Kompleks)</option>
-                                        <option value="superset_light">Az Süperset</option>
-                                        <option value="superset_intense">Yoğun Süperset</option>
-                                        <option value="straight">Klasik Düz Set</option>
-                                        <option value="emom_strength">Kuvvet EMOM</option>
-                                        <option value="emom_hypertrophy">Kas EMOM</option>
-                                        <option value="emom_conditioning">Kondisyon EMOM</option>
-                                    </select>
+                    <!-- GELİŞMİŞ AYARLAR (OPSİYONEL) AKORDEONU -->
+                    <div class="gen-advanced-accordion" id="genAdvancedAccordion">
+                        <button type="button" id="btnToggleGenAdvanced" class="gen-advanced-toggle-btn" aria-expanded="false" onclick="toggleGenAdvancedAccordion()">
+                            <span>Gelişmiş Ayarlar (Opsiyonel)</span>
+                            <span id="genAdvancedAccordionArrow" class="gen-advanced-arrow">▼ Aç</span>
+                        </button>
+
+                        <div id="genAdvancedAccordionBody" class="gen-collapsible-section" style="display:none;">
+                            <!-- A. Kapsam, Haftalık Şablon & Çelik Akışı -->
+                            <div class="gen-adv-block">
+                                <div class="gen-adv-title">Program Kapsamı &amp; Haftalık Plan</div>
+                                <p class="gen-adv-desc">Tek seans yerine 3-4 günlük haftalık plan veya dambılı bırakmadan yapılan 20 dakikalık Çelik Akışı kurar.</p>
+                                <div class="ai-scope-toggle-bar" role="tablist" aria-label="Program Kapsamı">
+                                    <button type="button" class="ai-scope-pill active" id="aiScopeBtnSingle" onclick="setAiGeneratorScope('single')">Tek Seans</button>
+                                    <button type="button" class="ai-scope-pill" id="aiScopeBtnWeekly" onclick="setAiGeneratorScope('weekly')">Haftalık Plan</button>
+                                    <button type="button" class="ai-scope-pill" id="aiScopeBtnFlow" onclick="setAiGeneratorScope('flow_complex')">Çelik Akışı</button>
                                 </div>
-                                <div class="param-group">
-                                    <label for="paramGoal">HEDEF</label>
-                                    <select id="paramGoal" class="param-select" onchange="updateSelectedParamLabel()">
-                                        <option value="hypertrophy" selected>Kas &amp; Hacim</option>
-                                        <option value="strength">Kuvvet &amp; Güç</option>
-                                        <option value="endurance">Kondisyon</option>
-                                    </select>
+
+                                <div id="flowConceptSection" style="display:none; margin-top:10px; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.35); border-radius:12px; padding:12px;">
+                                    <div style="font-size:12px; font-weight:800; color:#FCD34D; margin-bottom:4px;">Çelik Akışı • 20 Dk Kesintisiz Dambıl Kompleksi</div>
+                                    <div style="font-size:11.5px; color:#CBD5E1; line-height:1.45;">Dambıllar 4 tur boyunca bırakılmaz; istasyonlar arası dinlenme olmadan 5 hareket art arda uygulanır.</div>
                                 </div>
-                                <div class="param-group">
-                                    <label for="paramDuration">SÜRE</label>
-                                    <select id="paramDuration" class="param-select" onchange="updateSelectedParamLabel()">
-                                        <option value="20">20 dk</option>
-                                        <option value="30">30 dk</option>
-                                        <option value="45" selected>45 dk</option>
-                                        <option value="60">60 dk</option>
-                                    </select>
+
+                                <div class="split-grid ai-weekly-split-grid is-hidden-grid" id="aiWeeklyTemplateGrid" style="display:none; margin-top:10px;">
+                                    <div class="split-card selected" data-wk-tpl="ai_auto" onclick="selectAiWeeklyTemplateCard('ai_auto')">
+                                        <span class="split-radio" aria-hidden="true"></span>
+                                        <div class="split-card-content">
+                                            <span class="split-name">Otomatik Haftalık Denge</span>
+                                            <span class="split-sub-desc">Eksik kaslara göre 3 gün</span>
+                                        </div>
+                                        <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'ai_auto')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
+                                    </div>
+                                    <div class="split-card" data-wk-tpl="upper_lower_full" onclick="selectAiWeeklyTemplateCard('upper_lower_full')">
+                                        <span class="split-radio" aria-hidden="true"></span>
+                                        <div class="split-card-content">
+                                            <span class="split-name">Üst • Alt • Tüm Vücut</span>
+                                            <span class="split-sub-desc">3 gün dengeli dağılım</span>
+                                        </div>
+                                        <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'upper_lower_full')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
+                                    </div>
+                                    <div class="split-card" data-wk-tpl="ppl_3day" onclick="selectAiWeeklyTemplateCard('ppl_3day')">
+                                        <span class="split-radio" aria-hidden="true"></span>
+                                        <div class="split-card-content">
+                                            <span class="split-name">İtiş • Çekiş • Bacak</span>
+                                            <span class="split-sub-desc">3 gün bölgesel odak</span>
+                                        </div>
+                                        <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'ppl_3day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
+                                    </div>
+                                    <div class="split-card" data-wk-tpl="fullbody_3day" onclick="selectAiWeeklyTemplateCard('fullbody_3day')">
+                                        <span class="split-radio" aria-hidden="true"></span>
+                                        <div class="split-card-content">
+                                            <span class="split-name">3 Gün Tüm Vücut</span>
+                                            <span class="split-sub-desc">Her gün farklı hareketler</span>
+                                        </div>
+                                        <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'fullbody_3day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
+                                    </div>
+                                    <div class="split-card" data-wk-tpl="flow_complex_3day" onclick="selectAiWeeklyTemplateCard('flow_complex_3day')">
+                                        <span class="split-radio" aria-hidden="true"></span>
+                                        <div class="split-card-content">
+                                            <span class="split-name">3 Gün Çelik Akışı</span>
+                                            <span class="split-sub-desc">Birleşik dambıl serisi</span>
+                                        </div>
+                                        <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'flow_complex_3day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
+                                    </div>
+                                    <div class="split-card" data-wk-tpl="upper_lower_4day" onclick="selectAiWeeklyTemplateCard('upper_lower_4day')">
+                                        <span class="split-radio" aria-hidden="true"></span>
+                                        <div class="split-card-content">
+                                            <span class="split-name">4 Gün Üst / Alt</span>
+                                            <span class="split-sub-desc">Yüksek hacimli 4 gün</span>
+                                        </div>
+                                        <button type="button" class="split-info-btn" onclick="toggleSplitMusclePopover(event, 'upper_lower_4day')" aria-label="Kas gruplarını gör" title="Hedef kas grupları">i</button>
+                                    </div>
                                 </div>
                             </div>
-                            <div id="flowParamNotice" style="display:none; font-size:11.5px; font-weight:700; color:#B45309; background:#FEF3C7; border:1px solid #FCD34D; border-radius:10px; padding:8px 12px; margin-top:10px;">
-                                🔒 Çelik Akışı parametreleri 20 Dk kesintisiz dambıl kompleksine göre kilitlendi.
+
+                            <!-- B. Set Düzeni, EMOM Döngüsü & Hedef -->
+                            <div class="gen-adv-block" id="paramSection">
+                                <div class="gen-adv-title">Set Düzeni, EMOM Döngüsü &amp; Hedef</div>
+                                <p class="gen-adv-desc">Süperset iki hareketi peş peşe eşleştirir; EMOM her dakika başında yeni set başlatır.</p>
+                                <span id="selectedParamLabel" style="display:none;">Orta Süperset • Kas &amp; Hacim • 45 Dk</span>
+                                <div class="param-grid">
+                                    <div class="param-group">
+                                        <label for="paramStyle">SET DÜZENİ</label>
+                                        <select id="paramStyle" class="param-select" onchange="updateSelectedParamLabel()">
+                                            <option value="superset" selected>Orta Süperset (Dengeli)</option>
+                                            <option value="complex">Birleşik Akış (Çelik Akışı)</option>
+                                            <option value="superset_light">Az Süperset</option>
+                                            <option value="superset_intense">Yoğun Süperset</option>
+                                            <option value="straight">Klasik Düz Set</option>
+                                            <option value="emom_strength">Kuvvet EMOM</option>
+                                            <option value="emom_hypertrophy">Kas EMOM</option>
+                                            <option value="emom_conditioning">Kondisyon EMOM</option>
+                                        </select>
+                                    </div>
+                                    <div class="param-group">
+                                        <label for="paramGoal">ANTRENMAN HEDEFİ</label>
+                                        <select id="paramGoal" class="param-select" onchange="updateSelectedParamLabel()">
+                                            <option value="hypertrophy" selected>Kas &amp; Hacim</option>
+                                            <option value="strength">Kuvvet &amp; Güç</option>
+                                            <option value="endurance">Kondisyon</option>
+                                        </select>
+                                    </div>
+                                    <div class="param-group">
+                                        <label for="paramDuration">SÜRE</label>
+                                        <select id="paramDuration" class="param-select" onchange="updateSelectedParamLabel()">
+                                            <option value="20">20 dk</option>
+                                            <option value="30">30 dk</option>
+                                            <option value="45" selected>45 dk</option>
+                                            <option value="60">60 dk</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="flowParamNotice" style="display:none; font-size:11.5px; font-weight:700; color:#FCD34D; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.35); border-radius:10px; padding:8px 12px; margin-top:10px;">
+                                    Çelik Akışı parametreleri 20 dk kesintisiz dambıl kompleksine göre kilitlendi.
+                                </div>
                             </div>
-                            <div class="ai-unified-wish-row">
-                                <label for="aiUnifiedWishInput" class="ai-unified-wish-label"><svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2.5 3.5A1.5 1.5 0 0 1 4 2h8a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 12 11H6.5L3.8 13.5V11H4a1.5 1.5 0 0 1-1.5-1.5v-6Z"/><path d="M5.5 5.5h5M5.5 8h3.5"/></svg> AI ÖZEL NOTU / ODAK &amp; HASSASİYET (İSTEĞE BAĞLI)</label>
-                                <input type="text" id="aiUnifiedWishInput" name="ai_wish_note" class="ai-unified-wish-input" placeholder="Örn: Omuz ve sırt odaklı olsun, diz yormasın..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true">
+
+                            <!-- C. Schumann (2022) Hibrit Model, Durum Telemetrisi & RPE -->
+                            <div class="gen-adv-block">
+                                <div class="gen-adv-title">Akademik Hibrit Model &amp; Durum Telemetrisi</div>
+                                <p class="gen-adv-desc">Schumann (2022) hibrit modeli kas gelişimi ile kondisyonu güç kaybı olmadan dengeler; durum telemetrisi ise geçmiş zorluk derecesi (RPE) ve kas yorgunluğuna göre yükü ayarlar.</p>
+                                <button type="button" class="btn btn-outline gen-adv-sub-btn" onclick="openAiHybridArchitectModal()">
+                                    Akademik Model &amp; Telemetri Paneli
+                                </button>
+                            </div>
+
+                            <!-- D. Özel Not & Hassasiyet -->
+                            <div class="gen-adv-block">
+                                <div class="gen-adv-title">Özel Not &amp; Eklem Hassasiyeti</div>
+                                <p class="gen-adv-desc">Eklem hassasiyetinizi veya ekstra odaklanmak istediğiniz bölgeyi programa uyarlar.</p>
+                                <div class="ai-unified-wish-row" style="margin-top:6px;">
+                                    <label for="aiUnifiedWishInput" class="ai-unified-wish-label">ÖZEL ODAK VEYA HASSASİYET (OPSİYONEL)</label>
+                                    <input type="text" id="aiUnifiedWishInput" name="ai_wish_note" class="ai-unified-wish-input" placeholder="Örn: Omuz ve sırt odaklı olsun, diz yormasın..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true">
+                                </div>
+                            </div>
+
+                            <!-- E. Manuel & Hızlı Antrenman Modları -->
+                            <div class="gen-adv-block" style="margin-bottom:0;">
+                                <div class="gen-adv-title">Manuel Kurulum &amp; Hızlı Başlat</div>
+                                <p class="gen-adv-desc">Hareketleri kütüphaneden tek tek kendiniz seçerek liste kurar veya tek hareketle anında seans başlatır.</p>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+                                    <button type="button" class="btn btn-outline gen-adv-sub-btn" onclick="openManualBuilderInWorkout()">
+                                        Manuel Program Kur
+                                    </button>
+                                    <button type="button" class="btn btn-outline gen-adv-sub-btn" onclick="openQuickWorkoutModal()">
+                                        Hızlı Antrenman Başlat
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- SINGLE UNIFIED AI GENERATE CTA + MANUAL BUILDER TRIGGER -->
-                    <div class="ai-prep-actions-row ai-unified-cta-row" style="display:flex; gap:8px; flex-wrap:wrap;">
-                        <button type="button" class="btn-ai-create-primary btn-ai-unified-cta" id="btnUnifiedAiGenerate" style="flex:1.4; min-width:180px;" onclick="handleQuickAiGenerate()">
-                            <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg> Programı Oluştur
-                        </button>
-                        <button type="button" class="btn btn-outline" style="flex:1; min-width:160px; font-size:13px; font-weight:800; padding:12px 14px; border-radius:12px; border:1.5px solid #CBD5E1; color:#0F172A; background:#FFFFFF;" onclick="openManualBuilderInWorkout()">
-                            🛠️ Manuel Oluştur
+                    <!-- TEK VE BELİRGİN ANA AKSİYON BUTONU (PRIMARY CTA) -->
+                    <div class="ai-prep-actions-row ai-unified-cta-row">
+                        <button type="button" class="btn-ai-create-primary btn-ai-unified-cta" id="btnUnifiedAiGenerate" style="width:100%;" onclick="handleQuickAiGenerate()">
+                            <svg class="cv-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 1.5L3 9h4.5L6.8 14.5L13 7H8.5L9 1.5Z"/></svg> Program Oluştur
                         </button>
                     </div>
                     <div class="ai-prep-hint" id="aiQuickPreviewHint">Onaylamadan takvime eklenmez</div>
@@ -661,12 +680,12 @@
                         </div>
                         <div class="stitch-hud-meta-right">
                             <span class="stitch-hud-total-lbl">Toplam: <strong id="workoutTotalTimerDisplay">00:00</strong></span>
-                            <button type="button" class="btn-hud-tiny" id="btnToggleWorkoutPause" onclick="toggleWorkoutPause()" title="Duraklat / Sürdür" aria-label="Antrenman süresini duraklat veya sürdür">⏸️</button>
+                            <button type="button" class="btn-hud-tiny" id="btnToggleWorkoutPause" onclick="toggleWorkoutPause()" title="Duraklat / Sürdür" aria-label="Antrenman süresini duraklat veya sürdür">Duraklat</button>
                             <div class="hud-view-toggle-group">
                                 <button type="button" class="btn-view-toggle active" id="btnViewFocus" onclick="setActiveWorkoutViewMode('focus')" title="Tek hareket odak modu" aria-label="Tek hareket odak modu">Odak</button>
                                 <button type="button" class="btn-view-toggle" id="btnViewList" onclick="setActiveWorkoutViewMode('list')" title="Tüm hareketler listesi" aria-label="Tüm hareketler listesi">Liste</button>
                             </div>
-                            <button type="button" id="wakeLockStatusBtn" class="wake-lock-pill" onclick="toggleWakeLockManual()" title="Ekranı açık tut" aria-label="Ekran kilidini açık tut" style="display:none;">🟢</button>
+                            <button type="button" id="wakeLockStatusBtn" class="wake-lock-pill" onclick="toggleWakeLockManual()" title="Ekranı açık tut" aria-label="Ekran kilidini açık tut" style="display:none;">Açık</button>
                             <span id="btnCollapseHUD" style="display:none;"><span id="hudCollapseIcon"></span></span>
                         </div>
                     </div>
@@ -697,17 +716,17 @@
                 <!-- FLOATING DOCK FOR QUICK WORKOUT NAVIGATION -->
                 <div id="workoutFloatingDock" class="workout-floating-dock" style="display:none;">
                     <button type="button" class="btn-dock-nav" id="btnDockPrev" onclick="goToPrevExercise()">
-                        ⬅️ Önceki
+                        ← Önceki
                     </button>
                     <div class="dock-ex-title">
                         <div class="dock-ex-counter" id="dockExCounter">EGZERSİZ 1/6</div>
                         <div class="dock-ex-name" id="dockExName">Egzersiz Adı</div>
                     </div>
                     <button type="button" class="btn-dock-nav next" id="btnDockNext" onclick="goToNextExercise()">
-                        Sonraki ➡️
+                        Sonraki →
                     </button>
                     <button type="button" class="btn-dock-add" onclick="openAddFinisherModal()" title="İlave hareket veya finisher ekle">
-                        ➕ Ekle
+                        + Ekle
                     </button>
                 </div>
 
@@ -770,7 +789,7 @@
                             </div>
                             <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
                                 <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:6px 10px; font-weight:800; border-color:rgba(167,139,250,0.35); color:#F3E8FF; background:#121024; flex-shrink:0; white-space:nowrap;" onclick="event.stopPropagation(); openQuickWorkoutModal()">
-                                    ⚡ Hızlı
+                                    Hızlı Başlat
                                 </button>
                                 <button type="button" class="btn btn-outline" id="btnToggleStudioAccordion" style="font-size:11.5px; padding:6px 10px; font-weight:800; border-color:rgba(167,139,250,0.35); color:#FFFFFF; background:#121024; flex-shrink:0; white-space:nowrap;">
                                     <span id="studioAccordionArrow">▼ Aç</span>
@@ -898,7 +917,7 @@
 
                         <h3 style="font-size:13.5px; font-weight:900; color:#FFFFFF; margin:18px 0 10px;">Klasik Şablonlar</h3>
                         <div id="officialProgramsList">
-                            <!-- Classic La Forja templates -->
+                            <!-- Çelik Kodu Şablonları -->
                         </div>
                     </div>
 
@@ -928,7 +947,7 @@
                             <div style="position:relative; margin-bottom:6px;">
                                 <input type="text" id="libExSearchInput" class="form-input" aria-label="Hareket veya kas ara" spellcheck="false" autocomplete="off"
                                        style="width:100%; padding:9px 34px 9px 12px; font-size:12.5px; border-radius:10px; background:#0B0A14; color:#FFFFFF; border:1px solid rgba(167, 139, 250, 0.25);" 
-                                       placeholder="🔍 Hareket veya kas ara..." 
+                                       placeholder="Hareket veya kas ara..." 
                                        oninput="renderLibraryExerciseCatalog()">
                                 <button id="libExClearSearchBtn" type="button" aria-label="Aramayı temizle" onclick="clearLibExSearch()" style="display:none; position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:#CBD5E1; font-size:18px; cursor:pointer;">&times;</button>
                             </div>
@@ -1086,9 +1105,8 @@
                     <!-- COLLAPSIBLE CUSTOMIZATION FORM (DEFAULT CLOSED) -->
                     <button type="button" id="profileEditToggleBtn" onclick="toggleProfileCustomizationDrawer()" aria-expanded="false" style="width:100%; display:flex; justify-content:space-between; align-items:center; background:#121024; border:1.5px solid rgba(167, 139, 250, 0.25); border-radius:12px; padding:12px 14px; cursor:pointer; text-align:left;">
                         <div style="display:flex; align-items:center; gap:10px;">
-                            <span style="font-size:18px;" aria-hidden="true">⚙️</span>
                             <div>
-                                <div style="font-size:13px; font-weight:800; color:#FFFFFF;">Profil & Görünüm Ayarları</div>
+                                <div style="font-size:13px; font-weight:800; color:#FFFFFF;">Profil &amp; Görünüm Ayarları</div>
                                 <div style="font-size:11px; color:#CBD5E1;">Sporcu adı, avatar, tema rengi ve seviye</div>
                             </div>
                         </div>
@@ -1147,14 +1165,13 @@
                         </div>
 
                         <button class="btn btn-gold" style="width:100%; padding:14px; font-weight:800; margin-top:8px;" onclick="saveCurrentProfile()">
-                            💾 PROFİL DEĞİŞİKLİKLERİNİ KAYDET
+                            Profil Değişikliklerini Kaydet
                         </button>
                     </div>
 
                     <!-- HESAP PAROLASI DEĞİŞTİRME -->
                     <div style="background:#121024; border:1.5px solid rgba(167, 139, 250, 0.25); border-radius:12px; padding:14px; margin-top:16px;">
                         <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
-                            <span style="font-size:18px;" aria-hidden="true">🔒</span>
                             <div>
                                 <h4 style="font-size:13px; font-weight:800; color:#FFFFFF; margin:0;">Hesap Parolasını Değiştir</h4>
                                 <div style="font-size:11px; color:#CBD5E1;">En az 8 karakter, harf ve rakam zorunlu</div>
@@ -1171,243 +1188,45 @@
                             </div>
                         </div>
                         <button type="button" class="btn btn-outline" style="width:100%; margin-top:10px; font-size:11.5px; padding:8px; border-color:rgba(252, 211, 77, 0.45); color:#FCD34D; font-weight:800;" onclick="handleUserChangePassword()">
-                            🔐 ŞİFREYİ GÜNCELLE
+                            Şifreyi Güncelle
                         </button>
                     </div>
 
-                    <!-- GOOGLE GEMINI AI CONFIGURATION -->
+                    <!-- AKILLI BİYOMEKANİK KOÇ BAĞLANTISI -->
                     <div id="profileGeminiConfigCard" style="background:#121024; border:1px solid rgba(167, 139, 250, 0.3); border-radius:10px; padding:14px; margin-top:20px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                             <div style="display:flex; align-items:center; gap:8px;">
-                                <span style="font-size:22px;" aria-hidden="true">🤖</span>
                                 <div>
-                                    <h4 style="font-size:13.5px; font-weight:800; color:#F3E8FF; margin:0;">Google Gemini AI Biyomekanik Motoru</h4>
-                                    <div style="font-size:11px; color:#CBD5E1;">Antrenman ortasında akıllı alternatifler ve eklem koruyucu reçeteler</div>
+                                    <h4 style="font-size:13.5px; font-weight:800; color:#F3E8FF; margin:0;">Çelik Kodu Akıllı Biyomekanik Koç</h4>
+                                    <div style="font-size:11px; color:#CBD5E1;">Ekipman ve eklem durumunuza göre anında akıllı hareket alternatifi üretir</div>
                                 </div>
                             </div>
-                            <span id="profileGeminiStatusBadge" aria-live="polite" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px; background:#2C2550; color:#F3E8FF; border:1px solid rgba(167, 139, 250, 0.3);">Kontrol Ediliyor…</span>
+                            <span id="profileGeminiStatusBadge" aria-live="polite" style="font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px; background:#14532D; color:#BBF7D0; border:1px solid rgba(74, 222, 128, 0.45); white-space:nowrap;">Hazır</span>
                         </div>
-                        <div id="profileGeminiAdminControls" style="display:none; margin-top:10px;">
-                            <div class="form-group" style="margin-bottom:8px;">
-                                <label class="form-label" for="profileGeminiApiKeyInput" style="font-size:11px;">Gemini API Anahtarı (Yalnızca Yönetici)</label>
-                                <div style="display:flex; gap:6px;">
-                                    <input type="password" id="profileGeminiApiKeyInput" name="geminiApiKey" class="form-input" placeholder="AIzaSy… anahtarınızı girin" autocomplete="off" spellcheck="false">
-                                    <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px; border-color:rgba(167, 139, 250, 0.45); color:#F3E8FF; font-weight:800; white-space:nowrap;" onclick="testAndSaveGeminiKeyFromProfile()">⚡ Test Et & Kaydet</button>
+                        <div id="profileGeminiAdminControls" style="margin-top:10px;">
+                            <button type="button" id="profileGeminiKeyDrawerToggleBtn" class="btn btn-outline" style="width:100%; font-size:11px; padding:7px 10px; border-color:rgba(167, 139, 250, 0.35); color:#E2E8F0; font-weight:700; display:flex; justify-content:space-between; align-items:center;" onclick="const b=document.getElementById('profileGeminiKeyDrawerBody'); const open=b && b.style.display==='none'; if(b){b.style.display=open?'block':'none';} this.querySelector('span:last-child').innerText=open?'▲ Gizle':'▼ Göster';">
+                                <span>Kişisel Koç Anahtarı (İsteğe Bağlı)</span>
+                                <span>▼ Göster</span>
+                            </button>
+                            <div id="profileGeminiKeyDrawerBody" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(167, 139, 250, 0.25);">
+                                <div class="form-group" style="margin-bottom:8px;">
+                                    <label class="form-label" for="profileGeminiApiKeyInput" style="font-size:11px;">Kişisel Bağlantı Anahtarı</label>
+                                    <div style="display:flex; gap:6px;">
+                                        <input type="password" id="profileGeminiApiKeyInput" name="geminiApiKey" class="form-input" placeholder="Kişisel anahtar (isteğe bağlı)" autocomplete="off" spellcheck="false">
+                                        <button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px; border-color:rgba(167, 139, 250, 0.45); color:#F3E8FF; font-weight:800; white-space:nowrap;" onclick="testAndSaveGeminiKeyFromProfile()">Test Et ve Kaydet</button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; flex-wrap:wrap; gap:6px;">
-                                <span style="color:#CBD5E1;">🔒 Anahtar yalnızca yöneticiye görünür; sporcular arka planda sınırsız kullanır.</span>
-                                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color:#7DD3FC; text-decoration:underline; font-weight:700;">🔗 Ücretsiz API Key Al (Google AI Studio) ➔</a>
+                                <div style="font-size:11px; color:#CBD5E1;">Yalnızca bu cihazda saklanır.</div>
                             </div>
                         </div>
                     </div>
 
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
-                        <button class="btn btn-outline" id="profileTabAdminBtn" style="font-size:11px; border-color:rgba(252, 211, 77, 0.45); color:#FCD34D; display:none;" onclick="openAdminModal()">
-                            👑 Sporcu Yönetim Portalı (Admin) <span id="profileAdminTelemetryBadge" style="display:none; background:#DC2626; color:#FFFFFF; font-size:10px; font-weight:800; padding:1px 6px; border-radius:999px; margin-left:4px;">0</span>
-                        </button>
-                    </div>
+                    <div id="profileAdminMountPoint" style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;"></div>
                 </div>
             </div>
 
         </div><!-- END APP CONTAINER -->
     </div><!-- END MAIN APP WRAPPER -->
-
-    <!-- ==================== ADMIN MANAGEMENT MODAL ==================== -->
-    <div id="adminModal" class="modal-overlay">
-        <div class="modal-box" style="max-width: 600px; width: 95%;">
-            <div class="modal-header">
-                <span class="modal-title">👑 Sporcu Yönetim Portalı (Admin)</span>
-                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeAdminModal()">✕</button>
-            </div>
-
-            <!-- ADMIN NAVIGATION TABS -->
-            <div style="display:flex; gap:6px; margin-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
-                <button id="adminTabBtnStatus" class="btn btn-gold" style="flex:1; font-size:11.5px; padding:9px 8px; font-weight:800; white-space:nowrap;" onclick="switchAdminModalTab('status')">
-                    Durumlar
-                </button>
-                <button id="adminTabBtnManage" class="btn btn-outline" style="flex:1; font-size:11.5px; padding:9px 8px; font-weight:800; color:var(--text-secondary); white-space:nowrap;" onclick="switchAdminModalTab('manage')">
-                    Hesaplar <span id="adminManagePendingBadge" style="display:none; background:#f59e0b; color:#090d16; font-size:10px; font-weight:900; padding:1px 6px; border-radius:99px; margin-left:3px;">0</span>
-                </button>
-                <button id="adminTabBtnTelemetry" class="btn btn-outline" style="flex:1.15; font-size:11.5px; padding:9px 8px; font-weight:800; color:var(--text-secondary); white-space:nowrap;" onclick="switchAdminModalTab('telemetry')">
-                    Sistem İzleme <span id="adminTelemetryTabBadge" style="display:none; background:#DC2626; color:#FFFFFF; font-size:10px; font-weight:900; padding:1px 6px; border-radius:99px; margin-left:3px;">0</span>
-                </button>
-            </div>
-
-            <!-- PENDING APPROVALS BANNER (ONAY BEKLEYEN KAYIT BAŞVURULARI) -->
-            <div id="adminPendingApprovalsSection" style="display:none; background:rgba(245, 158, 11, 0.1); border:1px solid rgba(245, 158, 11, 0.45); border-radius:12px; padding:12px 14px; margin-bottom:16px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <h3 style="font-size:13px; font-weight:800; color:var(--gold); margin:0;">⏳ Onay Bekleyen Kayıt Başvuruları</h3>
-                    <span id="adminPendingCountLabel" style="font-size:10.5px; font-weight:800; color:#fde68a;">0 Başvuru</span>
-                </div>
-                <div id="adminPendingApprovalsList" style="display:flex; flex-direction:column; gap:8px;"></div>
-            </div>
-
-            <!-- TAB 1: SPORCU ÇALIŞMA DURUMLARI (ÖZET PANELİ) -->
-            <div id="adminViewStatus">
-                <!-- TOP KPI BAR -->
-                <div id="adminSummaryKpis" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-bottom:14px;"></div>
-
-                <!-- ATHLETES LIVE CARDS -->
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <h3 style="font-size:13px; font-weight:800; color:#FFFFFF; margin:0;">📋 Sporcuların Antrenman & Kilo Durumları</h3>
-                    <span style="font-size:10.5px; color:var(--text-secondary);">Hesap değiştirmeden canlı teftiş</span>
-                </div>
-                <div id="adminAthleteStatusContainer"></div>
-            </div>
-
-            <!-- TAB 2: SPORCU HESAP YÖNETİMİ -->
-            <div id="adminViewManage" style="display:none;">
-                <!-- ADD NEW USER SECTION -->
-                <div style="background:var(--bg-surface); border:1px solid var(--gold); border-radius:10px; padding:14px; margin-bottom:16px;">
-                    <h3 style="font-size:13px; font-weight:800; color:var(--gold); margin-bottom:10px;">➕ Yeni Sporcu Oluştur (Doğrudan Onaylı)</h3>
-                    
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;" class="form-group">
-                        <div>
-                            <label class="form-label">Kullanıcı Adı</label>
-                            <input type="text" id="newUsername" class="form-input" placeholder="Örn: ahmet" autocapitalize="none">
-                        </div>
-                        <div>
-                            <label class="form-label">Şifre (En az 6 karakter)</label>
-                            <input type="text" id="newPassword" class="form-input" value="123456" minlength="6">
-                        </div>
-                    </div>
-
-                    <div style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap:8px;" class="form-group">
-                        <div>
-                            <label class="form-label">Ad Soyad</label>
-                            <input type="text" id="newDisplayName" class="form-input" placeholder="Örn: Ahmet Yılmaz">
-                        </div>
-                        <div>
-                            <label class="form-label">Rol</label>
-                            <select id="newRole" class="form-select">
-                                <option value="athlete">Sporcu</option>
-                                <option value="admin">Yönetici (Admin)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">E-Posta Adresi (Opsiyonel)</label>
-                        <input type="email" id="newEmail" class="form-input" placeholder="ornek@gmail.com" autocapitalize="none">
-                    </div>
-
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;" class="form-group">
-                        <div>
-                            <label class="form-label">Seviye</label>
-                            <select id="newLevel" class="form-select">
-                                <option value="Başlangıç">Başlangıç</option>
-                                <option value="Orta Seviye" selected>Orta Seviye</option>
-                                <option value="İleri Seviye">İleri Seviye</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="form-label">Cinsiyet</label>
-                            <select id="newGender" class="form-select">
-                                <option value="Erkek">Erkek</option>
-                                <option value="Kadın">Kadın</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Avatar</label>
-                        <div class="avatar-picker-grid" id="newAvatarPicker">
-                            <div class="avatar-choice selected" onclick="selectNewAvatar('🥋')">🥋</div>
-                            <div class="avatar-choice" onclick="selectNewAvatar('🦁')">🦁</div>
-                            <div class="avatar-choice" onclick="selectNewAvatar('⚡')">⚡</div>
-                            <div class="avatar-choice" onclick="selectNewAvatar('🛡️')">🛡️</div>
-                            <div class="avatar-choice" onclick="selectNewAvatar('🦅')">🦅</div>
-                        </div>
-                    </div>
-
-                    <button class="btn btn-gold" style="width:100%; padding:10px; font-weight:800;" onclick="handleCreateUser()">
-                        ➕ KULLANICIYI KAYDET
-                    </button>
-                </div>
-
-                <!-- COLLAPSIBLE EMAILJS / WEBHOOK AUTO-EMAIL SETTINGS -->
-                <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 12px; margin-bottom:16px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleAdminEmailConfigAccordion()">
-                        <span style="font-size:12px; font-weight:800; color:#FFFFFF;">📧 Otomatik E-Posta Servisi Ayarları (EmailJS)</span>
-                        <span id="adminEmailConfigToggleLabel" style="font-size:11px; color:var(--cyan); font-weight:700;">▼ Göster</span>
-                    </div>
-                    <div id="adminEmailConfigBody" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.1); font-size:11.5px;">
-                        <p style="color:var(--text-secondary); margin:0 0 8px; line-height:1.4;">
-                            Onay verdiğinizde mailin arka planda <strong>hiçbir pencere açılmadan otomatik</strong> gitmesi için ücretsiz <a href="https://dashboard.emailjs.com" target="_blank" rel="noopener noreferrer" style="color:var(--cyan);">EmailJS</a> bilgilerinizi girebilirsiniz. Boş bırakırsanız onay anında hazır mail gönderim ekranı açılır.
-                        </p>
-                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:8px;">
-                            <input type="text" id="emailJsServiceId" class="form-input" placeholder="Service ID (service_...)" style="font-size:11px; padding:6px 8px;">
-                            <input type="text" id="emailJsTemplateId" class="form-input" placeholder="Template ID (template_...)" style="font-size:11px; padding:6px 8px;">
-                            <input type="text" id="emailJsPublicKey" class="form-input" placeholder="Public Key" style="font-size:11px; padding:6px 8px;">
-                        </div>
-                        <button type="button" class="btn btn-outline" style="width:100%; font-size:11px; padding:7px; border-color:var(--gold); color:var(--gold); font-weight:800;" onclick="saveAdminEmailJsConfig()">
-                            💾 Otomatik Mail Ayarlarını Kaydet
-                        </button>
-                    </div>
-                </div>
-
-                <!-- ATHLETES LIST -->
-                <h3 style="font-size:13px; font-weight:800; color:#FFFFFF; margin-bottom:10px;">📋 Kayıtlı Sporcu Hesapları</h3>
-                <div id="adminUserListContainer"></div>
-            </div>
-
-            <!-- TAB 3: SİSTEM İZLEME (4 KAPILI KARA KUTU) -->
-            <div id="adminViewTelemetry" style="display:none;">
-                <div id="adminTelemetryKpis" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-bottom:12px;"></div>
-
-                <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-                    <button type="button" id="adminTelGateBtn_ALL" onclick="setAdminTelemetryFilter('ALL', null)" style="font-size:11px; font-weight:800; padding:6px 10px; border-radius:8px; border:1px solid rgba(167,139,250,0.45); background:#6D28D9; color:#FFFFFF; cursor:pointer; white-space:nowrap;">Tümü</button>
-                    <button type="button" id="adminTelGateBtn_K1" onclick="setAdminTelemetryFilter('K1', null)" style="font-size:11px; font-weight:800; padding:6px 10px; border-radius:8px; border:1px solid rgba(167,139,250,0.25); background:#121024; color:#CBD5E1; cursor:pointer; white-space:nowrap;">K1 Gümrük</button>
-                    <button type="button" id="adminTelGateBtn_K2" onclick="setAdminTelemetryFilter('K2', null)" style="font-size:11px; font-weight:800; padding:6px 10px; border-radius:8px; border:1px solid rgba(167,139,250,0.25); background:#121024; color:#CBD5E1; cursor:pointer; white-space:nowrap;">K2 Saat</button>
-                    <button type="button" id="adminTelGateBtn_K3" onclick="setAdminTelemetryFilter('K3', null)" style="font-size:11px; font-weight:800; padding:6px 10px; border-radius:8px; border:1px solid rgba(167,139,250,0.25); background:#121024; color:#CBD5E1; cursor:pointer; white-space:nowrap;">K3 Gemini</button>
-                    <button type="button" id="adminTelGateBtn_K4" onclick="setAdminTelemetryFilter('K4', null)" style="font-size:11px; font-weight:800; padding:6px 10px; border-radius:8px; border:1px solid rgba(167,139,250,0.25); background:#121024; color:#CBD5E1; cursor:pointer; white-space:nowrap;">K4 Bulut</button>
-                </div>
-
-                <div style="display:flex; gap:6px; margin-bottom:10px;">
-                    <button type="button" id="adminTelSevBtn_ALL" onclick="setAdminTelemetryFilter(null, 'ALL')" style="flex:1; font-size:11px; font-weight:800; padding:6px 10px; border-radius:8px; border:1px solid rgba(167,139,250,0.45); background:#2C2550; color:#FFFFFF; cursor:pointer; white-space:nowrap;">Tüm Kayıtlar</button>
-                    <button type="button" id="adminTelSevBtn_error" onclick="setAdminTelemetryFilter(null, 'error')" style="flex:1; font-size:11px; font-weight:800; padding:6px 10px; border-radius:8px; border:1px solid rgba(248,113,113,0.35); background:#121024; color:#FECACA; cursor:pointer; white-space:nowrap;">Sadece Arıza</button>
-                </div>
-
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:12px;">
-                    <button type="button" onclick="copyAdminTelemetryPromptToClipboard()" style="font-size:11.5px; font-weight:800; padding:9px 10px; border-radius:10px; border:1px solid rgba(74,222,128,0.45); background:#14532D; color:#BBF7D0; cursor:pointer; white-space:nowrap;">Düzeltme Emri Kopyala</button>
-                    <button type="button" onclick="clearAdminTelemetryEvents()" style="font-size:11.5px; font-weight:800; padding:9px 10px; border-radius:10px; border:1px solid rgba(248,113,113,0.45); background:#7F1D1D; color:#FECACA; cursor:pointer; white-space:nowrap;">Tümünü Temizle</button>
-                </div>
-
-                <div id="adminTelemetryListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:46vh; overflow-y:auto;"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== APPROVAL EMAIL DISPATCH MODAL ==================== -->
-    <div id="approvalEmailDispatchModal" class="modal-overlay" onclick="if(event.target === this) closeApprovalEmailModal()">
-        <div class="modal-box" style="max-width: 480px; width: 94%;">
-            <div class="modal-header">
-                <span class="modal-title" style="color:#4ADE80;">✅ Hesap Onaylandı & Onay Maili</span>
-                <button type="button" class="modal-close" aria-label="Kapat" onclick="closeApprovalEmailModal()">✕</button>
-            </div>
-            <div style="font-size:12.5px; color:#E2E8F0; line-height:1.5; margin-bottom:12px;">
-                <strong id="approvalModalUserName" style="color:var(--gold);">Sporcu</strong> adlı kullanıcının hesabı aktif edildi ve buluta kaydedildi. Şimdi kullanıcıya onay e-postasını gönderin:
-            </div>
-            <div id="approvalModalAutoStatus" style="display:none; padding:8px 10px; border-radius:8px; font-size:11.5px; margin-bottom:10px;"></div>
-            <div style="background:#121024; border:1px solid rgba(167, 139, 250, 0.25); border-radius:8px; padding:10px 12px; margin-bottom:14px; font-size:11.5px; color:#CBD5E1;">
-                <div style="margin-bottom:4px;"><strong>Alıcı:</strong> <span id="approvalModalUserEmail" style="color:var(--cyan);"></span></div>
-                <div style="margin-bottom:6px;"><strong>Konu:</strong> <span id="approvalModalSubject" style="color:#FFFFFF;"></span></div>
-                <div id="approvalModalBodyPreview" style="white-space:pre-wrap; background:#0B0A14; border:1px solid rgba(167, 139, 250, 0.2); padding:8px; border-radius:6px; color:#E2E8F0; font-size:11px; max-height:130px; overflow-y:auto;"></div>
-            </div>
-            <div style="display:flex; flex-direction:column; gap:8px;">
-                <a id="approvalModalMailtoBtn" href="#" class="btn btn-gold" style="text-align:center; text-decoration:none; padding:11px; font-weight:800; font-size:12.5px; display:block;">
-                    📧 Varsayılan Mail Uygulaması İle Gönder
-                </a>
-                <a id="approvalModalGmailBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="text-align:center; text-decoration:none; padding:10px; font-weight:800; font-size:12px; border-color:var(--cyan); color:var(--cyan); display:block;">
-                    🌐 Gmail Web İle Tek Tıkla Gönder
-                </a>
-                <button type="button" class="btn btn-outline" style="padding:9px; font-size:11.5px;" onclick="copyApprovalMessageToClipboard()">
-                    📋 Onay Mesajını Kopyala
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- ==================== HD EXERCISE IMAGE LIGHTBOX MODAL ==================== -->
     <div id="imageLightboxModal" class="image-lightbox-modal" onclick="closeImageLightbox(event)">
@@ -1419,7 +1238,7 @@
                 </div>
                 <div class="lightbox-actions">
                     <button type="button" class="btn-lightbox-action" id="btnLightboxZoom" onclick="toggleLightboxZoom()" title="Görseli %180 büyüt veya sığdır">
-                        🔍 <span id="lightboxZoomText">Büyüt (%180)</span>
+                        <span id="lightboxZoomText">Büyüt (%180)</span>
                     </button>
                     <button type="button" class="btn-lightbox-close" aria-label="Kapat" onclick="closeImageLightbox()" title="Kapat (ESC)">✕</button>
                 </div>
@@ -1429,7 +1248,7 @@
                 <img id="lightboxImg" src="" alt="Detaylı Egzersiz Görseli" class="lightbox-img" onclick="toggleLightboxZoom()">
             </div>
             <div class="lightbox-footer">
-                <span>💡 İpucu: Görsele dokunarak büyütebilir veya telefonunuzu yatay çevirerek tam genişlikte inceleyebilirsiniz.</span>
+                <span>Görsele dokunarak büyütebilir veya telefonunuzu yatay çevirerek tam genişlikte inceleyebilirsiniz.</span>
             </div>
         </div>
     </div>
@@ -1439,7 +1258,7 @@
         <div class="modal-box" style="max-width: 520px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
                 <div>
-                    <span class="auth-role-tag role-admin" style="font-size:10px; background:rgba(245,158,11,0.2); color:var(--gold);">⚡ PROGRAMA EKLE</span>
+                    <span class="auth-role-tag role-admin" style="font-size:10px; background:rgba(245,158,11,0.2); color:var(--gold);">PROGRAMA EKLE</span>
                     <h3 class="modal-title" id="addToProgModalTitle" style="font-size:16px; margin-top:4px;">Egzersizi Ekle</h3>
                     <div id="addToProgModalSubtitle" style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;"></div>
                 </div>
@@ -1456,7 +1275,7 @@
         <div class="modal-box" style="max-width: 480px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
                 <div>
-                    <span class="auth-role-tag role-admin" style="font-size:10px; background:rgba(245,158,11,0.2); color:var(--gold);">⚡ HIZLI KAS DENGESİ</span>
+                    <span class="auth-role-tag role-admin" style="font-size:10px; background:rgba(245,158,11,0.2); color:var(--gold);">HIZLI KAS DENGESİ</span>
                     <h3 class="modal-title" id="quickAddModalTitle" style="font-size:16px; margin-top:4px;">Egzersizi Güne Ekle</h3>
                 </div>
                 <button type="button" class="modal-close" aria-label="Kapat" onclick="closeQuickAddToDayModal()">✕</button>
@@ -1472,7 +1291,7 @@
         <div class="modal-box" style="max-width: 520px; max-height: 92vh; overflow-y: auto;">
             <div class="modal-header">
                 <div>
-                    <span class="auth-role-tag role-admin" style="font-size:10px; background:rgba(245,158,11,0.2); color:var(--gold);">📅 TAKVİM MİMARI</span>
+                    <span class="auth-role-tag role-admin" style="font-size:10px; background:rgba(245,158,11,0.2); color:var(--gold);">TAKVİM MİMARI</span>
                     <h3 class="modal-title" style="font-size:16px; margin-top:4px;">Antrenmanı Takvime Ata</h3>
                 </div>
                 <button type="button" class="modal-close" aria-label="Kapat" onclick="closeAssignWorkoutCalendarModal()">✕</button>
@@ -1484,10 +1303,10 @@
             <!-- WEEK SELECTOR TABS (Bu Hafta / Gelecek Hafta) -->
             <div style="display:flex; gap:6px; margin-bottom:12px; background:#F1F5F9; padding:4px; border-radius:10px; border:1.5px solid #E2E8F0;">
                 <button type="button" id="assignModalWeekCurrentBtn" class="btn" style="flex:1; font-size:12px; padding:8px 10px; font-weight:800; border-radius:7px; background:var(--gold); color:#000;" onclick="switchAssignModalWeek('current')">
-                    📅 Bu Hafta
+                    Bu Hafta
                 </button>
                 <button type="button" id="assignModalWeekNextBtn" class="btn btn-outline" style="flex:1; font-size:12px; padding:8px 10px; font-weight:800; border-radius:7px; border:none; color:var(--text-secondary);" onclick="switchAssignModalWeek('next')">
-                    🚀 Gelecek Hafta
+                    Gelecek Hafta
                 </button>
             </div>
 
@@ -1496,7 +1315,7 @@
 
             <!-- 7-DAY CALENDAR GRID -->
             <div style="font-size:11px; font-weight:900; color:var(--gold); text-transform:uppercase; margin-bottom:8px; letter-spacing:0.5px;">
-                🗓️ VEYA BİR GÜN SEÇİN
+                VEYA BİR GÜN SEÇİN
             </div>
             <div id="assignModalDaysGrid" style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px;"></div>
         </div>
@@ -1512,7 +1331,7 @@
                 </div>
                 <div style="display:inline-flex; align-items:center; gap:6px; flex-shrink:0;">
                     <button type="button" class="stitch-time-pill-btn" onclick="toggleSchedTimingDrawer()" title="Saat ve Takvim Ayarı">
-                        🕒 <span id="schedHeaderTimeLabel">18:30</span>
+                        <span id="schedHeaderTimeLabel">18:30</span>
                     </button>
                     <button type="button" class="wk-info-modal-close" aria-label="Kapat" onclick="closeScheduleDayModal()">✕</button>
                 </div>
@@ -1525,11 +1344,11 @@
                 <!-- Populated dynamically -->
             </div>
 
-            <!-- SEANS SAATİ & CANLI TAKVİM ENTEGRASYON KARTI (SADECE 🕒 TIKLANINCA AÇILIR) -->
+            <!-- SEANS SAATİ & CANLI TAKVİM ENTEGRASYON KARTI -->
             <div id="schedDayTimingSection" style="display:none; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:10px; margin-bottom:10px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <span style="font-size:12.5px; font-weight:800; color:#0F172A; display:flex; align-items:center; gap:6px;">
-                        <span>🕒</span> Seans Saati & Takvim Durumu
+                        Seans Saati &amp; Takvim Durumu
                     </span>
                     <span id="schedDaySyncStatusBadge" style="font-size:10.5px; font-weight:800; padding:3px 8px; border-radius:6px; background:#F1F5F9; color:#334155; border:1px solid #CBD5E1;">
                         Yerel Plan
@@ -1580,7 +1399,7 @@
         <div class="quick-listbox-sheet" onclick="event.stopPropagation()">
             <div class="quick-listbox-header">
                 <div>
-                    <div class="quick-listbox-title" id="listboxTitle">⚖️ Ağırlık Seç (KG)</div>
+                    <div class="quick-listbox-title" id="listboxTitle">Ağırlık Seç (KG)</div>
                     <div class="quick-listbox-sub" id="listboxSub">Set Detayı</div>
                 </div>
                 <button type="button" class="btn-listbox-close" aria-label="Kapat" onclick="closeListboxPicker()">✕</button>
@@ -1597,49 +1416,45 @@
     <div id="completeModal" class="modal-overlay">
         <div class="modal-box" style="max-width: 560px; max-height: 92vh; overflow-y: auto;">
             <div class="modal-header">
-                <span class="modal-title">🏁 Antrenmanı Tamamla & Kaydet</span>
+                <span class="modal-title">Antrenmanı Tamamla &amp; Kaydet</span>
                 <button type="button" class="modal-close" aria-label="Kapat" onclick="closeCompleteModal()">✕</button>
             </div>
 
             <div class="form-group">
                 <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>🏷️ Antrenman İsmi / Program Başlığı</span>
+                    <span>Antrenman İsmi / Program Başlığı</span>
                     <span style="font-size:11px; color:var(--text-secondary); font-weight:normal;">(Hatırlamak için özelleştirin)</span>
                 </label>
-                <input type="text" id="logProgramName" name="log_program_name" class="form-input" placeholder="Örn: Pazartesi Ağır Çelik, Rodium Bacak Günü..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true">
+                <input type="text" id="logProgramName" name="log_program_name" class="form-input" placeholder="Örn: Pazartesi Ağır Çelik, Üst Vücut Günü..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true">
             </div>
 
             <!-- MEKAN & SALON LOKASYONU -->
             <div class="form-group" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
                 <label class="form-label" style="margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-                    <span>📍 Antrenman Nerede Yapıldı?</span>
-                    <span style="font-size:11px; color:var(--text-secondary); font-weight:normal;">(Mekan & Salon Analizi)</span>
+                    <span>Antrenman Nerede Yapıldı?</span>
+                    <span style="font-size:11px; color:var(--text-secondary); font-weight:normal;">(Mekan &amp; Salon Analizi)</span>
                 </label>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <div>
                         <label style="font-size:11px; color:var(--text-secondary); font-weight:700; margin-bottom:4px; display:block;">Mekan Tipi</label>
                         <select id="logLocationType" class="form-select" onchange="handleLocationTypeChange()">
-                            <option value="salon" selected>🏋️ Spor Salonu</option>
-                            <option value="ev">🏠 Ev</option>
-                            <option value="acik_hava">🌲 Açık Hava / Park</option>
+                            <option value="salon" selected>Spor Salonu</option>
+                            <option value="ev">Ev</option>
+                            <option value="acik_hava">Açık Hava / Park</option>
                         </select>
                     </div>
                     <div id="gymSelectGroup">
                         <label style="font-size:11px; color:var(--text-secondary); font-weight:700; margin-bottom:4px; display:block;">Salon Seçimi</label>
                         <select id="logGymSelect" class="form-select" onchange="handleGymSelectChange()">
-                            <option value="Rodium">Rodium</option>
-                            <option value="Sports & More">Sports & More</option>
-                            <option value="Samandağ">Samandağ</option>
-                            <option value="MACFit">MACFit</option>
-                            <option value="FitStop">FitStop</option>
-                            <option value="custom">✏️ Diğer / Yeni Salon Yaz...</option>
+                            <option value="Spor Salonu">Spor Salonu</option>
+                            <option value="custom">Yeni Salon Ekle...</option>
                         </select>
                     </div>
                 </div>
 
                 <div id="gymCustomGroup" style="margin-top: 10px;">
                     <label id="gymCustomLabel" style="font-size:11px; color:var(--text-secondary); font-weight:700; margin-bottom:4px; display:block;">Salon / Konum Detayı</label>
-                    <input type="text" id="logLocationName" name="log_location_name" class="form-input" value="Rodium" placeholder="Salon veya konum adını giriniz..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true">
+                    <input type="text" id="logLocationName" name="log_location_name" class="form-input" value="" placeholder="Salon veya konum adını giriniz..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true">
                 </div>
             </div>
 
@@ -1668,10 +1483,10 @@
 
             <div style="display:flex; gap:10px; margin-top:8px;">
                 <button type="button" class="btn btn-danger-soft" style="flex:1; padding:13px; font-weight:700; font-size:12.5px;" onclick="cancelActiveWorkout()">
-                    🛑 İptal Et
+                    İptal Et
                 </button>
                 <button type="button" class="btn btn-gold" style="flex:2; padding:13px; font-weight:900; font-size:13px;" onclick="saveCompletedWorkout()">
-                    ✅ GÜNLÜĞE KAYDET
+                    Günlüğe Kaydet
                 </button>
             </div>
         </div>
@@ -1687,7 +1502,7 @@
                 </div>
                 <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
                     <button type="button" id="workoutDetailsViewModeBtn" onclick="window.toggleWorkoutDetailsViewMode()" style="height:30px; padding:0 8px; background:#F1F5F9; border:1px solid #CBD5E1; color:#0F172A; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="Görünümü Değiştir">
-                        <span id="workoutDetailsViewModeIcon">📋</span>
+                        <span id="workoutDetailsViewModeIcon" style="display:none;"></span>
                         <span id="workoutDetailsViewModeText" style="font-size:11px; font-weight:800;">Liste</span>
                     </button>
                     <button type="button" class="modal-close" aria-label="Kapat" onclick="closeWorkoutDetailsModal()" style="font-size:16px; background:#F1F5F9; border:none; border-radius:50%; width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; color:#64748B; cursor:pointer;">✕</button>
@@ -1701,7 +1516,7 @@
             <div id="workoutDetailsMusclesContainer" style="display:none; margin-bottom:10px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <button type="button" id="workoutDetailsMusclesToggleBtn" onclick="window.toggleWorkoutDetailsMuscles()" style="background:#F0FDF4; border:1px solid #BBF7D0; color:#15803D; border-radius:8px; padding:4px 10px; font-size:11.5px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:5px;" title="Çalışan Kas Gruplarını Göster/Gizle">
-                        <span id="workoutDetailsMusclesCountText">💪 0 Kas</span>
+                        <span id="workoutDetailsMusclesCountText">0 Kas</span>
                         <span id="workoutDetailsMusclesArrow" style="font-size:9px;">▼</span>
                     </button>
                 </div>
@@ -1761,7 +1576,7 @@
             <!-- FOOTER -->
             <div id="subModalExerciseFooter" style="margin-top:16px; display:flex; gap:8px;">
                 <button type="button" id="subModalExerciseEditBtn" onclick="window.startSubModalExerciseEdit()" style="flex:1; background:#F1F5F9; border:1px solid #CBD5E1; color:#0F172A; border-radius:10px; padding:10px; font-size:13px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-                    ✏️ Düzenle
+                    Düzenle
                 </button>
                 <button type="button" onclick="closeWorkoutExerciseDetailSubModal()" style="flex:1; background:#0F172A; border:none; color:#FFFFFF; border-radius:10px; padding:10px; font-size:13px; font-weight:800; cursor:pointer;">
                     Geri Dön
@@ -1821,7 +1636,7 @@
                     </div>
                     <div>
                         <label for="editLogLocationNameInput" class="edit-log-field-label">Salon / Konum</label>
-                        <input type="text" id="editLogLocationNameInput" name="edit_log_location" class="form-input edit-log-input" maxlength="50" placeholder="Örn: Rodium" autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true">
+                        <input type="text" id="editLogLocationNameInput" name="edit_log_location" class="form-input edit-log-input" maxlength="50" placeholder="Örn: Merkez Spor Salonu" autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true">
                     </div>
                 </div>
                 <div style="margin-top:8px;">
@@ -1853,7 +1668,7 @@
     <div id="scaleModal" class="modal-overlay">
         <div class="modal-box" style="max-width: 520px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
-                <span class="modal-title">⚖️📏 Vücut Analizi & Mezura Ölçümü Ekle</span>
+                <span class="modal-title">Vücut Analizi &amp; Mezura Ölçümü Ekle</span>
                 <button type="button" class="modal-close" aria-label="Kapat" onclick="closeScaleModal()">✕</button>
             </div>
 
@@ -1862,7 +1677,6 @@
                  ondragover="event.preventDefault(); this.classList.add('dragover');" 
                  ondragleave="this.classList.remove('dragover');" 
                  ondrop="handleScalePdfDrop(event)">
-                <div style="font-size:32px; margin-bottom:4px;">📊</div>
                 <div style="font-weight:900; font-size:14.5px; color:#0F172A;">Tartı veya Ölçüm Raporu Yükle</div>
                 <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px; margin-bottom:12px;">
                     PDF veya görsel seçin, sürükleyin ya da yapıştırın
@@ -1871,7 +1685,7 @@
                 <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
                     <div style="position: relative; display: inline-flex;">
                         <button type="button" class="btn btn-gold" style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; padding:10px 18px; border-radius:22px; font-weight:800; pointer-events:none;">
-                            📁 PDF veya Görsel (PNG/JPG) Seç
+                            PDF veya Görsel (PNG/JPG) Seç
                         </button>
                         <input type="file" id="scalePdfInput" accept="application/pdf,.pdf,image/png,image/jpeg,image/webp,image/*" 
                                style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; font-size:0; z-index:10;" 
@@ -1879,19 +1693,19 @@
                     </div>
                     
                     <button type="button" class="btn btn-outline" style="display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:10px 16px; border-radius:22px; font-weight:800; border-color:var(--cyan); color:var(--cyan); background:rgba(56,189,248,0.12); cursor:pointer;" onclick="pasteFromClipboard(event)">
-                        📋 Panodan / Metinle Yapıştır
+                        Panodan / Metinle Yapıştır
                     </button>
                 </div>
 
                 <div id="scaleManualPasteContainer" style="display:none; margin-top:12px; text-align:left; background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:10px; padding:12px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                        <span style="font-size:11.5px; font-weight:800; color:var(--cyan);">📋 Rapor Metnini Yapıştırın</span>
+                        <span style="font-size:11.5px; font-weight:800; color:var(--cyan);">Rapor Metnini Yapıştırın</span>
                         <button type="button" onclick="toggleScalePasteBox(false)" style="background:none; border:none; color:var(--text-secondary); font-size:14px; cursor:pointer;">✕</button>
                     </div>
                     <textarea id="scalePasteArea" class="form-input" style="width:100%; height:85px; font-size:11px; padding:8px; border-radius:8px; resize:vertical; font-family:monospace;" placeholder="Unique Health raporundan kopyaladığınız metni buraya yapıştırın (veya parmağınızı basılı tutup 'Yapıştır' seçin)..."></textarea>
                     <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
                         <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 12px;" onclick="toggleScalePasteBox(false)">İptal</button>
-                        <button type="button" class="btn btn-gold" style="font-size:11px; padding:5px 14px; font-weight:800;" onclick="parseScaleFromPastedTextarea()">⚡ Verileri Çek ve Doldur</button>
+                        <button type="button" class="btn btn-gold" style="font-size:11px; padding:5px 14px; font-weight:800;" onclick="parseScaleFromPastedTextarea()">Verileri Çek ve Doldur</button>
                     </div>
                 </div>
 
@@ -1900,7 +1714,7 @@
 
             <div style="display:flex; align-items:center; gap:8px; margin: 10px 0 14px;">
                 <div style="flex:1; height:1px; background:var(--border);"></div>
-                <span style="font-size:10px; color:var(--text-secondary); font-weight:700; text-transform:uppercase;">⚖️ Tartı & Biyo-Empedans Verileri</span>
+                <span style="font-size:10px; color:var(--text-secondary); font-weight:700; text-transform:uppercase;">Tartı &amp; Biyo-Empedans Verileri</span>
                 <div style="flex:1; height:1px; background:var(--border);"></div>
             </div>
 
@@ -1946,7 +1760,7 @@
             <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 12px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <span style="font-size:12px; font-weight:800; color:var(--cyan); display:flex; align-items:center; gap:6px;">
-                        <span>📏 Mezura Vücut Ölçüleri (cm)</span>
+                        <span>Mezura Vücut Ölçüleri (cm)</span>
                     </span>
                     <span style="font-size:10px; color:var(--text-secondary);">(İsteğe Bağlı / Opsiyonel)</span>
                 </div>
@@ -1995,7 +1809,7 @@
             </div>
 
             <button class="btn btn-gold" style="width:100%; padding:13px; font-weight:900;" onclick="saveScaleEntry()">
-                💾 TÜM VÜCUT KAYDINI KAYDET
+                Tüm Vücut Kaydını Kaydet
             </button>
         </div>
     </div>
@@ -2004,7 +1818,7 @@
     <div id="measurementsModal" class="modal-overlay">
         <div class="modal-box" style="max-width: 520px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
-                <span class="modal-title">📏 Mezura Vücut Ölçüleri Ekle</span>
+                <span class="modal-title">Mezura Vücut Ölçüleri Ekle</span>
                 <button type="button" class="modal-close" aria-label="Kapat" onclick="closeMeasurementsModal()">✕</button>
             </div>
 
@@ -2057,7 +1871,7 @@
             </div>
 
             <button class="btn btn-gold" style="width:100%; padding:13px; font-weight:900;" onclick="saveMeasurementsEntry()">
-                💾 VÜCUT ÖLÇÜLERİNİ KAYDET
+                Vücut Ölçülerini Kaydet
             </button>
         </div>
     </div>
@@ -2069,10 +1883,10 @@
             <div class="modal-header ai-architect-modal-header">
                 <div style="min-width:0; padding-right:8px;">
                     <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                        <span class="auth-role-tag" style="background:linear-gradient(135deg, rgba(168,85,247,0.35), rgba(245,158,11,0.25)); color:#6B21A8; border:1px solid rgba(168,85,247,0.5); font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px;">🧠 AKADEMİK AI MİMARI</span>
+                        <span class="auth-role-tag" style="background:linear-gradient(135deg, rgba(168,85,247,0.35), rgba(245,158,11,0.25)); color:#F3E8FF; border:1px solid rgba(168,85,247,0.5); font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px;">AKADEMİK AI MİMARI</span>
                         <span style="font-size:10.5px; color:var(--gold); font-weight:800;" id="aiModalVersionTag">Schumann (2022) Hibrit Model</span>
                     </div>
-                    <span class="modal-title" style="font-size:16px; margin-top:3px; display:block; line-height:1.25;">Bodybuilding & Fonksiyonel Hibrit Doktrini</span>
+                    <span class="modal-title" style="font-size:16px; margin-top:3px; display:block; line-height:1.25;">Bodybuilding &amp; Fonksiyonel Hibrit Doktrini</span>
                 </div>
                 <button type="button" class="modal-close" aria-label="Kapat" onclick="closeAiHybridArchitectModal()" style="width:34px; height:34px; border-radius:8px; background:rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; flex-shrink:0;">✕</button>
             </div>
@@ -2083,7 +1897,6 @@
                 <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:10px; padding:9px 12px; margin-bottom:8px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleAiTelemetryAccordion()">
                         <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="font-size:13px;">📊</span>
                             <strong style="font-size:12px; color:#0F172A;">Durum Telemetrisi</strong>
                         </div>
                         <span id="aiTelemetryToggleLabel" style="font-size:11px; color:var(--cyan); font-weight:700;">▼ Göster</span>
@@ -2099,7 +1912,6 @@
                 <div style="background:linear-gradient(135deg, #FAF5FF, #F3E8FF); border:1.5px solid #D8B4FE; border-radius:10px; padding:10px 12px; margin-bottom:10px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; gap:8px;" onclick="toggleAiDiagnosticAccordion()">
                         <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-                            <span style="font-size:14px; flex-shrink:0;">🧠</span>
                             <strong style="font-size:12px; color:#0F172A; line-height:1.35;" id="aiDiagnosticHeadline">AI Biyomekanik Teşhis Raporu</strong>
                         </div>
                         <span id="aiDiagnosticToggleLabel" style="font-size:11px; color:#6B21A8; font-weight:700; flex-shrink:0;">▼ Göster</span>
@@ -2110,7 +1922,7 @@
                         </div>
                         <div style="display:flex; justify-content:flex-end;">
                             <button type="button" class="btn btn-outline" id="btnTriggerGeminiLiveReport" onclick="requestGeminiDeepHybridReport()" style="font-size:11px; padding:4px 10px; border-color:#9333EA; color:#6B21A8; background:#FFFFFF; font-weight:800; display:flex; align-items:center; gap:5px;">
-                                <span>✨ Canlı Gemini Analizi</span>
+                                <span>Canlı Gemini Analizi</span>
                             </button>
                         </div>
                         <div id="aiGeminiExtraReportContainer" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed #D8B4FE; font-size:12px; color:#0F172A; line-height:1.55;">
@@ -2122,13 +1934,13 @@
                 <!-- BÖLÜM 3: HİBRİT DOKTRİN SEÇİMİ -->
                 <div style="margin-bottom:10px;">
                     <div style="font-size:12px; font-weight:800; color:#0F172A; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
-                        <span>🎯</span> <span>Programın Temel Doktrinini Seç:</span>
+                        <span>Programın Temel Doktrinini Seç:</span>
                     </div>
                     <div class="doctrine-grid" id="doctrineSelectionGrid">
                         <!-- 1. Pure Bodybuilding -->
                         <div class="doctrine-card" id="docCard_bb_pure" onclick="selectAiDoctrine('bb_pure')" style="padding:9px 11px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
-                                <strong style="color:#0F172A; font-size:12px;">🛡️ Saf BB</strong>
+                                <strong style="color:#0F172A; font-size:12px;">Saf Kas</strong>
                                 <span style="font-size:10.5px; color:var(--gold); font-weight:800;">%90 Kas</span>
                             </div>
                         </div>
@@ -2136,7 +1948,7 @@
                         <!-- 2. BB-Dominant Hybrid -->
                         <div class="doctrine-card selected ai-recommended" id="docCard_bb_hybrid" onclick="selectAiDoctrine('bb_hybrid')" style="padding:9px 11px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
-                                <strong style="color:var(--gold); font-size:12px;">⚡ BB Hibrit ⭐</strong>
+                                <strong style="color:var(--gold); font-size:12px;">Kas Hibrit</strong>
                                 <span style="font-size:10.5px; color:var(--gold); font-weight:800;">%70 Kas</span>
                             </div>
                         </div>
@@ -2144,7 +1956,7 @@
                         <!-- 3. Balanced Hybrid (50/50) -->
                         <div class="doctrine-card" id="docCard_balanced_hybrid" onclick="selectAiDoctrine('balanced_hybrid')" style="padding:9px 11px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
-                                <strong style="color:#0F172A; font-size:12px;">⚖️ Dengeli</strong>
+                                <strong style="color:#0F172A; font-size:12px;">Dengeli</strong>
                                 <span style="font-size:10.5px; color:#38bdf8; font-weight:800;">%50/%50</span>
                             </div>
                         </div>
@@ -2152,7 +1964,7 @@
                         <!-- 4. Functional-Dominant Hybrid -->
                         <div class="doctrine-card" id="docCard_func_hybrid" onclick="selectAiDoctrine('func_hybrid')" style="padding:9px 11px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
-                                <strong style="color:#0F172A; font-size:12px;">🔥 Fonk-Hibrit</strong>
+                                <strong style="color:#0F172A; font-size:12px;">Fonk-Hibrit</strong>
                                 <span style="font-size:10.5px; color:#f97316; font-weight:800;">%70 Fonk</span>
                             </div>
                         </div>
@@ -2160,7 +1972,7 @@
                         <!-- 5. Pure Functional -->
                         <div class="doctrine-card" id="docCard_func_pure" onclick="selectAiDoctrine('func_pure')" style="padding:9px 11px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
-                                <strong style="color:#0F172A; font-size:12px;">🌪️ Saf Kondisyon & Fonksiyonel</strong>
+                                <strong style="color:#0F172A; font-size:12px;">Saf Kondisyon &amp; Fonksiyonel</strong>
                                 <span style="font-size:10.5px; color:#4ade80; font-weight:800;">%90 Fonk</span>
                             </div>
                         </div>
@@ -2173,46 +1985,46 @@
                         <div style="min-width:0;">
                             <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block;">Günlük Bölge / Split</label>
                             <select id="aiModalSplitSelect" class="form-input" style="font-size:12px; padding:7px 9px; width:100%; box-sizing:border-box;">
-                                <option value="full_body" selected>⚡ Tüm Vücut</option>
-                                <option value="upper_push">🛡️ İtiş (Göğüs/Omuz/Triceps)</option>
-                                <option value="upper_pull">⚔️ Çekiş (Sırt/Arka Omuz/Biceps)</option>
-                                <option value="lower">🦵 Alt Vücut & Bacak</option>
-                                <option value="upper">🦅 Tüm Üst Vücut</option>
-                                <option value="core">🧱 Karın & Core Zırhı</option>
-                                <option value="functional">🔥 Fonksiyonel & Kondisyon</option>
+                                <option value="full_body" selected>Tüm Vücut</option>
+                                <option value="upper_push">İtiş (Göğüs/Omuz/Triceps)</option>
+                                <option value="upper_pull">Çekiş (Sırt/Arka Omuz/Biceps)</option>
+                                <option value="lower">Alt Vücut &amp; Bacak</option>
+                                <option value="upper">Tüm Üst Vücut</option>
+                                <option value="core">Karın &amp; Core Zırhı</option>
+                                <option value="functional">Fonksiyonel &amp; Kondisyon</option>
                             </select>
                         </div>
                         <div style="min-width:0;">
                             <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block;">Seans Süresi</label>
                             <select id="aiModalDurationSelect" class="form-input" style="font-size:12px; padding:7px 9px; width:100%; box-sizing:border-box;">
-                                <option value="30">⏱️ 30 Dk (4 Hareket)</option>
-                                <option value="45" selected>⏱️ 45 Dk (6 Hareket)</option>
-                                <option value="60">⏱️ 60 Dk (8 Hareket)</option>
+                                <option value="30">30 Dk (4 Hareket)</option>
+                                <option value="45" selected>45 Dk (6 Hareket)</option>
+                                <option value="60">60 Dk (8 Hareket)</option>
                             </select>
                         </div>
                     </div>
                     <div style="margin-bottom:8px;">
-                        <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block;">Set & Süperset Yoğunluğu (Akademik Hibrit)</label>
+                        <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block;">Set &amp; Süperset Yoğunluğu (Akademik Hibrit)</label>
                         <select id="aiModalStyleSelect" class="form-input" style="font-size:12px; padding:7px 9px; width:100%; box-sizing:border-box;">
-                            <option value="superset" selected>⚖️ Orta Süperset</option>
-                            <option value="complex">⚔️ Birleşik Akış (Kompleks)</option>
-                            <option value="superset_light">🌱 Az Süperset</option>
-                            <option value="superset_intense">🔥 Yoğun Süperset</option>
-                            <option value="straight">🛡️ Klasik Düz Set</option>
-                            <option value="emom_strength">⚡ Kuvvet EMOM</option>
-                            <option value="emom_hypertrophy">💪 Kas EMOM</option>
-                            <option value="emom_conditioning">⏱️ Kondisyon EMOM</option>
+                            <option value="superset" selected>Orta Süperset</option>
+                            <option value="complex">Birleşik Akış (Kompleks)</option>
+                            <option value="superset_light">Az Süperset</option>
+                            <option value="superset_intense">Yoğun Süperset</option>
+                            <option value="straight">Klasik Düz Set</option>
+                            <option value="emom_strength">Kuvvet EMOM</option>
+                            <option value="emom_hypertrophy">Kas EMOM</option>
+                            <option value="emom_conditioning">Kondisyon EMOM</option>
                         </select>
                     </div>
                     <div style="margin-bottom:8px;">
                         <label class="form-label" style="font-size:10.5px; margin-bottom:3px; display:block; color:#38bdf8;">Haftalık Şablon</label>
                         <select id="aiModalWeeklyTemplateSelect" class="form-input" style="font-size:12px; padding:7px 9px; width:100%; box-sizing:border-box; border-color:rgba(56,189,248,0.35);">
-                            <option value="ai_auto" selected>🤖 AI Otomatik Teşhis</option>
-                            <option value="upper_lower_full">📅 3 Gün: Üst • Alt • Tüm Vücut</option>
-                            <option value="ppl_3day">📅 3 Gün: İtiş • Çekiş • Bacak</option>
-                            <option value="fullbody_3day">📅 3 Gün: Tüm Vücut (Farklı Hareketler)</option>
-                            <option value="flow_complex_3day">⚔️ 3 Gün: Çelik Akışı</option>
-                            <option value="upper_lower_4day">📅 4 Gün: Üst / Alt</option>
+                            <option value="ai_auto" selected>Otomatik Haftalık Denge</option>
+                            <option value="upper_lower_full">3 Gün: Üst • Alt • Tüm Vücut</option>
+                            <option value="ppl_3day">3 Gün: İtiş • Çekiş • Bacak</option>
+                            <option value="fullbody_3day">3 Gün: Tüm Vücut (Farklı Hareketler)</option>
+                            <option value="flow_complex_3day">3 Gün: Çelik Akışı</option>
+                            <option value="upper_lower_4day">4 Gün: Üst / Alt</option>
                         </select>
                     </div>
                     <div>
@@ -2226,14 +2038,14 @@
             <div class="ai-architect-modal-footer">
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
                     <button type="button" class="btn btn-outline" style="width:100%; padding:11px 10px; font-weight:800; font-size:12.5px; display:flex; justify-content:center; align-items:center; gap:5px; border-color:var(--gold); color:var(--gold);" onclick="applyAiHybridProgram(false)">
-                        <span>⚡ Günlük Program Oluştur</span>
+                        <span>Günlük Program Oluştur</span>
                     </button>
                     <button type="button" class="btn btn-gold" style="width:100%; padding:11px 10px; font-weight:800; font-size:12.5px; display:flex; justify-content:center; align-items:center; gap:5px;" onclick="applyAiHybridProgram(true)">
-                        <span>🚀 Günlük Hemen Başlat</span>
+                        <span>Günlük Hemen Başlat</span>
                     </button>
                 </div>
                 <button type="button" class="btn btn-outline" style="width:100%; padding:10px 12px; font-weight:800; font-size:12px; display:flex; justify-content:center; align-items:center; gap:6px; border-color:#38bdf8; color:#38bdf8; background:rgba(56,189,248,0.08);" onclick="applyAiWeeklySchedule()">
-                    <span>📅 Haftalık Programı AI İle Kur (Günler Arası Tekrarsız A/B/C)</span>
+                    <span>Haftalık Programı Kur</span>
                 </button>
             </div>
         </div>
@@ -2302,17 +2114,17 @@
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
                     <button type="button" class="btn-report-mini" id="btnExDetailReport" style="padding:6px 10px; font-size:11px;" title="Bu egzersizde hata bildir">
-                        ⚠️ Hata Bildir
+                        Hata Bildir
                     </button>
                     <button type="button" class="modal-close" aria-label="Kapat" onclick="closeExerciseDetailModal()">✕</button>
                 </div>
             </div>
 
-            <!-- TABS: 📸 Form Rehberi | 🧬 Kas Anatomisi | 📝 Adım Adım -->
+            <!-- TABS -->
             <div style="display:flex; gap:6px; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
-                <button class="pos-tab-btn active" id="btnExDetailTabForm" onclick="switchExDetailTab('form')">📸 Form Rehberi</button>
-                <button class="pos-tab-btn" id="btnExDetailTabAnatomy" onclick="switchExDetailTab('anatomy')">🧬 Çalışan Kaslar</button>
-                <button class="pos-tab-btn" id="btnExDetailTabSteps" onclick="switchExDetailTab('steps')">📝 Adım Adım</button>
+                <button class="pos-tab-btn active" id="btnExDetailTabForm" onclick="switchExDetailTab('form')">Form Rehberi</button>
+                <button class="pos-tab-btn" id="btnExDetailTabAnatomy" onclick="switchExDetailTab('anatomy')">Çalışan Kaslar</button>
+                <button class="pos-tab-btn" id="btnExDetailTabSteps" onclick="switchExDetailTab('steps')">Adım Adım</button>
             </div>
 
             <div id="exDetailTabContentForm" class="ex-detail-tab-pane">
@@ -2327,9 +2139,9 @@
 
             <div style="margin-top:16px; display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px;">
                 <button class="btn btn-outline" style="flex:1; min-width:80px;" onclick="closeExerciseDetailModal()">Kapat</button>
-                <button class="btn btn-outline" id="btnExDetailToggleHide" style="flex:1; min-width:90px; font-weight:700; transition:all 0.2s;" title="Kişisel havuzunuzdan gizleyin">👁️ Gizle</button>
-                <button class="btn btn-outline" id="btnExDetailAlt" style="flex:1.2; min-width:110px; color:var(--cyan); border-color:var(--cyan); font-weight:800;">🔄 Alternatifler</button>
-                <button class="btn btn-gold" id="btnExDetailAdd" style="flex:1.5; min-width:130px; font-weight:800;">➕ Bu Hareketi Ekle</button>
+                <button class="btn btn-outline" id="btnExDetailToggleHide" style="flex:1; min-width:90px; font-weight:700; transition:all 0.2s;" title="Kişisel havuzunuzdan gizleyin">Gizle</button>
+                <button class="btn btn-outline" id="btnExDetailAlt" style="flex:1.2; min-width:110px; color:var(--cyan); border-color:var(--cyan); font-weight:800;">Alternatifler</button>
+                <button class="btn btn-gold" id="btnExDetailAdd" style="flex:1.5; min-width:130px; font-weight:800;">+ Programa Ekle</button>
             </div>
         </div>
     </div>
@@ -2390,26 +2202,24 @@
                 </div>
             </div>
 
-            <!-- TAB 2: 🤖 GEMINI AI BİYOMEKANİK KOÇ -->
+            <!-- TAB 2: AKILLI BİYOMEKANİK KOÇ -->
             <div id="pickerSubPanelAI" style="display:none; margin-bottom:8px;">
-                <!-- API KEY MISSING STATE -->
+                <!-- PERSONAL KEY DRAWER -->
                 <div id="geminiAiKeyMissingBox" style="display:none; background:rgba(192, 132, 252, 0.08); border:1px solid rgba(192, 132, 252, 0.35); border-radius:10px; padding:12px 14px; margin-bottom:8px;">
                     <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-                        <span style="font-size:22px;">🤖</span>
                         <div>
-                            <div style="font-size:12.5px; font-weight:800; color:#6B21A8;">Çelik Kodu Gemini AI Biyomekanik Koç</div>
+                            <div style="font-size:12.5px; font-weight:800; color:#F3E8FF;">Çelik Kodu Akıllı Biyomekanik Koç</div>
                             <div style="font-size:11px; color:var(--text-secondary);">Ekipman durumunuza, eklem ağrılarınıza ve hedefinize göre anında akıllı ikame üretin.</div>
                         </div>
                     </div>
                     <div style="margin-top:10px;">
-                        <label style="font-size:11px; font-weight:700; color:var(--text-secondary); display:block; margin-bottom:4px;">Google Gemini API Anahtarınız:</label>
+                        <label style="font-size:11px; font-weight:700; color:var(--text-secondary); display:block; margin-bottom:4px;">Kişisel Bağlantı Anahtarınız:</label>
                         <div style="display:flex; gap:6px;">
-                            <input type="password" id="geminiApiKeyModalInput" class="form-input" style="font-size:12px; padding:8px;" placeholder="AIzaSy... anahtarınızı yapıştırın" autocomplete="off">
-                            <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; white-space:nowrap; font-weight:800;" onclick="saveGeminiApiKeyFromModal()">💾 Kaydet</button>
+                            <input type="password" id="geminiApiKeyModalInput" class="form-input" style="font-size:12px; padding:8px;" placeholder="Kişisel anahtar yapıştırın" autocomplete="off">
+                            <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; white-space:nowrap; font-weight:800;" onclick="saveGeminiApiKeyFromModal()">Kaydet</button>
                         </div>
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:10.5px; flex-wrap:wrap; gap:4px;">
-                            <span style="color:var(--text-secondary);">🔒 Tamamen cihazınızda saklanır.</span>
-                            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--cyan); text-decoration:underline; font-weight:700;">🔗 Ücretsiz API Key Al (Google AI Studio) ➔</a>
+                            <span style="color:var(--text-secondary);">Yalnızca bu cihazda saklanır.</span>
                         </div>
                     </div>
                 </div>
@@ -2418,31 +2228,31 @@
                 <div id="geminiAiActiveBox" style="display:none;">
                     <div style="background:rgba(192, 132, 252, 0.06); border:1px solid rgba(192, 132, 252, 0.25); border-radius:8px; padding:8px 10px; margin-bottom:8px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                            <span style="font-size:11px; font-weight:800; color:#6B21A8; display:flex; align-items:center; gap:5px;">
-                                <span>🤖</span> <span>Biyomekanik Koça Durumunu Bildir:</span>
+                            <span style="font-size:11px; font-weight:800; color:#F3E8FF; display:flex; align-items:center; gap:5px;">
+                                <span>Biyomekanik Koça Durumunu Bildir:</span>
                             </span>
-                            <span id="btnEditGeminiKeyModal" style="display:none; font-size:10px; color:var(--cyan); cursor:pointer; font-weight:700;" onclick="editGeminiApiKey()">⚙️ API Anahtarını Değiştir</span>
+                            <span id="btnEditGeminiKeyModal" style="display:none; font-size:10px; color:var(--cyan); cursor:pointer; font-weight:700;" onclick="editGeminiApiKey()">Bağlantı Ayarı</span>
                         </div>
                         <!-- QUICK AI PROMPTS -->
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:8px;">
                             <button type="button" class="btn-quick-equip" style="text-align:left; padding:5px 8px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:5px; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('no_equip')">
-                                <span>🚫</span> <span>Alet Yok (Dambıl İkamesi)</span>
+                                <span>Alet Yok (Dambıl İkamesi)</span>
                             </button>
                             <button type="button" class="btn-quick-equip" style="text-align:left; padding:5px 8px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:5px; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('joint_pain')">
-                                <span>🩹</span> <span>Bel / Eklem Dostu (Sıfır Yük)</span>
+                                <span>Bel / Eklem Dostu (Sıfır Yük)</span>
                             </button>
                             <button type="button" class="btn-quick-equip" style="text-align:left; padding:5px 8px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:5px; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('easier')">
-                                <span>📉</span> <span>Daha Kolay (Regresyon)</span>
+                                <span>Daha Kolay (Regresyon)</span>
                             </button>
                             <button type="button" class="btn-quick-equip" style="text-align:left; padding:5px 8px; font-size:11px; border-radius:6px; display:flex; align-items:center; gap:5px; border-color:rgba(192,132,252,0.3);" onclick="quickAskGemini('conditioning')">
-                                <span>⚡</span> <span>Balistik & Kondisyon</span>
+                                <span>Balistik &amp; Kondisyon</span>
                             </button>
                         </div>
                         <!-- CUSTOM USER QUERY -->
                         <div style="display:flex; gap:6px; align-items:center;">
-                            <input type="text" id="geminiCustomQueryInput" name="gemini_custom_query" class="form-input" style="font-size:11.5px; padding:7px 10px;" placeholder="✍️ Özel durumunu yaz (örn: bel ağrısı, 15 kg dambıl)..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true" onkeydown="if(event.key === 'Enter') submitGeminiCustomQuery()">
+                            <input type="text" id="geminiCustomQueryInput" name="gemini_custom_query" class="form-input" style="font-size:11.5px; padding:7px 10px;" placeholder="Özel durumunu yaz (örn: bel ağrısı, 15 kg dambıl)..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true" onkeydown="if(event.key === 'Enter') submitGeminiCustomQuery()">
                             <button type="button" class="btn btn-gold" id="btnSubmitGeminiQuery" style="font-size:11.5px; padding:7px 12px; font-weight:800; white-space:nowrap; background:#9333ea; border-color:#a855f7; color:#fff;" onclick="submitGeminiCustomQuery()">
-                                🚀 Sor
+                                Sor
                             </button>
                         </div>
                     </div>
@@ -2462,7 +2272,7 @@
             <!-- TAB 4: DİĞER (GENİŞLETİLMİŞ KATALOG VE SERBEST ARAMA) -->
             <div id="pickerSubPanelCatalog" style="display:none; margin-bottom:8px;">
                 <div style="margin-bottom:6px;">
-                    <input type="text" id="pickerSearchInput" name="picker_ex_search" class="form-input" placeholder="🔍 Egzersiz adı, kas veya ipucu ara..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true" oninput="handlePickerSearchInput()">
+                    <input type="text" id="pickerSearchInput" name="picker_ex_search" class="form-input" placeholder="Egzersiz adı, kas veya ipucu ara..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true" oninput="handlePickerSearchInput()">
                 </div>
                 <div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:4px;" id="pickerCategoryPills">
                     <button class="btn-quick-equip" id="pill_cat_all" onclick="setPickerCategory('all')">Tüm Kategoriler</button>
@@ -2470,8 +2280,8 @@
                     <button class="btn-quick-equip" id="pill_cat_pull" onclick="setPickerCategory('pull')">Çekiş / Sırt / Biceps</button>
                     <button class="btn-quick-equip" id="pill_cat_legs_quad" onclick="setPickerCategory('legs_quad')">Ön Bacak / Quad</button>
                     <button class="btn-quick-equip" id="pill_cat_legs_hinge" onclick="setPickerCategory('legs_hinge')">Arka Bacak / Kalça</button>
-                    <button class="btn-quick-equip" id="pill_cat_core" onclick="setPickerCategory('core')">Karın & Core</button>
-                    <button class="btn-quick-equip" id="pill_cat_conditioning" onclick="setPickerCategory('conditioning')">⚡ Fonksiyonel & Kondisyon</button>
+                    <button class="btn-quick-equip" id="pill_cat_core" onclick="setPickerCategory('core')">Karın &amp; Core</button>
+                    <button class="btn-quick-equip" id="pill_cat_conditioning" onclick="setPickerCategory('conditioning')">Fonksiyonel &amp; Kondisyon</button>
                 </div>
             </div>
 
@@ -2486,7 +2296,7 @@
     <div id="exerciseBugReportModal" class="modal-overlay">
         <div class="modal-box" style="max-width: 520px;">
             <div class="modal-header">
-                <span class="modal-title" style="color:#B91C1C;">⚠️ Egzersiz Hata Bildirimi</span>
+                <span class="modal-title" style="color:#FCA5A5;">Egzersiz Hata Bildirimi</span>
                 <button type="button" class="modal-close" aria-label="Kapat" onclick="closeExerciseBugReportModal()">✕</button>
             </div>
 
@@ -2496,9 +2306,9 @@
                     <img id="bugReportImgPreview" src="" alt="Önizleme" style="max-width:100%; max-height:100%; object-fit:contain;">
                 </div>
                 <div>
-                    <div style="font-size:14.5px; font-weight:900; color:#0F172A;" id="bugReportExName">Egzersiz Adı</div>
+                    <div style="font-size:14.5px; font-weight:900; color:#FFFFFF;" id="bugReportExName">Egzersiz Adı</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;" id="bugReportExMeta">Ekipman • Kas</div>
-                    <div style="font-size:10.5px; color:var(--gold); margin-top:2px;">Bulut: Firebase Firestore Havuzuna Aktarılacak</div>
+                    <div style="font-size:10.5px; color:var(--gold); margin-top:2px;">Geri bildiriminiz incelenmek üzere kaydedilecek</div>
                 </div>
             </div>
 
@@ -2507,19 +2317,19 @@
                 <label class="form-label" style="margin-bottom:6px;">Hata Türünü Seçin:</label>
                 <div class="bug-cat-grid">
                     <div class="bug-cat-chip selected" id="bugCat_image_mismatch" onclick="selectBugCategory('image_mismatch')">
-                        <span>🖼️</span> <span>Görsel Uyuşmuyor</span>
+                        <span>Görsel Uyuşmuyor</span>
                     </div>
                     <div class="bug-cat-chip" id="bugCat_equipment_mismatch" onclick="selectBugCategory('equipment_mismatch')">
-                        <span>🏋️</span> <span>Ekipman / Pozisyon</span>
+                        <span>Ekipman / Pozisyon</span>
                     </div>
                     <div class="bug-cat-chip" id="bugCat_cue_technique" onclick="selectBugCategory('cue_technique')">
-                        <span>📝</span> <span>Form / İpucu Hatalı</span>
+                        <span>Form / İpucu Hatalı</span>
                     </div>
                     <div class="bug-cat-chip" id="bugCat_name_mismatch" onclick="selectBugCategory('name_mismatch')">
-                        <span>🏷️</span> <span>İsim / Adlandırma</span>
+                        <span>İsim / Adlandırma</span>
                     </div>
                     <div class="bug-cat-chip" id="bugCat_other" onclick="selectBugCategory('other')" style="grid-column: span 2;">
-                        <span>❓</span> <span>Diğer / Genel Aksaklık</span>
+                        <span>Diğer / Genel Aksaklık</span>
                     </div>
                 </div>
             </div>
@@ -2534,7 +2344,7 @@
             <div style="display:flex; justify-content:flex-end; gap:8px;">
                 <button type="button" class="btn btn-outline" style="padding:9px 14px; font-size:12px;" onclick="closeExerciseBugReportModal()">Vazgeç</button>
                 <button type="button" class="btn btn-gold" id="btnSubmitBugReport" style="padding:9px 18px; font-size:12.5px; font-weight:800; background:#ef4444; border-color:#ef4444; color:#fff;" onclick="submitExerciseBugReport()">
-                    🚀 Firebase Havuzuna Gönder
+                    Geri Bildirimi Gönder
                 </button>
             </div>
         </div>
@@ -2545,10 +2355,9 @@
         <div class="modal-box" style="max-width: 650px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:20px;">📋</span>
                     <div>
-                        <h3 class="modal-title" style="font-size:15px; margin:0;">Egzersiz Hata Bildirim Havuzu</h3>
-                        <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">Firebase Firestore Canlı Veritabanı</p>
+                        <h3 class="modal-title" style="font-size:15px; margin:0;">Egzersiz Geri Bildirimleri</h3>
+                        <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">Gönderilen Geri Bildirimler ve İnceleme Durumu</p>
                     </div>
                 </div>
                 <button type="button" class="modal-close" aria-label="Kapat" onclick="closeBugReportsPoolModal()">✕</button>
@@ -2557,10 +2366,10 @@
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.3); padding:10px 12px; border-radius:10px;">
                 <div>
                     <span style="font-size:12.5px; font-weight:800; color:var(--gold);" id="bugPoolCountText">0 Bildirim Bekliyor</span>
-                    <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">AI düzeltme yaptıktan sonra benden okey aldığında silinir.</p>
+                    <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">İncelenip çözümlenen geri bildirimleri listeden kaldırabilirsiniz.</p>
                 </div>
-                <button type="button" class="btn btn-gold" style="font-size:11px; padding:7px 12px; font-weight:800;" onclick="copyBugReportsToClipboard()">
-                    🤖 AI İçin Görev Emri Kopyala
+                <button type="button" id="btnCopyBugReportsAdmin" class="btn btn-gold" style="font-size:11px; padding:7px 12px; font-weight:800; display:none;" onclick="copyBugReportsToClipboard()">
+                    Bildirim Özeti Kopyala
                 </button>
             </div>
 
@@ -2576,69 +2385,69 @@
         <div class="modal-box" style="max-width: 580px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
                 <div>
-                    <h3 class="modal-title" style="font-size:16px; margin:0;">➕ İlave Hareket & Finisher Ekle</h3>
-                    <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">Antrenman erken bittiğinde veya pump hissetmek istediğinizde seansa ekleyin.</p>
+                    <h3 class="modal-title" style="font-size:16px; margin:0;">İlave Hareket &amp; Finisher Ekle</h3>
+                    <p style="font-size:11px; color:var(--text-secondary); margin:2px 0 0;">Antrenman erken bittiğinde veya ekstra seri istediğinizde seansa ekleyin.</p>
                 </div>
                 <button type="button" class="modal-close" aria-label="Kapat" onclick="closeAddFinisherModal()">✕</button>
             </div>
 
             <!-- 1. HIZLI FINISHER PAKETLERİ (TEK DOKUNUŞLA 3 SET) -->
             <div style="font-size:12px; font-weight:900; color:var(--gold); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">
-                ⚡ Hızlı Finisher Paketleri (Tek Dokunuş):
+                Hızlı Finisher Paketleri:
             </div>
 
             <div class="finisher-preset-card">
                 <div>
-                    <div style="font-size:13.5px; font-weight:800; color:#0F172A;">🛡️ Core & Karın Çelik Zırhı</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#F8FAFC;">Core &amp; Karın Çelik Zırhı</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Plank + Hollow Body / Knee Raise</div>
                     <span class="finisher-badge">3 Set • 30-45s / 12 Tk</span>
                 </div>
                 <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; font-weight:800;" onclick="addPresetFinisher('core_armor')">
-                    ➕ Ekle
+                    + Ekle
                 </button>
             </div>
 
             <div class="finisher-preset-card">
                 <div>
-                    <div style="font-size:13.5px; font-weight:800; color:#0F172A;">🦾 Kol Pump Süperset</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#F8FAFC;">Kol Pump Süperset</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Dambıl Biceps Curl + Triceps Overhead</div>
                     <span class="finisher-badge">3 Set • 10-12 Tekrar</span>
                 </div>
                 <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; font-weight:800;" onclick="addPresetFinisher('arms_pump')">
-                    ➕ Ekle
+                    + Ekle
                 </button>
             </div>
 
             <div class="finisher-preset-card">
                 <div>
-                    <div style="font-size:13.5px; font-weight:800; color:#0F172A;">🦅 3D Omuz & Trapez Genişletme</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#F8FAFC;">3D Omuz &amp; Trapez Genişletme</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Lateral Raise + Face Pull / Halo</div>
                     <span class="finisher-badge">3 Set • 12-15 Tekrar</span>
                 </div>
                 <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; font-weight:800;" onclick="addPresetFinisher('shoulder_wings')">
-                    ➕ Ekle
+                    + Ekle
                 </button>
             </div>
 
             <div class="finisher-preset-card">
                 <div>
-                    <div style="font-size:13.5px; font-weight:800; color:#0F172A;">🧳 Kavrama & Trapez: Çift Ağırlık Taşıma</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#F8FAFC;">Kavrama &amp; Trapez: Çift Ağırlık Taşıma</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Dambıl / Kettlebell Farmer's Walk</div>
                     <span class="finisher-badge">3 Set • 45 Metre / Adım</span>
                 </div>
                 <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; font-weight:800;" onclick="addPresetFinisher('farmers_walk')">
-                    ➕ Ekle
+                    + Ekle
                 </button>
             </div>
 
             <div class="finisher-preset-card">
                 <div>
-                    <div style="font-size:13.5px; font-weight:800; color:#0F172A;">🔥 Kalori & Patlayıcı Güç Finisher</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#F8FAFC;">Kalori &amp; Patlayıcı Güç Finisher</div>
                     <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">Kettlebell / Dambıl Swing + Burpee</div>
                     <span class="finisher-badge">3 Set • 15 Swing + 8 Burpee</span>
                 </div>
                 <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:8px 14px; font-weight:800;" onclick="addPresetFinisher('cardio_burn')">
-                    ➕ Ekle
+                    + Ekle
                 </button>
             </div>
 
@@ -2646,7 +2455,7 @@
             <div style="margin-top:16px; padding-top:14px; border-top:1px dashed var(--border); text-align:center;">
                 <div style="font-size:12px; color:var(--text-secondary); margin-bottom:8px;">Veya kütüphaneden tek tek hareket seçmek için:</div>
                 <button type="button" class="btn btn-outline" style="border-color:var(--cyan); color:var(--cyan); font-weight:800; padding:10px 18px; font-size:12.5px;" onclick="closeAddFinisherModal(); openAddExerciseModal('active');">
-                    🔍 Tüm Egzersiz Kütüphanesinden Seç
+                    Tüm Egzersiz Kütüphanesinden Seç
                 </button>
             </div>
         </div>
@@ -2657,15 +2466,15 @@
         <div class="modal-box" style="max-width: 540px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
                 <div>
-                    <h3 class="modal-title" style="font-size:16px; margin:0;" id="interSetModalTitle">⚡ Set Arası İlave Hareket Ekle</h3>
+                    <h3 class="modal-title" style="font-size:16px; margin:0;" id="interSetModalTitle">Set Arası İlave Hareket Ekle</h3>
                     <p style="font-size:11.5px; color:var(--text-secondary); margin:2px 0 0;" id="interSetModalSubtitle">Dinlenme arasında aktif toparlanma, core veya kondisyon hareketi ekleyin.</p>
                 </div>
                 <button type="button" class="modal-close" aria-label="Kapat" onclick="closeInterSetModal()">✕</button>
             </div>
 
             <!-- 1. POPÜLER SET ARASI HAREKETLER (HIZLI SEÇİM) -->
-            <div style="font-size:11.5px; font-weight:900; color:#0284C7; margin-bottom:7px; text-transform:uppercase; letter-spacing:0.5px;">
-                ⚡ Hızlı Popüler Seçim (Tek Dokunuş):
+            <div style="font-size:11.5px; font-weight:900; color:#7DD3FC; margin-bottom:7px; text-transform:uppercase; letter-spacing:0.5px;">
+                Hızlı Popüler Seçim:
             </div>
             <div class="interset-chip-grid" id="interSetQuickChips">
                 <!-- Populated dynamically -->
@@ -2673,8 +2482,8 @@
 
             <!-- 2. TÜM EGZERSİZ HAVUZUNDAN ARAMA -->
             <div style="margin-bottom:12px;">
-                <label for="interSetSearchInput" style="font-size:11.5px; font-weight:800; color:#0F172A; display:block; margin-bottom:5px;">
-                    🔍 Tüm Egzersiz Havuzundan Ara & Seç:
+                <label for="interSetSearchInput" style="font-size:11.5px; font-weight:800; color:#F8FAFC; display:block; margin-bottom:5px;">
+                    Tüm Egzersiz Havuzundan Ara &amp; Seç:
                 </label>
                 <input type="text" id="interSetSearchInput" name="interset_ex_search" class="form-input" style="padding:9px 12px; font-size:12.5px;" placeholder="Hareket adı veya bölge yazın (Örn: Plank, Squat, Lunge, Şınav)..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true" oninput="filterInterSetPoolSearch()">
                 <div id="interSetSearchResults" style="max-height:155px; overflow-y:auto; margin-top:6px; display:none; border:1px solid #CBD5E1; border-radius:10px; padding:6px; background:#F8FAFC;">
@@ -2689,8 +2498,8 @@
                         <div style="font-size:14px; font-weight:900; color:#0F172A;" id="interSetSelectedName">Jumping Jack</div>
                     </div>
                     <div style="display:flex; gap:6px;">
-                        <button type="button" id="btnInterSetTypeTime" class="interset-metric-pill active" onclick="setInterSetMetricType('time')">⏱️ Süre (sn)</button>
-                        <button type="button" id="btnInterSetTypeReps" class="interset-metric-pill" onclick="setInterSetMetricType('reps')">🔢 Tekrar (tk)</button>
+                        <button type="button" id="btnInterSetTypeTime" class="interset-metric-pill active" onclick="setInterSetMetricType('time')">Süre (sn)</button>
+                        <button type="button" id="btnInterSetTypeReps" class="interset-metric-pill" onclick="setInterSetMetricType('reps')">Tekrar (tk)</button>
                     </div>
                 </div>
 
@@ -2707,10 +2516,10 @@
             <!-- 4. KAYDETME AKSİYONLARI -->
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <button type="button" class="btn btn-gold" style="width:100%; padding:11px; font-size:13px; font-weight:900;" id="btnSaveSingleInterSet" onclick="saveInterSetExercise(false)">
-                    ➕ Bu Set Arasına Ekle
+                    + Bu Set Arasına Ekle
                 </button>
-                <button type="button" class="btn btn-outline" style="width:100%; padding:10px; font-size:12.5px; font-weight:800; border-color:#0284C7; color:#0284C7;" onclick="saveInterSetExercise(true)">
-                    ⚡ Bu Hareketin Tüm Set Aralarına Uygula
+                <button type="button" class="btn btn-outline" style="width:100%; padding:10px; font-size:12.5px; font-weight:800; border-color:#0284C7; color:#7DD3FC;" onclick="saveInterSetExercise(true)">
+                    Bu Hareketin Tüm Set Aralarına Uygula
                 </button>
             </div>
         </div>
@@ -2753,15 +2562,15 @@
         <div class="modal-box" style="max-width: 560px; max-height:85vh; display:flex; flex-direction:column; background:#FFFFFF; border-radius:20px; border:1.5px solid #E2E8F0; padding:16px; box-shadow:0 10px 30px rgba(15,23,42,0.15);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                 <div>
-                    <h3 style="font-size:17px; font-weight:900; color:#0F172A; margin:0;">⚡ Hızlı Antrenman Başlat</h3>
-                    <p style="font-size:12px; color:#64748B; margin:2px 0 0;">Tek hareketle hemen başla veya hareketleri seçip seans kur</p>
+                    <h3 style="font-size:17px; font-weight:900; color:#FFFFFF; margin:0;">Hızlı Antrenman Başlat</h3>
+                    <p style="font-size:12px; color:#CBD5E1; margin:2px 0 0;">Tek hareketle hemen başla veya hareketleri seçip seans kur</p>
                 </div>
-                <button type="button" class="modal-close-btn" onclick="closeQuickWorkoutModal()" style="font-size:20px; background:none; border:none; cursor:pointer; color:#64748B;">✕</button>
+                <button type="button" class="modal-close-btn" onclick="closeQuickWorkoutModal()" style="font-size:20px; background:none; border:none; cursor:pointer; color:#CBD5E1;">✕</button>
             </div>
 
             <!-- Arama Kutusu -->
             <div style="margin-bottom:10px;">
-                <input type="text" id="quickWorkoutSearchInput" name="quick_workout_search" class="form-input" style="padding:10px 14px; font-size:14px; font-weight:800; border-radius:12px; background:#F8FAFC; border:1.5px solid #CBD5E1; color:#0F172A; width:100%;" placeholder="🔍 Egzersiz adı veya kas grubu yazın..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true" oninput="onQuickWorkoutSearch(this.value)">
+                <input type="text" id="quickWorkoutSearchInput" name="quick_workout_search" class="form-input" style="padding:10px 14px; font-size:14px; font-weight:800; border-radius:12px; background:#0B0A14; border:1px solid rgba(167,139,250,0.3); color:#FFFFFF; width:100%;" placeholder="Egzersiz adı veya kas grubu yazın..." autocomplete="off" data-form-type="other" data-lpignore="true" data-1p-ignore="true" oninput="onQuickWorkoutSearch(this.value)">
             </div>
 
             <!-- Kategori Hapları -->
@@ -2775,9 +2584,9 @@
             </div>
 
             <!-- Seçilenlerle Başlat Alt Barı -->
-            <div id="quickWorkoutBottomActionBar" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid #E2E8F0;">
+            <div id="quickWorkoutBottomActionBar" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid rgba(167,139,250,0.2);">
                 <button type="button" class="daylight-primary-cta" id="btnStartSelectedQuickWorkout" onclick="startSelectedQuickWorkout()">
-                    🚀 Seçilenlerle Başlat (0 Hareket)
+                    Seçilenlerle Başlat (0 Hareket)
                 </button>
             </div>
         </div>
@@ -2839,7 +2648,7 @@
             <div class="more-sheet-title">Menü & Ayarlar</div>
             <button type="button" aria-label="Menüyü kapat" onclick="closeMoreSheet()" style="background:none; border:none; color:#0F172A; font-size:20px; font-weight:700; cursor:pointer;">&times;</button>
         </div>
-        <div class="more-sheet-grid">
+        <div class="more-sheet-grid" id="moreSheetGrid">
             <div class="more-sheet-btn" onclick="closeMoreSheet(); openExerciseLibraryTab();">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-secondary);"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
                 <span>Egzersiz Kütüphanesi</span>
@@ -2854,16 +2663,7 @@
             </div>
             <div class="more-sheet-btn" onclick="closeMoreSheet(); openBugReportsPoolModal();">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-secondary);"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                <span>Hata Havuzu</span>
-            </div>
-            <div class="more-sheet-btn" onclick="closeMoreSheet(); forceAppUpdate();">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-secondary);"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-                <span>Sürümü Yenile (Cache)</span>
-            </div>
-            <div class="more-sheet-btn" id="sheetAdminBtn" onclick="closeMoreSheet(); openAdminModal();" style="display:none;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-secondary);"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
-                <span>Sporcu Yönetimi</span>
-                <span id="sheetAdminTelemetryBadge" style="display:none; background:#DC2626; color:#FFFFFF; font-size:9.5px; font-weight:800; padding:1px 6px; border-radius:999px; margin-left:auto;">0</span>
+                <span>Geri Bildirimler</span>
             </div>
             <div class="more-sheet-btn logout" onclick="closeMoreSheet(); handleAuthLogout();">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#e11d48;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
@@ -3077,8 +2877,8 @@
             <div style="padding:16px 20px; border-bottom:1.5px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC;">
                 <div style="display:flex; align-items:center; gap:10px;">
                     <div>
-                        <h3 style="font-size:15px; font-weight:900; color:#0F172A; margin:0;">FitLAB Spor Bilimi ve Analiz Raporu</h3>
-                        <span style="font-size:12px; color:#475569;">FitLAB İstasyonu Tarafından Üretildi</span>
+                        <h3 style="font-size:15px; font-weight:900; color:#0F172A; margin:0;">Çelik Kodu Spor Bilimi ve Analiz Raporu</h3>
+                        <span style="font-size:12px; color:#475569;">Çelik Kodu Analiz Motoru Tarafından Üretildi</span>
                     </div>
                 </div>
                 <button type="button" onclick="document.getElementById('academicReportModal').style.display='none'" style="background:transparent; border:none; color:#475569; font-size:20px; cursor:pointer; padding:4px 8px;">&times;</button>

@@ -23,6 +23,7 @@ const LOAD_ORDER_FILES = [
   { rel: 'js/chiefs/bridge-customs.js', owner: 'bridge-customs' },
   { rel: 'js/chiefs/liaison-subchiefs.js', owner: 'liaison-subchiefs' },
   { rel: 'js/chiefs/profile-chief.js', owner: 'profile-guard' },
+  { rel: 'js/chiefs/admin-portal.js', owner: 'profile-guard' },
   { rel: 'js/chiefs/library-chief.js', owner: 'library-guard' },
   { rel: 'js/chiefs/history-chief.js', owner: 'history-guard' },
   { rel: 'js/chiefs/analytics-chief.js', owner: 'analytics-guard' },

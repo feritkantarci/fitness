@@ -785,9 +785,26 @@
                         if (firebase.auth.Auth && firebase.auth.Auth.Persistence) {
                             fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
                         }
-                        fbAuth.onAuthStateChanged(fbUser => {
-                            if (fbUser && navigator.onLine) {
-                                flushPendingCloudOutbox();
+                        fbAuth.onAuthStateChanged(async fbUser => {
+                            if (fbUser) {
+                                if (typeof syncUserRoleDocument === 'function') {
+                                    const activeU = typeof getActiveUser === 'function' ? getActiveUser() : null;
+                                    syncUserRoleDocument(fbUser, activeU).catch(() => {});
+                                }
+                                if (navigator.onLine) {
+                                    flushPendingCloudOutbox();
+                                }
+                                const curSess = typeof getSession === 'function' ? getSession() : null;
+                                if (curSess && curSess.role === 'admin' && typeof isVerifiedAdminSession === 'function' && isVerifiedAdminSession(curSess)) {
+                                    await ensureAdminPortalLoadedAndMounted(curSess);
+                                    if (typeof updateAdminPendingBadges === 'function') updateAdminPendingBadges();
+                                } else {
+                                    unmountAdminPortalFromDOM();
+                                }
+                            } else {
+                                if (!IS_LOCAL_DEV) {
+                                    unmountAdminPortalFromDOM();
+                                }
                             }
                         });
                     } catch {}
@@ -841,7 +858,31 @@
         }
 
         // Buluttan verileri çekme ve birleştirme (Merge)
+        const DEMO_GUEST_UID = 'usr_demo_guest';
+        const DEMO_GUEST_USER = {
+            id: DEMO_GUEST_UID,
+            username: 'demo',
+            name: 'Misafir Sporcu',
+            role: 'athlete',
+            status: 'active',
+            isDemoGuest: true,
+            level: 'Orta Seviye',
+            gender: 'Erkek',
+            theme: 'purple',
+            avatar: '⚡'
+        };
+
+        function isDemoGuestSession(sessionOverride) {
+            const s = sessionOverride || (typeof getSession === 'function' ? getSession() : null);
+            return Boolean(s && (s.isDemoGuest === true || s.userId === DEMO_GUEST_UID));
+        }
+        window.isDemoGuestSession = isDemoGuestSession;
+
         async function syncAllFromCloud() {
+            if (isDemoGuestSession()) {
+                updateCloudSyncBadge('synced', 'Demo Modu');
+                return;
+            }
             if (!isFirebaseReady || !fbDb) return;
             updateCloudSyncBadge('syncing', 'Eşitleniyor...');
 
@@ -855,7 +896,7 @@
                 // 2. Kullanıcıları eşitle
                 await syncUsersFromCloud();
 
-                // 3. Kalan aktif kullanıcı verilerini eşitle (FitLAB otomatik direktif/program dinleme stabilite için kapalıdır)
+                // 3. Kalan aktif kullanıcı verilerini eşitle (otomatik direktif/program dinleme stabilite için kapalıdır)
                 if (uid) {
                     await syncUserScaleLogsFromCloud(uid);
                     await syncUserMeasurementsFromCloud(uid);
@@ -894,29 +935,9 @@
                     } else {
                         syncMasterCatalogFromCloud(0);
                     }
-                    const rawSealed = typeof data.sealedAiKey === 'string' ? data.sealedAiKey.trim() : '';
-                    const legacyPlain = typeof data.geminiApiKey === 'string' ? data.geminiApiKey.trim() : '';
-                    const cloudKey = rawSealed ? unsealSystemAiKey(rawSealed) : legacyPlain;
-                    const sealedForVault = rawSealed || (legacyPlain ? sealSystemAiKey(legacyPlain) : '');
-
-                    if (cloudKey && sealedForVault) {
-                        try {
-                            localStorage.removeItem(GEMINI_API_STORAGE_KEY);
-                            localStorage.removeItem(`${GEMINI_API_STORAGE_KEY}_usr_admin`);
-                            localStorage.setItem(SYSTEM_AI_VAULT_KEY, JSON.stringify({
-                                sealedAiKey: sealedForVault,
-                                masterCatalogMeta: data.masterCatalogMeta || null,
-                                updatedAt: Date.now()
-                            }));
-                        } catch {}
-                        if (typeof window !== 'undefined' && typeof window.setSystemAiKeyMemoryOnly === 'function') {
-                            window.setSystemAiKeyMemoryOnly(cloudKey);
-                        }
-                        if (typeof updateProfileGeminiStatusUI === 'function') updateProfileGeminiStatusUI();
-                        const curEx = (typeof pickerContext !== 'undefined' && pickerContext && pickerContext.targetExId) ? EXERCISES_DB.find(e => e.id === pickerContext.targetExId) : null;
-                        if (typeof updateGeminiAiModalUI === 'function') updateGeminiAiModalUI(curEx);
-                        return;
-                    }
+                    try {
+                        localStorage.removeItem(`${GEMINI_API_STORAGE_KEY}_usr_admin`);
+                    } catch {}
                 }
             } catch (err) {
                 console.warn("AI config buluttan eşitlenemedi:", err);
@@ -1112,6 +1133,7 @@
         window.hydrateLocalSnapshotIfDev = hydrateLocalSnapshotIfDev;
 
         async function syncUsersToCloud(users) {
+            if (isDemoGuestSession()) return;
             if (IS_LOCAL_DEV) {
                 updateCloudSyncBadge('synced', 'Yerel Test (İzole)');
                 return;
@@ -1669,7 +1691,7 @@
 
         function scheduleUserStateCloudSync(targetUid) {
             const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
-            if (!uid) return;
+            if (!uid || uid === DEMO_GUEST_UID || isDemoGuestSession()) return;
             markLocalUserStateModified(uid);
             if (IS_LOCAL_DEV) return;
             if (userStateSyncTimer) clearTimeout(userStateSyncTimer);
@@ -2114,7 +2136,7 @@
         async function syncUserStateToCloud(targetUid) {
             if (IS_LOCAL_DEV) return;
             const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
-            if (!uid) return;
+            if (!uid || uid === DEMO_GUEST_UID || isDemoGuestSession()) return;
             if (!isFirebaseReady || !fbDb || navigator.onLine === false) {
                 try { localStorage.setItem(`celik_kodu_pending_state_sync_${uid}`, '1'); } catch {}
                 recordCloudGateTelemetry('warn', 'Durum Bulut Yazımı', uid, 'Çevrimdışı kuyruğa alındı', uid);
@@ -2350,7 +2372,7 @@
 
         async function syncUserStateFromCloud(targetUid) {
             const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
-            if (!isFirebaseReady || !fbDb || !uid) return;
+            if (!isFirebaseReady || !fbDb || !uid || uid === DEMO_GUEST_UID || isDemoGuestSession()) return;
             try {
                 const docRef = fbDb.collection('user_state').doc(uid);
                 const doc = await fetchCloudDocPreferServer(docRef);
@@ -3106,9 +3128,16 @@
                 const raw = localStorage.getItem('celik_kodu_session');
                 if (raw) {
                     const session = JSON.parse(raw);
-                    // Güvenlik Doğrulaması: Yalnızca açıkça şifre ile giriş yapılmış (authVerified: true) oturumları tanı.
+                    const isValidDemoSession = Boolean(
+                        session &&
+                        session.isDemoGuest === true &&
+                        session.userId === DEMO_GUEST_UID &&
+                        session.role === 'athlete' &&
+                        session.authVerified === false
+                    );
+                    // Güvenlik Doğrulaması: Yalnızca şifre ile doğrulanmış oturumları veya yetkisiz demo misafir oturumunu tanı.
                     // Önceki sürümlerden kalan sahte veya otomatik usr_admin oturumlarını anında temizle.
-                    if (session && session.userId && session.authVerified === true) {
+                    if ((session && session.userId && session.authVerified === true) || isValidDemoSession) {
                         return session;
                     }
                     localStorage.removeItem('celik_kodu_session');
@@ -3124,7 +3153,12 @@
         function setSession(session) {
             currentSession = session;
             if (session) {
-                session.authVerified = true;
+                if (session.isDemoGuest === true || session.userId === DEMO_GUEST_UID) {
+                    session.isDemoGuest = true;
+                    session.authVerified = false;
+                } else {
+                    session.authVerified = true;
+                }
                 localStorage.setItem('celik_kodu_session', JSON.stringify(session));
                 localStorage.setItem('celik_kodu_active_user_id', session.userId);
                 localStorage.removeItem('celik_kodu_logged_out');
@@ -3155,9 +3189,15 @@
                         }
                     }
                 } catch (e) {}
-                syncAllFromCloud();
+                if (session.isDemoGuest) {
+                    updateCloudSyncBadge('synced', 'Demo Modu');
+                } else {
+                    syncAllFromCloud();
+                }
             } else {
+                unmountAdminPortalFromDOM();
                 localStorage.removeItem('celik_kodu_session');
+                currentSession = null;
                 localStorage.removeItem('celik_kodu_active_user_id');
                 localStorage.removeItem('celik_kodu_last_generated_workout');
                 if (typeof currentGeneratedWorkout !== 'undefined') currentGeneratedWorkout = null;
@@ -3189,8 +3229,159 @@
         function getActiveUser() {
             const uid = getActiveUserId();
             if (!uid) return null;
+            if (uid === DEMO_GUEST_UID) return { ...DEMO_GUEST_USER };
             const users = getAuthUsers();
             return users.find(u => u.id === uid) || null;
+        }
+
+        function enterGuestDemoMode() {
+            setSession({
+                userId: DEMO_GUEST_UID,
+                username: 'demo',
+                role: 'athlete',
+                name: 'Misafir Sporcu',
+                isDemoGuest: true,
+                authVerified: false,
+                passwordPolicyVerified: true,
+                loginAt: Date.now()
+            });
+            updateCloudSyncBadge('synced', 'Demo Modu');
+            if (typeof selectedEquipments !== 'undefined') selectedEquipments = ['dumbbell', 'bench', 'bodyweight'];
+            if (typeof selectedSplits !== 'undefined') selectedSplits = ['full_body'];
+            if (typeof selectedSplit !== 'undefined') selectedSplit = 'full_body';
+            window.aiGeneratorScope = 'single';
+            if (typeof setAiGeneratorScope === 'function') setAiGeneratorScope('single');
+            if (typeof renderEquipChips === 'function') renderEquipChips();
+            if (typeof renderSplitCards === 'function') renderSplitCards();
+            if (typeof handleGenerateWorkout === 'function') handleGenerateWorkout('bb_hybrid', '');
+            if (typeof renderLibrary === 'function') renderLibrary();
+            if (typeof renderLibraryExerciseCatalog === 'function') renderLibraryExerciseCatalog();
+            if (typeof switchTab === 'function') switchTab('generatorTab');
+        }
+        window.enterGuestDemoMode = enterGuestDemoMode;
+
+        let _adminPortalScriptLoadingPromise = null;
+
+        function isVerifiedAdminSession(sessionOverride) {
+            const session = sessionOverride || getSession();
+            if (!session || session.role !== 'admin' || session.authVerified !== true) return false;
+            if (
+                typeof IS_LOCAL_DEV !== 'undefined' && !IS_LOCAL_DEV &&
+                typeof isFirebaseReady !== 'undefined' && isFirebaseReady &&
+                typeof fbAuth !== 'undefined' && fbAuth
+            ) {
+                const cu = fbAuth.currentUser;
+                if (!cu) return false;
+                const email = String(cu.email || '').toLowerCase();
+                if (cu.uid !== 'usr_admin' && email !== 'feritkantarci@gmail.com' && session.fbAdminVerified !== true) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function unmountAdminPortalFromDOM() {
+            if (typeof window !== 'undefined' && window.CelikAdminPortal && typeof window.CelikAdminPortal.unmountAdminPortalDOM === 'function') {
+                window.CelikAdminPortal.unmountAdminPortalDOM();
+                return;
+            }
+            if (typeof document === 'undefined') return;
+            ['adminModal', 'approvalEmailDispatchModal', 'profileTabAdminBtn', 'headerAdminTelemetryBtn', 'btnAdminPanelPopup', 'sheetAdminBtn'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (el.classList && typeof el.classList.remove === 'function') el.classList.remove('active');
+                    if (el.style) el.style.display = 'none';
+                    if (typeof el.remove === 'function') el.remove();
+                }
+            });
+            const profileMount = document.getElementById('profileAdminMountPoint');
+            if (profileMount) profileMount.innerHTML = '';
+        }
+
+        function ensureAdminPortalMountedSync(sessionOverride) {
+            if (!isVerifiedAdminSession(sessionOverride)) {
+                unmountAdminPortalFromDOM();
+                return false;
+            }
+            if (typeof window !== 'undefined' && window.CelikAdminPortal && typeof window.CelikAdminPortal.mountAdminPortalDOM === 'function') {
+                const ok = window.CelikAdminPortal.mountAdminPortalDOM();
+                if (ok && typeof applyProfileTabDarkSurfaceStyles === 'function') applyProfileTabDarkSurfaceStyles();
+                return ok;
+            }
+            return false;
+        }
+
+        async function ensureAdminPortalLoadedAndMounted(sessionOverride) {
+            if (!isVerifiedAdminSession(sessionOverride)) {
+                unmountAdminPortalFromDOM();
+                return false;
+            }
+            if (ensureAdminPortalMountedSync(sessionOverride)) {
+                return true;
+            }
+            if (typeof document === 'undefined' || typeof document.createElement !== 'function' || !document.head || typeof document.head.appendChild !== 'function') {
+                return false;
+            }
+            if (!_adminPortalScriptLoadingPromise) {
+                _adminPortalScriptLoadingPromise = new Promise((resolve) => {
+                    try {
+                        const script = document.createElement('script');
+                        script.src = 'js/chiefs/admin-portal.js?v=335';
+                        script.async = false;
+                        script.onload = () => resolve(true);
+                        script.onerror = () => {
+                            _adminPortalScriptLoadingPromise = null;
+                            resolve(false);
+                        };
+                        document.head.appendChild(script);
+                    } catch (e) {
+                        _adminPortalScriptLoadingPromise = null;
+                        resolve(false);
+                    }
+                });
+            }
+            const loaded = await _adminPortalScriptLoadingPromise;
+            if (loaded && ensureAdminPortalMountedSync()) {
+                if (typeof updateAdminPendingBadges === 'function') updateAdminPendingBadges();
+                return true;
+            }
+            return false;
+        }
+
+        async function syncUserRoleDocument(fbUser, appUser) {
+            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || !fbUser || !fbUser.uid) return false;
+            if (typeof navigator !== 'undefined' && navigator.onLine === false) return false;
+            try {
+                const email = String(fbUser.email || (appUser && appUser.fbAuthEmail) || '').trim().toLowerCase();
+                let resolvedRole = (appUser && appUser.role === 'admin') ? 'admin' : 'athlete';
+                if (email === 'feritkantarci@gmail.com' || fbUser.uid === 'usr_admin') {
+                    resolvedRole = 'admin';
+                }
+                try {
+                    const tok = await fbUser.getIdTokenResult();
+                    if (tok && tok.claims && (tok.claims.role === 'admin' || tok.claims.admin === true)) {
+                        resolvedRole = 'admin';
+                    }
+                } catch {}
+                const resolvedAppUid = (appUser && appUser.id)
+                    ? String(appUser.id)
+                    : (resolvedRole === 'admin' ? 'usr_admin' : ('usr_' + fbUser.uid));
+                await fbDb.collection('user_roles').doc(fbUser.uid).set({
+                    role: resolvedRole,
+                    appUid: resolvedAppUid,
+                    email,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        if (typeof window !== 'undefined') {
+            window.isVerifiedAdminSession = isVerifiedAdminSession;
+            window.unmountAdminPortalFromDOM = unmountAdminPortalFromDOM;
+            window.ensureAdminPortalLoadedAndMounted = ensureAdminPortalLoadedAndMounted;
         }
 
         function syncAppViewState() {
@@ -3199,6 +3390,7 @@
             const mainAppWrapper = document.getElementById('mainAppWrapper');
 
             if (!session) {
+                unmountAdminPortalFromDOM();
                 if (loginScreen) loginScreen.classList.add('active');
                 if (mainAppWrapper) mainAppWrapper.style.display = 'none';
                 return;
@@ -3209,6 +3401,7 @@
             const users = getAuthUsers();
             const activeUser = users.find(u => u.id === session.userId);
             if (activeUser && activeUser.mustChangePassword === true && !session.passwordPolicyVerified) {
+                unmountAdminPortalFromDOM();
                 localStorage.removeItem('celik_kodu_session');
                 currentSession = null;
                 if (loginScreen) loginScreen.classList.add('active');
@@ -3224,24 +3417,20 @@
             if (loginScreen) loginScreen.classList.remove('active');
             if (mainAppWrapper) mainAppWrapper.style.display = 'block';
 
-            const isAdmin = session.role === 'admin';
-
-            const btnAdmin = document.getElementById('btnAdminPanel');
-            if (btnAdmin) btnAdmin.style.display = isAdmin ? 'flex' : 'none';
-
-            const btnAdminPopup = document.getElementById('btnAdminPanelPopup');
-            if (btnAdminPopup) btnAdminPopup.style.display = isAdmin ? 'flex' : 'none';
-
-            const sheetAdmin = document.getElementById('sheetAdminBtn');
-            if (sheetAdmin) sheetAdmin.style.display = isAdmin ? 'flex' : 'none';
-
-            const profileTabAdminBtn = document.getElementById('profileTabAdminBtn');
-            if (profileTabAdminBtn) profileTabAdminBtn.style.display = isAdmin ? 'inline-block' : 'none';
+            const isAdmin = isVerifiedAdminSession(session);
+            if (isAdmin) {
+                if (!ensureAdminPortalMountedSync(session)) {
+                    ensureAdminPortalLoadedAndMounted(session);
+                }
+            } else {
+                unmountAdminPortalFromDOM();
+            }
 
             const roleBadge = document.getElementById('headerUserRoleBadge');
             if (roleBadge) {
-                roleBadge.innerText = isAdmin ? 'YÖNETİCİ' : 'SPORCU';
+                roleBadge.innerText = isAdmin ? 'YÖNETİCİ' : (isDemoGuestSession(session) ? 'DEMO' : 'SPORCU');
                 roleBadge.className = 'auth-role-tag ' + (isAdmin ? 'role-admin' : 'role-athlete');
+                roleBadge.style.display = (isAdmin || isDemoGuestSession(session)) ? 'inline-block' : 'none';
             }
 
             updateAdminPendingBadges();
@@ -3422,6 +3611,17 @@
                 if (loginForm) loginForm.style.display = 'none';
                 if (regForm) regForm.style.display = 'none';
                 if (forgotForm) forgotForm.style.display = 'block';
+                pendingForgotOtpState = null;
+                const step2El = document.getElementById('forgotStep2Container');
+                const otpEl = document.getElementById('forgotOtpCode');
+                const newPassEl = document.getElementById('forgotNewPass');
+                const confirmPassEl = document.getElementById('forgotNewPassConfirm');
+                const forgotBtn = document.getElementById('forgotSubmitBtn');
+                if (step2El) step2El.style.display = 'none';
+                if (otpEl) { otpEl.value = ''; otpEl.required = false; otpEl.removeAttribute('maxlength'); }
+                if (newPassEl) { newPassEl.value = ''; newPassEl.required = false; }
+                if (confirmPassEl) { confirmPassEl.value = ''; confirmPassEl.required = false; }
+                if (forgotBtn) forgotBtn.textContent = 'Sıfırlama Kodu Gönder';
                 const loginUnameEl = document.getElementById('loginUsername');
                 const forgotIdEl = document.getElementById('forgotIdentity');
                 if (loginUnameEl && forgotIdEl && loginUnameEl.value.trim() && !forgotIdEl.value.trim()) {
@@ -3545,12 +3745,22 @@
             const errorBox = document.getElementById('loginErrorMsg');
             if (errorBox) errorBox.style.display = 'none';
 
+            const hasFbAdmin = Boolean(
+                matched && matched.role === 'admin' &&
+                typeof fbAuth !== 'undefined' && fbAuth && fbAuth.currentUser &&
+                (
+                    fbAuth.currentUser.uid === 'usr_admin' ||
+                    String(fbAuth.currentUser.email || '').toLowerCase() === 'feritkantarci@gmail.com'
+                )
+            );
+
             setSession({
                 userId: matched.id,
                 username: matched.username,
                 role: matched.role,
                 name: matched.name,
                 authVerified: true,
+                fbAdminVerified: hasFbAdmin,
                 passwordPolicyVerified: true,
                 loginAt: Date.now()
             });
@@ -3673,27 +3883,34 @@
         }
         window.handleForcePasswordUpgradeSubmit = handleForcePasswordUpgradeSubmit;
 
-        async function handleSendFirebaseResetLink() {
+        async function sendForgotResetStage1() {
             const idEl = document.getElementById('forgotIdentity');
+            const step2El = document.getElementById('forgotStep2Container');
+            const otpContainer = document.getElementById('forgotOtpContainer');
+            const otpEl = document.getElementById('forgotOtpCode');
+            const passEl = document.getElementById('forgotNewPass');
+            const passConfirmEl = document.getElementById('forgotNewPassConfirm');
+            const submitBtn = document.getElementById('forgotSubmitBtn');
             const errorBox = document.getElementById('loginErrorMsg');
             const successBox = document.getElementById('loginSuccessMsg');
+
             if (errorBox) errorBox.style.display = 'none';
             if (successBox) successBox.style.display = 'none';
 
             const rawIdentity = (idEl ? idEl.value : '').trim();
             if (!rawIdentity) {
                 if (errorBox) {
-                    errorBox.innerText = '❌ Önce kayıtlı e-posta adresinizi veya kullanıcı adınızı yazın.';
+                    errorBox.innerText = 'Önce kayıtlı e-posta adresinizi veya kullanıcı adınızı yazın.';
                     errorBox.style.display = 'block';
                 }
-                return;
+                return false;
             }
-            if (!fbAuth || navigator.onLine === false) {
+            if (navigator.onLine === false) {
                 if (errorBox) {
-                    errorBox.innerText = '❌ Şu an çevrimdışısınız. Aşağıdaki doğrudan yenileme alanını kullanın.';
+                    errorBox.innerText = 'İnternet bağlantınız yok. Şifre sıfırlama için çevrimiçi olun.';
                     errorBox.style.display = 'block';
                 }
-                return;
+                return false;
             }
 
             if (typeof syncUsersFromCloud === 'function' && isFirebaseReady && !IS_LOCAL_DEV) {
@@ -3708,7 +3925,7 @@
             const normId = normalizeAuthString(rawIdentity);
             const emailId = rawIdentity.toLowerCase();
             const users = getAuthUsers();
-            const matched = users.find(u => {
+            const matchedUser = users.find(u => {
                 const uUname = normalizeAuthString(u.username);
                 const uEmail = (u.email || '').trim().toLowerCase();
                 const aliases = Array.isArray(u.aliases) ? u.aliases.map(normalizeAuthString) : [];
@@ -3716,37 +3933,125 @@
                     (uEmail && uEmail === emailId) ||
                     (u.id === 'usr_admin' && (normId === 'admin' || normId === 'ferit')) ||
                     aliases.includes(normId);
-            });
+            }) || null;
 
-            const targetEmail = matched ? getCanonicalFbAuthEmail(matched) : (emailId.includes('@') ? emailId : '');
+            const targetEmail = matchedUser ? getCanonicalFbAuthEmail(matchedUser) : (emailId.includes('@') ? emailId : '');
             if (!targetEmail || targetEmail.endsWith('@auth.celikkodu.app')) {
                 if (errorBox) {
-                    errorBox.innerText = '❌ Bu hesapta tanımlı gerçek bir e-posta adresi bulunamadı. Lütfen aşağıdaki Ad Soyad doğrulama alanıyla şifrenizi yenileyin.';
+                    errorBox.innerText = 'Bu hesapta tanımlı geçerli bir e-posta adresi bulunamadı.';
                     errorBox.style.display = 'block';
                 }
-                return;
+                return false;
             }
 
-            try {
-                await fbAuth.sendPasswordResetEmail(targetEmail);
-                switchAuthScreenTab('login');
+            const openStage2UI = (isEmailJsMode, msgText) => {
+                if (step2El) step2El.style.display = 'block';
+                if (otpContainer) otpContainer.style.display = 'block';
+                if (otpEl) {
+                    otpEl.value = '';
+                    otpEl.required = true;
+                    if (isEmailJsMode) otpEl.setAttribute('maxlength', '6');
+                    else otpEl.removeAttribute('maxlength');
+                }
+                if (passEl) passEl.required = true;
+                if (passConfirmEl) passConfirmEl.required = true;
+                if (submitBtn) submitBtn.textContent = 'Yeni Şifreyi Kaydet';
                 if (successBox) {
-                    successBox.innerText = `📩 Şifre sıfırlama bağlantısı (${targetEmail}) adresinize gönderildi. E-postadaki bağlantıdan yeni şifrenizi belirleyip giriş yapabilirsiniz.`;
+                    successBox.innerText = msgText;
                     successBox.style.display = 'block';
                 }
-            } catch (err) {
+            };
+
+            const cfg = typeof getAdminEmailJsConfig === 'function' ? getAdminEmailJsConfig() : null;
+            if (cfg && cfg.serviceId && cfg.templateId && cfg.publicKey) {
+                const randArr = new Uint32Array(1);
+                if (window.crypto && window.crypto.getRandomValues) {
+                    window.crypto.getRandomValues(randArr);
+                } else {
+                    randArr[0] = Math.floor(Math.random() * 900000) + 100000;
+                }
+                const code = String((randArr[0] % 900000) + 100000);
+                try {
+                    const resp = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            service_id: cfg.serviceId,
+                            template_id: cfg.templateId,
+                            user_id: cfg.publicKey,
+                            template_params: {
+                                to_email: targetEmail,
+                                to_name: (matchedUser && matchedUser.name) || 'Sporcu',
+                                username: (matchedUser && matchedUser.username) || rawIdentity,
+                                subject: 'Çelik Kodu | Şifre Sıfırlama Doğrulama Kodu',
+                                message: `Merhaba ${(matchedUser && matchedUser.name) || 'Sporcu'},\n\nŞifre yenileme işleminiz için 6 haneli doğrulama kodunuz: ${code}\n\nBu kod 10 dakika boyunca geçerlidir.`
+                            }
+                        })
+                    });
+                    if (resp.ok) {
+                        pendingForgotOtpState = {
+                            mode: 'emailjs_otp',
+                            userId: matchedUser ? matchedUser.id : null,
+                            email: targetEmail,
+                            code,
+                            createdAt: Date.now()
+                        };
+                        openStage2UI(true, `Sıfırlama kodu (${targetEmail}) adresinize gönderildi. Kodu ve yeni şifrenizi girin.`);
+                        return true;
+                    }
+                } catch (err) {}
+            }
+
+            if (!fbAuth) {
                 if (errorBox) {
-                    errorBox.innerText = '❌ Sıfırlama e-postası gönderilemedi. Lütfen birkaç dakika sonra tekrar deneyin.';
+                    errorBox.innerText = 'Sıfırlama servisi şu an kullanılamıyor. Lütfen daha sonra tekrar deneyin.';
                     errorBox.style.display = 'block';
                 }
+                return false;
             }
+
+            let fbMailOk = false;
+            try {
+                await fbAuth.sendPasswordResetEmail(targetEmail);
+                fbMailOk = true;
+            } catch (err) {
+                if (!IS_LOCAL_DEV) {
+                    if (errorBox) {
+                        errorBox.innerText = 'Sıfırlama e-postası gönderilemedi. Lütfen birkaç dakika sonra tekrar deneyin.';
+                        errorBox.style.display = 'block';
+                    }
+                    return false;
+                }
+            }
+
+            if (fbMailOk || IS_LOCAL_DEV) {
+                pendingForgotOtpState = {
+                    mode: 'firebase_oob',
+                    userId: matchedUser ? matchedUser.id : null,
+                    email: targetEmail,
+                    createdAt: Date.now()
+                };
+                openStage2UI(false, `Sıfırlama e-postası (${targetEmail}) adresinize gönderildi. E-postadaki bağlantıyı kullanabilir veya sıfırlama kodunu aşağıya girerek yeni şifrenizi belirleyebilirsiniz.`);
+                return true;
+            }
+            return false;
+        }
+
+        async function handleSendFirebaseResetLink() {
+            return await sendForgotResetStage1();
         }
         window.handleSendFirebaseResetLink = handleSendFirebaseResetLink;
+
+        async function resendForgotVerificationCode() {
+            pendingForgotOtpState = null;
+            return await sendForgotResetStage1();
+        }
+        window.resendForgotVerificationCode = resendForgotVerificationCode;
 
         async function handleForgotPasswordSubmit(e) {
             e.preventDefault();
             const idEl = document.getElementById('forgotIdentity');
-            const nameEl = document.getElementById('forgotFullName');
+            const step2El = document.getElementById('forgotStep2Container');
             const otpContainer = document.getElementById('forgotOtpContainer');
             const otpEl = document.getElementById('forgotOtpCode');
             const passEl = document.getElementById('forgotNewPass');
@@ -3757,159 +4062,136 @@
             if (errorBox) errorBox.style.display = 'none';
             if (successBox) successBox.style.display = 'none';
 
-            const rawIdentity = (idEl ? idEl.value : '').trim();
-            const normIdentity = normalizeAuthString(rawIdentity);
-            const emailIdentity = rawIdentity.toLowerCase();
-            const rawFullName = (nameEl ? nameEl.value : '').trim();
-            const normFullName = normalizeAuthString(rawFullName);
-            const newPass = (passEl ? passEl.value : '').trim();
-            const newPassConfirm = (passConfirmEl ? passConfirmEl.value : '').trim();
-
-            if (!normIdentity || !normFullName || !newPass || !newPassConfirm) {
-                errorBox.innerText = "❌ Lütfen tüm alanları eksiksiz doldurun.";
-                errorBox.style.display = 'block';
+            const isStep2Open = step2El && step2El.style.display !== 'none';
+            if (!isStep2Open || !pendingForgotOtpState) {
+                await sendForgotResetStage1();
                 return;
             }
 
-            const prelimCheck = evaluatePasswordSecurity(newPass, { username: normIdentity, name: rawFullName });
-            if (!prelimCheck.isValid) {
-                errorBox.innerText = `❌ ${prelimCheck.reason}`;
-                errorBox.style.display = 'block';
+            const rawIdentity = (idEl ? idEl.value : '').trim();
+            const enteredOtp = (otpEl ? otpEl.value : '').trim();
+            const newPass = (passEl ? passEl.value : '').trim();
+            const newPassConfirm = (passConfirmEl ? passConfirmEl.value : '').trim();
+
+            if (!enteredOtp) {
+                if (otpContainer) otpContainer.style.display = 'block';
+                if (errorBox) {
+                    errorBox.innerText = 'Lütfen e-postanıza gelen sıfırlama kodunu girin.';
+                    errorBox.style.display = 'block';
+                }
+                return;
+            }
+
+            if (Date.now() - Number(pendingForgotOtpState.createdAt || 0) > 10 * 60 * 1000) {
+                pendingForgotOtpState = null;
+                if (step2El) step2El.style.display = 'none';
+                const submitBtn = document.getElementById('forgotSubmitBtn');
+                if (submitBtn) submitBtn.textContent = 'Sıfırlama Kodu Gönder';
+                if (errorBox) {
+                    errorBox.innerText = 'Sıfırlama kodunun süresi doldu. Lütfen yeniden kod isteyin.';
+                    errorBox.style.display = 'block';
+                }
+                return;
+            }
+
+            if (!newPass || !newPassConfirm) {
+                if (errorBox) {
+                    errorBox.innerText = 'Lütfen yeni şifre alanlarını doldurun.';
+                    errorBox.style.display = 'block';
+                }
                 return;
             }
 
             if (newPass !== newPassConfirm) {
-                errorBox.innerText = "❌ Girdiğiniz yeni şifreler birbiriyle eşleşmiyor!";
-                errorBox.style.display = 'block';
+                if (errorBox) {
+                    errorBox.innerText = 'Girdiğiniz yeni şifreler birbiriyle eşleşmiyor.';
+                    errorBox.style.display = 'block';
+                }
                 return;
-            }
-
-            if (typeof syncUsersFromCloud === 'function' && isFirebaseReady && !IS_LOCAL_DEV) {
-                try { await syncUsersFromCloud(); } catch (err) {}
             }
 
             const users = getAuthUsers();
-            const matchedUser = users.find(u => {
-                const uUname = normalizeAuthString(u.username);
-                const uEmail = (u.email || '').trim().toLowerCase();
-                const uName = normalizeAuthString(u.name);
-                const aliases = Array.isArray(u.aliases) ? u.aliases.map(normalizeAuthString) : [];
+            const matchedUser = users.find(u =>
+                (pendingForgotOtpState.userId && u.id === pendingForgotOtpState.userId) ||
+                ((u.email || '').trim().toLowerCase() === String(pendingForgotOtpState.email || '').toLowerCase())
+            ) || null;
 
-                const idMatches = (uUname && uUname === normIdentity) ||
-                    (uEmail && uEmail === emailIdentity) ||
-                    aliases.includes(normIdentity);
-                if (!idMatches) return false;
-
-                const nameMatches = (uName && uName === normFullName) ||
-                    (u.id === 'usr_admin' && (normFullName === 'ferit' || normFullName.includes('ferit')));
-                return nameMatches;
-            });
-
-            if (!matchedUser) {
-                errorBox.innerText = "❌ E-posta/kullanıcı adı ile kayıtlı Ad Soyad bilgisi eşleşmedi. Lütfen kayıtlı bilgilerinizi kontrol edin.";
-                errorBox.style.display = 'block';
-                return;
-            }
-
-            const fullSecCheck = evaluatePasswordSecurity(newPass, matchedUser);
+            const fullSecCheck = evaluatePasswordSecurity(newPass, matchedUser || { username: rawIdentity, email: pendingForgotOtpState.email });
             if (!fullSecCheck.isValid) {
-                errorBox.innerText = `❌ ${fullSecCheck.reason}`;
-                errorBox.style.display = 'block';
+                if (errorBox) {
+                    errorBox.innerText = fullSecCheck.reason;
+                    errorBox.style.display = 'block';
+                }
                 return;
             }
 
-            // Eğer EmailJS aktifse ve kullanıcının e-postası varsa 6 haneli doğrulama kodu (OTP) kontrolü
-            const cfg = typeof getAdminEmailJsConfig === 'function' ? getAdminEmailJsConfig() : null;
-            if (cfg && cfg.serviceId && cfg.templateId && cfg.publicKey && matchedUser.email) {
-                const enteredOtp = (otpEl ? otpEl.value : '').trim();
-                const isOtpActiveForUser = pendingForgotOtpState &&
-                    pendingForgotOtpState.userId === matchedUser.id &&
-                    (Date.now() - pendingForgotOtpState.createdAt < 10 * 60 * 1000);
-
-                if (!isOtpActiveForUser) {
-                    const randArr = new Uint32Array(1);
-                    if (window.crypto && window.crypto.getRandomValues) {
-                        window.crypto.getRandomValues(randArr);
-                    } else {
-                        randArr[0] = Math.floor(Math.random() * 900000) + 100000;
-                    }
-                    const code = String((randArr[0] % 900000) + 100000);
-                    pendingForgotOtpState = { userId: matchedUser.id, code, createdAt: Date.now() };
-
-                    try {
-                        const resp = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                service_id: cfg.serviceId,
-                                template_id: cfg.templateId,
-                                user_id: cfg.publicKey,
-                                template_params: {
-                                    to_email: matchedUser.email,
-                                    to_name: matchedUser.name,
-                                    username: matchedUser.username,
-                                    subject: '🔐 Çelik Kodu | Şifre Sıfırlama Doğrulama Kodu',
-                                    message: `Merhaba ${matchedUser.name},\n\nŞifre yenileme işleminiz için 6 haneli doğrulama kodunuz: ${code}\n\nBu kod 10 dakika boyunca geçerlidir.`
-                                }
-                            })
-                        });
-                        if (resp.ok) {
-                            if (otpContainer) otpContainer.style.display = 'block';
-                            if (successBox) {
-                                successBox.innerText = `📩 (${matchedUser.email}) adresinize 6 haneli doğrulama kodu gönderildi. Kodu girip tekrar 'Şifremi Yenile' butonuna basın.`;
-                                successBox.style.display = 'block';
-                            }
-                            return;
-                        }
-                    } catch (err) {
-                        // EmailJS erişilemezse kimlik doğrulamasıyla devam et
-                        pendingForgotOtpState = null;
-                    }
-                } else {
-                    if (enteredOtp !== pendingForgotOtpState.code) {
-                        if (otpContainer) otpContainer.style.display = 'block';
-                        errorBox.innerText = "❌ Girdiğiniz 6 haneli e-posta doğrulama kodu hatalı!";
+            if (pendingForgotOtpState.mode === 'emailjs_otp') {
+                if (enteredOtp !== pendingForgotOtpState.code) {
+                    if (otpContainer) otpContainer.style.display = 'block';
+                    if (errorBox) {
+                        errorBox.innerText = 'Girdiğiniz 6 haneli sıfırlama kodu hatalı.';
                         errorBox.style.display = 'block';
-                        return;
                     }
+                    return;
                 }
+            } else if (pendingForgotOtpState.mode === 'firebase_oob') {
+                if (!fbAuth || typeof fbAuth.verifyPasswordResetCode !== 'function' || typeof fbAuth.confirmPasswordReset !== 'function') {
+                    if (errorBox) {
+                        errorBox.innerText = 'Sunucu kod doğrulaması şu an kullanılamıyor. E-postadaki bağlantıyı kullanabilirsiniz.';
+                        errorBox.style.display = 'block';
+                    }
+                    return;
+                }
+                try {
+                    await fbAuth.verifyPasswordResetCode(enteredOtp);
+                    await fbAuth.confirmPasswordReset(enteredOtp, newPass);
+                } catch (fbErr) {
+                    if (errorBox) {
+                        errorBox.innerText = 'Geçersiz veya süresi dolmuş sıfırlama kodu. E-postadaki bağlantıyı kullanabilir veya yeni kod isteyebilirsiniz.';
+                        errorBox.style.display = 'block';
+                    }
+                    return;
+                }
+            } else {
+                return;
             }
 
-            // Yeni şifreyi izole yerel kasaya kriptografik Salted SHA-256 ile kaydet
-            const nowMs = Date.now();
-            const salt = generateSecureSalt();
-            const passHash = await sha256Hex(salt + newPass);
-            setLocalUserCred(matchedUser.id, {
-                salt,
-                passwordHash: passHash,
-                passwordStrengthLevel: fullSecCheck.levelLabel,
-                mustChangePassword: false,
-                passwordUpdatedAt: nowMs
-            });
-            delete matchedUser.password;
-            delete matchedUser.passwordHash;
-            delete matchedUser.salt;
-            matchedUser.mustChangePassword = false;
-            matchedUser.passwordStrengthLevel = fullSecCheck.levelLabel;
-            matchedUser.passwordUpdatedAt = nowMs;
-            matchedUser.updatedAt = nowMs;
+            if (matchedUser) {
+                const nowMs = Date.now();
+                const salt = generateSecureSalt();
+                const passHash = await sha256Hex(salt + newPass);
+                setLocalUserCred(matchedUser.id, {
+                    salt,
+                    passwordHash: passHash,
+                    passwordStrengthLevel: fullSecCheck.levelLabel,
+                    mustChangePassword: false,
+                    passwordUpdatedAt: nowMs
+                });
+                delete matchedUser.password;
+                delete matchedUser.passwordHash;
+                delete matchedUser.salt;
+                matchedUser.mustChangePassword = false;
+                matchedUser.passwordStrengthLevel = fullSecCheck.levelLabel;
+                matchedUser.passwordUpdatedAt = nowMs;
+                matchedUser.updatedAt = nowMs;
+                saveAuthUsers(users);
+            }
 
-            saveAuthUsers(users);
+            const loginHintValue = (matchedUser && (matchedUser.username || matchedUser.email)) || pendingForgotOtpState.email || rawIdentity;
             pendingForgotOtpState = null;
 
             if (idEl) idEl.value = '';
-            if (nameEl) nameEl.value = '';
             if (otpEl) otpEl.value = '';
-            if (otpContainer) otpContainer.style.display = 'none';
             if (passEl) passEl.value = '';
             if (passConfirmEl) passConfirmEl.value = '';
+            if (step2El) step2El.style.display = 'none';
 
             switchAuthScreenTab('login');
             const loginUnameEl = document.getElementById('loginUsername');
-            if (loginUnameEl) loginUnameEl.value = matchedUser.username || matchedUser.email;
+            if (loginUnameEl && loginHintValue) loginUnameEl.value = loginHintValue;
 
             if (successBox) {
-                successBox.innerText = `✅ Güçlü şifreniz kaydedildi! Kullanıcı adınız (@${matchedUser.username}) veya e-postanızla hemen giriş yapabilirsiniz.`;
+                successBox.innerText = 'Yeni şifreniz kaydedildi! Hesabınızla şimdi giriş yapabilirsiniz.';
                 successBox.style.display = 'block';
             }
         }
@@ -3993,6 +4275,16 @@
                     if (cred && cred.user && cred.user.uid) {
                         const cleanFbUid = String(cred.user.uid).replace(/[^a-zA-Z0-9_]/g, '').slice(0, 32);
                         if (cleanFbUid) assignedId = 'usr_' + cleanFbUid;
+                        if (!IS_LOCAL_DEV && secondaryFbApp && typeof secondaryFbApp.firestore === 'function') {
+                            try {
+                                await secondaryFbApp.firestore().collection('user_roles').doc(cred.user.uid).set({
+                                    role: 'athlete',
+                                    appUid: assignedId,
+                                    email: rawEmail,
+                                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                                }, { merge: true });
+                            } catch (roleErr) {}
+                        }
                     }
                     await secAuth.signOut().catch(() => {});
                 } catch (fbRegErr) {
@@ -4145,6 +4437,9 @@
                     }
 
                     if (fbVerified) {
+                        if (fbAuth && fbAuth.currentUser) {
+                            syncUserRoleDocument(fbAuth.currentUser, u).catch(() => {});
+                        }
                         const evalRes = evaluatePasswordSecurity(pass, u);
                         const freshSalt = generateSecureSalt();
                         const freshHash = await sha256Hex(freshSalt + pass);
@@ -4195,6 +4490,9 @@
                                 (u.email || '').toLowerCase() === emailInput ||
                                 (u.fbAuthEmail || '').toLowerCase() === emailInput
                             )) || null;
+                            if (matched) {
+                                syncUserRoleDocument(cred.user, matched).catch(() => {});
+                            }
                         }
                     } catch (directErr) {
                         if (directErr && directErr.code === 'auth/too-many-requests') {
@@ -4262,6 +4560,10 @@
         }
 
         function handleAuthLogout() {
+            if (isDemoGuestSession()) {
+                setSession(null);
+                return;
+            }
             if (confirm("Oturumu kapatmak istediğinize emin misiniz?")) {
                 if (fbAuth) {
                     try { fbAuth.signOut().catch(() => {}); } catch (e) {}
@@ -4396,7 +4698,10 @@
             }
 
             const session = getSession();
-            const isAdmin = Boolean(session && session.role === 'admin');
+            const isAdmin = isVerifiedAdminSession(session);
+            if (isAdmin) {
+                ensureAdminPortalMountedSync(session);
+            }
             const roleBadge = document.getElementById('headerUserRoleBadge');
             if (roleBadge && isAdmin) {
                 roleBadge.innerText = pendingCount > 0 ? `YÖNETİCİ (${pendingCount} ONAY)` : 'YÖNETİCİ';
@@ -4424,6 +4729,9 @@
                     el.style.display = 'none';
                 }
             });
+            if (!isAdmin) {
+                unmountAdminPortalFromDOM();
+            }
         }
         if (typeof window !== 'undefined') {
             window.updateAdminPendingBadges = updateAdminPendingBadges;
@@ -4485,9 +4793,17 @@
 
         async function openAdminModal(initialTab = 'status') {
             const session = getSession();
-            if (!session || session.role !== 'admin') {
-                alert("Bu alana sadece yöneticiler erişebilir.");
+            if (!isVerifiedAdminSession(session)) {
+                unmountAdminPortalFromDOM();
+                alert("Bu alana sadece doğrulanmış yöneticiler erişebilir.");
                 return;
+            }
+            if (!ensureAdminPortalMountedSync(session)) {
+                const mounted = await ensureAdminPortalLoadedAndMounted(session);
+                if (!mounted) {
+                    alert("Yönetici paneli yüklenemedi. Lütfen tekrar deneyin.");
+                    return;
+                }
             }
             if (typeof syncUsersFromCloud === 'function' && isFirebaseReady && !IS_LOCAL_DEV) {
                 try { await syncUsersFromCloud(); } catch (err) {}
@@ -4517,7 +4833,8 @@
         }
 
         function closeAdminModal() {
-            document.getElementById('adminModal').classList.remove('active');
+            const el = document.getElementById('adminModal');
+            if (el) el.classList.remove('active');
         }
 
         function setAdminModalTabBtnStyle(btn, isActive) {
@@ -4838,6 +5155,16 @@
                     if (cred && cred.user && cred.user.uid) {
                         const cleanFbUid = String(cred.user.uid).replace(/[^a-zA-Z0-9_]/g, '').slice(0, 32);
                         if (cleanFbUid) assignedId = 'usr_' + cleanFbUid;
+                        if (!IS_LOCAL_DEV && isFirebaseReady && fbDb) {
+                            try {
+                                await fbDb.collection('user_roles').doc(cred.user.uid).set({
+                                    role: role === 'admin' ? 'admin' : 'athlete',
+                                    appUid: assignedId,
+                                    email: fbEmailForNew,
+                                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                                }, { merge: true });
+                            } catch (roleErr) {}
+                        }
                     }
                     await secAuth.signOut().catch(() => {});
                 } catch (fbCreateErr) {
@@ -5676,12 +6003,12 @@
                     gemInput.style.color = '#FFFFFF';
                     gemInput.style.borderColor = 'rgba(167, 139, 250, 0.3)';
                 }
-                const gemBtn = geminiCard.querySelector('button');
-                if (gemBtn) {
+                const gemBtns = geminiCard.querySelectorAll('button');
+                gemBtns.forEach(gemBtn => {
                     gemBtn.style.background = '#2C2550';
                     gemBtn.style.color = '#F3E8FF';
                     gemBtn.style.borderColor = 'rgba(192, 132, 252, 0.45)';
-                }
+                });
                 const gemLink = geminiCard.querySelector('a');
                 if (gemLink) {
                     gemLink.style.color = '#BAE6FD';
@@ -5691,7 +6018,8 @@
             const badge = document.getElementById('profileGeminiStatusBadge');
             if (badge) {
                 const hasKey = (typeof getGeminiApiKey === 'function') && Boolean(getGeminiApiKey());
-                if (hasKey || String(badge.innerText || '').includes('Aktif')) {
+                const badgeTxt = String(badge.innerText || '');
+                if (hasKey || badgeTxt.includes('Aktif') || badgeTxt.includes('Hazır')) {
                     badge.style.background = '#14532D';
                     badge.style.color = '#BBF7D0';
                     badge.style.border = '1px solid rgba(74, 222, 128, 0.45)';
@@ -5809,6 +6137,10 @@
         }
 
         function saveCurrentProfile() {
+            if (isDemoGuestSession()) {
+                alert("Demo modunda profil değişiklikleri kaydedilmez. Kendi hesabınızı oluşturmak için kayıt olabilirsiniz.");
+                return;
+            }
             const user = getActiveUser();
             const nameInput = document.getElementById('editUserName');
             const newName = nameInput.value.trim() || 'Sporcu';
@@ -5820,13 +6152,13 @@
             user.gender = document.getElementById('editUserGender').value;
 
             const geminiInput = document.getElementById('profileGeminiApiKeyInput');
-            if (geminiInput && user.role === 'admin') {
+            if (geminiInput) {
                 const gKey = geminiInput.value.trim();
                 if (gKey) {
-                    setGeminiApiKey(gKey, true);
+                    setGeminiApiKey(gKey, false);
                 }
-                if (user.geminiApiKey) delete user.geminiApiKey;
             }
+            if (user.geminiApiKey) delete user.geminiApiKey;
 
             const users = getAuthUsers();
             const idx = users.findIndex(u => u.id === user.id);

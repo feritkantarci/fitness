@@ -1933,7 +1933,7 @@
                                             <span class="text">Gelecek Hafta Antrenman Planı (Önizleme)</span>
                                         </div>
                                         <div class="collapsible-panel-meta">
-                                            <span class="collapsible-panel-badge">${hasIncomingAi ? 'FitLAB Reçetesi' : 'Plan Hazır'}</span>
+                                            <span class="collapsible-panel-badge">${hasIncomingAi ? 'Çelik Kodu Reçetesi' : 'Plan Hazır'}</span>
                                             <span class="collapsible-panel-arrow">▼</span>
                                         </div>
                                     </div>
@@ -3132,24 +3132,33 @@
         // ==================== COMPLETE & LOG WORKOUT ====================
         function getSavedGymsList() {
             const uid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
-            const defaultGyms = uid === 'usr_admin'
-                ? ["Rodium", "Sports & More", "Samandağ", "MACFit", "FitStop"]
-                : ["Spor Salonu", "MACFit"];
+            const gyms = [];
+            const addGymUnique = (name) => {
+                if (!name || typeof name !== 'string') return;
+                const trimmed = name.trim();
+                if (!trimmed || trimmed === 'Ev' || trimmed === 'Açık Hava / Park' || trimmed === 'custom') return;
+                if (!gyms.includes(trimmed)) gyms.push(trimmed);
+            };
             try {
                 const scopedKey = uid ? `celik_kodu_custom_gyms_${uid}` : 'celik_kodu_custom_gyms';
-                const stored = localStorage.getItem(scopedKey) || (uid === 'usr_admin' ? localStorage.getItem('celik_kodu_custom_gyms') : null);
+                const stored = localStorage.getItem(scopedKey);
                 if (stored) {
                     const parsed = JSON.parse(stored);
-                    if (Array.isArray(parsed)) {
-                        parsed.forEach(g => {
-                            if (g && typeof g === 'string' && !defaultGyms.includes(g)) {
-                                defaultGyms.push(g);
-                            }
-                        });
-                    }
+                    if (Array.isArray(parsed)) parsed.forEach(addGymUnique);
                 }
             } catch(e) {}
-            return defaultGyms;
+            try {
+                if (typeof getWorkoutLogs === 'function') {
+                    const logs = getWorkoutLogs() || [];
+                    logs.forEach(log => {
+                        if (log && log.locationType === 'salon' && log.locationName) {
+                            addGymUnique(log.locationName);
+                        }
+                    });
+                }
+            } catch(e) {}
+            if (gyms.length === 0) gyms.push('Spor Salonu');
+            return gyms;
         }
 
         function saveCustomGym(gymName) {
@@ -3187,7 +3196,7 @@
             } catch(e) {}
 
             const locType = lastLoc?.type || 'salon';
-            const locName = lastLoc?.name || 'Rodium';
+            const locName = lastLoc?.name || gyms[0] || 'Spor Salonu';
 
             const locTypeEl = document.getElementById('logLocationType');
             if (locTypeEl) locTypeEl.value = locType;
@@ -3217,12 +3226,14 @@
 
             if (locType === 'salon') {
                 if (gymGroup) gymGroup.style.display = 'block';
-                if (customLabel) customLabel.innerText = 'Salon / Konum Detayı (Örn: Rodium, Sports & More...)';
+                if (customLabel) customLabel.innerText = 'Salon / Konum Detayı (Örn: Merkez Spor Salonu)';
+                const gyms = getSavedGymsList();
+                const fallbackGym = gyms[0] || 'Spor Salonu';
                 if (gymSelect && gymSelect.value !== 'custom') {
                     locNameEl.value = gymSelect.value;
                 } else if (!locNameEl.value || locNameEl.value === 'Ev' || locNameEl.value === 'Açık Hava / Park') {
-                    locNameEl.value = 'Rodium';
-                    if (gymSelect) gymSelect.value = 'Rodium';
+                    locNameEl.value = fallbackGym;
+                    if (gymSelect) gymSelect.value = fallbackGym;
                 }
             } else if (locType === 'ev') {
                 if (gymGroup) gymGroup.style.display = 'none';
@@ -4041,7 +4052,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
 
             if (matches.length === 0) {
-                return [{ dayTitle: 'FitLAB AI Antrenmanı', exercises: extractExercisesFromBlock(text) }];
+                return [{ dayTitle: 'Çelik Kodu AI Antrenmanı', exercises: extractExercisesFromBlock(text) }];
             }
 
             const days = [];
@@ -4059,7 +4070,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             }
 
             if (days.length === 0) {
-                return [{ dayTitle: 'FitLAB AI Antrenmanı', exercises: extractExercisesFromBlock(text) }];
+                return [{ dayTitle: 'Çelik Kodu AI Antrenmanı', exercises: extractExercisesFromBlock(text) }];
             }
 
             return days;
@@ -4259,7 +4270,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         muscle: rawEx.muscle || 'Genel Kas Gelişimi & Fonksiyonel Güç',
                         primaryMuscles: ['full_body'],
                         equipment: 'dumbbell',
-                        cue: note || 'FitLAB AI Koçu tarafından sporcuya özel reçete edilen hareket.',
+                        cue: note || 'Çelik Kodu AI Koçu tarafından sporcuya özel reçete edilen hareket.',
                         isCustomAi: true
                     };
                 });
@@ -4268,10 +4279,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 schedule[slot] = {
                     id: 'fitlab_ai_day_' + slot,
                     title: '🔬 ' + (pDay.dayTitle || ('Gün ' + (idx + 1))),
-                    desc: exNames || 'FitLAB AI Hipertrofi Bloğu',
+                    desc: exNames || 'Çelik Kodu AI Hipertrofi Bloğu',
                     type: 'custom_ai',
                     rest: false,
-                    source: 'FitLAB AI',
+                    source: 'Çelik Kodu AI',
                     exercises: enrichedExercises
                 };
             });
@@ -4286,7 +4297,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const prog = JSON.parse(raw);
                 if (!prog || !prog.active || prog.dismissed || prog.applied) return '';
 
-                let shortSummary = 'FitLAB masaüstü istasyonundan sizin için optimize edilmiş yeni bir antrenman bloğu gönderildi.';
+                let shortSummary = 'Çelik Kodu üzerinden sizin için optimize edilmiş yeni bir antrenman bloğu gönderildi.';
                 if (prog.programText) {
                     const lines = prog.programText.split('\n').filter(l => l.trim() && !l.startsWith('#') && !l.startsWith('|'));
                     if (lines.length > 0) {
@@ -4302,7 +4313,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                         <div class="collapsible-panel-header" onclick="toggleIncomingProgramPanel('${uid}')">
                             <div class="collapsible-panel-title">
                                 <span class="icon">💻</span>
-                                <span class="text">FitLAB • Yeni Masaüstü Programı</span>
+                                <span class="text">Çelik Kodu • Yeni Masaüstü Programı</span>
                             </div>
                             <div class="collapsible-panel-meta">
                                 <span class="collapsible-panel-badge">Yeni Reçete</span>
@@ -4362,7 +4373,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             try {
                 const aiRaw = localStorage.getItem(`celik_kodu_ai_program_${uid}`);
                 if (!aiRaw) {
-                    showToast("⚠️ FitLAB programı bulunamadı.");
+                    showToast("⚠️ Çelik Kodu programı bulunamadı.");
                     return;
                 }
                 const aiData = JSON.parse(aiRaw);
@@ -4397,7 +4408,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
 
                 const workoutObj = {
                     id: 'fitlab_prog_' + Date.now(),
-                    title: firstDay.dayTitle || aiData.title || 'FitLAB Özel Antrenmanı',
+                    title: firstDay.dayTitle || aiData.title || 'Çelik Kodu Özel Antrenmanı',
                     split: 'custom',
                     splitName: firstDay.dayTitle || aiData.title,
                     duration: Math.round(exercisesList.length * 7),
@@ -6754,7 +6765,7 @@ KURALLAR:
 
             return {
                 id: 'directive_workout_' + Date.now(),
-                title: directiveTitle || 'FitLAB Antrenman Protokolü',
+                title: directiveTitle || 'Çelik Kodu Antrenman Protokolü',
                 duration: Math.max(30, Math.round(exercises.length * 6.5)),
                 exercises: exercises,
                 isDirective: true,
@@ -6828,7 +6839,7 @@ KURALLAR:
             try {
                 const raw = localStorage.getItem(`celik_kodu_coach_directive_${uid}`);
                 if (!raw) {
-                    showToast("⚠️ FitLAB direktifi bulunamadı.");
+                    showToast("⚠️ Çelik Kodu direktifi bulunamadı.");
                     return;
                 }
                 const dir = JSON.parse(raw);
@@ -6846,7 +6857,7 @@ KURALLAR:
                 const schedule = getWeeklySchedule();
                 schedule[todayIdx] = {
                     id: workout.id || ('directive_' + Date.now()),
-                    title: workout.title || 'FitLAB Özel Seansı',
+                    title: workout.title || 'Çelik Kodu Özel Seansı',
                     type: 'custom_saved',
                     desc: `${workout.exercises.length} Hareket • ${workout.duration || 45} Dk`,
                     rest: false,
@@ -7146,8 +7157,8 @@ KURALLAR:
         }
 
         // ==================== GOOGLE & DEVICE CALENDAR LIVE SYNC ENGINE ====================
-        const FITLAB_CALENDAR_SUMMARY = 'FitLab • Antrenmanlarım';
-        const FITLAB_CALENDAR_DESC = 'Çelik Kodu & FitLab Antrenman Programı ve İlerleyiş Takvimi';
+        const FITLAB_CALENDAR_SUMMARY = 'Çelik Kodu • Antrenmanlarım';
+        const FITLAB_CALENDAR_DESC = 'Çelik Kodu Antrenman Programı ve İlerleyiş Takvimi';
 
         function getCalendarPreferences(uid) {
             const user = getActiveUser();
@@ -7249,6 +7260,10 @@ KURALLAR:
         }
 
         function saveCustomGoogleClientId(val) {
+            if (typeof isVerifiedAdminSession !== 'function' || !isVerifiedAdminSession()) {
+                if (typeof showToast === 'function') showToast("🔒 Bu geliştirici ayarı yalnızca yöneticiye açıktır.");
+                return;
+            }
             const clean = (val || '').trim();
             try {
                 localStorage.setItem('celik_kodu_gcal_custom_client_id', clean);
@@ -7260,6 +7275,10 @@ KURALLAR:
         }
 
         function applyManualGoogleToken() {
+            if (typeof isVerifiedAdminSession !== 'function' || !isVerifiedAdminSession()) {
+                if (typeof showToast === 'function') showToast("🔒 Bu geliştirici ayarı yalnızca yöneticiye açıktır.");
+                return;
+            }
             const input = document.getElementById('calCustomTokenInput');
             if (!input || !input.value.trim()) {
                 alert("Lütfen geçerli bir Google OAuth erişim belirteci (Access Token) yapıştırın.");
@@ -7318,7 +7337,7 @@ KURALLAR:
                     const existing = await callGoogleCalendarApi(`/calendars/${encodeURIComponent(calId)}`);
                     if (existing && existing.id) return existing.id;
                 } catch(e) {
-                    console.warn("Kayıtlı FitLab takvim kimliği doğrulanamadı, yeniden aranıyor...", e);
+                    console.warn("Kayıtlı Çelik Kodu takvim kimliği doğrulanamadı, yeniden aranıyor...", e);
                 }
             }
 
@@ -7396,7 +7415,7 @@ KURALLAR:
             const exercises = workoutDetails.exercises || plan.exercises || [];
             const schemeStr = workoutDetails.scheme ? `${workoutDetails.scheme.sets} Set x ${workoutDetails.scheme.reps}` : `${exercises.length} Hareket`;
             
-            let desc = `🏋️ FITLAB • ÇELİK KODU ANTRENMAN SEANSI\n`;
+            let desc = `🏋️ ÇELİK KODU ANTRENMAN SEANSI\n`;
             desc += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
             desc += `🎯 Program: ${plan.title || 'Antrenman Seansı'}\n`;
             desc += `⏱️ Tahmini Süre: ${duration} Dakika\n`;
@@ -7457,7 +7476,7 @@ KURALLAR:
             const eventsByDate = {};
             existingEvents.forEach(ev => {
                 if (!ev.start) return;
-                const isFitLab = (ev.extendedProperties?.private?.fitLabSource === 'FitLab_PWA') || (ev.summary && ev.summary.includes('FitLab'));
+                const isFitLab = (ev.extendedProperties?.private?.fitLabSource === 'FitLab_PWA') || (ev.summary && (ev.summary.includes('Çelik Kodu') || ev.summary.includes('FitLab')));
                 if (!isFitLab) return;
 
                 const dStr = (ev.start.dateTime || ev.start.date || '').substring(0, 10);
@@ -7506,7 +7525,7 @@ KURALLAR:
                     const endIsoStr = formatIsoDateTimeWithOffset(endDate);
 
                     const cleanTitle = (plan.title || 'Antrenman Seansı').replace(/^[⚔️🧘🔬🔥\s]+/, '');
-                    const summary = `⚔️ FitLab: ${cleanTitle}`;
+                    const summary = `⚔️ Çelik Kodu: ${cleanTitle}`;
                     const description = buildEventDescription(plan, d, duration, restSec);
 
                     const eventBody = {
@@ -7606,7 +7625,7 @@ KURALLAR:
 
             events.forEach(ev => {
                 if (!ev.start) return;
-                const isFitLab = (ev.extendedProperties && ev.extendedProperties.private && ev.extendedProperties.private.fitLabSource === 'FitLab_PWA') || (ev.summary && ev.summary.includes('FitLab'));
+                const isFitLab = (ev.extendedProperties && ev.extendedProperties.private && ev.extendedProperties.private.fitLabSource === 'FitLab_PWA') || (ev.summary && (ev.summary.includes('Çelik Kodu') || ev.summary.includes('FitLab')));
                 if (!isFitLab) return;
 
                 const evDate = new Date(ev.start.dateTime || ev.start.date);
@@ -7780,7 +7799,7 @@ KURALLAR:
 
             const datesParam = `${formatUtcCompact(startDate)}/${formatUtcCompact(endDate)}`;
             const cleanTitle = (plan.title || 'Antrenman Seansı').replace(/^[⚔️🧘🔬🔥\s]+/, '');
-            const titleParam = `⚔️ FitLab: ${cleanTitle}`;
+            const titleParam = `⚔️ Çelik Kodu: ${cleanTitle}`;
             const descParam = buildEventDescription(plan, dayIdx, duration);
             const user = getActiveUser();
 
@@ -7833,7 +7852,7 @@ KURALLAR:
                         autoCardBadge.style.background = "#10b981";
                     }
                     if (autoCardDesc) {
-                        autoCardDesc.innerHTML = "Google hesabınız bağlı durumda. FitLAB veya web takvimine atanan seanslar arka planda Google Takviminize <strong>otomatik yüklenir</strong>.";
+                        autoCardDesc.innerHTML = "Google hesabınız bağlı durumda. Çelik Kodu takvimine atanan seanslar arka planda Google Takviminize <strong>otomatik yüklenir</strong>.";
                     }
                     autoCardAction.innerHTML = `
                         <button type="button" class="btn btn-gold" style="font-size:11.5px; padding:7px 14px; font-weight:800;" onclick="performFullCalendarSync()">
@@ -7850,7 +7869,7 @@ KURALLAR:
                         autoCardBadge.style.background = "#10b981";
                     }
                     if (autoCardDesc) {
-                        autoCardDesc.innerHTML = "Google hesabınızı <strong>1 kere bağlayın</strong>. Artık hiçbir dosya indirmekle veya butona basmakla uğraşmayın; FitLAB veya web üzerinden atanan tüm programlar Google Takviminize <strong>kendiliğinden otomatik yüklensin</strong>.";
+                        autoCardDesc.innerHTML = "Google hesabınızı <strong>1 kere bağlayın</strong>. Artık hiçbir dosya indirmekle veya butona basmakla uğraşmayın; Çelik Kodu üzerinden atanan tüm programlar Google Takviminize <strong>kendiliğinden otomatik yüklensin</strong>.";
                     }
                     autoCardAction.innerHTML = `
                         <button type="button" class="btn btn-gold" style="font-size:12px; padding:9px 18px; font-weight:900; box-shadow:0 0 15px rgba(245,158,11,0.3); white-space:nowrap;" onclick="connectGoogleCalendarPrompt()">
@@ -7960,10 +7979,10 @@ KURALLAR:
             let ics = [
                 'BEGIN:VCALENDAR',
                 'VERSION:2.0',
-                'PRODID:-//FitLab//Celik Kodu PWA//TR',
+                'PRODID:-//Celik Kodu//Celik Kodu PWA//TR',
                 'CALSCALE:GREGORIAN',
                 'METHOD:PUBLISH',
-                'X-WR-CALNAME:FitLab • Antrenmanlarım',
+                'X-WR-CALNAME:Çelik Kodu • Antrenmanlarım',
                 'X-WR-TIMEZONE:Europe/Istanbul'
             ];
 
@@ -7986,7 +8005,7 @@ KURALLAR:
                 const endDate = new Date(startDate.getTime() + (duration * 60 * 1000));
 
                 const cleanTitle = (plan.title || 'Antrenman Seansı').replace(/^[⚔️🧘🔬🔥\s]+/, '');
-                const summary = `⚔️ FitLab: ${cleanTitle}`;
+                const summary = `⚔️ Çelik Kodu: ${cleanTitle}`;
                 const descText = buildEventDescription(plan, dayIdx, duration)
                     .replace(/\\/g, '\\\\')
                     .replace(/;/g, '\\;')
@@ -7995,7 +8014,7 @@ KURALLAR:
 
                 ics.push(
                     'BEGIN:VEVENT',
-                    `UID:fitlab-${formatDateYMD(dayDate)}-${startDate.getTime()}@fitness.kantarci.io`,
+                    `UID:celik-kodu-${formatDateYMD(dayDate)}-${startDate.getTime()}@fitness.kantarci.io`,
                     `DTSTAMP:${formatIcsDate(new Date())}`,
                     `DTSTART:${formatIcsDate(startDate)}`,
                     `DTEND:${formatIcsDate(endDate)}`,
@@ -8004,7 +8023,7 @@ KURALLAR:
                     'BEGIN:VALARM',
                     'ACTION:DISPLAY',
                     `TRIGGER:-PT${prefs.reminderMin || 30}M`,
-                    'DESCRIPTION:FitLab Antrenman Vakti!',
+                    'DESCRIPTION:Çelik Kodu Antrenman Vakti!',
                     'END:VALARM',
                     'END:VEVENT'
                 );
@@ -8021,7 +8040,7 @@ KURALLAR:
             const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `fitlab-haftalik-antrenman.ics`;
+            link.download = `celik-kodu-haftalik-antrenman.ics`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -8044,7 +8063,7 @@ KURALLAR:
             const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `fitlab-gun-${activeSchedulingDayIdx}.ics`;
+            link.download = `celik-kodu-gun-${activeSchedulingDayIdx}.ics`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -8059,7 +8078,7 @@ KURALLAR:
                     <div class="calendar-live-bar">
                         <div class="calendar-live-info">
                             <span class="weekly-day-sync-dot"></span>
-                            <span style="color:#0F172A;">FitLab • Antrenmanlarım</span>
+                            <span style="color:#0F172A;">Çelik Kodu • Antrenmanlarım</span>
                             <span style="font-size:10px; color:#10b981; font-weight:800;">(Canlı Eşitli)</span>
                         </div>
                         <div class="calendar-live-actions">
@@ -8188,10 +8207,21 @@ KURALLAR:
             const timeEl = document.getElementById('calPrefDefaultTime');
             const remEl = document.getElementById('calPrefReminderMin');
             const clientEl = document.getElementById('calCustomClientId');
+            const tokenEl = document.getElementById('calCustomTokenInput');
+            const isAdmin = (typeof isVerifiedAdminSession === 'function') && isVerifiedAdminSession();
 
             if (timeEl) timeEl.value = prefs.defaultTime || '18:30';
             if (remEl) remEl.value = String(prefs.reminderMin || 30);
-            if (clientEl) clientEl.value = prefs.customClientId || '';
+            if (clientEl) {
+                const container = clientEl.closest('.form-group, .cal-admin-section, details, div');
+                if (container && container !== modal) container.style.display = isAdmin ? '' : 'none';
+                clientEl.value = isAdmin ? (prefs.customClientId || '') : '';
+            }
+            if (tokenEl) {
+                const container = tokenEl.closest('.form-group, .cal-admin-section, details, div');
+                if (container && container !== modal) container.style.display = isAdmin ? '' : 'none';
+                if (!isAdmin) tokenEl.value = '';
+            }
 
             modal.style.display = 'flex';
         }
@@ -8214,7 +8244,7 @@ KURALLAR:
                                 <span style="font-size:22px;">🟢</span>
                                 <div>
                                     <div style="font-size:13px; font-weight:800; color:#0F172A;">Google Takvim Canlı Bağlı</div>
-                                    <div style="font-size:11px; color:#065F46; margin-top:2px;">Özel Takvim: <strong>FitLab • Antrenmanlarım</strong></div>
+                                    <div style="font-size:11px; color:#065F46; margin-top:2px;">Özel Takvim: <strong>Çelik Kodu • Antrenmanlarım</strong></div>
                                 </div>
                             </div>
                             <button type="button" class="btn btn-outline" style="font-size:11px; padding:5px 10px; color:#DC2626; border-color:rgba(239,68,68,0.4);" onclick="disconnectGoogleCalendar()">
@@ -8536,18 +8566,18 @@ KURALLAR:
                 if (rawDir) coachDir = JSON.parse(rawDir);
             } catch(e) {}
             if (!coachDir) {
-                if (typeof showToast === 'function') showToast("⚠️ FitLAB direktifi bulunamadı.");
+                if (typeof showToast === 'function') showToast("⚠️ Çelik Kodu direktifi bulunamadı.");
                 return;
             }
             const dirWorkout = coachDir.parsedWorkout || (coachDir.fullReport ? parseDirectiveWorkout(coachDir.fullReport, coachDir.title) : null);
             if (!dirWorkout) {
-                if (typeof showToast === 'function') showToast("⚠️ FitLAB egzersiz detayları ayrıştırılamadı.");
+                if (typeof showToast === 'function') showToast("⚠️ Çelik Kodu egzersiz detayları ayrıştırılamadı.");
                 return;
             }
             const targetDay = activeSchedulingDayIdx;
             const newPlan = {
                 id: dirWorkout.id || ('directive_' + Date.now()),
-                title: dirWorkout.title || 'FitLAB Özel Seansı',
+                title: dirWorkout.title || 'Çelik Kodu Özel Seansı',
                 type: 'custom_saved',
                 desc: `${dirWorkout.exercises ? dirWorkout.exercises.length : 0} Hareket • ${dirWorkout.duration || 45} Dk`,
                 rest: false,
