@@ -2235,8 +2235,7 @@ Türkçe, sade, motive edici ve net yaz.`;
                         type: 'custom_generated',
                         desc: `${wClone.exercises.length} Hareket • ${wClone.duration} Dk${userWish ? ' • Özel Odak' : ''}`,
                         rest: false,
-                        customWorkout: wClone,
-                        exercises: wClone.exercises
+                        customWorkout: wClone
                     };
                     generatedDaysList.push({
                         dayIdx: slot.dayIdx,
@@ -3167,7 +3166,7 @@ Aşağıdaki JSON şemasında çıktı ver:
                     if (dItem && dItem.workout && plan.draftSchedule[dItem.dayIdx]) {
                         const wObj = dItem.workout;
                         plan.draftSchedule[dItem.dayIdx].customWorkout = wObj;
-                        plan.draftSchedule[dItem.dayIdx].exercises = wObj.exercises || [];
+                        delete plan.draftSchedule[dItem.dayIdx].exercises;
                         plan.draftSchedule[dItem.dayIdx].desc = `${(wObj.exercises || []).length} Hareket • ${wObj.duration || 45} Dk`;
                         plan.draftSchedule[dItem.dayIdx].updatedAt = Date.now();
                     }
@@ -3271,7 +3270,6 @@ Aşağıdaki JSON şemasında çıktı ver:
                             desc: `${wkClone.exercises ? wkClone.exercises.length : 0} Hareket • ${wkClone.duration || 45} Dk`,
                             rest: false,
                             customWorkout: wkClone,
-                            exercises: wkClone.exercises,
                             updatedAt: nowTs
                         };
                     }
@@ -3334,7 +3332,7 @@ Aşağıdaki JSON şemasında çıktı ver:
                                     regen.id = (curWorkout && curWorkout.id) || ('ai_dyn_' + d2 + '_' + nowTs);
                                     regen.title = curDay.title;
                                     currentSched[d2].customWorkout = regen;
-                                    currentSched[d2].exercises = regen.exercises;
+                                    delete currentSched[d2].exercises;
                                     currentSched[d2].desc = `${regen.exercises.length} Hareket • ${regen.duration || 45} Dk`;
                                 }
                             }
@@ -5257,6 +5255,9 @@ Aşağıdaki JSON şemasında çıktı ver:
                     if (yEntry) {
                         hadYesterdayDateEntry = true;
                         if (!yEntry.rest) {
+                            if (Array.isArray(yEntry.primarySubKeys)) {
+                                yEntry.primarySubKeys.forEach(pk => { if (pk) adjacentPrevDaySubKeys31.add(String(pk)); });
+                            }
                             const yExList = Array.isArray(yEntry.exercises)
                                 ? yEntry.exercises
                                 : (yEntry.customWorkout && Array.isArray(yEntry.customWorkout.exercises) ? yEntry.customWorkout.exercises : []);
@@ -5275,6 +5276,9 @@ Aşağıdaki JSON şemasında çıktı ver:
                         const yDayIdx = yesterdayRefObj.getDay();
                         const wkEntry = wkSched && wkSched[yDayIdx];
                         if (wkEntry && !wkEntry.rest) {
+                            if (Array.isArray(wkEntry.primarySubKeys)) {
+                                wkEntry.primarySubKeys.forEach(pk => { if (pk) adjacentPrevDaySubKeys31.add(String(pk)); });
+                            }
                             const wkExList = Array.isArray(wkEntry.exercises)
                                 ? wkEntry.exercises
                                 : (wkEntry.customWorkout && Array.isArray(wkEntry.customWorkout.exercises) ? wkEntry.customWorkout.exercises : []);
@@ -7277,7 +7281,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     dayEntry.workout = currentGeneratedWorkout;
                     if (window.pendingAiWeeklyPlan.draftSchedule && window.pendingAiWeeklyPlan.draftSchedule[dayEntry.dayIdx]) {
                         window.pendingAiWeeklyPlan.draftSchedule[dayEntry.dayIdx].customWorkout = currentGeneratedWorkout;
-                        window.pendingAiWeeklyPlan.draftSchedule[dayEntry.dayIdx].exercises = currentGeneratedWorkout.exercises;
+                        delete window.pendingAiWeeklyPlan.draftSchedule[dayEntry.dayIdx].exercises;
                         window.pendingAiWeeklyPlan.draftSchedule[dayEntry.dayIdx].desc = `${currentGeneratedWorkout.exercises.length} Hareket • ${currentGeneratedWorkout.duration} Dk`;
                     }
                 }
@@ -7422,8 +7426,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 type: 'custom_generated',
                 desc: `${workout.exercises.length} Hareket • ${workout.duration || 45} Dk`,
                 rest: false,
-                customWorkout: JSON.parse(JSON.stringify(workout)),
-                exercises: workout.exercises
+                customWorkout: JSON.parse(JSON.stringify(workout))
             };
             saveNextWeeklySchedule(nextSched, uid);
             activePlannerWeek = 'next';
@@ -9292,7 +9295,7 @@ KESİN KURALLAR:
                         const schedIdx = (dayEntry.dayIdx !== undefined && dayEntry.dayIdx !== null) ? dayEntry.dayIdx : actIdx;
                         if (plan.draftSchedule && plan.draftSchedule[schedIdx]) {
                             plan.draftSchedule[schedIdx].customWorkout = workout;
-                            plan.draftSchedule[schedIdx].exercises = workout.exercises;
+                            delete plan.draftSchedule[schedIdx].exercises;
                             plan.draftSchedule[schedIdx].desc = `${workout.exercises.length} Hareket • ${workout.duration || 45} Dk`;
                         }
                     }
@@ -10000,7 +10003,7 @@ KESİN KURALLAR:
                         if (window.pendingAiWeeklyPlan.draftSchedule && window.pendingAiWeeklyPlan.draftSchedule[dItem.dayIdx]) {
                             const slotObj = window.pendingAiWeeklyPlan.draftSchedule[dItem.dayIdx];
                             slotObj.customWorkout = workout;
-                            slotObj.exercises = workout.exercises;
+                            delete slotObj.exercises;
                             slotObj.desc = `${workout.exercises.length} Hareket • ${workout.duration || 45} Dk`;
                             slotObj.updatedAt = nowTs;
                         }
@@ -10085,7 +10088,7 @@ KESİN KURALLAR:
                         const clonedActive = JSON.parse(JSON.stringify(activeWorkoutSession));
                         clonedActive.updatedAt = nowTs;
                         daySlot.customWorkout = clonedActive;
-                        daySlot.exercises = clonedActive.exercises;
+                        delete daySlot.exercises;
                         daySlot.desc = `${clonedActive.exercises.length} Hareket • ${clonedActive.duration || 45} Dk`;
                         daySlot.updatedAt = nowTs;
                         const targetYMD = activeWorkoutSession.scheduledDateStr || (typeof resolveScheduleDateStr === 'function' ? resolveScheduleDateStr(candidateDayIdx, null, isNextWk ? 1 : 0) : (!isNextWk && candidateDayIdx === todayIdx ? todayYMD : ''));
@@ -10226,7 +10229,6 @@ KESİN KURALLAR:
                         desc: `${newExercises.length} Hareket • ${updatedWorkout.duration} Dk`,
                         rest: false,
                         customWorkout: updatedWorkout,
-                        exercises: newExercises,
                         extraCardioSessions: existingCardio,
                         updatedAt: nowTs
                     };

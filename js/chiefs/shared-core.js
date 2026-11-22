@@ -3099,6 +3099,101 @@
             };
         }
 
+        function extractPrimarySubKeysFromExercises(exList) {
+            if (!Array.isArray(exList) || exList.length === 0) return [];
+            const keys = new Set();
+            for (const rawEx of exList) {
+                if (!rawEx) continue;
+                const resolved = (typeof resolveCanonicalDbExercise === 'function') ? resolveCanonicalDbExercise(rawEx) : rawEx;
+                const anat = (typeof getExerciseAnatomy === 'function') ? getExerciseAnatomy(resolved || rawEx) : null;
+                if (anat && Array.isArray(anat.primarySubKeys)) {
+                    anat.primarySubKeys.forEach(pk => { if (pk) keys.add(String(pk)); });
+                } else if (anat && anat.subKey && anat.subKey !== 'general') {
+                    keys.add(String(anat.subKey));
+                }
+            }
+            return Array.from(keys);
+        }
+
+        function normalizeScheduleSlotSingleCopy(slot) {
+            if (!slot || typeof slot !== 'object' || Array.isArray(slot)) return slot;
+            const copy = Object.assign({}, slot);
+            if (copy.customWorkout && typeof copy.customWorkout === 'object' && Array.isArray(copy.customWorkout.exercises)) {
+                delete copy.exercises;
+            }
+            return copy;
+        }
+
+        function slimStaleCalendarDayEntry(dateStr, entry, refDayMs = Date.now()) {
+            if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return entry;
+            const clean = normalizeScheduleSlotSingleCopy(entry);
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr || ''))) return clean;
+
+            const refNum = Number(refDayMs) || Date.now();
+            const refDt = new Date(refNum);
+            const refIso = `${refDt.getFullYear()}-${String(refDt.getMonth() + 1).padStart(2, '0')}-${String(refDt.getDate()).padStart(2, '0')}`;
+            const refNoonUtcMs = Date.parse(`${refIso}T12:00:00Z`);
+            const dayNoonUtcMs = Date.parse(`${dateStr}T12:00:00Z`);
+            const isOlderThan7d = Number.isFinite(refNoonUtcMs) && Number.isFinite(dayNoonUtcMs) && (refNoonUtcMs - dayNoonUtcMs) > (7 * 86400000);
+            if (!isOlderThan7d) return clean;
+
+            const hadHeavyPayload = Boolean(entry.customWorkout || entry.exercises);
+            const rawExList = (entry.customWorkout && Array.isArray(entry.customWorkout.exercises))
+                ? entry.customWorkout.exercises
+                : (Array.isArray(entry.exercises) ? entry.exercises : []);
+            const primarySubKeys = (Array.isArray(clean.primarySubKeys) && clean.primarySubKeys.length > 0)
+                ? Array.from(new Set(clean.primarySubKeys.map(String).filter(Boolean)))
+                : extractPrimarySubKeysFromExercises(rawExList);
+            const prevTs = Number(clean.updatedAt || 0);
+
+            const slim = {
+                type: String(clean.type || (clean.rest ? 'rest' : 'custom_generated')),
+                title: String(clean.title || (entry.customWorkout && entry.customWorkout.title) || (clean.rest ? 'Dinlenme' : 'Antrenman')),
+                rest: Boolean(clean.rest),
+                desc: String(clean.desc || ''),
+                updatedAt: hadHeavyPayload
+                    ? Math.max(refNum, prevTs + 1)
+                    : (prevTs || refNum)
+            };
+            if (clean.id) slim.id = String(clean.id);
+            if (Array.isArray(clean.extraCardioSessions) && clean.extraCardioSessions.length > 0) {
+                slim.extraCardioSessions = clean.extraCardioSessions;
+            }
+            if (Array.isArray(primarySubKeys) && primarySubKeys.length > 0) {
+                slim.primarySubKeys = primarySubKeys;
+            }
+            return slim;
+        }
+
+        function compactDateScheduleMap(dateSchedMap, refDayMs = Date.now()) {
+            if (!dateSchedMap || typeof dateSchedMap !== 'object' || Array.isArray(dateSchedMap)) {
+                return { map: {}, changed: false };
+            }
+            const out = {};
+            let changed = false;
+            for (const [dateStr, entry] of Object.entries(dateSchedMap)) {
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr) || !entry || typeof entry !== 'object' || Array.isArray(entry)) continue;
+                const compacted = slimStaleCalendarDayEntry(dateStr, entry, refDayMs);
+                out[dateStr] = compacted;
+                if (
+                    !changed &&
+                    (Boolean(entry.customWorkout) !== Boolean(compacted.customWorkout) ||
+                        Boolean(entry.exercises) !== Boolean(compacted.exercises) ||
+                        JSON.stringify(entry) !== JSON.stringify(compacted))
+                ) {
+                    changed = true;
+                }
+            }
+            return { map: out, changed };
+        }
+
+        if (typeof window !== 'undefined') {
+            window.extractPrimarySubKeysFromExercises = extractPrimarySubKeysFromExercises;
+            window.normalizeScheduleSlotSingleCopy = normalizeScheduleSlotSingleCopy;
+            window.slimStaleCalendarDayEntry = slimStaleCalendarDayEntry;
+            window.compactDateScheduleMap = compactDateScheduleMap;
+        }
+
         // CUSTOM ROUTINE BUILDER STATE
         let customRoutineState = {
             title: "Özel Çelik Programım",
@@ -3813,7 +3908,9 @@
                 if (user) {
                     user.lastExerciseWeights = Object.assign({}, user.lastExerciseWeights || {}, map);
                 }
-                if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(uid);
+                if (typeof window.scheduleUserStateCloudSync === 'function') {
+                    window.scheduleUserStateCloudSync(uid, { deferUntilWorkoutEnd: true });
+                }
             } catch (e) {}
         }
 

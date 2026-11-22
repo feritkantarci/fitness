@@ -3951,6 +3951,706 @@ function runAcademicMathSuite(moduleSources, dbText) {
           })
         };
       }
+    },
+    {
+      id: 'T62',
+      owner: 'profile-guard',
+      title: 'Bulut Kota Tasarrufu: Zaman Aşımı≠Kota, Antrenman Sonu Eşitleme, Kara Kutu Aralığı, Tekil Okuma',
+      expected: 'Timeout resource-exhausted sayılmaz (deadline-exceeded/queued/Bulut Yavaş), canlı antrenman bitiş/iptalde buluta gider, telemetri 60 sn/imza korumalı, rol/katalog/admin okumaları sınırlı',
+      run: () => {
+        const profileCode = fs.readFileSync(path.join(ROOT, 'js', 'chiefs', 'profile-chief.js'), 'utf8');
+        const workoutCode = fs.readFileSync(path.join(ROOT, 'js', 'chiefs', 'workout-chief.js'), 'utf8');
+        const sharedCode = fs.readFileSync(path.join(ROOT, 'js', 'chiefs', 'shared-core.js'), 'utf8');
+        const adminCode = fs.readFileSync(path.join(ROOT, 'js', 'chiefs', 'admin-portal.js'), 'utf8');
+
+        const noTimeoutAsQuota = !/tErr\.code\s*=\s*'resource-exhausted'/.test(profileCode);
+        const hasTimeoutCircuitSplit =
+          profileCode.includes('deadline-exceeded') &&
+          profileCode.includes('getFirestoreCircuitBadgeText') &&
+          profileCode.includes("'queued'");
+
+        const deferInAllThree =
+          profileCode.includes('deferUntilWorkoutEnd') &&
+          workoutCode.includes('deferUntilWorkoutEnd') &&
+          sharedCode.includes('deferUntilWorkoutEnd');
+
+        const sliceFnBody = (src, fnName) => {
+          const idx = src.indexOf(`function ${fnName}(`);
+          if (idx < 0) return '';
+          const nextIdx = src.indexOf('\n        function ', idx + 20);
+          return nextIdx > idx ? src.slice(idx, nextIdx) : src.slice(idx, idx + 4500);
+        };
+        const hasSyncAfterActiveRemove = (body) => {
+          const rmMatch = body.match(/localStorage\.removeItem\(`celik_kodu_active_state_\$\{uid\}`\);/);
+          if (!rmMatch) return false;
+          const afterRm = body.slice(rmMatch.index + rmMatch[0].length);
+          return /scheduleUserStateCloudSync\(/.test(afterRm);
+        };
+        const finishSyncOk = hasSyncAfterActiveRemove(sliceFnBody(workoutCode, 'saveCompletedWorkout'));
+        const cancelSyncOk = hasSyncAfterActiveRemove(sliceFnBody(workoutCode, 'cancelActiveWorkout'));
+
+        const roleCallCount = (profileCode.match(/getUserRoleDocCached\(/g) || []).length;
+        const telemetryRateLimitOk =
+          profileCode.includes('TELEMETRY_SYNC_MIN_GAP_MS') &&
+          profileCode.includes('system_telemetry:') &&
+          profileCode.includes('celik_kodu_cloud_master_catalog_checked_at') &&
+          profileCode.includes('_lastAdminTelemetryFetchAt') &&
+          roleCallCount >= 3;
+
+        const adminRateLimitOk = adminCode.includes('minGapMs');
+
+        const ok =
+          noTimeoutAsQuota &&
+          hasTimeoutCircuitSplit &&
+          deferInAllThree &&
+          finishSyncOk &&
+          cancelSyncOk &&
+          telemetryRateLimitOk &&
+          adminRateLimitOk;
+
+        return {
+          ok,
+          actual: JSON.stringify({
+            noTimeoutAsQuota,
+            hasTimeoutCircuitSplit,
+            deferInAllThree,
+            finishSyncOk,
+            cancelSyncOk,
+            telemetryRateLimitOk,
+            roleCallCount,
+            adminRateLimitOk
+          })
+        };
+      }
+    },
+    {
+      id: 'T63',
+      owner: 'profile-guard',
+      title: 'Bulut Mimari v2 (Aşama 2): Belge Başına Antrenman/Takvim Yazımı, Mezar Taşı & Artımlı Çekme',
+      expected: 'Değişmeyen antrenman/gün tekrar yazılmaz (0 upsert), yeni/değişen tek belge ayrılır, silme tombstones deleted:true üretir, artımlı çekme yereli günceller',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const uid = 'usr_v2_test';
+          const prefixes = [
+            'celik_kodu_history_', 'celik_kodu_deleted_logs_', 'celik_kodu_cloud_pull_at_workout_',
+            'celik_kodu_cloud_item_sigs_workout_', 'celik_kodu_date_schedule_',
+            'celik_kodu_cloud_pull_at_days_', 'celik_kodu_cloud_item_sigs_days_'
+          ];
+          prefixes.forEach(p => localStorage.removeItem(p + uid));
+
+          const mkLog = (id, date, title) => ({
+            id,
+            date,
+            program: title,
+            title,
+            exercises: [{ id: 'db_bench_press', name: 'Dambıl Bench Press', sets: [{ setNo: 1, weight: 20, reps: 10, completed: true }] }],
+            updatedAt: 1700000000000
+          });
+
+          applyIncrementalWorkoutItemsFromCloud(uid, [
+            { id: 'w1', data: mkLog('w1', '2026-11-20', 'İtiş') },
+            { id: 'w2', data: mkLog('w2', '2026-11-19', 'Çekiş') },
+            { id: 'w3', data: mkLog('w3', '2026-11-18', 'Bacak') }
+          ]);
+          const diffSeeded = computeWorkoutLogsCloudDiff(getUserLogsById(uid), uid);
+
+          const afterAdd = getUserLogsById(uid);
+          afterAdd.unshift(mkLog('w4', '2026-11-21', 'Omuz'));
+          localStorage.setItem('celik_kodu_history_' + uid, JSON.stringify(afterAdd));
+          const diffAdded = computeWorkoutLogsCloudDiff(getUserLogsById(uid), uid);
+
+          markWorkoutLogDeleted(uid, 'w2');
+          localStorage.setItem('celik_kodu_history_' + uid, JSON.stringify(getUserLogsById(uid).filter(l => l && l.id !== 'w2')));
+          const diffDeleted = computeWorkoutLogsCloudDiff(getUserLogsById(uid), uid);
+
+          applyIncrementalWorkoutItemsFromCloud(uid, [
+            { id: 'w5', data: mkLog('w5', '2026-11-22', 'Kol') },
+            { id: 'w1', data: { id: 'w1', deleted: true, updatedAt: Date.now() + 1000 } }
+          ]);
+          const logsAfterPull = getUserLogsById(uid);
+          const delLogsAfterPull = getDeletedWorkoutLogIds(uid);
+          const workoutPullTs = Number(localStorage.getItem('celik_kodu_cloud_pull_at_workout_' + uid) || 0);
+
+          const mkDay = (dt, title) => ({
+            date: dt,
+            type: 'custom',
+            title,
+            rest: false,
+            updatedAt: 1700000000000
+          });
+          applyIncrementalCalendarDaysFromCloud(uid, [
+            { id: '2026-11-20', data: mkDay('2026-11-20', 'Gün 1') },
+            { id: '2026-11-21', data: mkDay('2026-11-21', 'Gün 2') },
+            { id: '2026-11-22', data: mkDay('2026-11-22', 'Gün 3') }
+          ]);
+          const dayDiffSeeded = computeCalendarDaysCloudDiff(JSON.parse(localStorage.getItem('celik_kodu_date_schedule_' + uid) || '{}'), uid);
+
+          const modSched = JSON.parse(localStorage.getItem('celik_kodu_date_schedule_' + uid) || '{}');
+          modSched['2026-11-22'].title = 'Gün 3 Güncel';
+          delete modSched['2026-11-20'];
+          localStorage.setItem('celik_kodu_date_schedule_' + uid, JSON.stringify(modSched));
+          const dayDiffEdited = computeCalendarDaysCloudDiff(modSched, uid);
+
+          applyIncrementalCalendarDaysFromCloud(uid, [
+            { id: '2026-11-23', data: mkDay('2026-11-23', 'Gün 4') },
+            { id: '2026-11-21', data: { date: '2026-11-21', deleted: true, updatedAt: Date.now() + 1000 } }
+          ]);
+          const schedAfterPull = JSON.parse(localStorage.getItem('celik_kodu_date_schedule_' + uid) || '{}');
+          const dayPullTs = Number(localStorage.getItem('celik_kodu_cloud_pull_at_days_' + uid) || 0);
+
+          return {
+            seedUnchanged: diffSeeded.upserts.length === 0 && diffSeeded.tombstones.length === 0 && diffSeeded.unchangedCount === 3,
+            addOneOk: diffAdded.upserts.length === 1 && diffAdded.upserts[0].logId === 'w4' && diffAdded.unchangedCount === 3 && diffAdded.tombstones.length === 0,
+            delTombstoneOk: diffDeleted.tombstones.length === 1 && diffDeleted.tombstones[0].logId === 'w2' && diffDeleted.tombstones[0].payload.deleted === true,
+            pullWorkoutOk: logsAfterPull.some(l => l.id === 'w5') && !logsAfterPull.some(l => l.id === 'w1') && delLogsAfterPull.includes('w1') && workoutPullTs > 0,
+            daySeedUnchanged: dayDiffSeeded.upserts.length === 0 && dayDiffSeeded.tombstones.length === 0 && dayDiffSeeded.unchangedCount === 3,
+            dayEditOk: dayDiffEdited.upserts.length === 1 && dayDiffEdited.upserts[0].dateStr === '2026-11-22' && dayDiffEdited.tombstones.length === 1 && dayDiffEdited.tombstones[0].dateStr === '2026-11-20' && dayDiffEdited.tombstones[0].payload.deleted === true && dayDiffEdited.unchangedCount === 1,
+            dayPullOk: Boolean(schedAfterPull['2026-11-23']) && !schedAfterPull['2026-11-21'] && dayPullTs > 0
+          };
+        })()`, ctx);
+
+        const ok = Boolean(
+          res.seedUnchanged &&
+          res.addOneOk &&
+          res.delTombstoneOk &&
+          res.pullWorkoutOk &&
+          res.daySeedUnchanged &&
+          res.dayEditOk &&
+          res.dayPullOk
+        );
+        return { ok, actual: JSON.stringify(res) };
+      }
+    },
+    {
+      id: 'T64',
+      owner: 'workout-guard',
+      title: 'Bulut Mimari v2 (Aşama 3): Takvim Tek Kopya (customWorkout) & 7 Günden Eski Günleri Özetleme',
+      expected: 'Takvimde customWorkout yanında çift exercises kopyası yazılmaz, >7 gün eski günler primarySubKeys+extraCardioSessions korunarak <600 byte özetlenir, dünkü özet kas koruması çalışır',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const uid = 'usr_exam';
+          const nowMs = Date.now();
+          const fmtYmd = (d) => formatDateYMD(d);
+          const todayYMD = fmtYmd(new Date(nowMs));
+          const oldYMD = fmtYmd(new Date(nowMs - 10 * 86400000));
+          const recentYMD = fmtYmd(new Date(nowMs - 3 * 86400000));
+          const futureYMD = fmtYmd(new Date(nowMs + 2 * 86400000));
+          const yesterdayYMD = fmtYmd(new Date(nowMs - 86400000));
+
+          localStorage.removeItem('celik_kodu_date_schedule_' + uid);
+          localStorage.removeItem('celik_kodu_weekly_schedule_' + uid);
+          localStorage.removeItem('celik_kodu_next_weekly_schedule_' + uid);
+
+          const exBench = EXERCISES_DB.find(e => e.id === 'db_bench_press') || { id: 'db_bench_press', name: 'Dambıl Bench Press', muscle: 'Göğüs' };
+          const exLat = EXERCISES_DB.find(e => e.id === 'db_lateral_raise') || { id: 'db_lateral_raise', name: 'Dambıl Lateral Raise', muscle: 'Omuz' };
+          const mkBloated = (id, title, extraCardio) => ({
+            id,
+            title,
+            type: 'custom_generated',
+            desc: '2 Hareket • 45 Dk',
+            rest: false,
+            customWorkout: {
+              id,
+              title,
+              duration: 45,
+              exercises: [Object.assign({}, exBench, { targetSets: 3, targetReps: '8-12' }), Object.assign({}, exLat, { targetSets: 3, targetReps: '12-15' })]
+            },
+            exercises: [Object.assign({}, exBench, { targetSets: 3, targetReps: '8-12' }), Object.assign({}, exLat, { targetSets: 3, targetReps: '12-15' })],
+            extraCardioSessions: extraCardio || [],
+            updatedAt: nowMs - 1000
+          });
+
+          saveDateScheduleOverride(todayYMD, mkBloated('t64_today', 'Bugün İtiş'), uid);
+          const afterToday = JSON.parse(localStorage.getItem('celik_kodu_date_schedule_' + uid) || '{}');
+          const storedToday = afterToday[todayYMD];
+          const todaySingleCopyOk = Boolean(
+            storedToday &&
+            storedToday.exercises === undefined &&
+            storedToday.customWorkout &&
+            Array.isArray(storedToday.customWorkout.exercises) &&
+            storedToday.customWorkout.exercises.length === 2
+          );
+          const todayDetails = getWorkoutDetailsForPlan(storedToday);
+          const todayDetailsOk = Boolean(todayDetails && Array.isArray(todayDetails.exercises) && todayDetails.exercises.length === 2);
+
+          const seededMap = {};
+          seededMap[oldYMD] = mkBloated('t64_old', 'Eski Gün', [{ id: 'cond_indoor_row', name: 'Kürek', duration: 20, addedAt: nowMs - 10 * 86400000 }]);
+          seededMap[recentYMD] = mkBloated('t64_rec', 'Son 3 Gün');
+          seededMap[futureYMD] = mkBloated('t64_fut', 'Gelecek Gün');
+          localStorage.setItem('celik_kodu_date_schedule_' + uid, JSON.stringify(seededMap));
+
+          const prune1 = window.pruneStaleWatchTelemetryAndDrafts(uid, { nowMs });
+          const afterPrune = JSON.parse(localStorage.getItem('celik_kodu_date_schedule_' + uid) || '{}');
+          const oldEntry = afterPrune[oldYMD];
+          const recEntry = afterPrune[recentYMD];
+          const futEntry = afterPrune[futureYMD];
+
+          const oldSlimmedOk = Boolean(
+            oldEntry &&
+            oldEntry.customWorkout === undefined &&
+            oldEntry.exercises === undefined &&
+            Array.isArray(oldEntry.extraCardioSessions) && oldEntry.extraCardioSessions.length === 1 &&
+            Array.isArray(oldEntry.primarySubKeys) &&
+            oldEntry.primarySubKeys.includes('chest_mid') &&
+            oldEntry.primarySubKeys.includes('shoulders_side') &&
+            JSON.stringify(oldEntry).length < 600
+          );
+          const recentPreservedOk = Boolean(
+            recEntry && recEntry.exercises === undefined &&
+            recEntry.customWorkout && Array.isArray(recEntry.customWorkout.exercises) && recEntry.customWorkout.exercises.length === 2
+          );
+          const futurePreservedOk = Boolean(
+            futEntry && futEntry.exercises === undefined &&
+            futEntry.customWorkout && Array.isArray(futEntry.customWorkout.exercises) && futEntry.customWorkout.exercises.length === 2
+          );
+
+          const prune2 = window.pruneStaleWatchTelemetryAndDrafts(uid, { nowMs });
+          const idempotentOk = prune2.prunedCalendar === false;
+
+          const yMap = {};
+          yMap[yesterdayYMD] = { type: 'custom_generated', title: 'Dün Göğüs', rest: false, primarySubKeys: ['chest_mid', 'shoulders_side'], updatedAt: nowMs - 86400000 };
+          localStorage.setItem('celik_kodu_date_schedule_' + uid, JSON.stringify(yMap));
+          const mCtx = getRecentAndScheduledMuscleContext({ referenceTimeMs: nowMs });
+          const prevDayMuscleGuardOk = Boolean(
+            mCtx && mCtx.adjacentPrevDaySubKeys31 &&
+            mCtx.adjacentPrevDaySubKeys31.has('chest_mid') &&
+            mCtx.adjacentPrevDaySubKeys31.has('shoulders_side')
+          );
+
+          return {
+            todaySingleCopyOk,
+            todayDetailsOk,
+            prune1Ok: prune1.prunedCalendar === true && prune1.changed === true,
+            oldSlimmedOk,
+            recentPreservedOk,
+            futurePreservedOk,
+            idempotentOk,
+            prevDayMuscleGuardOk
+          };
+        })()`, ctx);
+
+        const ok = Object.values(res).every(Boolean);
+        return { ok, actual: JSON.stringify(res) };
+      }
+    },
+    {
+      id: 'T65',
+      owner: 'profile-guard',
+      title: 'Bulut Mimari v2 (Aşama 4): Alt Koleksiyon (items & days) Güvenlik Kuralları, Sahip İzolasyonu & Şema Denetimi',
+      expected: 'firestore.rules===config/firestore.rules, items ve days yalnız isOwner(uid)||isAdmin() + isValidAthleteId(uid) ile korunur, secret/deleted/updatedAt/syncSeal doğrulamaları aktif',
+      run: () => {
+        const rulesCode = fs.readFileSync(path.join(ROOT, 'firestore.rules'), 'utf8');
+        const configRulesCode = fs.readFileSync(path.join(ROOT, 'config', 'firestore.rules'), 'utf8');
+        const rulesIdentical = rulesCode === configRulesCode;
+
+        const itemsMatch = rulesCode.match(/match \/workout_logs\/\{uid\}\/items\/\{logId\}\s*\{([\s\S]*?)\n\s*\}/);
+        const itemsBody = itemsMatch ? itemsMatch[1] : '';
+        const hasWorkoutItemsMatch = Boolean(
+          itemsBody &&
+          itemsBody.includes('(isOwner(uid) || isAdmin()) && isValidAthleteId(uid)') &&
+          /isValidWorkoutLogItemPayload\(request\.resource\.data,\s*logId\)/.test(itemsBody) &&
+          itemsBody.includes('isSealValidForCreate()') &&
+          itemsBody.includes('isSealValidForWrite(uid)') &&
+          itemsBody.includes('allow delete: if isAdmin();')
+        );
+
+        const daysMatch = rulesCode.match(/match \/user_state\/\{uid\}\/days\/\{dateStr\}\s*\{([\s\S]*?)\n\s*\}/);
+        const daysBody = daysMatch ? daysMatch[1] : '';
+        const hasCalendarDaysMatch = Boolean(
+          daysBody &&
+          daysBody.includes('(isOwner(uid) || isAdmin()) && isValidAthleteId(uid)') &&
+          /isValidCalendarDayItemPayload\(request\.resource\.data,\s*dateStr\)/.test(daysBody) &&
+          daysBody.includes('isSealValidForCreate()') &&
+          daysBody.includes('isSealValidForWrite(uid)') &&
+          daysBody.includes('allow delete: if isAdmin();')
+        );
+
+        const workoutValMatch = rulesCode.match(/function isValidWorkoutLogItemPayload\(data, logId\)\s*\{([\s\S]*?)\n\s*\}/);
+        const workoutValBody = workoutValMatch ? workoutValMatch[1] : '';
+        const workoutValidatorOk = Boolean(
+          workoutValBody &&
+          workoutValBody.includes('!data.keys().hasAny(secretKeys)') &&
+          workoutValBody.includes("'deleted' in data") &&
+          workoutValBody.includes('data.deleted is bool') &&
+          workoutValBody.includes("'updatedAt' in data") &&
+          workoutValBody.includes('(data.updatedAt is number && data.updatedAt >= 0)') &&
+          workoutValBody.includes('isValidOptionalSyncSeal(data)')
+        );
+
+        const dayValMatch = rulesCode.match(/function isValidCalendarDayItemPayload\(data, dateStr\)\s*\{([\s\S]*?)\n\s*\}/);
+        const dayValBody = dayValMatch ? dayValMatch[1] : '';
+        const dayValidatorOk = Boolean(
+          dayValBody &&
+          dayValBody.includes('!data.keys().hasAny(secretKeys)') &&
+          dayValBody.includes("dateStr.matches('^\\\\d{4}-\\\\d{2}-\\\\d{2}$')") &&
+          dayValBody.includes('data.date == dateStr') &&
+          dayValBody.includes("'deleted' in data") &&
+          dayValBody.includes('data.deleted is bool') &&
+          dayValBody.includes('isValidOptionalSyncSeal(data)')
+        );
+
+        const ok = rulesIdentical && hasWorkoutItemsMatch && hasCalendarDaysMatch && workoutValidatorOk && dayValidatorOk;
+        return {
+          ok,
+          actual: JSON.stringify({
+            rulesIdentical,
+            hasWorkoutItemsMatch,
+            hasCalendarDaysMatch,
+            workoutValidatorOk,
+            dayValidatorOk
+          })
+        };
+      }
+    },
+    {
+      id: 'T66',
+      owner: 'profile-guard',
+      title: 'Bulut Mimari v2 (Aşama 5): Kademeli Taşıma (Yönetici Öncelikli), 30 Günlük Yedek & Tek Adımda Geri Dönüş',
+      expected: 'Önce yalnız yönetici taşınır (diğer sporcu kilitli), tek seferlik bölme 30 günlük yedek metası bırakır, commit sonrası 0 mükerrer yazım olur, rollback eski takvim yedeğini ve geçmişi geri yükler',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const adminUid = 'usr_admin';
+          const athleteUid = 'usr_sporcu2';
+          const nowMs = Date.now();
+          const fmtYmd = (d) => formatDateYMD(d);
+          const oldDayYmd = fmtYmd(new Date(nowMs - 12 * 86400000));
+          const todayYmd = fmtYmd(new Date(nowMs));
+
+          const clearV2Keys = (u) => {
+            [
+              'celik_kodu_v2_subdoc_migrated_',
+              'celik_kodu_v2_legacy_backup_meta_',
+              'celik_kodu_v2_legacy_datesched_backup_',
+              'celik_kodu_cloud_pull_at_workout_',
+              'celik_kodu_cloud_pull_at_days_',
+              'celik_kodu_cloud_item_sigs_workout_',
+              'celik_kodu_cloud_item_sigs_days_'
+            ].forEach(p => localStorage.removeItem(p + u));
+          };
+
+          setV2SubcollectionRolloutAll(false);
+          clearV2Keys(adminUid);
+          clearV2Keys(athleteUid);
+
+          const adminEnabledDefault = isSubcollectionMigrationEnabledForUser(adminUid);
+          const athleteBlockedDefault = !isSubcollectionMigrationEnabledForUser(athleteUid);
+          setV2SubcollectionRolloutAll(true);
+          const athleteEnabledAfterToggle = isSubcollectionMigrationEnabledForUser(athleteUid);
+          setV2SubcollectionRolloutAll(false);
+
+          const mkLog = (id, date, title) => ({
+            id,
+            date,
+            program: title,
+            title,
+            exercises: [{ id: 'db_bench_press', name: 'Dambıl Bench Press', sets: [{ setNo: 1, weight: 20, reps: 10, completed: true }] }],
+            updatedAt: nowMs - 3600000
+          });
+          const logs = [
+            mkLog('m_w1', todayYmd, 'İtiş 1'),
+            mkLog('m_w2', oldDayYmd, 'İtiş 2'),
+            mkLog('m_w3', oldDayYmd, 'Çekiş 3')
+          ];
+          localStorage.setItem('celik_kodu_history_' + adminUid, JSON.stringify(logs));
+          localStorage.setItem('celik_kodu_deleted_logs_' + adminUid, JSON.stringify(['m_w_del']));
+          localStorage.setItem('celik_kodu_cloud_item_sigs_workout_' + adminUid, JSON.stringify({ m_w1: 'legacy_sig' }));
+
+          const exBench = EXERCISES_DB.find(e => e.id === 'db_bench_press') || { id: 'db_bench_press', name: 'Dambıl Bench Press', muscle: 'Göğüs' };
+          const mkBloatedDay = (id, title) => ({
+            id,
+            title,
+            type: 'custom_generated',
+            desc: '1 Hareket • 40 Dk',
+            rest: false,
+            customWorkout: { id, title, duration: 40, exercises: [Object.assign({}, exBench, { targetSets: 3, targetReps: '8-12' })] },
+            exercises: [Object.assign({}, exBench, { targetSets: 3, targetReps: '8-12' })],
+            updatedAt: nowMs - 86400000
+          });
+          const preSched = {};
+          preSched[oldDayYmd] = mkBloatedDay('d_old', 'Eski Gün');
+          preSched[todayYmd] = mkBloatedDay('d_today', 'Bugün');
+          localStorage.setItem('celik_kodu_date_schedule_' + adminUid, JSON.stringify(preSched));
+
+          const plan = buildLegacyToSubcollectionMigrationPlan(adminUid, { nowMs });
+          const planOk = Boolean(
+            plan &&
+            plan.workoutItems.length === 4 &&
+            plan.calendarDayItems.length === 2 &&
+            plan.backupMeta &&
+            plan.backupMeta.legacyParentWorkoutDocPreserved === true &&
+            plan.backupMeta.backupRetainUntil === nowMs + 30 * 86400000
+          );
+
+          const commitOk = commitSubcollectionMigrationSuccess(adminUid, plan);
+          const migratedFlagOk = localStorage.getItem('celik_kodu_v2_subdoc_migrated_' + adminUid) === '1';
+
+          const workoutDiffAfter = computeWorkoutLogsCloudDiff(getUserLogsById(adminUid), adminUid);
+          const dayDiffAfter = computeCalendarDaysCloudDiff(
+            JSON.parse(localStorage.getItem('celik_kodu_date_schedule_' + adminUid) || '{}'),
+            adminUid
+          );
+          const zeroDirtyWritesAfterCommit = Boolean(
+            workoutDiffAfter.upserts.length === 0 &&
+            workoutDiffAfter.tombstones.length === 0 &&
+            workoutDiffAfter.unchangedCount === 3 &&
+            dayDiffAfter.upserts.length === 0 &&
+            dayDiffAfter.tombstones.length === 0 &&
+            dayDiffAfter.unchangedCount === 2
+          );
+
+          localStorage.setItem('celik_kodu_date_schedule_' + adminUid, JSON.stringify({}));
+          const rb = rollbackUserSubcollectionMigration(adminUid);
+          const restoredSched = JSON.parse(localStorage.getItem('celik_kodu_date_schedule_' + adminUid) || '{}');
+          const rollbackOk = Boolean(
+            rb &&
+            rb.rolledBack === true &&
+            rb.restoredDateScheduleBackup === true &&
+            localStorage.getItem('celik_kodu_v2_subdoc_migrated_' + adminUid) === null &&
+            Object.keys(restoredSched).length === 2 &&
+            getUserLogsById(adminUid).length === 3
+          );
+
+          clearV2Keys(adminUid);
+          localStorage.removeItem('celik_kodu_history_' + adminUid);
+          localStorage.removeItem('celik_kodu_deleted_logs_' + adminUid);
+          localStorage.removeItem('celik_kodu_date_schedule_' + adminUid);
+
+          return {
+            stagedGateOk: adminEnabledDefault && athleteBlockedDefault && athleteEnabledAfterToggle,
+            planOk,
+            commitOk,
+            migratedFlagOk,
+            zeroDirtyWritesAfterCommit,
+            rollbackOk
+          };
+        })()`, ctx);
+
+        const ok = Object.values(res).every(Boolean);
+        return { ok, actual: JSON.stringify(res) };
+      }
+    },
+    {
+      id: 'T67',
+      owner: 'profile-guard',
+      title: 'Bulut Alt Şefi Karnesi + Faz 6 Uçtan Uca v2 Taşıma Veri Sağlaması',
+      expected: 'Bulut Alt Şefi okuma/yazma/tasarruf/boyut/devre karnesi ve kopyalanabilir raporu çalışır; v2 zarflı yapı + 7 gün takvim sadeleştirmesi öncesi ve sonrası geçmiş tonaj, 10 ana/31 alt kas seti ve haftalık puanlar birebir eşit kalır',
+      run: () => {
+        ctx.__seedState();
+        const res = vm.runInContext(`(() => {
+          const uid = 'usr_admin';
+          const nowMs = Date.now();
+          const fmtYmd = (d) => formatDateYMD(d);
+          const todayYmd = fmtYmd(new Date(nowMs));
+          const yesterdayYmd = fmtYmd(new Date(nowMs - 86400000));
+          const old14Ymd = fmtYmd(new Date(nowMs - 14 * 86400000));
+
+          const clearKeys = () => {
+            [
+              'celik_kodu_v2_subdoc_migrated_',
+              'celik_kodu_v2_legacy_backup_meta_',
+              'celik_kodu_v2_legacy_datesched_backup_',
+              'celik_kodu_cloud_pull_at_workout_',
+              'celik_kodu_cloud_pull_at_days_',
+              'celik_kodu_cloud_item_sigs_workout_',
+              'celik_kodu_cloud_item_sigs_days_'
+            ].forEach(p => localStorage.removeItem(p + uid));
+          };
+          clearKeys();
+
+          localStorage.setItem('celik_kodu_active_user_id', uid);
+          localStorage.setItem('celik_kodu_session', JSON.stringify({ userId: uid, username: 'admin', role: 'admin', authVerified: true }));
+          localStorage.setItem('celik_garmin_wellness_steps_v1_' + uid, JSON.stringify({
+            [todayYmd]: { totalSteps: 9500, stepGoal: 8000 },
+            [yesterdayYmd]: { totalSteps: 8200, stepGoal: 8000 }
+          }));
+
+          const exBench = EXERCISES_DB.find(e => e.id === 'db_bench_press') || { id: 'db_bench_press', name: 'Dambıl Bench Press', muscle: 'Göğüs', primaryMuscles: ['chest'] };
+          const exRow = EXERCISES_DB.find(e => e.id === 'db_row') || { id: 'db_row', name: 'Tek Kol Dambıl Row', muscle: 'Sırt', primaryMuscles: ['back'] };
+          const exRun = EXERCISES_DB.find(e => e.id === 'cardio_run') || { id: 'cardio_run', name: 'Koşu', muscle: 'Kardiyo', category: 'cardio', isCardioMinutes: true };
+
+          const logsBefore = [
+            {
+              id: 'p6_w1',
+              date: todayYmd,
+              timestamp: nowMs - 3600000,
+              program: 'Üst Gövde Güç',
+              totalVolumeKg: 1200,
+              totalSetsCompleted: 4,
+              totalRepsCompleted: 40,
+              exercises: [
+                Object.assign({}, exBench, {
+                  sets: [
+                    { setNo: 1, weight: 30, reps: 10, completed: true, volume: 300 },
+                    { setNo: 2, weight: 30, reps: 10, completed: true, volume: 300 },
+                    { setNo: 3, weight: 30, reps: 10, completed: true, volume: 300 },
+                    { setNo: 4, weight: 30, reps: 10, completed: true, volume: 300 }
+                  ]
+                })
+              ]
+            },
+            {
+              id: 'p6_w2',
+              date: yesterdayYmd,
+              timestamp: nowMs - 86400000,
+              program: 'Çekiş + Kardiyo',
+              totalVolumeKg: 900,
+              totalSetsCompleted: 4,
+              totalRepsCompleted: 30,
+              exercises: [
+                Object.assign({}, exRow, {
+                  sets: [
+                    { setNo: 1, weight: 30, reps: 10, completed: true, volume: 300 },
+                    { setNo: 2, weight: 30, reps: 10, completed: true, volume: 300 },
+                    { setNo: 3, weight: 30, reps: 10, completed: true, volume: 300 }
+                  ]
+                }),
+                Object.assign({}, exRun, {
+                  sets: [{ setNo: 1, weight: 0, reps: 25, completed: true, volume: 0 }]
+                })
+              ]
+            }
+          ];
+          localStorage.setItem('celik_kodu_history_' + uid, JSON.stringify(logsBefore));
+
+          const mkBloatedDay = (id, title, ex) => ({
+            id,
+            title,
+            type: 'custom_generated',
+            desc: '1 Hareket • 35 Dk',
+            rest: false,
+            customWorkout: { id, title, duration: 35, exercises: [Object.assign({}, ex, { targetSets: 3, targetReps: '8-12' })] },
+            exercises: [Object.assign({}, ex, { targetSets: 3, targetReps: '8-12' })],
+            extraCardioSessions: [{ id: 'ec_1', name: 'Tempo Koşusu', durationMin: 20 }],
+            updatedAt: nowMs - 7200000
+          });
+          const schedBefore = {};
+          schedBefore[todayYmd] = mkBloatedDay('d_t', 'Bugün Planı', exBench);
+          schedBefore[yesterdayYmd] = mkBloatedDay('d_y', 'Dün Planı', exRow);
+          schedBefore[old14Ymd] = mkBloatedDay('d_old', 'Eski Plan', exBench);
+          localStorage.setItem('celik_kodu_date_schedule_' + uid, JSON.stringify(schedBefore));
+
+          const captureAnalyticsSnapshot = () => {
+            const curLogs = getUserLogsById(uid);
+            const totalVol = Math.round(curLogs.reduce((acc, l) => acc + (Number(l.totalVolumeKg) || 0), 0));
+            const doneM = calculateWeeklyMuscleSufficiency('week_done', 0);
+            const projM = calculateWeeklyMuscleSufficiency('week_projected', 0);
+            const schedM = calculateWeeklyMuscleSufficiency('schedule_full', 0);
+            const scores = calculateWeeklyFitnessAndCardioScores(0);
+            const compSummary = (doneM.muscles || []).map(m => {
+              const cm = computeMuscleCompartmentMap(m, 'week_done') || {};
+              return {
+                id: m.id,
+                effDone: m.effectiveDone,
+                effProj: ((projM.muscles || []).find(x => x.id === m.id) || {}).effectiveTotal || 0,
+                schedTotal: ((schedM.muscles || []).find(x => x.id === m.id) || {}).effectiveTotal || 0,
+                subs: Object.keys(cm).sort().map(k => ({ k, done: cm[k].done || 0, plan: cm[k].plan || 0 }))
+              };
+            });
+            return {
+              count: curLogs.length,
+              totalVol,
+              fitnessScore: scores.fitness ? scores.fitness.totalScore : 0,
+              cardioScore: scores.cardio ? scores.cardio.totalScore : 0,
+              compSummary
+            };
+          };
+
+          const beforeSnap = captureAnalyticsSnapshot();
+
+          // Aşama 3 + Aşama 5: Tam v2 taşıma ve takvim sadeleştirmesi uygula
+          const plan = buildLegacyToSubcollectionMigrationPlan(uid, { nowMs });
+          const commitOk = commitSubcollectionMigrationSuccess(uid, plan);
+
+          // v2 bulut zarfından geri çekilse bile (applyIncrementalWorkoutItemsFromCloud + applyIncrementalCalendarDaysFromCloud) veri aynı kalmalı
+          localStorage.setItem('celik_kodu_history_' + uid, JSON.stringify([]));
+          localStorage.setItem('celik_kodu_date_schedule_' + uid, JSON.stringify({}));
+          applyIncrementalWorkoutItemsFromCloud(uid, plan.workoutItems.map(i => ({ id: i.docId, data: i.payload })));
+          applyIncrementalCalendarDaysFromCloud(uid, plan.calendarDayItems.map(d => ({ id: d.dateStr, data: d.payload })));
+
+          const afterSnap = captureAnalyticsSnapshot();
+          const parityOk = Boolean(
+            commitOk &&
+            beforeSnap.totalVol === 2100 &&
+            beforeSnap.fitnessScore > 0 &&
+            beforeSnap.cardioScore > 0 &&
+            beforeSnap.count === afterSnap.count &&
+            beforeSnap.totalVol === afterSnap.totalVol &&
+            beforeSnap.fitnessScore === afterSnap.fitnessScore &&
+            beforeSnap.cardioScore === afterSnap.cardioScore &&
+            JSON.stringify(beforeSnap.compSummary) === JSON.stringify(afterSnap.compSummary)
+          );
+
+          // 14 günlük eski gün özetlenmiş olmalı ama primarySubKeys + extraCardioSessions korunmalı; bugün tam kopya tekil olmalı
+          const afterSched = JSON.parse(localStorage.getItem('celik_kodu_date_schedule_' + uid) || '{}');
+          const oldEntry = afterSched[old14Ymd] || {};
+          const todayEntry = afterSched[todayYmd] || {};
+          const scheduleCompactionOk = Boolean(
+            !oldEntry.customWorkout &&
+            !oldEntry.exercises &&
+            Array.isArray(oldEntry.primarySubKeys) &&
+            oldEntry.primarySubKeys.length > 0 &&
+            Array.isArray(oldEntry.extraCardioSessions) &&
+            oldEntry.extraCardioSessions.length === 1 &&
+            todayEntry.customWorkout &&
+            !todayEntry.exercises
+          );
+
+          // Bulut Alt Şefi doğrulaması
+          const subApi = window.CelikLiaisonSubChiefs;
+          const prevStats = subApi.getCloudSubChiefStats();
+          subApi.noteCloudSubChiefEvent('read', 'workout_logs/items', 'Artımlı zarf çekimi', 2);
+          subApi.noteCloudSubChiefEvent('write', 'workout_logs/items', 'p6_w1', 1);
+          subApi.noteCloudSubChiefEvent('saved_write', 'user_state', 'Canlı set yazımı ertelendi', 3);
+          subApi.noteCloudSubChiefEvent('saved_read', 'user_roles', '10dk önbellek', 1);
+          const nextStats = subApi.getCloudSubChiefStats();
+
+          const health = subApi.inspectCloudHealthSnapshot(uid);
+          const reportText = subApi.buildCloudSubChiefDiagnosticReport(uid);
+
+          let cardRenderedOk = false;
+          if (typeof CelikAdminPortal !== 'undefined' && typeof CelikAdminPortal.mountAdminPortalDOM === 'function') {
+            localStorage.setItem('celik_kodu_session', JSON.stringify({ userId: 'usr_admin', username: 'admin', role: 'admin', authVerified: true }));
+            window._celikVerifiedAdminClaim = true;
+            CelikAdminPortal.mountAdminPortalDOM();
+            if (typeof renderAdminSystemTelemetry === 'function') {
+              renderAdminSystemTelemetry();
+              const cardEl = document.getElementById('adminCloudSubChiefCard');
+              const html = cardEl ? cardEl.innerHTML : '';
+              cardRenderedOk = Boolean(
+                html.includes('Bulut Alt Şefi Canlı Karnesi') &&
+                html.includes('Oturum Trafiği') &&
+                html.includes('1 MB Paket Sağlığı') &&
+                !/telemetri/i.test(html)
+              );
+            }
+          }
+
+          const cloudSubChiefOk = Boolean(
+            nextStats.readsCount >= prevStats.readsCount + 2 &&
+            nextStats.writesCount >= prevStats.writesCount + 1 &&
+            nextStats.savedWritesCount >= prevStats.savedWritesCount + 3 &&
+            nextStats.savedReadsCount >= prevStats.savedReadsCount + 1 &&
+            health.v2Migrated === true &&
+            health.v2WorkoutSigsCount >= 2 &&
+            health.v2CalendarDaySigsCount >= 3 &&
+            health.parentStateLimitPct < 20 &&
+            health.maxSingleWorkoutLimitPct < 5 &&
+            typeof reportText === 'string' &&
+            reportText.includes('CELIK KODU BULUT ALT SEFI DIAGNOSTIK RAPORU') &&
+            typeof copyCloudSubChiefReportToClipboard === 'function' &&
+            cardRenderedOk
+          );
+
+          clearKeys();
+          return { parityOk, scheduleCompactionOk, cloudSubChiefOk };
+        })()`, ctx);
+
+        const ok = Object.values(res).every(Boolean);
+        return { ok, actual: JSON.stringify(res) };
+      }
     }
   ];
 

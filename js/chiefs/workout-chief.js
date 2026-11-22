@@ -921,7 +921,9 @@
             };
             try {
                 localStorage.setItem(`celik_kodu_active_state_${uid}`, JSON.stringify(state));
-                if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(uid);
+                if (typeof window.scheduleUserStateCloudSync === 'function') {
+                    window.scheduleUserStateCloudSync(uid, { deferUntilWorkoutEnd: true });
+                }
             } catch(e) {}
         }
 
@@ -3426,6 +3428,7 @@
             if (!ok) return;
 
             localStorage.removeItem(`celik_kodu_active_state_${uid}`);
+            if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(uid);
             if (typeof workoutTimerInterval !== 'undefined') clearInterval(workoutTimerInterval);
             if (typeof timerInterval !== 'undefined') clearInterval(timerInterval);
             activeWorkoutSession = null;
@@ -3834,6 +3837,7 @@
 
             // Clear active workout session state
             localStorage.removeItem(`celik_kodu_active_state_${uid}`);
+            if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(uid);
             clearInterval(workoutTimerInterval);
             clearInterval(timerInterval);
             activeWorkoutSession = null;
@@ -3911,6 +3915,9 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                 const nowTs = Date.now();
                 if (schedule && typeof schedule === 'object') {
                     [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+                        if (typeof normalizeScheduleSlotSingleCopy === 'function' && schedule[d]) {
+                            schedule[d] = normalizeScheduleSlotSingleCopy(schedule[d]);
+                        }
                         const slot = schedule[d];
                         if (!slot || typeof slot !== 'object') return;
                         const prevSlot = prevSchedule && prevSchedule[d];
@@ -4465,8 +4472,7 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     type: 'custom_saved',
                     desc: `${exercisesList.length} Hareket • ${workoutObj.duration} Dk`,
                     rest: false,
-                    customWorkout: workoutObj,
-                    exercises: exercisesList
+                    customWorkout: workoutObj
                 };
                 saveWeeklySchedule(schedule);
 
@@ -4586,12 +4592,24 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
             if (planId.startsWith('celik_ai_day_') || /^[a-z]+_ai_day_/i.test(planId)) {
                 const slot = parseInt(planId.replace(/^[a-z]+_ai_day_/i, ''), 10);
                 const nextSched = typeof getNextWeeklySchedule === 'function' ? getNextWeeklySchedule() : null;
-                if (nextSched && nextSched[slot] && Array.isArray(nextSched[slot].exercises) && nextSched[slot].exercises.length > 0) {
-                    return normalizeWorkout(nextSched[slot]);
+                const nextSlot = nextSched && nextSched[slot];
+                if (nextSlot) {
+                    if (nextSlot.customWorkout && Array.isArray(nextSlot.customWorkout.exercises) && nextSlot.customWorkout.exercises.length > 0) {
+                        return normalizeWorkout(nextSlot.customWorkout);
+                    }
+                    if (Array.isArray(nextSlot.exercises) && nextSlot.exercises.length > 0) {
+                        return normalizeWorkout(nextSlot);
+                    }
                 }
                 const currSched = typeof getWeeklySchedule === 'function' ? getWeeklySchedule() : null;
-                if (currSched && currSched[slot] && Array.isArray(currSched[slot].exercises) && currSched[slot].exercises.length > 0) {
-                    return normalizeWorkout(currSched[slot]);
+                const currSlot = currSched && currSched[slot];
+                if (currSlot) {
+                    if (currSlot.customWorkout && Array.isArray(currSlot.customWorkout.exercises) && currSlot.customWorkout.exercises.length > 0) {
+                        return normalizeWorkout(currSlot.customWorkout);
+                    }
+                    if (Array.isArray(currSlot.exercises) && currSlot.exercises.length > 0) {
+                        return normalizeWorkout(currSlot);
+                    }
                 }
             }
 
@@ -5603,10 +5621,10 @@ Antrenman tüm setler, kilolar ve çalışan kas gruplarıyla günlüğe kaydedi
                     desc: `${updatedExercises.length} Hareket • ${updatedWorkout.duration || Math.round(updatedExercises.length * 7) || 45} Dk`,
                     rest: false,
                     customWorkout: updatedWorkout,
-                    exercises: updatedExercises,
                     aiMoveSummary: summaryObj,
                     updatedAt: nowTs
                 });
+                delete updatedPlanObj.exercises;
 
                 if (!moveMeta || !moveMeta.isCrossWeekMove) {
                     schedule[targetDayIdx] = updatedPlanObj;
@@ -5791,7 +5809,6 @@ KURALLAR:
                 time: sourcePlan.time || '18:30',
                 duration: movedWorkoutObj.duration || sourcePlan.duration || 45,
                 customWorkout: movedWorkoutObj,
-                exercises: srcExercises,
                 updatedAt: nowTs
             };
 
@@ -5833,7 +5850,6 @@ KURALLAR:
                     time: targetPlan.time || '18:30',
                     duration: swappedWorkoutObj.duration || targetPlan.duration || 45,
                     customWorkout: swappedWorkoutObj,
-                    exercises: tgtExercises,
                     updatedAt: nowTs
                 };
                 if (!isCrossWeekMove) {
@@ -6033,8 +6049,7 @@ KURALLAR:
                 type: 'custom_saved',
                 desc: `${exercisesList.length} Hareket • ${updatedWorkout.duration} Dk`,
                 rest: false,
-                customWorkout: updatedWorkout,
-                exercises: exercisesList
+                customWorkout: updatedWorkout
             };
 
             const todayDate = new Date();
@@ -6627,8 +6642,7 @@ KURALLAR:
                 type: workout.type || (workout.isCustom ? 'custom_saved' : 'custom_generated'),
                 desc: `${exercisesList.length} Hareket • ${details.duration || 45} Dk`,
                 rest: false,
-                customWorkout: JSON.parse(JSON.stringify(details)),
-                exercises: exercisesList
+                customWorkout: JSON.parse(JSON.stringify(details))
             };
 
             const resolvedTargetDateStr = resolveScheduleDateStr(dayIdx, dateStr || (dayIdx === todayIdx && targetWeek !== 'next' ? todayYMD : null), targetWeek === 'next' ? 1 : 0);
@@ -6964,8 +6978,7 @@ KURALLAR:
                     type: 'custom_saved',
                     desc: `${workout.exercises.length} Hareket • ${workout.duration || 45} Dk`,
                     rest: false,
-                    customWorkout: JSON.parse(JSON.stringify(workout)),
-                    exercises: workout.exercises
+                    customWorkout: JSON.parse(JSON.stringify(workout))
                 };
                 saveWeeklySchedule(schedule);
 
@@ -8568,10 +8581,16 @@ KURALLAR:
                     }
                 }
                 if (!cloned.updatedAt) cloned.updatedAt = Date.now();
-                overrides[dateStr] = cloned;
+                const normalizedSlot = (typeof slimStaleCalendarDayEntry === 'function')
+                    ? slimStaleCalendarDayEntry(dateStr, cloned)
+                    : cloned;
+                overrides[dateStr] = normalizedSlot;
             }
             try {
-                localStorage.setItem(`celik_kodu_date_schedule_${targetUid}`, JSON.stringify(overrides));
+                const finalOverrides = (typeof compactDateScheduleMap === 'function')
+                    ? compactDateScheduleMap(overrides).map
+                    : overrides;
+                localStorage.setItem(`celik_kodu_date_schedule_${targetUid}`, JSON.stringify(finalOverrides));
                 if (typeof window.scheduleUserStateCloudSync === 'function') window.scheduleUserStateCloudSync(targetUid);
             } catch(e) {}
         }
@@ -8679,8 +8698,7 @@ KURALLAR:
                 type: 'custom_saved',
                 desc: `${dirWorkout.exercises ? dirWorkout.exercises.length : 0} Hareket • ${dirWorkout.duration || 45} Dk`,
                 rest: false,
-                customWorkout: dirWorkout,
-                exercises: dirWorkout.exercises
+                customWorkout: dirWorkout
             };
             syncDayPlanToDateAndWeek(targetDay, activeSchedulingDateStr, newPlan, uid, typeof activePlannerWeek !== 'undefined' && activePlannerWeek === 'next');
             if (typeof renderActiveWorkout === 'function') renderActiveWorkout();

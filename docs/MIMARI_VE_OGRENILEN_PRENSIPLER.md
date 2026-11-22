@@ -77,3 +77,8 @@ Her anatomik hücre için üç durumdan biri geçerlidir:
    - Kartta sadece sade bir buton bulunur: `💡 Koç Tavsiyesi (4 Öneri) ▼ Göster`.
    - Kullanıcı dilediğinde tek dokunuşla açar (`▲ Gizle`) ve kapatır.
    - Aynı standart "🔬 Hangi Seans & Hareketten Geldi?" lineage dökümü için de geçerlidir.
+
+---
+
+## 5. Tek Belge 1 MB Sınırı & Artımlı Bulut Eşitleme
+- **Tek belge 1 MB kalıcı sınırı:** Büyüyen listeler (antrenman geçmişi, takvim günleri) tek belgede biriktirilmez, belge başına bölünür; yerel anahtarlar değişmez, yalnız eşitleme katmanı değişir.

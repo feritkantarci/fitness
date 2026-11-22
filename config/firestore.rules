@@ -40,6 +40,16 @@ rules_version = '2';
 //   - lastUpdatedBy: string | null (optional, <= 120 chars) - actor identifier
 //   - syncSeal: string (optional, 10..120 chars) - integrity seal
 //
+// Subcollection: workout_logs/{uid}/items/{logId}
+// Document ID: Safe workout log ID (1..128 chars)
+// Fields (<= 60 keys, zero secrets):
+//   - id: string (required, 1..128 chars)
+//   - deleted: bool (required)
+//   - updatedAt: number (required, >= 0)
+//   - exercises: list | null (optional, <= 100 items)
+//   - serverUpdatedAt: timestamp | null (optional)
+//   - syncSeal: string (optional, 10..120 chars)
+//
 // Collection: scale_logs/{uid} & measurement_logs/{uid}
 // Document ID: Athlete ID (^usr_[a-zA-Z0-9_-]{1,64}$)
 // Fields:
@@ -64,6 +74,18 @@ rules_version = '2';
 //   - aiCoachSummary, lastGeneratedWorkout, activeWorkoutDraft: map | null (optional, <= 100 keys)
 //   - updatedAt: timestamp | string | number | null (optional)
 //   - clientUpdatedAt: number (optional, >= 0)
+//   - syncSeal: string (optional, 10..120 chars)
+//
+// Subcollection: user_state/{uid}/days/{dateStr}
+// Document ID: Date string (^\d{4}-\d{2}-\d{2}$)
+// Fields (<= 40 keys, zero secrets):
+//   - date: string (required, must match {dateStr})
+//   - deleted: bool (required)
+//   - updatedAt: number (required, >= 0)
+//   - customWorkout: map | null (optional, <= 40 keys, zero secrets)
+//   - primarySubKeys: list | null (optional, <= 50 items)
+//   - extraCardioSessions: list | null (optional, <= 30 items)
+//   - serverUpdatedAt: timestamp | null (optional)
 //   - syncSeal: string (optional, 10..120 chars)
 //
 // Collection: coach_directives/{uid} & custom_programs/{uid}
@@ -358,6 +380,72 @@ service cloud.firestore {
           !('syncSeal' in data)
           || (data.syncSeal is string && data.syncSeal.size() >= 10 && data.syncSeal.size() <= 120)
         );
+    }
+
+    function isValidWorkoutLogItemPayload(data, logId) {
+      let secretKeys = ['password', 'passwordHash', 'salt', 'geminiApiKey', 'tredictToken', 'intervalsToken', 'accessToken', 'refreshToken'];
+      return data is map
+        && data.keys().size() <= 60
+        && !data.keys().hasAny(secretKeys)
+        && logId is string
+        && logId.size() >= 1
+        && logId.size() <= 128
+        && 'id' in data
+        && data.id is string
+        && data.id.size() >= 1
+        && data.id.size() <= 128
+        && 'deleted' in data
+        && data.deleted is bool
+        && 'updatedAt' in data
+        && (data.updatedAt is number && data.updatedAt >= 0)
+        && (
+          !('exercises' in data)
+          || data.exercises == null
+          || (data.exercises is list && data.exercises.size() <= 100)
+        )
+        && (
+          !('serverUpdatedAt' in data)
+          || data.serverUpdatedAt == null
+          || data.serverUpdatedAt is timestamp
+        )
+        && isValidOptionalSyncSeal(data);
+    }
+
+    function isValidCalendarDayItemPayload(data, dateStr) {
+      let secretKeys = ['password', 'passwordHash', 'salt', 'geminiApiKey', 'tredictToken', 'intervalsToken', 'accessToken', 'refreshToken'];
+      return data is map
+        && data.keys().size() <= 40
+        && !data.keys().hasAny(secretKeys)
+        && dateStr is string
+        && dateStr.matches('^\\d{4}-\\d{2}-\\d{2}$')
+        && 'date' in data
+        && data.date is string
+        && data.date == dateStr
+        && 'deleted' in data
+        && data.deleted is bool
+        && 'updatedAt' in data
+        && (data.updatedAt is number && data.updatedAt >= 0)
+        && (
+          !('customWorkout' in data)
+          || data.customWorkout == null
+          || (data.customWorkout is map && data.customWorkout.keys().size() <= 40 && !data.customWorkout.keys().hasAny(secretKeys))
+        )
+        && (
+          !('primarySubKeys' in data)
+          || data.primarySubKeys == null
+          || (data.primarySubKeys is list && data.primarySubKeys.size() <= 50)
+        )
+        && (
+          !('extraCardioSessions' in data)
+          || data.extraCardioSessions == null
+          || (data.extraCardioSessions is list && data.extraCardioSessions.size() <= 30)
+        )
+        && (
+          !('serverUpdatedAt' in data)
+          || data.serverUpdatedAt == null
+          || data.serverUpdatedAt is timestamp
+        )
+        && isValidOptionalSyncSeal(data);
     }
 
     function isValidMetricLogPayload(data) {
@@ -999,6 +1087,20 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Sporcu Antrenman Kayıtları Alt Koleksiyonu
+    match /workout_logs/{uid}/items/{logId} {
+      allow read: if (isOwner(uid) || isAdmin()) && isValidAthleteId(uid);
+      allow create: if (isOwner(uid) || isAdmin())
+        && isValidAthleteId(uid)
+        && isValidWorkoutLogItemPayload(request.resource.data, logId)
+        && isSealValidForCreate();
+      allow update: if (isOwner(uid) || isAdmin())
+        && isValidAthleteId(uid)
+        && isValidWorkoutLogItemPayload(request.resource.data, logId)
+        && isSealValidForWrite(uid);
+      allow delete: if isAdmin();
+    }
+
     // Vücut Kompozisyonu ve Tartı Geçmişi
     match /scale_logs/{uid} {
       allow read: if (isOwner(uid) || isAdmin()) && isValidAthleteId(uid);
@@ -1037,6 +1139,20 @@ service cloud.firestore {
       allow update: if (isOwner(uid) || isAdmin())
         && isValidAthleteId(uid)
         && isValidUserStatePayload(request.resource.data)
+        && isSealValidForWrite(uid);
+      allow delete: if isAdmin();
+    }
+
+    // Sporcu Takvim Günü Alt Koleksiyonu
+    match /user_state/{uid}/days/{dateStr} {
+      allow read: if (isOwner(uid) || isAdmin()) && isValidAthleteId(uid);
+      allow create: if (isOwner(uid) || isAdmin())
+        && isValidAthleteId(uid)
+        && isValidCalendarDayItemPayload(request.resource.data, dateStr)
+        && isSealValidForCreate();
+      allow update: if (isOwner(uid) || isAdmin())
+        && isValidAthleteId(uid)
+        && isValidCalendarDayItemPayload(request.resource.data, dateStr)
         && isSealValidForWrite(uid);
       allow delete: if isAdmin();
     }

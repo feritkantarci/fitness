@@ -3999,7 +3999,6 @@
                 desc: `${existingExercises.length} Hareket • ${customWorkout.duration} Dk`,
                 rest: false,
                 customWorkout: customWorkout,
-                exercises: customWorkout.exercises,
                 extraCardioSessions: preservedCardio,
                 updatedAt: nowTs
             };

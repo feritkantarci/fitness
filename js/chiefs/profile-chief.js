@@ -378,8 +378,17 @@
                 const cachedObj = cachedRaw ? JSON.parse(cachedRaw) : null;
                 const localVersion = Number(cachedObj?.version || 0);
                 if (cachedObj && Number(expectedVersion || 0) > 0 && localVersion >= Number(expectedVersion)) {
+                    notifyCloudSubChief('saved_read', 'master_catalog', 'Sürüm önbellekten karşılandı', 1);
                     loadCachedCloudMasterCatalogOnBoot();
                     return true;
+                }
+                if (Number(expectedVersion || 0) === 0 && cachedObj && localVersion > 0) {
+                    const lastCheckedAt = Number(localStorage.getItem('celik_kodu_cloud_master_catalog_checked_at') || 0);
+                    if (lastCheckedAt > 0 && (Date.now() - lastCheckedAt) < 24 * 3600 * 1000) {
+                        notifyCloudSubChief('saved_read', 'master_catalog', '24saat önbellekten karşılandı', 1);
+                        loadCachedCloudMasterCatalogOnBoot();
+                        return true;
+                    }
                 }
 
                 let cloudPayload = null;
@@ -405,6 +414,7 @@
                 }
 
                 if (cloudPayload && applyCloudMasterCatalogPayload(cloudPayload, true)) {
+                    try { localStorage.setItem('celik_kodu_cloud_master_catalog_checked_at', String(Date.now())); } catch {}
                     if (typeof updateLibrarySubTabButtons === 'function') updateLibrarySubTabButtons();
                     if (typeof document !== 'undefined') {
                         const isLibActive = document.getElementById('libraryTab')?.classList.contains('active');
@@ -539,7 +549,7 @@
             try {
                 const ver = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAppVersion === 'function')
                     ? window.CelikKaraKutu.getAppVersion()
-                    : 'v355';
+                    : 'v356';
                 const keys = payload && typeof payload === 'object' ? Object.keys(payload) : [];
                 const undefKeys = [];
                 const overLimit = [];
@@ -580,7 +590,66 @@
         }
 
         let _firestoreQuotaExhaustedUntil = 0;
+        let _firestoreCircuitReason = 'quota';
+        let _firestoreSlowStreak = 0;
         const _lastCloudWritePayloadSig = {};
+
+        function notifyCloudSubChief(kind, target, detail, count = 1) {
+            try {
+                if (typeof window !== 'undefined' && window.CelikLiaisonSubChiefs && typeof window.CelikLiaisonSubChiefs.noteCloudSubChiefEvent === 'function') {
+                    window.CelikLiaisonSubChiefs.noteCloudSubChiefEvent(kind, target, detail, count);
+                }
+            } catch {}
+        }
+
+        function getCloudCircuitDiagnosticState() {
+            const nowMs = Date.now();
+            const isOpen = nowMs < _firestoreQuotaExhaustedUntil;
+            return {
+                isOpen,
+                reason: isOpen ? _firestoreCircuitReason : '',
+                remainingMs: isOpen ? Math.max(0, _firestoreQuotaExhaustedUntil - nowMs) : 0,
+                slowStreak: _firestoreSlowStreak,
+                badgeText: isOpen ? getFirestoreCircuitBadgeText() : 'Bulut Aktif',
+                lastIssue: typeof _cloudSyncLastIssue !== 'undefined' ? _cloudSyncLastIssue : null
+            };
+        }
+        if (typeof window !== 'undefined') {
+            window.getCloudCircuitDiagnosticState = getCloudCircuitDiagnosticState;
+        }
+
+        function getFirestoreCircuitBadgeText() {
+            return _firestoreCircuitReason === 'slow'
+                ? 'Bulut Yavaş (Yerel Aktif)'
+                : 'Bulut Kotası Doldu (Yerel Aktif)';
+        }
+
+        function noteFirestoreSuccess() {
+            _firestoreSlowStreak = 0;
+        }
+
+        function noteFirestoreTimeout() {
+            _firestoreSlowStreak++;
+            notifyCloudSubChief('timeout', 'firestore', '2.2sn zaman aşımı', 1);
+            if (_firestoreSlowStreak >= 3 && !isFirestoreQuotaCircuitOpen()) {
+                _firestoreCircuitReason = 'slow';
+                _firestoreQuotaExhaustedUntil = Date.now() + 5 * 60 * 1000;
+                updateCloudSyncBadge('offline', getFirestoreCircuitBadgeText());
+            }
+        }
+
+        function markCloudDocPendingAfterLateFailure(colName, uid) {
+            try {
+                if (colName === 'workout_logs') {
+                    localStorage.setItem(`celik_kodu_pending_workout_sync_${uid}`, '1');
+                } else if (colName === 'user_state') {
+                    localStorage.setItem(`celik_kodu_pending_state_sync_${uid}`, '1');
+                } else if (colName === 'system_telemetry') {
+                    localStorage.setItem(`celik_kodu_pending_telemetry_sync_${uid}`, '1');
+                }
+            } catch {}
+            delete _lastCloudWritePayloadSig[`${colName}:${uid}`];
+        }
 
         function isFirestoreQuotaError(err) {
             if (!err) return false;
@@ -595,8 +664,10 @@
 
         function tripFirestoreQuotaCircuitIfNeeded(err) {
             if (isFirestoreQuotaError(err)) {
+                _firestoreCircuitReason = 'quota';
                 _firestoreQuotaExhaustedUntil = Date.now() + 15 * 60 * 1000;
-                updateCloudSyncBadge('offline', 'Bulut Kotası Doldu (Yerel Aktif)');
+                notifyCloudSubChief('quota', 'bulut_kotasi', '15dk kota koruma devrede', 1);
+                updateCloudSyncBadge('offline', getFirestoreCircuitBadgeText());
                 return true;
             }
             return false;
@@ -605,7 +676,7 @@
         async function writeAthleteDocWithSealHeal(colName, uid, buildPayloadFn) {
             if (isFirestoreQuotaCircuitOpen()) {
                 const qErr = new Error('Firestore quota circuit open');
-                qErr.code = 'resource-exhausted';
+                qErr.code = 'circuit-open';
                 qErr._k4Recorded = true;
                 throw qErr;
             }
@@ -617,13 +688,23 @@
             let lastPayload = buildPayloadFn(firstSeal);
             try {
                 // Tam şema yazımı ({ merge: true } yerine): garminManifests gibi iç haritalarda budanan eski anahtarların bulutta da silinmesini sağlar
-                const writeRes = await withAuthTimeout(docRef.set(lastPayload), 2200, '__FIRESTORE_TIMEOUT__');
+                const writePromise = docRef.set(lastPayload);
+                const writeRes = await withAuthTimeout(writePromise, 2200, '__FIRESTORE_TIMEOUT__');
                 if (writeRes === '__FIRESTORE_TIMEOUT__') {
-                    const tErr = new Error('Firestore write timeout (quota/backoff)');
-                    tErr.code = 'resource-exhausted';
-                    tripFirestoreQuotaCircuitIfNeeded(tErr);
-                    throw tErr;
+                    notifyCloudSubChief('timeout', colName, 'Yazım arka plan kuyruğuna alındı', 1);
+                    writePromise
+                        .then(() => {
+                            noteFirestoreSuccess();
+                            if (!IS_LOCAL_DEV && !isTelCol) clearResolvedCloudErrors(colName, uid);
+                        })
+                        .catch(lateErr => {
+                            tripFirestoreQuotaCircuitIfNeeded(lateErr);
+                            markCloudDocPendingAfterLateFailure(colName, uid);
+                        });
+                    return 'queued';
                 }
+                noteFirestoreSuccess();
+                notifyCloudSubChief('write', colName, 'Ana paket yazımı', 1);
                 if (!IS_LOCAL_DEV && !isTelCol) clearResolvedCloudErrors(colName, uid);
                 return true;
             } catch (err) {
@@ -642,13 +723,21 @@
                             attemptLabel = 'MühürYenileme';
                             usedSeal = remoteSeal;
                             lastPayload = buildPayloadFn(usedSeal);
-                            const retryRes = await withAuthTimeout(docRef.set(lastPayload), 2200, '__FIRESTORE_TIMEOUT__');
+                            const retryPromise = docRef.set(lastPayload);
+                            const retryRes = await withAuthTimeout(retryPromise, 2200, '__FIRESTORE_TIMEOUT__');
                             if (retryRes === '__FIRESTORE_TIMEOUT__') {
-                                const tErr = new Error('Firestore retry write timeout (quota/backoff)');
-                                tErr.code = 'resource-exhausted';
-                                tripFirestoreQuotaCircuitIfNeeded(tErr);
-                                throw tErr;
+                                retryPromise
+                                    .then(() => {
+                                        noteFirestoreSuccess();
+                                        if (!IS_LOCAL_DEV && !isTelCol) clearResolvedCloudErrors(colName, uid);
+                                    })
+                                    .catch(lateErr => {
+                                        tripFirestoreQuotaCircuitIfNeeded(lateErr);
+                                        markCloudDocPendingAfterLateFailure(colName, uid);
+                                    });
+                                return 'queued';
                             }
+                            noteFirestoreSuccess();
                             if (!IS_LOCAL_DEV && !isTelCol) {
                                 clearResolvedCloudErrors(colName, uid);
                                 recordCloudGateTelemetry('warn', `${colName} Mühür Onarımı`, uid, 'Bulut mühür uyuşmazlığı otomatik onarıldı', uid);
@@ -672,6 +761,88 @@
             }
         }
 
+        function toSafeCloudSubDocId(rawId) {
+            const s = String(rawId || '').trim().replace(/[\/\\]/g, '_').slice(0, 128);
+            return (!s || s === '.' || s === '..') ? '' : s;
+        }
+
+        async function writeAthleteSubDocWithSealHeal(parentColName, uid, subColName, subDocId, buildPayloadFn) {
+            if (isFirestoreQuotaCircuitOpen()) {
+                const qErr = new Error('Firestore quota circuit open');
+                qErr.code = 'circuit-open';
+                qErr._k4Recorded = true;
+                throw qErr;
+            }
+            const safeSubId = toSafeCloudSubDocId(subDocId);
+            if (!safeSubId) throw new Error('Invalid subdocument id');
+            const parentRef = fbDb.collection(parentColName).doc(uid);
+            const subDocRef = parentRef.collection(subColName).doc(safeSubId);
+            const firstSeal = getAthleteCloudSeal(uid, parentColName);
+            let usedSeal = firstSeal;
+            let lastPayload = buildPayloadFn(firstSeal);
+            try {
+                const writePromise = subDocRef.set(lastPayload);
+                const writeRes = await withAuthTimeout(writePromise, 2200, '__FIRESTORE_TIMEOUT__');
+                if (writeRes === '__FIRESTORE_TIMEOUT__') {
+                    notifyCloudSubChief('timeout', `${parentColName}/${subColName}`, String(safeSubId), 1);
+                    writePromise
+                        .then(() => {
+                            noteFirestoreSuccess();
+                            if (!IS_LOCAL_DEV) clearResolvedCloudErrors(parentColName, uid);
+                        })
+                        .catch(lateErr => {
+                            tripFirestoreQuotaCircuitIfNeeded(lateErr);
+                            markCloudDocPendingAfterLateFailure(parentColName, uid);
+                        });
+                    return 'queued';
+                }
+                noteFirestoreSuccess();
+                notifyCloudSubChief('write', `${parentColName}/${subColName}`, String(safeSubId), 1);
+                if (!IS_LOCAL_DEV) clearResolvedCloudErrors(parentColName, uid);
+                return true;
+            } catch (err) {
+                if (tripFirestoreQuotaCircuitIfNeeded(err)) {
+                    if (err && typeof err === 'object') err._k4Recorded = true;
+                    throw err;
+                }
+                const isPermErr = err && (err.code === 'permission-denied' || /permission|insufficient/i.test(String(err.message || '')));
+                if (isPermErr) {
+                    try {
+                        const snap = await fetchCloudDocPreferServer(parentRef);
+                        const snapData = (snap && snap.exists && typeof snap.data === 'function') ? (snap.data() || {}) : null;
+                        const remoteSeal = snapData ? adoptCloudSyncSealIfPresent(parentColName, uid, snapData) : '';
+                        if (remoteSeal && remoteSeal !== firstSeal) {
+                            usedSeal = remoteSeal;
+                            lastPayload = buildPayloadFn(usedSeal);
+                            const retryPromise = subDocRef.set(lastPayload);
+                            const retryRes = await withAuthTimeout(retryPromise, 2200, '__FIRESTORE_TIMEOUT__');
+                            if (retryRes === '__FIRESTORE_TIMEOUT__') {
+                                retryPromise
+                                    .then(() => {
+                                        noteFirestoreSuccess();
+                                        if (!IS_LOCAL_DEV) clearResolvedCloudErrors(parentColName, uid);
+                                    })
+                                    .catch(lateErr => {
+                                        tripFirestoreQuotaCircuitIfNeeded(lateErr);
+                                        markCloudDocPendingAfterLateFailure(parentColName, uid);
+                                    });
+                                return 'queued';
+                            }
+                            noteFirestoreSuccess();
+                            if (!IS_LOCAL_DEV) {
+                                clearResolvedCloudErrors(parentColName, uid);
+                            }
+                            return true;
+                        }
+                    } catch (healErr) {
+                        tripFirestoreQuotaCircuitIfNeeded(healErr);
+                        err = healErr;
+                    }
+                }
+                throw err;
+            }
+        }
+
         function markLocalUserStateModified(targetUid) {
             const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
             if (!uid) return;
@@ -684,6 +855,9 @@
         }
 
         const systemTelemetrySyncTimers = {};
+        const systemTelemetryLastWriteAt = {};
+        const TELEMETRY_SYNC_DEBOUNCE_MS = 30000;
+        const TELEMETRY_SYNC_MIN_GAP_MS = 60000;
 
         async function syncSystemTelemetryToCloud(targetUid) {
             const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
@@ -703,6 +877,22 @@
                     if (ev && ev.severity === 'error') openErrorCount++;
                     else openWarnCount++;
                 });
+
+                const telSigKey = `system_telemetry:${uid}`;
+                let telSig = '';
+                try {
+                    telSig = JSON.stringify({
+                        e: cleanEvents.map(ev => ev && [ev.id, ev.severity, ev.status, ev.gate, ev.module, ev.action, ev.outcome]),
+                        openErrorCount,
+                        openWarnCount
+                    });
+                } catch {}
+                if (telSig && _lastCloudWritePayloadSig[telSigKey] === telSig) {
+                    notifyCloudSubChief('saved_write', 'system_telemetry', 'Değişmeyen kayıt yazımı önlendi', 1);
+                    try { localStorage.removeItem(`celik_kodu_pending_telemetry_sync_${uid}`); } catch {}
+                    return true;
+                }
+
                 const users = typeof getAuthUsers === 'function' ? getAuthUsers() : [];
                 const uObj = users.find(u => u && u.id === uid);
                 const userName = String((uObj && (uObj.name || uObj.username)) || (cleanEvents[0] && cleanEvents[0].userName) || uid).slice(0, 120);
@@ -717,6 +907,8 @@
                     syncSeal: seal,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }));
+                if (telSig) _lastCloudWritePayloadSig[telSigKey] = telSig;
+                systemTelemetryLastWriteAt[uid] = Date.now();
                 try { localStorage.removeItem(`celik_kodu_pending_telemetry_sync_${uid}`); } catch {}
                 return true;
             } catch {
@@ -729,32 +921,41 @@
             const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
             if (!uid || !/^usr_[a-zA-Z0-9_-]{1,64}$/.test(uid)) return;
             if (IS_LOCAL_DEV) return;
+            try { localStorage.setItem(`celik_kodu_pending_telemetry_sync_${uid}`, '1'); } catch {}
             if (!isFirebaseReady || !fbDb || (typeof navigator !== 'undefined' && navigator.onLine === false)) {
-                try { localStorage.setItem(`celik_kodu_pending_telemetry_sync_${uid}`, '1'); } catch {}
                 return;
             }
             if (systemTelemetrySyncTimers[uid]) clearTimeout(systemTelemetrySyncTimers[uid]);
+            const waitForGap = (systemTelemetryLastWriteAt[uid] || 0) + TELEMETRY_SYNC_MIN_GAP_MS - Date.now();
+            const delayMs = Math.max(TELEMETRY_SYNC_DEBOUNCE_MS, waitForGap);
             systemTelemetrySyncTimers[uid] = setTimeout(() => {
                 syncSystemTelemetryToCloud(uid);
-            }, 1500);
+            }, delayMs);
         }
 
-        async function fetchAllCloudSystemTelemetryForAdmin() {
+        let _lastAdminTelemetryFetchAt = 0;
+
+        async function fetchAllCloudSystemTelemetryForAdmin(options = {}) {
+            const opts = options && typeof options === 'object' ? options : {};
             const session = typeof getSession === 'function' ? getSession() : null;
             if (typeof isVerifiedAdminSession === 'function' ? !isVerifiedAdminSession(session) : (!session || session.role !== 'admin' || session.authVerified !== true)) return false;
             if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || isFirestoreQuotaCircuitOpen() || (typeof navigator !== 'undefined' && navigator.onLine === false)) return false;
             if (typeof window === 'undefined' || !window.CelikKaraKutu) return false;
+            if (!opts.force && (Date.now() - _lastAdminTelemetryFetchAt) < 60000) {
+                notifyCloudSubChief('saved_read', 'system_telemetry', 'Yönetici izleme önbellekten açıldı', 1);
+                updateAdminPendingBadges();
+                return true;
+            }
 
             try {
                 const docEntries = [];
                 try {
                     const snap = await withAuthTimeout(fbDb.collection('system_telemetry').get(), 2200, '__FIRESTORE_TIMEOUT__');
                     if (snap === '__FIRESTORE_TIMEOUT__') {
-                        const tErr = new Error('Firestore admin telemetry read timeout');
-                        tErr.code = 'resource-exhausted';
-                        tripFirestoreQuotaCircuitIfNeeded(tErr);
+                        noteFirestoreTimeout();
                         return false;
                     }
+                    if (snap) _lastAdminTelemetryFetchAt = Date.now();
                     if (snap && typeof snap.forEach === 'function') {
                         snap.forEach(doc => {
                             if (doc && doc.exists) docEntries.push({ id: doc.id, data: doc.data() || {} });
@@ -826,7 +1027,13 @@
                     const logs = getUserLogsById(uid);
                     if (logs.length > 0) await syncWorkoutLogsToCloud(logs, uid);
                 }
-                if (localStorage.getItem(`celik_kodu_pending_state_sync_${uid}`) === '1') {
+                if (
+                    localStorage.getItem(`celik_kodu_pending_state_sync_${uid}`) === '1' ||
+                    (
+                        localStorage.getItem(`celik_kodu_deferred_state_sync_${uid}`) === '1' &&
+                        !localStorage.getItem(`celik_kodu_active_state_${uid}`)
+                    )
+                ) {
                     await syncUserStateToCloud(uid);
                 }
                 if (localStorage.getItem(`celik_kodu_pending_telemetry_sync_${uid}`) === '1' && !isFirestoreQuotaCircuitOpen()) {
@@ -1000,7 +1207,7 @@
                     const txt = headerBadge ? String(headerBadge.textContent || '').trim() : '';
                     if (txt && !/bağlanıyor|eşitleniyor/i.test(txt)) return;
                     if (isFirestoreQuotaCircuitOpen()) {
-                        updateCloudSyncBadge('offline', 'Bulut Kotası Doldu (Yerel Aktif)');
+                        updateCloudSyncBadge('offline', getFirestoreCircuitBadgeText());
                     } else if (typeof navigator !== 'undefined' && navigator.onLine === false) {
                         updateCloudSyncBadge('offline', 'Çevrimdışı (Yerel Aktif)');
                     } else if (fbAuth && fbAuth.currentUser) {
@@ -1081,17 +1288,19 @@
             if (!docRef || typeof docRef.get !== 'function') return null;
             if (isFirestoreQuotaCircuitOpen()) {
                 const qErr = new Error('Firestore quota circuit open');
-                qErr.code = 'resource-exhausted';
+                qErr.code = 'circuit-open';
                 throw qErr;
             }
             try {
                 const res = await withAuthTimeout(docRef.get(), 2200, '__FIRESTORE_TIMEOUT__');
                 if (res === '__FIRESTORE_TIMEOUT__') {
-                    const tErr = new Error('Firestore quota/backoff timeout');
-                    tErr.code = 'resource-exhausted';
-                    tripFirestoreQuotaCircuitIfNeeded(tErr);
+                    noteFirestoreTimeout();
+                    const tErr = new Error('Firestore read timeout');
+                    tErr.code = 'deadline-exceeded';
                     throw tErr;
                 }
+                noteFirestoreSuccess();
+                notifyCloudSubChief('read', 'belge_okuma', (docRef && docRef.path) ? String(docRef.path) : 'Sunucu okuma', 1);
                 return res;
             } catch (e) {
                 tripFirestoreQuotaCircuitIfNeeded(e);
@@ -1212,6 +1421,44 @@
             return idx === -1 ? clean : users[idx];
         }
 
+        const _userRoleDocCache = { uid: null, data: undefined, at: 0, promise: null };
+
+        async function getUserRoleDocCached(fbUid, maxAgeMs = 600000) {
+            if (!fbUid || !isFirebaseReady || !fbDb) return null;
+            if (
+                _userRoleDocCache.uid === fbUid &&
+                _userRoleDocCache.data !== undefined &&
+                (Date.now() - _userRoleDocCache.at) < maxAgeMs
+            ) {
+                notifyCloudSubChief('saved_read', 'user_roles', '10dk rol önbelleği', 1);
+                return _userRoleDocCache.data;
+            }
+            if (_userRoleDocCache.promise && _userRoleDocCache.uid === fbUid) {
+                return _userRoleDocCache.promise;
+            }
+            if (_userRoleDocCache.uid !== fbUid) {
+                _userRoleDocCache.uid = fbUid;
+                _userRoleDocCache.data = undefined;
+                _userRoleDocCache.at = 0;
+            }
+            const p = (async () => {
+                const snap = await fetchCloudDocPreferServer(fbDb.collection('user_roles').doc(fbUid));
+                const data = (snap && snap.exists) ? (snap.data() || null) : null;
+                _userRoleDocCache.uid = fbUid;
+                _userRoleDocCache.data = data;
+                _userRoleDocCache.at = Date.now();
+                return data;
+            })();
+            _userRoleDocCache.promise = p;
+            try {
+                return await p;
+            } finally {
+                if (_userRoleDocCache.promise === p) {
+                    _userRoleDocCache.promise = null;
+                }
+            }
+        }
+
         async function syncOwnUserProfileFromCloud(fbUserOverride) {
             if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || isFirestoreQuotaCircuitOpen()) return null;
             const fbUser = fbUserOverride || (typeof fbAuth !== 'undefined' && fbAuth ? fbAuth.currentUser : null);
@@ -1224,8 +1471,7 @@
                     if (profSnap && profSnap.exists) cloudProfile = profSnap.data() || null;
                 } catch {}
                 try {
-                    const roleSnap = await fetchCloudDocPreferServer(fbDb.collection('user_roles').doc(fbUser.uid));
-                    if (roleSnap && roleSnap.exists) cloudRoleDoc = roleSnap.data() || null;
+                    cloudRoleDoc = await getUserRoleDocCached(fbUser.uid);
                 } catch {}
                 if (!cloudProfile && !cloudRoleDoc) return null;
 
@@ -1294,7 +1540,7 @@
             }
             if (!isFirebaseReady || !fbDb) return;
             if (isFirestoreQuotaCircuitOpen()) {
-                updateCloudSyncBadge('offline', 'Bulut Kotası Doldu (Yerel Aktif)');
+                updateCloudSyncBadge('offline', getFirestoreCircuitBadgeText());
                 return;
             }
             _cloudSyncLastIssue = null;
@@ -1346,11 +1592,14 @@
                 if (uid && !isFirestoreQuotaCircuitOpen()) {
                     await syncUserMeasurementsFromCloud(uid);
                     await syncUserStateFromCloud(uid);
+                    if (isSubcollectionMigrationEnabledForUser(uid)) {
+                        await migrateLegacyAthleteDocsToSubcollections(uid);
+                    }
                 }
 
                 const hasPendingWorkout = Boolean(uid && localStorage.getItem(`celik_kodu_pending_workout_sync_${uid}`) === '1');
                 if (isFirestoreQuotaCircuitOpen()) {
-                    updateCloudSyncBadge('offline', 'Bulut Kotası Doldu (Yerel Aktif)');
+                    updateCloudSyncBadge('offline', getFirestoreCircuitBadgeText());
                 } else if (_cloudSyncLastIssue === 'auth-required') {
                     updateCloudSyncBadge('auth-required', 'Bulut Girişi Gerekli');
                 } else if (_cloudSyncLastIssue === 'permission-denied') {
@@ -1367,7 +1616,7 @@
                 const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
                 const authMissing = Boolean(!IS_LOCAL_DEV && typeof fbAuth !== 'undefined' && fbAuth && !fbAuth.currentUser);
                 if (isFirestoreQuotaCircuitOpen()) {
-                    updateCloudSyncBadge('offline', 'Bulut Kotası Doldu (Yerel Aktif)');
+                    updateCloudSyncBadge('offline', getFirestoreCircuitBadgeText());
                 } else if (authMissing) {
                     updateCloudSyncBadge('auth-required', 'Bulut Girişi Gerekli');
                 } else if (offline) {
@@ -1649,6 +1898,200 @@
             };
         }
 
+        const WORKOUT_CLOUD_PULL_AT_PREFIX = 'celik_kodu_cloud_pull_at_workout_';
+        const WORKOUT_CLOUD_ITEM_SIGS_PREFIX = 'celik_kodu_cloud_item_sigs_workout_';
+
+        function readCloudItemSigMap(storageKey) {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(storageKey) || '{}');
+                return (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : {};
+            } catch {
+                return {};
+            }
+        }
+
+        function writeCloudItemSigMap(storageKey, sigMap, maxKeys = 600) {
+            try {
+                const entries = Object.entries(sigMap && typeof sigMap === 'object' ? sigMap : {});
+                const trimmed = entries.length > maxKeys ? Object.fromEntries(entries.slice(-maxKeys)) : sigMap;
+                localStorage.setItem(storageKey, JSON.stringify(trimmed));
+            } catch {}
+        }
+
+        function readWorkoutCloudItemSigs(uid) {
+            return readCloudItemSigMap(WORKOUT_CLOUD_ITEM_SIGS_PREFIX + uid);
+        }
+
+        function writeWorkoutCloudItemSigs(uid, sigMap) {
+            writeCloudItemSigMap(WORKOUT_CLOUD_ITEM_SIGS_PREFIX + uid, sigMap, 600);
+        }
+
+        function stripWorkoutLogCloudEnvelope(rawLog) {
+            if (!rawLog || typeof rawLog !== 'object' || Array.isArray(rawLog)) return null;
+            const copy = Object.assign({}, rawLog);
+            delete copy.deleted;
+            delete copy.syncSeal;
+            delete copy.serverUpdatedAt;
+            delete copy.clientUpdatedAt;
+            delete copy.updatedAt;
+            Object.keys(copy).forEach(k => { if (copy[k] === undefined) delete copy[k]; });
+            return copy;
+        }
+
+        function computeCanonicalWorkoutLogSig(logObj) {
+            const clean = stripWorkoutLogCloudEnvelope(logObj);
+            if (!clean) return '';
+            try { return JSON.stringify(clean); } catch { return ''; }
+        }
+
+        function computeWorkoutLogsCloudDiff(logs, uid) {
+            let cleanLogs = [];
+            try {
+                cleanLogs = JSON.parse(JSON.stringify(Array.isArray(logs) ? logs : []));
+            } catch {
+                cleanLogs = Array.isArray(logs) ? logs : [];
+            }
+            const knownSigs = readWorkoutCloudItemSigs(uid);
+            const deletedIds = typeof getDeletedWorkoutLogIds === 'function' ? getDeletedWorkoutLogIds(uid) : [];
+            const activeDocIds = new Set();
+            const upserts = [];
+            let unchangedCount = 0;
+
+            for (const log of cleanLogs) {
+                if (!log || !log.id) continue;
+                const docId = toSafeCloudSubDocId(log.id);
+                if (!docId) continue;
+                activeDocIds.add(docId);
+                const sig = computeCanonicalWorkoutLogSig(log);
+                if (sig && knownSigs[docId] === sig) {
+                    unchangedCount++;
+                } else {
+                    const ts = Math.max(Date.now(), Number(log.userEditedAt || log.updatedAt || log.timestamp || 0));
+                    const envelope = stripWorkoutLogCloudEnvelope(log) || {};
+                    upserts.push({
+                        docId,
+                        logId: String(log.id),
+                        sig,
+                        payload: Object.assign({}, envelope, { id: String(log.id), updatedAt: ts, deleted: false })
+                    });
+                }
+            }
+
+            const tombstones = [];
+            for (const rawDelId of deletedIds) {
+                const docId = toSafeCloudSubDocId(rawDelId);
+                if (!docId || activeDocIds.has(docId)) continue;
+                if (knownSigs[docId] === '__DELETED__') continue;
+                tombstones.push({
+                    docId,
+                    logId: String(rawDelId),
+                    sig: '__DELETED__',
+                    payload: { id: String(rawDelId), deleted: true, updatedAt: Date.now() }
+                });
+            }
+
+            return { upserts, tombstones, unchangedCount, cleanLogs };
+        }
+
+        function applyIncrementalWorkoutItemsFromCloud(uid, itemDocs, options = {}) {
+            const docs = Array.isArray(itemDocs) ? itemDocs : [];
+            const knownSigs = readWorkoutCloudItemSigs(uid);
+            const incomingLogs = [];
+            let appliedDeletions = 0;
+            let maxUpdatedAt = Number(localStorage.getItem(WORKOUT_CLOUD_PULL_AT_PREFIX + uid) || 0);
+
+            for (const entry of docs) {
+                const data = (entry && entry.data && typeof entry.data === 'object')
+                    ? entry.data
+                    : (entry && typeof entry === 'object' ? entry : null);
+                if (!data) continue;
+                const rawId = String(data.id || (entry && entry.id) || '').trim();
+                const docId = toSafeCloudSubDocId(rawId);
+                if (!docId) continue;
+                const itemTs = Number(data.updatedAt || data.clientUpdatedAt || 0);
+                if (itemTs > maxUpdatedAt) maxUpdatedAt = itemTs;
+
+                if (data.deleted === true) {
+                    if (typeof markWorkoutLogDeleted === 'function') {
+                        markWorkoutLogDeleted(uid, { id: rawId, garminActivityId: data.garminActivityId });
+                    }
+                    knownSigs[docId] = '__DELETED__';
+                    appliedDeletions++;
+                } else {
+                    const cleanLog = stripWorkoutLogCloudEnvelope(Object.assign({}, data, { id: rawId }));
+                    if (cleanLog && cleanLog.id) {
+                        incomingLogs.push(cleanLog);
+                        knownSigs[docId] = computeCanonicalWorkoutLogSig(cleanLog);
+                    }
+                }
+            }
+
+            const localLogs = getUserLogsById(uid);
+            const { mergedLogs, filteredCloudDeletion } = mergeWorkoutLogCollections(localLogs, incomingLogs, uid);
+            let normalizedCloudLogs = false;
+            if (typeof window.recalculateWorkoutLogMetrics === 'function') {
+                mergedLogs.forEach(logItem => {
+                    const rec = window.recalculateWorkoutLogMetrics(logItem);
+                    if (rec && rec.unitCorruptionFixed) normalizedCloudLogs = true;
+                });
+            }
+
+            if (!normalizedCloudLogs) {
+                const incomingIdSet = new Set(incomingLogs.map(l => toSafeCloudSubDocId(l.id)));
+                mergedLogs.forEach(m => {
+                    const docId = m && m.id ? toSafeCloudSubDocId(m.id) : '';
+                    if (docId && incomingIdSet.has(docId)) {
+                        knownSigs[docId] = computeCanonicalWorkoutLogSig(m);
+                    }
+                });
+            }
+
+            if (mergedLogs.length > 0 || appliedDeletions > 0 || filteredCloudDeletion) {
+                localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(mergedLogs));
+            }
+            writeWorkoutCloudItemSigs(uid, knownSigs);
+            const nextPullAt = Math.max(maxUpdatedAt, Date.now());
+            try { localStorage.setItem(WORKOUT_CLOUD_PULL_AT_PREFIX + uid, String(nextPullAt)); } catch {}
+
+            return {
+                mergedLogs,
+                appliedUpserts: incomingLogs.length,
+                appliedDeletions,
+                nextPullAt,
+                filteredCloudDeletion,
+                normalizedCloudLogs
+            };
+        }
+
+        function refreshWorkoutHistoryUIAfterCloudSync(uid, mergedLogs, isFromRealtimeSnapshot) {
+            if (typeof window !== 'undefined') window._initialWorkoutLogsCloudSyncDone = true;
+            if (window.GarminTredictChief && typeof window.GarminTredictChief.syncWatchTitlesFromWorkoutLogs === 'function') {
+                window.GarminTredictChief.syncWatchTitlesFromWorkoutLogs(mergedLogs, uid);
+            }
+            if (!isFromRealtimeSnapshot && window.GarminTredictChief && typeof window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs === 'function') {
+                window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs();
+            }
+            if (typeof renderHistory === 'function') renderHistory();
+            if (window.GarminTredictChief && typeof window.GarminTredictChief.renderHistoryGarminSyncPanel === 'function') {
+                window.GarminTredictChief.renderHistoryGarminSyncPanel();
+            }
+            applyWednesdayHammerCurlPatch();
+        }
+
+        function attachLegacyWorkoutLogsRealtimeListener(uid) {
+            const docRef = fbDb.collection('workout_logs').doc(uid);
+            if (typeof docRef.onSnapshot !== 'function') return;
+            workoutLogsRealtimeUnsub = docRef.onSnapshot((snap) => {
+                if (!snap || !snap.exists) return;
+                if (snap.metadata && (snap.metadata.hasPendingWrites || snap.metadata.fromCache)) return;
+                const data = snap.data() || {};
+                if (!Array.isArray(data.logs)) return;
+                syncUserWorkoutLogsFromCloud(uid, { snapshotLogs: data.logs, snapshotData: data });
+            }, (err) => {
+                console.warn("Antrenman canlı dinleyicisi geçici olarak durakladı:", err);
+            });
+        }
+
         function ensureWorkoutLogsRealtimeListener(uid) {
             if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || !uid) return;
             if (workoutLogsRealtimeUid === uid && typeof workoutLogsRealtimeUnsub === 'function') return;
@@ -1659,16 +2102,33 @@
             workoutLogsRealtimeUid = uid;
             try {
                 const docRef = fbDb.collection('workout_logs').doc(uid);
-                if (typeof docRef.onSnapshot !== 'function') return;
-                workoutLogsRealtimeUnsub = docRef.onSnapshot((snap) => {
-                    if (!snap || !snap.exists) return;
-                    if (snap.metadata && (snap.metadata.hasPendingWrites || snap.metadata.fromCache)) return;
-                    const data = snap.data() || {};
-                    if (!Array.isArray(data.logs)) return;
-                    syncUserWorkoutLogsFromCloud(uid, { snapshotLogs: data.logs, snapshotData: data });
-                }, (err) => {
-                    console.warn("Antrenman canlı dinleyicisi geçici olarak durakladı:", err);
-                });
+                const hasV2PullTs = Number(localStorage.getItem(WORKOUT_CLOUD_PULL_AT_PREFIX + uid) || 0) > 0;
+                if (typeof docRef.collection === 'function') {
+                    const itemsQuery = docRef.collection('items').where('updatedAt', '>', Date.now() - 5000);
+                    if (typeof itemsQuery.onSnapshot === 'function') {
+                        workoutLogsRealtimeUnsub = itemsQuery.onSnapshot((snap) => {
+                            if (!snap || !Array.isArray(snap.docs)) return;
+                            if (snap.metadata && (snap.metadata.hasPendingWrites || snap.metadata.fromCache)) return;
+                            const changedDocs = snap.docs
+                                .filter(d => d && d.exists)
+                                .map(d => ({ id: d.id, data: d.data() || {} }));
+                            if (changedDocs.length === 0) return;
+                            const res = applyIncrementalWorkoutItemsFromCloud(uid, changedDocs, { isFromRealtimeSnapshot: true });
+                            refreshWorkoutHistoryUIAfterCloudSync(uid, res.mergedLogs, true);
+                        }, (err) => {
+                            const isPerm = Boolean(err && (err.code === 'permission-denied' || /permission|insufficient/i.test(String(err.message || ''))));
+                            if (isPerm && !hasV2PullTs) {
+                                try { if (typeof workoutLogsRealtimeUnsub === 'function') workoutLogsRealtimeUnsub(); } catch {}
+                                workoutLogsRealtimeUnsub = null;
+                                attachLegacyWorkoutLogsRealtimeListener(uid);
+                            } else {
+                                console.warn("Antrenman canlı dinleyicisi geçici olarak durakladı:", err);
+                            }
+                        });
+                        return;
+                    }
+                }
+                attachLegacyWorkoutLogsRealtimeListener(uid);
             } catch (e) {}
         }
 
@@ -1689,6 +2149,45 @@
 
             try {
                 const localLogs = getUserLogsById(uid);
+
+                if (!Array.isArray(opts.snapshotLogs) && isFirebaseReady && fbDb) {
+                    const parentDocRef = fbDb.collection('workout_logs').doc(uid);
+                    if (typeof parentDocRef.collection === 'function') {
+                        const lastPulledAt = Number(localStorage.getItem(WORKOUT_CLOUD_PULL_AT_PREFIX + uid) || 0);
+                        try {
+                            const itemsCol = parentDocRef.collection('items');
+                            const queryRef = (lastPulledAt > 0 && !opts.fullSubcollectionScan)
+                                ? itemsCol.where('updatedAt', '>', Math.max(0, lastPulledAt - 60000))
+                                : itemsCol;
+                            const subSnap = await withAuthTimeout(queryRef.get(), 2200, '__FIRESTORE_TIMEOUT__');
+                            if (subSnap === '__FIRESTORE_TIMEOUT__') {
+                                noteFirestoreTimeout();
+                            } else if (subSnap && (!subSnap.empty || lastPulledAt > 0)) {
+                                noteFirestoreSuccess();
+                                workoutLogsLastFetchAt[uid] = Date.now();
+                                const subDocs = [];
+                                if (typeof subSnap.forEach === 'function') {
+                                    subSnap.forEach(d => {
+                                        if (d && d.exists) subDocs.push({ id: d.id, data: d.data() || {} });
+                                    });
+                                }
+                                notifyCloudSubChief('read', 'workout_logs/items', lastPulledAt > 0 ? 'Artımlı zarf çekimi' : 'Tam zarf taraması', Math.max(1, subDocs.length));
+                                if (subDocs[0] && subDocs[0].data) {
+                                    adoptCloudSyncSealIfPresent('workout_logs', uid, subDocs[0].data);
+                                }
+                                const incRes = applyIncrementalWorkoutItemsFromCloud(uid, subDocs);
+                                refreshWorkoutHistoryUIAfterCloudSync(uid, incRes.mergedLogs, false);
+                                const pushDiff = computeWorkoutLogsCloudDiff(getUserLogsById(uid), uid);
+                                if (!IS_LOCAL_DEV && (pushDiff.upserts.length > 0 || pushDiff.tombstones.length > 0)) {
+                                    await syncWorkoutLogsToCloud(getUserLogsById(uid), uid);
+                                }
+                                return;
+                            }
+                        } catch (subErr) {
+                            tripFirestoreQuotaCircuitIfNeeded(subErr);
+                        }
+                    }
+                }
 
                 let cloudLogs = [];
                 let cloudFetchOk = Array.isArray(opts.snapshotLogs);
@@ -1719,7 +2218,7 @@
                         else if (isPerm) _cloudSyncLastIssue = 'permission-denied';
                         else if (offline) _cloudSyncLastIssue = 'offline';
                         else _cloudSyncLastIssue = 'error';
-                        if (!IS_LOCAL_DEV && !offline) {
+                        if (!IS_LOCAL_DEV && !offline && (!err || (err.code !== 'deadline-exceeded' && err.code !== 'circuit-open'))) {
                             recordCloudGateTelemetry('error', 'Antrenman Bulut Okuma', uid, String((err && err.message) || err || 'Bulut okuma hatası'), uid);
                         }
                     }
@@ -1744,20 +2243,25 @@
                     });
                 }
 
+                if (cloudLogs.length > 0) {
+                    const seededSigs = readWorkoutCloudItemSigs(uid);
+                    const mergedById = new Map(mergedLogs.map(m => [String(m && m.id), m]));
+                    cloudLogs.forEach(c => {
+                        if (!c || !c.id) return;
+                        const docId = toSafeCloudSubDocId(c.id);
+                        if (!docId) return;
+                        const localMatch = localLogs.find(l => l && String(l.id) === String(c.id));
+                        const localNewer = localMatch && Number(localMatch.userEditedAt || 0) > Number(c.userEditedAt || 0);
+                        if (!localNewer && !seededSigs[docId] && mergedById.has(String(c.id))) {
+                            seededSigs[docId] = computeCanonicalWorkoutLogSig(mergedById.get(String(c.id)));
+                        }
+                    });
+                    writeWorkoutCloudItemSigs(uid, seededSigs);
+                }
+
                 if (mergedLogs.length > 0 || (cloudLogs.length > 0 && filteredCloudDeletion)) {
                     localStorage.setItem(`celik_kodu_history_${uid}`, JSON.stringify(mergedLogs));
-                    if (typeof window !== 'undefined') window._initialWorkoutLogsCloudSyncDone = true;
-                    if (window.GarminTredictChief && typeof window.GarminTredictChief.syncWatchTitlesFromWorkoutLogs === 'function') {
-                        window.GarminTredictChief.syncWatchTitlesFromWorkoutLogs(mergedLogs, uid);
-                    }
-                    if (!isFromRealtimeSnapshot && window.GarminTredictChief && typeof window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs === 'function') {
-                        window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs();
-                    }
-                    if (typeof renderHistory === 'function') renderHistory();
-                    if (window.GarminTredictChief && typeof window.GarminTredictChief.renderHistoryGarminSyncPanel === 'function') {
-                        window.GarminTredictChief.renderHistoryGarminSyncPanel();
-                    }
-                    applyWednesdayHammerCurlPatch();
+                    refreshWorkoutHistoryUIAfterCloudSync(uid, mergedLogs, isFromRealtimeSnapshot);
 
                     // onSnapshot tetiklemesinden gelen çağrılarda buluta geri yazım yapılmaz (sonsuz ping-pong döngüsünü önler)
                     if (!isFromRealtimeSnapshot && !IS_LOCAL_DEV && cloudFetchOk && (mergedLogs.length !== cloudLogs.length || hasLocalEditNewerThanCloud || filteredCloudDeletion || normalizedCloudLogs)) {
@@ -1810,8 +2314,50 @@
                         cleanJsonStr = JSON.stringify(logsToWrite);
                         logsToWrite = JSON.parse(cleanJsonStr);
                     } catch {}
+
+                    const diff = computeWorkoutLogsCloudDiff(logsToWrite, uid);
+                    const knownSigs = readWorkoutCloudItemSigs(uid);
+                    if (diff.unchangedCount > 0) {
+                        notifyCloudSubChief('saved_write', 'workout_logs/items', 'Değişmeyen antrenman zarfı atlandı', diff.unchangedCount);
+                    }
+                    if (diff.upserts.length === 0 && diff.tombstones.length === 0 && Object.keys(knownSigs).length > 0) {
+                        localStorage.removeItem(`celik_kodu_pending_workout_sync_${uid}`);
+                        _cloudSyncLastIssue = null;
+                        updateCloudSyncBadge('synced', 'Bulut Aktif');
+                        return;
+                    }
+
+                    if (typeof docRef.collection === 'function') {
+                        let subPermFailed = false;
+                        try {
+                            for (const item of [...diff.upserts, ...diff.tombstones]) {
+                                await writeAthleteSubDocWithSealHeal('workout_logs', uid, 'items', item.docId, (seal) =>
+                                    Object.assign({}, item.payload, {
+                                        syncSeal: seal,
+                                        serverUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                                    })
+                                );
+                                knownSigs[item.docId] = item.sig;
+                            }
+                            writeWorkoutCloudItemSigs(uid, knownSigs);
+                            try { localStorage.setItem(WORKOUT_CLOUD_PULL_AT_PREFIX + uid, String(Date.now())); } catch {}
+                            _lastCloudWritePayloadSig[`workout_logs:${uid}`] = cleanJsonStr;
+                            localStorage.removeItem(`celik_kodu_pending_workout_sync_${uid}`);
+                            _cloudSyncLastIssue = null;
+                            updateCloudSyncBadge('synced', 'Bulut Aktif');
+                            return;
+                        } catch (subWriteErr) {
+                            writeWorkoutCloudItemSigs(uid, knownSigs);
+                            const isPerm = Boolean(subWriteErr && (subWriteErr.code === 'permission-denied' || /permission|insufficient/i.test(String(subWriteErr.message || ''))));
+                            if (!isPerm) throw subWriteErr;
+                            subPermFailed = true;
+                        }
+                        if (!subPermFailed) return;
+                    }
+
                     const sigKey = `workout_logs:${uid}`;
                     if (_lastCloudWritePayloadSig[sigKey] === cleanJsonStr) {
+                        notifyCloudSubChief('saved_write', 'workout_logs', 'Mükerrer paket yazımı önlendi', 1);
                         localStorage.removeItem(`celik_kodu_pending_workout_sync_${uid}`);
                         _cloudSyncLastIssue = null;
                         updateCloudSyncBadge('synced', 'Bulut Aktif');
@@ -2050,9 +2596,22 @@
         // ==================== KULLANICI DURUMU (TAKVİM, AI KOÇ, AĞIRLIK HAFIZASI, GİZLİ HAREKETLER) BULUT SENKRONU ====================
         let userStateSyncTimer = null;
 
-        function scheduleUserStateCloudSync(targetUid) {
+        function scheduleUserStateCloudSync(targetUid, options = {}) {
             const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
             if (!uid || uid === DEMO_GUEST_UID || isDemoGuestSession()) return;
+            const opts = options && typeof options === 'object' ? options : {};
+            if (opts.deferUntilWorkoutEnd === true) {
+                let hasActiveState = false;
+                try { hasActiveState = Boolean(localStorage.getItem(`celik_kodu_active_state_${uid}`)); } catch {}
+                if (hasActiveState) {
+                    notifyCloudSubChief('saved_write', 'user_state', 'Canlı set yazımı antrenman sonuna ertelendi', 1);
+                    try {
+                        localStorage.setItem(`celik_kodu_state_updated_at_${uid}`, String(Date.now()));
+                        localStorage.setItem(`celik_kodu_deferred_state_sync_${uid}`, '1');
+                    } catch {}
+                    return;
+                }
+            }
             markLocalUserStateModified(uid);
             if (IS_LOCAL_DEV) return;
             if (userStateSyncTimer) clearTimeout(userStateSyncTimer);
@@ -2433,11 +2992,12 @@
 
         function pruneStaleWatchTelemetryAndDrafts(uidOverride, options = {}) {
             const uid = uidOverride || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
-            if (!uid) return { prunedDraft: false, prunedWatch: false, prunedManifests: false, changed: false };
+            if (!uid) return { prunedDraft: false, prunedWatch: false, prunedManifests: false, prunedCalendar: false, changed: false };
             const nowMs = Number(options.nowMs) || Date.now();
             let prunedDraft = false;
             let prunedWatch = false;
             let prunedManifests = false;
+            let prunedCalendar = false;
 
             try {
                 const scopedKey = getLastGeneratedWorkoutStorageKey(uid);
@@ -2500,11 +3060,53 @@
                 }
             } catch {}
 
+            try {
+                const dsKey = `celik_kodu_date_schedule_${uid}`;
+                const rawDs = localStorage.getItem(dsKey);
+                if (rawDs && typeof compactDateScheduleMap === 'function') {
+                    const parsedDs = JSON.parse(rawDs);
+                    if (parsedDs && typeof parsedDs === 'object' && !Array.isArray(parsedDs)) {
+                        const compRes = compactDateScheduleMap(parsedDs, nowMs);
+                        if (compRes.changed) {
+                            localStorage.setItem(dsKey, JSON.stringify(compRes.map));
+                            prunedCalendar = true;
+                        }
+                    }
+                }
+            } catch {}
+
+            try {
+                if (typeof normalizeScheduleSlotSingleCopy === 'function') {
+                    [`celik_kodu_weekly_schedule_${uid}`, `celik_kodu_next_weekly_schedule_${uid}`].forEach(wkKey => {
+                        const rawWk = localStorage.getItem(wkKey);
+                        if (!rawWk) return;
+                        const parsedWk = JSON.parse(rawWk);
+                        if (!parsedWk || typeof parsedWk !== 'object' || Array.isArray(parsedWk)) return;
+                        let wkChanged = false;
+                        [0, 1, 2, 3, 4, 5, 6].forEach(d => {
+                            const slot = parsedWk[d];
+                            if (slot && typeof slot === 'object') {
+                                const deduped = normalizeScheduleSlotSingleCopy(slot);
+                                if (Array.isArray(slot.exercises) && !Array.isArray(deduped.exercises)) {
+                                    parsedWk[d] = deduped;
+                                    wkChanged = true;
+                                }
+                            }
+                        });
+                        if (wkChanged) {
+                            localStorage.setItem(wkKey, JSON.stringify(parsedWk));
+                            prunedCalendar = true;
+                        }
+                    });
+                }
+            } catch {}
+
             return {
                 prunedDraft,
                 prunedWatch,
                 prunedManifests,
-                changed: prunedDraft || prunedWatch || prunedManifests
+                prunedCalendar,
+                changed: prunedDraft || prunedWatch || prunedManifests || prunedCalendar
             };
         }
         window.pruneStaleWatchTelemetryAndDrafts = pruneStaleWatchTelemetryAndDrafts;
@@ -2574,6 +3176,7 @@
                 if (!s.rest) {
                     if (Array.isArray(s.exercises) && s.exercises.length > 0) return true;
                     if (s.customWorkout && Array.isArray(s.customWorkout.exercises) && s.customWorkout.exercises.length > 0) return true;
+                    if (Array.isArray(s.primarySubKeys) && s.primarySubKeys.length > 0) return true;
                     if (s.program) return true;
                 }
                 return Array.isArray(s.extraCardioSessions) && s.extraCardioSessions.length > 0;
@@ -2585,6 +3188,7 @@
             if (!slot.rest) {
                 if (Array.isArray(slot.exercises) && slot.exercises.length > 0) return true;
                 if (slot.customWorkout && Array.isArray(slot.customWorkout.exercises) && slot.customWorkout.exercises.length > 0) return true;
+                if (Array.isArray(slot.primarySubKeys) && slot.primarySubKeys.length > 0) return true;
                 if (slot.program) return true;
             }
             return Array.isArray(slot.extraCardioSessions) && slot.extraCardioSessions.length > 0;
@@ -2627,6 +3231,441 @@
                 }
             });
             localStorage.setItem(storageKey, JSON.stringify(merged));
+        }
+
+        const DAYS_CLOUD_PULL_AT_PREFIX = 'celik_kodu_cloud_pull_at_days_';
+        const DAYS_CLOUD_ITEM_SIGS_PREFIX = 'celik_kodu_cloud_item_sigs_days_';
+
+        function readCalendarDayCloudItemSigs(uid) {
+            return readCloudItemSigMap(DAYS_CLOUD_ITEM_SIGS_PREFIX + uid);
+        }
+
+        function writeCalendarDayCloudItemSigs(uid, sigMap) {
+            writeCloudItemSigMap(DAYS_CLOUD_ITEM_SIGS_PREFIX + uid, sigMap, 1500);
+        }
+
+        function stripCalendarDayCloudEnvelope(rawEntry) {
+            if (!rawEntry || typeof rawEntry !== 'object' || Array.isArray(rawEntry)) return null;
+            const copy = Object.assign({}, rawEntry);
+            delete copy.deleted;
+            delete copy.syncSeal;
+            delete copy.serverUpdatedAt;
+            delete copy.date;
+            Object.keys(copy).forEach(k => { if (copy[k] === undefined) delete copy[k]; });
+            return copy;
+        }
+
+        function computeCanonicalCalendarDaySig(entry) {
+            const clean = stripCalendarDayCloudEnvelope(entry);
+            if (!clean) return '';
+            try { return JSON.stringify(clean); } catch { return ''; }
+        }
+
+        function computeCalendarDaysCloudDiff(dateSchedMap, uid) {
+            const src = (dateSchedMap && typeof dateSchedMap === 'object' && !Array.isArray(dateSchedMap)) ? dateSchedMap : {};
+            const knownSigs = readCalendarDayCloudItemSigs(uid);
+            const upserts = [];
+            let unchangedCount = 0;
+            let totalValidDays = 0;
+            const activeDates = new Set();
+
+            for (const [dateStr, rawEntry] of Object.entries(src)) {
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr) || !rawEntry || typeof rawEntry !== 'object' || Array.isArray(rawEntry)) continue;
+                totalValidDays++;
+                activeDates.add(dateStr);
+                const baseEntry = stripCalendarDayCloudEnvelope(rawEntry);
+                const slimmedEntry = (baseEntry && typeof slimStaleCalendarDayEntry === 'function')
+                    ? slimStaleCalendarDayEntry(dateStr, baseEntry)
+                    : baseEntry;
+                const cleanEntry = stripWatchBridgeSecretsFromObj(slimmedEntry, 0);
+                const sig = computeCanonicalCalendarDaySig(cleanEntry);
+                if (sig && knownSigs[dateStr] === sig) {
+                    unchangedCount++;
+                } else {
+                    const ts = Math.max(Date.now(), Number((cleanEntry && cleanEntry.updatedAt) || 0));
+                    upserts.push({
+                        dateStr,
+                        sig,
+                        payload: Object.assign({}, cleanEntry || {}, { date: dateStr, updatedAt: ts, deleted: false })
+                    });
+                }
+            }
+
+            const tombstones = [];
+            for (const [dateStr, oldSig] of Object.entries(knownSigs)) {
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr) || oldSig === '__DELETED__') continue;
+                if (!activeDates.has(dateStr)) {
+                    tombstones.push({
+                        dateStr,
+                        sig: '__DELETED__',
+                        payload: { date: dateStr, deleted: true, updatedAt: Date.now() }
+                    });
+                }
+            }
+
+            return { upserts, tombstones, unchangedCount, totalValidDays };
+        }
+
+        function applyIncrementalCalendarDaysFromCloud(uid, dayDocs, options = {}) {
+            const docs = Array.isArray(dayDocs) ? dayDocs : [];
+            const opts = options && typeof options === 'object' ? options : {};
+            const hasPendingLocalState = Boolean(
+                opts.hasPendingLocalState !== undefined
+                    ? opts.hasPendingLocalState
+                    : (localStorage.getItem(`celik_kodu_pending_state_sync_${uid}`) === '1')
+            );
+            const knownSigs = readCalendarDayCloudItemSigs(uid);
+            let localDateSched = {};
+            try { localDateSched = JSON.parse(localStorage.getItem(`celik_kodu_date_schedule_${uid}`) || '{}') || {}; } catch { localDateSched = {}; }
+            let appliedUpserts = 0;
+            let appliedDeletions = 0;
+            let maxUpdatedAt = Number(localStorage.getItem(DAYS_CLOUD_PULL_AT_PREFIX + uid) || 0);
+
+            for (const entry of docs) {
+                const data = (entry && entry.data && typeof entry.data === 'object')
+                    ? entry.data
+                    : (entry && typeof entry === 'object' ? entry : null);
+                if (!data) continue;
+                const dateStr = String(data.date || (entry && entry.id) || '').trim();
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) continue;
+                const remoteTs = Number(data.updatedAt || opts.cloudUpdatedAt || 0);
+                if (remoteTs > maxUpdatedAt) maxUpdatedAt = remoteTs;
+                const locEntry = localDateSched[dateStr];
+                const locTs = Number((locEntry && locEntry.updatedAt) || opts.localUpdatedAt || 0);
+
+                if (data.deleted === true) {
+                    if (!locEntry || (!hasPendingLocalState && remoteTs >= locTs)) {
+                        delete localDateSched[dateStr];
+                        knownSigs[dateStr] = '__DELETED__';
+                        appliedDeletions++;
+                    }
+                } else {
+                    const cleanEnvelope = stripCalendarDayCloudEnvelope(data);
+                    const cleanEntry = (cleanEnvelope && typeof slimStaleCalendarDayEntry === 'function')
+                        ? slimStaleCalendarDayEntry(dateStr, cleanEnvelope)
+                        : cleanEnvelope;
+                    if (!cleanEntry) continue;
+                    if (!locEntry || (!hasPendingLocalState && remoteTs >= locTs)) {
+                        localDateSched[dateStr] = cleanEntry;
+                        knownSigs[dateStr] = computeCanonicalCalendarDaySig(cleanEntry);
+                        appliedUpserts++;
+                    }
+                }
+            }
+
+            localStorage.setItem(`celik_kodu_date_schedule_${uid}`, JSON.stringify(localDateSched));
+            writeCalendarDayCloudItemSigs(uid, knownSigs);
+            const nextPullAt = Math.max(maxUpdatedAt, Date.now());
+            try { localStorage.setItem(DAYS_CLOUD_PULL_AT_PREFIX + uid, String(nextPullAt)); } catch {}
+
+            return { mergedDateSchedule: localDateSched, appliedUpserts, appliedDeletions, nextPullAt };
+        }
+
+        async function syncUserCalendarDaysToCloud(uid) {
+            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || !uid || isFirestoreQuotaCircuitOpen()) {
+                return { subcollectionActive: false, allDaysSyncedToSubcollection: false };
+            }
+            const parentDocRef = fbDb.collection('user_state').doc(uid);
+            if (typeof parentDocRef.collection !== 'function') {
+                return { subcollectionActive: false, allDaysSyncedToSubcollection: false };
+            }
+            let localDateSched = {};
+            try { localDateSched = JSON.parse(localStorage.getItem(`celik_kodu_date_schedule_${uid}`) || '{}') || {}; } catch { localDateSched = {}; }
+            const diff = computeCalendarDaysCloudDiff(localDateSched, uid);
+            const knownSigs = readCalendarDayCloudItemSigs(uid);
+            if (diff.unchangedCount > 0) {
+                notifyCloudSubChief('saved_write', 'user_state/days', 'Değişmeyen takvim günü zarfı atlandı', diff.unchangedCount);
+            }
+            if (diff.upserts.length === 0 && diff.tombstones.length === 0) {
+                return { subcollectionActive: true, allDaysSyncedToSubcollection: diff.totalValidDays === diff.unchangedCount };
+            }
+            try {
+                for (const item of [...diff.upserts, ...diff.tombstones]) {
+                    await writeAthleteSubDocWithSealHeal('user_state', uid, 'days', item.dateStr, (seal) =>
+                        Object.assign({}, item.payload, {
+                            syncSeal: seal,
+                            serverUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        })
+                    );
+                    knownSigs[item.dateStr] = item.sig;
+                }
+                writeCalendarDayCloudItemSigs(uid, knownSigs);
+                try { localStorage.setItem(DAYS_CLOUD_PULL_AT_PREFIX + uid, String(Date.now())); } catch {}
+                return { subcollectionActive: true, allDaysSyncedToSubcollection: true };
+            } catch (err) {
+                writeCalendarDayCloudItemSigs(uid, knownSigs);
+                return { subcollectionActive: false, allDaysSyncedToSubcollection: false };
+            }
+        }
+
+        async function syncUserCalendarDaysFromCloud(uid, options = {}) {
+            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || !uid || isFirestoreQuotaCircuitOpen()) return false;
+            const parentDocRef = fbDb.collection('user_state').doc(uid);
+            if (typeof parentDocRef.collection !== 'function') return false;
+            const opts = options && typeof options === 'object' ? options : {};
+            try {
+                const lastPulledAt = Number(localStorage.getItem(DAYS_CLOUD_PULL_AT_PREFIX + uid) || 0);
+                const daysCol = parentDocRef.collection('days');
+                const queryRef = (lastPulledAt > 0 && !opts.fullSubcollectionScan)
+                    ? daysCol.where('updatedAt', '>', Math.max(0, lastPulledAt - 60000))
+                    : daysCol;
+                const snap = await withAuthTimeout(queryRef.get(), 2200, '__FIRESTORE_TIMEOUT__');
+                if (snap === '__FIRESTORE_TIMEOUT__') {
+                    noteFirestoreTimeout();
+                    return false;
+                }
+                noteFirestoreSuccess();
+                if (snap && (!snap.empty || lastPulledAt > 0)) {
+                    const dayDocs = [];
+                    if (typeof snap.forEach === 'function') {
+                        snap.forEach(d => {
+                            if (d && d.exists) dayDocs.push({ id: d.id, data: d.data() || {} });
+                        });
+                    }
+                    notifyCloudSubChief('read', 'user_state/days', lastPulledAt > 0 ? 'Artımlı takvim çekimi' : 'Tam takvim taraması', Math.max(1, dayDocs.length));
+                    applyIncrementalCalendarDaysFromCloud(uid, dayDocs, opts);
+                    return true;
+                }
+                return false;
+            } catch (err) {
+                tripFirestoreQuotaCircuitIfNeeded(err);
+                return false;
+            }
+        }
+
+        const V2_MIGRATION_COMPLETED_PREFIX = 'celik_kodu_v2_subdoc_migrated_';
+        const V2_BACKUP_META_PREFIX = 'celik_kodu_v2_legacy_backup_meta_';
+        const V2_BACKUP_DATESCHED_PREFIX = 'celik_kodu_v2_legacy_datesched_backup_';
+        const V2_ROLLOUT_ALL_KEY = 'celik_kodu_v2_rollout_all';
+        const V2_BACKUP_RETENTION_MS = 30 * 86400000;
+
+        function setV2SubcollectionRolloutAll(enabled) {
+            try {
+                if (enabled) localStorage.setItem(V2_ROLLOUT_ALL_KEY, '1');
+                else localStorage.removeItem(V2_ROLLOUT_ALL_KEY);
+            } catch {}
+            return Boolean(enabled);
+        }
+
+        function isSubcollectionMigrationEnabledForUser(uid, options = {}) {
+            const opts = options && typeof options === 'object' ? options : {};
+            if (!uid || uid === DEMO_GUEST_UID || isDemoGuestSession()) return false;
+            if (opts.force === true) return true;
+            try {
+                if (
+                    localStorage.getItem(V2_ROLLOUT_ALL_KEY) === '1' ||
+                    localStorage.getItem(V2_MIGRATION_COMPLETED_PREFIX + uid) === '1'
+                ) {
+                    return true;
+                }
+            } catch {}
+            if (uid === 'usr_admin') return true;
+            if (typeof isVerifiedAdminSession === 'function' && isVerifiedAdminSession()) {
+                const activeUid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+                if (activeUid === uid) return true;
+            }
+            return false;
+        }
+
+        function buildLegacyToSubcollectionMigrationPlan(uid, options = {}) {
+            const opts = options && typeof options === 'object' ? options : {};
+            const nowMs = Number(opts.nowMs) || Date.now();
+            const rawLogs = Array.isArray(opts.logs) ? opts.logs : getUserLogsById(uid);
+            let cleanLogs = [];
+            try {
+                cleanLogs = JSON.parse(JSON.stringify(Array.isArray(rawLogs) ? rawLogs : []));
+            } catch {
+                cleanLogs = [];
+            }
+            const deletedIds = typeof getDeletedWorkoutLogIds === 'function' ? getDeletedWorkoutLogIds(uid) : [];
+            const activeDocIds = new Set();
+            const workoutItems = [];
+
+            for (const log of cleanLogs) {
+                if (!log || !log.id) continue;
+                const docId = toSafeCloudSubDocId(log.id);
+                if (!docId) continue;
+                activeDocIds.add(docId);
+                const sig = computeCanonicalWorkoutLogSig(log);
+                const ts = Math.max(nowMs, Number(log.userEditedAt || log.updatedAt || log.timestamp || 0));
+                const envelope = stripWorkoutLogCloudEnvelope(log) || {};
+                workoutItems.push({
+                    docId,
+                    logId: String(log.id),
+                    sig,
+                    payload: Object.assign({}, envelope, { id: String(log.id), updatedAt: ts, deleted: false })
+                });
+            }
+
+            for (const rawDelId of deletedIds) {
+                const docId = toSafeCloudSubDocId(rawDelId);
+                if (!docId || activeDocIds.has(docId)) continue;
+                workoutItems.push({
+                    docId,
+                    logId: String(rawDelId),
+                    sig: '__DELETED__',
+                    payload: { id: String(rawDelId), deleted: true, updatedAt: nowMs }
+                });
+            }
+
+            let rawDateSched = opts.dateSchedule;
+            if (!rawDateSched || typeof rawDateSched !== 'object') {
+                try {
+                    rawDateSched = JSON.parse(localStorage.getItem(`celik_kodu_date_schedule_${uid}`) || '{}') || {};
+                } catch {
+                    rawDateSched = {};
+                }
+            }
+            const compactedRes = (typeof compactDateScheduleMap === 'function')
+                ? compactDateScheduleMap(rawDateSched, nowMs)
+                : { map: rawDateSched, changed: false };
+            const compactedDateSchedule = compactedRes.map || {};
+            const calendarDayItems = [];
+
+            for (const [dateStr, rawEntry] of Object.entries(compactedDateSchedule)) {
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr) || !rawEntry || typeof rawEntry !== 'object' || Array.isArray(rawEntry)) continue;
+                const cleanEntry = stripWatchBridgeSecretsFromObj(stripCalendarDayCloudEnvelope(rawEntry), 0);
+                const sig = computeCanonicalCalendarDaySig(cleanEntry);
+                const ts = Math.max(nowMs, Number((cleanEntry && cleanEntry.updatedAt) || 0));
+                calendarDayItems.push({
+                    dateStr,
+                    sig,
+                    payload: Object.assign({}, cleanEntry || {}, { date: dateStr, updatedAt: ts, deleted: false })
+                });
+            }
+
+            const backupMeta = {
+                uid,
+                migratedAt: nowMs,
+                backupRetainUntil: nowMs + V2_BACKUP_RETENTION_MS,
+                legacyWorkoutCount: cleanLogs.length,
+                legacyCalendarDayCount: calendarDayItems.length,
+                legacyParentWorkoutDocPreserved: true,
+                legacyParentDateScheduleSnapshotKey: V2_BACKUP_DATESCHED_PREFIX + uid
+            };
+
+            return {
+                uid,
+                nowMs,
+                workoutItems,
+                calendarDayItems,
+                rawDateSchedule: rawDateSched,
+                compactedDateSchedule,
+                backupMeta
+            };
+        }
+
+        function commitSubcollectionMigrationSuccess(uid, plan) {
+            if (!uid || !plan || typeof plan !== 'object') return false;
+            try {
+                if (!localStorage.getItem(V2_BACKUP_DATESCHED_PREFIX + uid) && plan.rawDateSchedule) {
+                    localStorage.setItem(V2_BACKUP_DATESCHED_PREFIX + uid, JSON.stringify(plan.rawDateSchedule));
+                }
+                if (plan.compactedDateSchedule) {
+                    localStorage.setItem(`celik_kodu_date_schedule_${uid}`, JSON.stringify(plan.compactedDateSchedule));
+                }
+                const wSigs = readWorkoutCloudItemSigs(uid);
+                (plan.workoutItems || []).forEach(item => {
+                    if (item && item.docId && item.sig) wSigs[item.docId] = item.sig;
+                });
+                writeWorkoutCloudItemSigs(uid, wSigs);
+
+                const dSigs = readCalendarDayCloudItemSigs(uid);
+                (plan.calendarDayItems || []).forEach(item => {
+                    if (item && item.dateStr && item.sig) dSigs[item.dateStr] = item.sig;
+                });
+                writeCalendarDayCloudItemSigs(uid, dSigs);
+
+                const pullTs = String(Number(plan.nowMs) || Date.now());
+                localStorage.setItem(WORKOUT_CLOUD_PULL_AT_PREFIX + uid, pullTs);
+                localStorage.setItem(DAYS_CLOUD_PULL_AT_PREFIX + uid, pullTs);
+                localStorage.setItem(
+                    V2_BACKUP_META_PREFIX + uid,
+                    JSON.stringify(plan.backupMeta || {
+                        uid,
+                        migratedAt: Number(pullTs),
+                        backupRetainUntil: Number(pullTs) + V2_BACKUP_RETENTION_MS,
+                        legacyParentWorkoutDocPreserved: true
+                    })
+                );
+                localStorage.setItem(V2_MIGRATION_COMPLETED_PREFIX + uid, '1');
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        function rollbackUserSubcollectionMigration(uid) {
+            if (!uid) return { rolledBack: false };
+            try {
+                const backupRaw = localStorage.getItem(V2_BACKUP_DATESCHED_PREFIX + uid);
+                if (backupRaw) {
+                    localStorage.setItem(`celik_kodu_date_schedule_${uid}`, backupRaw);
+                }
+                localStorage.removeItem(V2_MIGRATION_COMPLETED_PREFIX + uid);
+                localStorage.removeItem(WORKOUT_CLOUD_PULL_AT_PREFIX + uid);
+                localStorage.removeItem(DAYS_CLOUD_PULL_AT_PREFIX + uid);
+                localStorage.removeItem(WORKOUT_CLOUD_ITEM_SIGS_PREFIX + uid);
+                localStorage.removeItem(DAYS_CLOUD_ITEM_SIGS_PREFIX + uid);
+                delete _lastCloudWritePayloadSig[`workout_logs:${uid}`];
+                delete _lastCloudWritePayloadSig[`user_state:${uid}`];
+                if (!IS_LOCAL_DEV) {
+                    localStorage.setItem(`celik_kodu_pending_workout_sync_${uid}`, '1');
+                    localStorage.setItem(`celik_kodu_pending_state_sync_${uid}`, '1');
+                }
+                return { rolledBack: true, restoredDateScheduleBackup: Boolean(backupRaw) };
+            } catch {
+                return { rolledBack: false };
+            }
+        }
+
+        async function migrateLegacyAthleteDocsToSubcollections(targetUid, options = {}) {
+            const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            const opts = options && typeof options === 'object' ? options : {};
+            if (!isSubcollectionMigrationEnabledForUser(uid, opts)) {
+                return { migrated: false, skipped: true, reason: 'rollout-gated' };
+            }
+            if (!opts.force && localStorage.getItem(V2_MIGRATION_COMPLETED_PREFIX + uid) === '1') {
+                return { migrated: false, skipped: true, reason: 'already-migrated' };
+            }
+            const plan = buildLegacyToSubcollectionMigrationPlan(uid, opts);
+            if (IS_LOCAL_DEV || !isFirebaseReady || !fbDb || isFirestoreQuotaCircuitOpen() || (typeof navigator !== 'undefined' && navigator.onLine === false)) {
+                return { migrated: false, skipped: true, reason: 'offline-or-local', plan };
+            }
+            const workoutParentRef = fbDb.collection('workout_logs').doc(uid);
+            const stateParentRef = fbDb.collection('user_state').doc(uid);
+            if (typeof workoutParentRef.collection !== 'function' || typeof stateParentRef.collection !== 'function') {
+                return { migrated: false, skipped: true, reason: 'subcollection-unsupported', plan };
+            }
+            try {
+                for (const item of plan.workoutItems) {
+                    await writeAthleteSubDocWithSealHeal('workout_logs', uid, 'items', item.docId, (seal) =>
+                        Object.assign({}, item.payload, {
+                            syncSeal: seal,
+                            serverUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        })
+                    );
+                }
+                for (const dayItem of plan.calendarDayItems) {
+                    await writeAthleteSubDocWithSealHeal('user_state', uid, 'days', dayItem.dateStr, (seal) =>
+                        Object.assign({}, dayItem.payload, {
+                            syncSeal: seal,
+                            serverUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        })
+                    );
+                }
+                commitSubcollectionMigrationSuccess(uid, plan);
+                await syncUserStateToCloud(uid);
+                return {
+                    migrated: true,
+                    workoutItemCount: plan.workoutItems.length,
+                    calendarDayCount: plan.calendarDayItems.length,
+                    backupMeta: plan.backupMeta
+                };
+            } catch (err) {
+                tripFirestoreQuotaCircuitIfNeeded(err);
+                return { migrated: false, error: String((err && err.message) || err || 'migration-failed') };
+            }
         }
 
         async function syncUserStateToCloud(targetUid) {
@@ -2831,11 +3870,14 @@
 
                 let diagForCatch = uid;
                 try {
+                    const daysSyncRes = await syncUserCalendarDaysToCloud(uid);
                     const clientUpdatedAt = Number(localStorage.getItem(`celik_kodu_state_updated_at_${uid}`) || Date.now());
                     const statePayloadCore = stripWatchBridgeSecretsFromObj({
                         weeklySchedule: ensureMapOr(safeParse(`celik_kodu_weekly_schedule_${uid}`, {}), 50, {}),
                         nextWeeklySchedule: ensureMapOr(safeParse(`celik_kodu_next_weekly_schedule_${uid}`, {}), 50, {}),
-                        dateSchedule: ensureMapOr(safeParse(`celik_kodu_date_schedule_${uid}`, {}), 1500, {}),
+                        dateSchedule: daysSyncRes.allDaysSyncedToSubcollection
+                            ? {}
+                            : ensureMapOr(safeParse(`celik_kodu_date_schedule_${uid}`, {}), 1500, {}),
                         rememberedWeights: ensureMapOr(safeParse(`celik_kodu_last_weights_${uid}`, {}), 1500, {}),
                         excludedExercises: ensureListMax(safeExclIds, 1000),
                         excludedExercisesUpdatedAt: Number.isFinite(Number(exclUpdatedAt)) ? Number(exclUpdatedAt) : 0,
@@ -2855,7 +3897,9 @@
                     try { stateSig = JSON.stringify(statePayloadCore); } catch {}
                     const sigKey = `user_state:${uid}`;
                     if (stateSig && _lastCloudWritePayloadSig[sigKey] === stateSig) {
+                        notifyCloudSubChief('saved_write', 'user_state', 'Değişmeyen paket yazımı önlendi', 1);
                         localStorage.removeItem(`celik_kodu_pending_state_sync_${uid}`);
+                        localStorage.removeItem(`celik_kodu_deferred_state_sync_${uid}`);
                         return;
                     }
                     diagForCatch = `${uid} (${diagnoseCloudPayloadPreFlight('user_state', statePayloadCore, '')})`;
@@ -2866,6 +3910,7 @@
                     }));
                     if (stateSig) _lastCloudWritePayloadSig[sigKey] = stateSig;
                     localStorage.removeItem(`celik_kodu_pending_state_sync_${uid}`);
+                    localStorage.removeItem(`celik_kodu_deferred_state_sync_${uid}`);
                 } catch (innerErr) {
                     if (innerErr && typeof innerErr === 'object' && !innerErr._k4DiagSummary) innerErr._k4DiagSummary = diagForCatch;
                     throw innerErr;
@@ -2925,6 +3970,9 @@
                 mergeWeeklyScheduleSafely(`celik_kodu_weekly_schedule_${uid}`, data.weeklySchedule, cloudUpdatedAt, localUpdatedAt, hasPendingLocalState);
                 mergeWeeklyScheduleSafely(`celik_kodu_next_weekly_schedule_${uid}`, data.nextWeeklySchedule, cloudUpdatedAt, localUpdatedAt, hasPendingLocalState);
 
+                const legacyDateSchedCount = (data.dateSchedule && typeof data.dateSchedule === 'object')
+                    ? Object.keys(data.dateSchedule).length
+                    : 0;
                 if (data.dateSchedule && typeof data.dateSchedule === 'object') {
                     const localDateSched = JSON.parse(localStorage.getItem(`celik_kodu_date_schedule_${uid}`) || '{}') || {};
                     const mergedDateSched = Object.assign({}, data.dateSchedule, localDateSched);
@@ -2937,6 +3985,13 @@
                         }
                     }
                     localStorage.setItem(`celik_kodu_date_schedule_${uid}`, JSON.stringify(mergedDateSched));
+                }
+                await syncUserCalendarDaysFromCloud(uid, { cloudUpdatedAt, localUpdatedAt, hasPendingLocalState });
+                if (Number(localStorage.getItem(DAYS_CLOUD_PULL_AT_PREFIX + uid) || 0) > 0 || legacyDateSchedCount === 0) {
+                    const dayDiffCheck = computeCalendarDaysCloudDiff(safeParseCloud(`celik_kodu_date_schedule_${uid}`, {}), uid);
+                    if (dayDiffCheck.upserts.length > 0 || dayDiffCheck.tombstones.length > 0) {
+                        hasUnsyncedLocalDiff = true;
+                    }
                 }
                 if (data.rememberedWeights && typeof data.rememberedWeights === 'object') {
                     const localW = JSON.parse(localStorage.getItem(`celik_kodu_last_weights_${uid}`) || '{}') || {};
@@ -3313,10 +4368,17 @@
                 if (!hasPendingLocalState && cloudUpdatedAt > localUpdatedAt && !hasUnsyncedLocalDiff) {
                     localStorage.setItem(`celik_kodu_state_updated_at_${uid}`, String(cloudUpdatedAt));
                 } else if (!IS_LOCAL_DEV && (hasPendingLocalState || localUpdatedAt > cloudUpdatedAt || hasUnsyncedLocalDiff)) {
-                    if (hasUnsyncedLocalDiff && cloudUpdatedAt >= localUpdatedAt) {
-                        localStorage.setItem(`celik_kodu_state_updated_at_${uid}`, String(Date.now()));
+                    const onlyDeferredWorkoutChanges =
+                        localStorage.getItem(`celik_kodu_deferred_state_sync_${uid}`) === '1' &&
+                        Boolean(localStorage.getItem(`celik_kodu_active_state_${uid}`)) &&
+                        !hasPendingLocalState &&
+                        !hasUnsyncedLocalDiff;
+                    if (!onlyDeferredWorkoutChanges) {
+                        if (hasUnsyncedLocalDiff && cloudUpdatedAt >= localUpdatedAt) {
+                            localStorage.setItem(`celik_kodu_state_updated_at_${uid}`, String(Date.now()));
+                        }
+                        await syncUserStateToCloud(uid);
                     }
-                    await syncUserStateToCloud(uid);
                 }
 
                 const savedScrollY = typeof window !== 'undefined' ? window.scrollY : 0;
@@ -3876,7 +4938,7 @@
                 _adminPortalScriptLoadingPromise = new Promise((resolve) => {
                     try {
                         const script = document.createElement('script');
-                        script.src = 'js/chiefs/admin-portal.js?v=355';
+                        script.src = 'js/chiefs/admin-portal.js?v=356';
                         script.async = false;
                         script.onload = () => resolve(true);
                         script.onerror = () => {
@@ -3913,8 +4975,7 @@
                 const roleRef = fbDb.collection('user_roles').doc(fbUser.uid);
                 let existingData = null;
                 try {
-                    const snap = await fetchCloudDocPreferServer(roleRef);
-                    if (snap && snap.exists) existingData = snap.data() || null;
+                    existingData = await getUserRoleDocCached(fbUser.uid);
                 } catch {}
                 if (isFirestoreQuotaCircuitOpen()) return false;
                 if (existingData && !isClaimAdmin) {
@@ -3925,12 +4986,27 @@
                 const resolvedAppUid = (appUser && appUser.id)
                     ? String(appUser.id)
                     : ((existingData && existingData.appUid) || ('usr_' + cleanFbUid));
+                if (
+                    existingData &&
+                    existingData.role === resolvedRole &&
+                    existingData.appUid === resolvedAppUid &&
+                    String(existingData.email || '') === email
+                ) {
+                    return true;
+                }
                 await withAuthTimeout(roleRef.set({
                     role: resolvedRole,
                     appUid: resolvedAppUid,
                     email,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true }), 2200, null);
+                _userRoleDocCache.uid = fbUser.uid;
+                _userRoleDocCache.data = Object.assign({}, existingData || {}, {
+                    role: resolvedRole,
+                    appUid: resolvedAppUid,
+                    email
+                });
+                _userRoleDocCache.at = Date.now();
                 return true;
             } catch (e) {
                 tripFirestoreQuotaCircuitIfNeeded(e);
@@ -3959,6 +5035,16 @@
             window.getSecondaryFirebaseAuth = getSecondaryFirebaseAuth;
             window.buildUserProfileDocPayload = buildUserProfileDocPayload;
             window.syncOwnUserProfileToCloud = syncOwnUserProfileToCloud;
+            window.computeWorkoutLogsCloudDiff = computeWorkoutLogsCloudDiff;
+            window.applyIncrementalWorkoutItemsFromCloud = applyIncrementalWorkoutItemsFromCloud;
+            window.computeCalendarDaysCloudDiff = computeCalendarDaysCloudDiff;
+            window.applyIncrementalCalendarDaysFromCloud = applyIncrementalCalendarDaysFromCloud;
+            window.setV2SubcollectionRolloutAll = setV2SubcollectionRolloutAll;
+            window.isSubcollectionMigrationEnabledForUser = isSubcollectionMigrationEnabledForUser;
+            window.buildLegacyToSubcollectionMigrationPlan = buildLegacyToSubcollectionMigrationPlan;
+            window.commitSubcollectionMigrationSuccess = commitSubcollectionMigrationSuccess;
+            window.rollbackUserSubcollectionMigration = rollbackUserSubcollectionMigration;
+            window.migrateLegacyAthleteDocsToSubcollections = migrateLegacyAthleteDocsToSubcollections;
             window.__celikGetFirebaseHandles = () => ({ fbDb, fbAuth, secondaryFbApp, isFirebaseReady, IS_LOCAL_DEV });
         }
 

@@ -13,7 +13,7 @@ Bu doküman, **Çelik Kodu (Fitness PWA & Desktop)** sisteminin en kritik işlev
 1. **Nihai Veri Üretim Merkezi:** Sporcunun tüm ağırlık, tekrar, süre ve tükeniş verileri bu akışta toplanır.
 2. **Biyomekanik Motor Entegrasyonu:** Kaldırılan toplam tonaj (kg), izometrik tutuş süresi, egzersiz bazlı PR (Kişisel Rekor) tespiti ve çalışan kas gruplarının (primer/sekonder) anatomik dağılımı burada hesaplanır.
 3. **Cihaz Donanım Yönetimi:** Tarayıcının Screen WakeLock (ekran uyanık kalma) kilidi serbest bırakılır, dinlenme sayaçları durdurulur ve Web Audio API ile başarı melodisi çalınır.
-4. **Hibrit Veri Mimarisi (Local-First & Cloud):** Sıfır gecikmeyle önce `localStorage` üzerine atomik olarak yazılır, ardından arka planda Firebase Firestore bulut veritabanına (`workout_logs/{uid}`) asenkron senkronize edilir.
+4. **Hibrit Veri Mimarisi (Local-First & Cloud):** Sıfır gecikmeyle önce `localStorage` üzerine atomik olarak yazılır, ardından arka planda Firebase Firestore bulut veritabanına (`workout_logs/{uid}`, `user_state/{uid}`, `scale_logs/{uid}`, `measurement_logs/{uid}`, `system_telemetry/{uid}`) asenkron ve tam belge yazımıyla (`set()`) senkronize edilir.
 
 ---
 
@@ -30,7 +30,7 @@ flowchart TD
     end
 
     subgraph ExternalSystems["Harici Sistemler & Bulut Servisleri"]
-        FirestoreCloud[("Firebase Cloud Firestore<br/>[BaaS / Bulut NoSQL Veritabanı]<br/>workout_logs, scale_logs, app_system")]
+        FirestoreCloud[("Firebase Cloud Firestore<br/>[BaaS / Bulut NoSQL Veritabanı]<br/>workout_logs, user_state, scale_logs, measurement_logs, system_telemetry, app_system")]
         GeminiAPI["Google Gemini 2.5 API<br/>[Yapay Zeka Servisi]<br/>Generative Language REST API"]
         GCalendar["Google Takvim / iCal<br/>[Harici Takvim Servisi]<br/>.ics dışa aktarım & Web takvim entegrasyonu"]
         BrowserAPIs["Tarayıcı & Cihaz Donanım API'leri<br/>[Web APIs]<br/>Web Audio, Screen WakeLock, Service Worker Cache"]
@@ -62,7 +62,7 @@ flowchart TD
 
     subgraph BackendLayer["Sunucu & Bulut Katmanı (Cloud / Server)"]
         WebServer["Statik Node.js Express Sunucusu<br/>[server.js / Node.js 18+]<br/>Statik PWA dosyaları sunumu & /api/health kontrolü"]
-        FirestoreDB[("Firebase Firestore Cloud DB<br/>[GCP Cloud Datastore]<br/>Koleksiyonlar: workout_logs, scale_logs, users")]
+        FirestoreDB[("Firebase Firestore Cloud DB<br/>[GCP Cloud Datastore]<br/>Koleksiyonlar: workout_logs, user_state, scale_logs, measurement_logs, system_telemetry, app_system")]
         GeminiService["Google Gemini Generative AI<br/>[REST / HTTPS]<br/>Biyomekanik antrenman analiz motoru"]
     end
 
@@ -72,7 +72,7 @@ flowchart TD
     ElectronHost -->|"ContextBridge (coachAPI)"| SPA
 
     WebServer -->|"Statik Dosya İletimi (HTML/JS/CSS)"| SPA
-    SPA -->|"HTTPS / REST & Firestore SDK (Merge Write)"| FirestoreDB
+    SPA -->|"HTTPS / REST & Firestore SDK (Tam Belge set())"| FirestoreDB
     SPA -->|"HTTPS POST / JSON (Gemini API Key)"| GeminiService
 ```
 
@@ -173,7 +173,7 @@ sequenceDiagram
     Handler->>DOM: updateCloudSyncBadge('syncing', 'Kaydediliyor...')
     
     alt Bulut Bağlantısı Açık (Online)
-        CloudAPI->>CloudAPI: fbDb.collection('workout_logs').doc(uid).set({ logs, updatedAt: serverTimestamp() }, { merge: true })
+        CloudAPI->>CloudAPI: fbDb.collection('workout_logs').doc(uid).set({ logs, clientUpdatedAt, syncSeal, updatedAt: serverTimestamp() })
         CloudAPI-->>Handler: 200 OK (Firestore Document Written)
         Handler->>DOM: updateCloudSyncBadge('synced', 'Bulut Aktif')
     else Cihaz Çevrimdışı (Offline)
@@ -264,5 +264,76 @@ flowchart TD
 ```
 
 - **Kara Kutu Kapıları:** `K1` (Şefler & Köprü Gümrüğü & Çalışma Zamanı), `K2` (Vercel & Garmin/Tredict Saat Hattı), `K3` (Google Gemini Yapay Zeka), `K4` (Google Firebase Bulut Eşitleme).
+- **Bulut Bağlantı Alt Şefi:** Mevcut 7 Bağlantı Alt Şefi (`js/chiefs/liaison-subchiefs.js`) içinde bulut kota/zaman aşımı/tasarruf sayacını, 1 MB belge doluluk oranını ve v2 zarf geçiş durumunu canlı takip eder; **Sistem İzleme** sekmesinde özet karne ve tek dokunuşla **Bulut Raporu Kopyala** çıktısı üretir.
 - **Gizlilik ve Tampon Sınırı:** Tüm parola, `syncSeal`, Gemini API anahtarı ve saat tokenları maskelenir; sporcu başına son 50 olay saklanır; `system_telemetry/{uid}` yalnızca sahibi veya Yönetici tarafından okunabilir.
-- **Yönetici Portalı:** `#adminModal` içindeki **Sistem İzleme** sekmesinden kapı/arıza filtresiyle canlı incelenir, tek dokunuşla AI düzeltme emri kopyalanır veya temizlenir.
+- **Yönetici Portalı:** `#adminModal` içindeki **Sistem İzleme** sekmesinden kapı/arıza filtresiyle canlı incelenir, tek dokunuşla AI düzeltme emri veya Bulut Raporu kopyalanır.
+
+---
+
+## 8. Bulut Veri Mimarisi v2 — Belge Başına Bölme (Aşama 1–6 Yerelde Doğrulandı: T62–T67)
+
+Tek Firestore belgesindeki **1 MB kalıcı boyut sınırını** aşmamak ve her güncellemede tüm geçmişin/takvimin baştan yazılmasını önlemek için uygulanmış v2 hedef mimarisidir. Cihaz içi `localStorage` anahtarları aynı kalır; yalnızca bulut senkronizasyon katmanı (`profile-chief.js`), takvim saklama biçimi ve güvenlik kuralları güncellenmiştir.
+
+### 8.1 Bugünkü Yapı vs. Hedef Yapı
+
+```mermaid
+flowchart LR
+    subgraph Bugun["Bugünkü Yapı (Tek Belge Riski)"]
+        B1["workout_logs/uid\nTüm geçmiş tek dizide (logs)\nÖrn. 207 KB / 1 MB"]
+        B2["user_state/uid\nTakvim + Program + Ağırlık + Ayarlar\nÖrn. 421 KB / 1 MB"]
+        B3["scale_logs/uid\nmeasurement_logs/uid\nsystem_telemetry/uid"]
+    end
+
+    subgraph Hedef["Hedef Yapı v2 (Belge Başına Bölme)"]
+        H1["workout_logs/uid/items/logId\nHer antrenman ayrı belge (~10 KB)\nupdatedAt + deleted mezar taşı"]
+        H2["user_state/uid/days/YYYY-MM-DD\nHer gün ayrı belge (tek kopya)\n7 günden eski günler özet"]
+        H3["user_state/uid\nYalnız hafif durum (takvimsiz)\nhaftalık plan, program, ağırlık, ayarlar"]
+        H4["scale_logs/uid\nmeasurement_logs/uid\nsystem_telemetry/uid (max 50 olay)"]
+    end
+
+    B1 -->|"Aşama 2 & 5 Bölme"| H1
+    B2 -->|"Aşama 2, 3 & 5 Bölme"| H2
+    B2 -->|"Takvim ayrılınca hafifler"| H3
+    B3 -->|"Değişmez"| H4
+```
+
+### 8.2 Artımlı Okuma ve Tekil Belge Yazımı Akışı
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Local as Yerel Depolama (localStorage)
+    participant Sync as Profil Eşitleme Katmanı (profile-chief.js)
+    participant Cloud as Firebase Firestore v2
+
+    Note over Local,Cloud: Açılış / Ön Plana Dönüş (Artımlı Çekme)
+    Sync->>Local: Son çekme zamanını oku (celik_kodu_cloud_pull_at_workout_uid)
+    Sync->>Cloud: items where updatedAt > lastPulledAt sorgula
+    Cloud-->>Sync: Yalnız yeni, değişen veya deleted=true belgeler
+    Sync->>Local: Yerel listeyle birleştir ve lastPulledAt güncelle
+
+    Note over Local,Cloud: Antrenman Bitişi veya Düzenleme (Tekil Yazım)
+    Local->>Sync: Değişen tek seans (logId)
+    Sync->>Cloud: workout_logs/uid/items/logId.set(log + updatedAt + deleted)
+    Cloud-->>Sync: Onay (tek ~10 KB belge yazıldı)
+```
+
+### 8.3 Canlı Veritabanı Ölçümü (22 Kasım 2026, 14:11)
+
+| Belge | Mevcut Boyut | İçerik Ayrıntısı |
+|---|---|---|
+| `workout_logs/usr_admin` | **207 KB** | 21 antrenman, ortalama 9,9 KB (~100 antrenmanda 1 MB dolar) |
+| `workout_logs/usr_ferit` | **50 KB** | 11 antrenman, ortalama 4,6 KB |
+| `workout_logs/usr_ismail` | **8 KB** | 2 antrenman, ortalama 4,0 KB |
+| `user_state/usr_admin` | **421 KB** | `dateSchedule` 263 KB, `weeklySchedule` 83 KB, `customPrograms` 37 KB, `garminManifests` 23 KB |
+
+### 8.4 Okuyucu Modüller ve Takvim Sadeleştirme Özeti
+- **Etkilenmeyen bölümler:** Analiz (`analytics-chief.js`), Geçmiş (`history-chief.js`), Antrenman (`workout-chief.js`), Kütüphane (`library-chief.js`), Ortak Çekirdek (`shared-core.js`) ve Yönetici Portalı (`admin-portal.js`) veriyi yerelden okumayı sürdürür.
+- **Tek kopya takvim:** Gün içi çifte kayıt (`exercises` tekrarı) kaldırılır, yalnızca `customWorkout` tutulur (okuyucular zaten buna düşer).
+- **7 günlük tam pencere:** Üretici'nin dünkü kas koruması ve Saat Köprüsü'nün 7 günlük aktivite eşleşmesi için son 7 gün + gelecek günler tam ayrıntıda kalır; 7 günden eski günler `{type, title, rest, desc, extraCardioSessions, primarySubKeys, updatedAt}` özetine indirilir.
+
+### 8.5 Geçiş, Güvenlik Kuralı ve Geri Dönüş İlkeleri
+- **Yerel Uygulama Durumu (`T62`–`T67`):** Aşama 1–6 ve Bulut Alt Şefi yerel diskte tamamlanmış, gerçek veri karşılaştırması dahil bekçi sınavlarıyla doğrulanmıştır (`T62` kota/zaman aşımı ayrımı, `T63` belge başına artımlı eşitleme, `T64` tek kopya ve 7 günlük takvim özetleme, `T65` iki eşit güvenlik kuralı dosyası, `T66` yönetici öncelikli kademeli taşıma ve tek adımda geri dönüş, `T67` Bulut Alt Şefi canlı karnesi ve v2 taşıma öncesi/sonrası kas/puan birebir sağlaması); canlı dağıtım kullanıcı onayı sonrasına ayrılmıştır.
+- **Güvenlik kuralları (Aşama 4):** `workout_logs/{uid}/items/{logId}` ve `user_state/{uid}/days/{dateStr}` için yalnız sahibi/yönetici okuyup yazabilir kuralı `firestore.rules` ve `config/firestore.rules` dosyalarına birebir aynı şekilde işlenmiştir.
+- **Taşıma ve yedek (Aşama 5):** `migrateLegacyAthleteDocsToSubcollections` eski büyük belgeleri silmeden alt belgelere böler; eski belgeler en az **30 gün** boyunca silinmeden yedek ve `rollbackUserSubcollectionMigration` ile tek adımda geri dönüş yolu olarak korunur.
+- **Kademeli canlı çıkış:** Önce yalnızca yönetici hesabında (`usr_admin`) devreye alınıp 2–3 gün izlenir; sorunsuz doğrulamanın ardından `setV2SubcollectionRolloutAll(true)` ile diğer 2 sporcu hesabı geçirilir.

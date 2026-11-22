@@ -14,6 +14,7 @@
     let adminTelemetryFilterGate = 'ALL';
     let adminTelemetryFilterSeverity = 'ALL';
     let lastApprovalMessageCache = '';
+    let _lastAdminUsersSyncAt = 0;
 
     function getFbHandles() {
         if (typeof global.__celikGetFirebaseHandles === 'function') {
@@ -198,6 +199,7 @@
             <!-- TAB 3: SİSTEM İZLEME (4 KAPILI KARA KUTU) -->
             <div id="adminViewTelemetry" style="display:none;">
                 <div id="adminTelemetryKpis" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-bottom:12px;"></div>
+                <div id="adminCloudSubChiefCard" style="margin-bottom:12px;"></div>
 
                 <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
                     <button type="button" id="adminTelGateBtn_ALL" onclick="setAdminTelemetryFilter('ALL', null)" style="font-size:11px; font-weight:800; padding:6px 10px; border-radius:8px; border:1px solid rgba(167,139,250,0.45); background:#6D28D9; color:#FFFFFF; cursor:pointer; white-space:nowrap;">Tümü</button>
@@ -213,8 +215,9 @@
                 </div>
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:12px;">
+                    <button type="button" onclick="copyCloudSubChiefReportToClipboard()" style="font-size:11.5px; font-weight:800; padding:9px 10px; border-radius:10px; border:1px solid rgba(167,139,250,0.45); background:#2C2550; color:#F3E8FF; cursor:pointer; white-space:nowrap;">Bulut Raporu Kopyala</button>
                     <button type="button" onclick="copyAdminTelemetryPromptToClipboard()" style="font-size:11.5px; font-weight:800; padding:9px 10px; border-radius:10px; border:1px solid rgba(74,222,128,0.45); background:#14532D; color:#BBF7D0; cursor:pointer; white-space:nowrap;">Düzeltme Emri Kopyala</button>
-                    <button type="button" onclick="clearAdminTelemetryEvents()" style="font-size:11.5px; font-weight:800; padding:9px 10px; border-radius:10px; border:1px solid rgba(248,113,113,0.45); background:#7F1D1D; color:#FECACA; cursor:pointer; white-space:nowrap;">Tümünü Temizle</button>
+                    <button type="button" onclick="clearAdminTelemetryEvents()" style="grid-column:span 2; font-size:11.5px; font-weight:800; padding:8px 10px; border-radius:10px; border:1px solid rgba(248,113,113,0.45); background:#7F1D1D; color:#FECACA; cursor:pointer; white-space:nowrap;">Tümünü Temizle</button>
                 </div>
 
                 <div id="adminTelemetryListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:46vh; overflow-y:auto;"></div>
@@ -391,11 +394,21 @@
         }
     }
 
-    async function syncAllUsersForAdmin() {
+    async function syncAllUsersForAdmin(options = {}) {
+        const opts = options && typeof options === 'object' ? options : {};
         if (!isAuthorizedForAdminPortal()) return [];
         const { fbDb, fbAuth, isFirebaseReady, IS_LOCAL_DEV } = getFbHandles();
         if (!isFirebaseReady || !fbDb) return getAuthUsers();
         if (!IS_LOCAL_DEV && fbAuth && !fbAuth.currentUser) return getAuthUsers();
+        const minGap = Number.isFinite(opts.minGapMs) ? opts.minGapMs : 600000;
+        if (!opts.force && (Date.now() - _lastAdminUsersSyncAt) < minGap) {
+            try {
+                if (global.CelikLiaisonSubChiefs && typeof global.CelikLiaisonSubChiefs.noteCloudSubChiefEvent === 'function') {
+                    global.CelikLiaisonSubChiefs.noteCloudSubChiefEvent('saved_read', 'admin_users', 'Sporcu listesi önbellekten geldi', 1);
+                }
+            } catch {}
+            return getAuthUsers();
+        }
 
         try {
             const localUsers = getAuthUsers();
@@ -450,6 +463,7 @@
                 const profilesSnap = typeof withAuthTimeout === 'function'
                     ? await withAuthTimeout(fbDb.collection('user_profiles').get(), 2200, null)
                     : await fbDb.collection('user_profiles').get();
+                if (profilesSnap) _lastAdminUsersSyncAt = Date.now();
                 if (profilesSnap && typeof profilesSnap.forEach === 'function') {
                     profilesSnap.forEach(doc => {
                         if (doc && doc.exists) {
@@ -560,7 +574,7 @@
         }
         const { isFirebaseReady, IS_LOCAL_DEV } = getFbHandles();
         if (isFirebaseReady && !IS_LOCAL_DEV) {
-            try { await syncAllUsersForAdmin(); } catch {}
+            try { await syncAllUsersForAdmin({ minGapMs: 60000 }); } catch {}
         }
         const adminModalEl = document.getElementById('adminModal');
         if (adminModalEl) {
@@ -661,11 +675,56 @@
         renderAdminSystemTelemetry();
     }
 
+    function renderAdminCloudSubChiefCard() {
+        const cardEl = document.getElementById('adminCloudSubChiefCard');
+        if (!cardEl) return;
+        const subApi = global.CelikLiaisonSubChiefs;
+        if (!subApi || typeof subApi.inspectCloudHealthSnapshot !== 'function') {
+            cardEl.innerHTML = '';
+            return;
+        }
+        const snap = subApi.inspectCloudHealthSnapshot();
+        const c = snap.circuitState || {};
+        const dotColor = c.isOpen
+            ? (c.reason === 'slow' ? '#FBBF24' : '#F87171')
+            : (snap.pendingTotalCount > 0 ? '#FBBF24' : '#4ADE80');
+        const statusText = c.isOpen
+            ? (c.reason === 'slow' ? 'Bulut Yavaş' : 'Kotası Doldu')
+            : (snap.pendingTotalCount > 0 ? 'Kuyrukta Bekleyen Var' : 'Bulut Aktif');
+        const savedTotal = Number(snap.savedWritesCount || 0) + Number(snap.savedReadsCount || 0);
+        const toKb = (b) => (Number(b || 0) / 1024).toFixed(1);
+
+        cardEl.innerHTML = `
+            <div style="background:#121024; border:1px solid rgba(167,139,250,0.25); border-radius:10px; padding:10px 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding-bottom:7px; border-bottom:1px solid rgba(255,255,255,0.06);">
+                    <div style="display:flex; align-items:center; gap:7px; min-width:0;">
+                        <span style="width:8px; height:8px; border-radius:50%; background:${dotColor}; flex-shrink:0; display:inline-block;"></span>
+                        <span style="font-size:12px; font-weight:800; color:#FFFFFF; white-space:nowrap;">Bulut Alt Şefi Canlı Karnesi</span>
+                    </div>
+                    <span style="font-size:11px; font-weight:700; color:${dotColor}; white-space:nowrap;">${esc(statusText)}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.06); font-size:11.5px;">
+                    <span style="color:#94A3B8;">Oturum Trafiği</span>
+                    <span style="color:#E2E8F0; font-weight:700;">Okuma: ${Number(snap.readsCount || 0)} • Yazma: ${Number(snap.writesCount || 0)} • Önlenen: ${savedTotal}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.06); font-size:11.5px;">
+                    <span style="color:#94A3B8;">1 MB Paket Sağlığı</span>
+                    <span style="color:#E2E8F0; font-weight:700;">Ana Durum: ~${toKb(snap.estimatedParentStateBytes)} KB (%${Number(snap.parentStateLimitPct || 0)}) • En Büyük Zarf: ~${toKb(snap.maxSingleWorkoutBytes)} KB (%${Number(snap.maxSingleWorkoutLimitPct || 0)})</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding-top:6px; font-size:11.5px;">
+                    <span style="color:#94A3B8;">v2 Zarflı Yapı &amp; Kuyruk</span>
+                    <span style="color:#E2E8F0; font-weight:700;">Antrenman: ${Number(snap.v2WorkoutSigsCount || 0)} zarf • Takvim: ${Number(snap.v2CalendarDaySigsCount || 0)} gün • Bekleyen: ${Number(snap.pendingTotalCount || 0)}</span>
+                </div>
+            </div>
+        `;
+    }
+
     function renderAdminSystemTelemetry() {
         if (!isAuthorizedForAdminPortal()) return;
         const kpisEl = document.getElementById('adminTelemetryKpis');
         const listEl = document.getElementById('adminTelemetryListContainer');
         const { all, filtered } = getFilteredAdminTelemetryEvents();
+        renderAdminCloudSubChiefCard();
 
         ['ALL', 'K1', 'K2', 'K3', 'K4'].forEach(g => {
             const btn = document.getElementById(`adminTelGateBtn_${g}`);
@@ -818,7 +877,10 @@
         if (!isAuthorizedForAdminPortal()) return '';
         const { all, filtered } = getFilteredAdminTelemetryEvents();
         const target = filtered.length > 0 ? filtered : all;
-        if (target.length === 0) return '';
+        const cloudReport = (global.CelikLiaisonSubChiefs && typeof global.CelikLiaisonSubChiefs.buildCloudSubChiefDiagnosticReport === 'function')
+            ? global.CelikLiaisonSubChiefs.buildCloudSubChiefDiagnosticReport()
+            : '';
+        if (target.length === 0) return cloudReport;
         const maskFn = (typeof global.CelikKaraKutu !== 'undefined' && global.CelikKaraKutu && typeof global.CelikKaraKutu.maskSecrets === 'function')
             ? global.CelikKaraKutu.maskSecrets
             : (s) => String(s || '');
@@ -835,7 +897,31 @@
             if (ev.inputSummary) lines.push(`   Girdi: ${maskFn(ev.inputSummary)}`);
             lines.push(`   Sonuç: ${maskFn(ev.outcome)} | Zaman: ${tm}`);
         });
+        if (cloudReport) {
+            lines.push('', '---', cloudReport);
+        }
         return maskFn(lines.join('\n'));
+    }
+
+    async function copyCloudSubChiefReportToClipboard() {
+        if (!isAuthorizedForAdminPortal()) return;
+        const subApi = global.CelikLiaisonSubChiefs;
+        const report = (subApi && typeof subApi.buildCloudSubChiefDiagnosticReport === 'function')
+            ? subApi.buildCloudSubChiefDiagnosticReport()
+            : '';
+        if (!report) {
+            alert('Kopyalanacak bulut raporu oluşturulamadı.');
+            return;
+        }
+        try {
+            if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+                await navigator.clipboard.writeText(report);
+                if (typeof showToast === 'function') showToast('Bulut Alt Şefi raporu panoya kopyalandı.');
+                else alert('Bulut Alt Şefi raporu panoya kopyalandı.');
+                return;
+            }
+        } catch {}
+        alert(report);
     }
 
     async function copyAdminTelemetryPromptToClipboard() {
@@ -1871,6 +1957,7 @@
         removeSingleAdminTelemetryEvent,
         clearAdminTelemetryEvents,
         buildAdminTelemetryAiPrompt,
+        copyCloudSubChiefReportToClipboard,
         copyAdminTelemetryPromptToClipboard,
         selectNewAvatar,
         generateStrongPasswordForAdmin,

@@ -61,7 +61,7 @@ Uygulama, hem mobil PWA (Progressive Web App) hem de masaüstü (Electron Coach 
 | Ağırlık / Tekrar Seçici | `openSetWeightPicker()`, `openSetRepsPicker()` | Hızlı sayı seçim listbox'ını (`#quickListboxModal`) açar, seçilen değeri anında set verisine işler |
 | Hareketi Değiştir (Swap) | `openExercisePickerModal('swap')` | Aynı kas grubunu veya ekipmanı hedefleyen alternatif hareket havuzunu açar ve seçileni seansa yerleştirir |
 | `Antrenmanı Bitir` `onclick` | `finishActiveWorkout()` | Süreyi durdurur, seans istatistiklerini (toplam tonaj, set sayısı, PR'lar) hesaplar ve `#completeModal` açar |
-| `#completeModal` -> `Kaydet` | `saveCompletedWorkout()` | `celik_kodu_history_${uid}` LocalStorage'a yazar, `workout_logs/{uid}` Firestore koleksiyonuna asenkron yazar, aktif seansı siler |
+| `#completeModal` -> `Kaydet` | `saveCompletedWorkout()` | `celik_kodu_history_${uid}` LocalStorage'a yazar, `workout_logs/{uid}/items/{logId}` (kural öncesi `workout_logs/{uid}` yedekli) Firestore alt koleksiyonuna ve antrenman sonu `user_state/{uid}/days` bulutuna asenkron yazar, aktif seansı siler |
 
 ### 2.4. Egzersiz Kütüphanesi & Rutinler (`#libraryTab`)
 
@@ -126,7 +126,7 @@ flowchart TD
     Tab3 -->|startActiveWorkoutFromCustom| Tab2
     Tab2 -->|finishActiveWorkout| CompleteModal["#completeModal<br/>(Tebrik & RPE Puanlama)"]
     CompleteModal -->|saveCompletedWorkout| LocalStore[("LocalStorage<br/>Yerel Depolama")]
-    CompleteModal -.->|Asenkron Senkronizasyon| FirestoreCloud[("Firebase Firestore<br/>workout_logs/{uid}")]
+    CompleteModal -.->|Asenkron Senkronizasyon| FirestoreCloud[("Firebase Firestore<br/>workout_logs/{uid}/items/{logId}<br/>& user_state/{uid}/days/{YYYY-MM-DD}")]
     CompleteModal --> Tab4
     CompleteModal --> Tab5
 
@@ -168,7 +168,7 @@ flowchart LR
     subgraph Veri_Katmani["4. Veri & Kalıcılık Sonucu"]
         DB_GenWk[("LocalStorage:<br/>last_generated_workout")]
         DB_ActState[("LocalStorage:<br/>active_state_{uid}")]
-        DB_History[("LocalStorage & Firestore:<br/>workout_logs/{uid}")]
+        DB_History[("LocalStorage & Firestore:<br/>workout_logs/{uid}/items/{logId}")]
         DB_Sched[("Haftalık Takvim Planı<br/>Güncellemesi")]
         DB_File["Müşteri Cihazına<br/>JSON / CSV İndirme"]
     end
@@ -211,7 +211,7 @@ sequenceDiagram
     Core->>LocalDB: celik_kodu_active_state_{uid} aktif oturum geçici önbelleğini temizle
 
     Note over Core,Cloud: Adım 2: Asenkron Güvenli Bulut Senkronizasyonu
-    Core->>Cloud: workout_logs/{uid} dokümanına yeni log ve serverTimestamp() gönder
+    Core->>Cloud: workout_logs/{uid}/items/{logId} dokümanına tekil log (eski kuralda workout_logs/{uid} yedekli) ve serverTimestamp() gönder
     alt Bulut Bağlantısı Başarılı
         Cloud-->>Core: 200 OK (Kayıt doğrulandı)
         Core->>UI: "Bulutla Senkronize Edildi" durum rozetini yeşile çevir

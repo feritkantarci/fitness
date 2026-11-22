@@ -321,18 +321,25 @@
             if (typeof globalScope.getWeeklySchedule === 'function' && typeof globalScope.saveWeeklySchedule === 'function' && replacement) {
                 const sched = globalScope.getWeeklySchedule(uid);
                 let schedChanged = false;
+                const replaceExcludedInList = (arr) => arr.map(ex => {
+                    const exId = typeof ex === 'string' ? ex : ex?.id;
+                    if (exId === excludedId) {
+                        fixedSchedule++;
+                        schedChanged = true;
+                        return typeof ex === 'string' ? replacement.id : Object.assign({}, replacement);
+                    }
+                    return ex;
+                });
                 for (const d of Object.keys(sched || {})) {
                     const dayPlan = sched[d];
-                    if (dayPlan && Array.isArray(dayPlan.exercises)) {
-                        dayPlan.exercises = dayPlan.exercises.map(ex => {
-                            const exId = typeof ex === 'string' ? ex : ex?.id;
-                            if (exId === excludedId) {
-                                fixedSchedule++;
-                                schedChanged = true;
-                                return typeof ex === 'string' ? replacement.id : Object.assign({}, replacement);
-                            }
-                            return ex;
-                        });
+                    if (dayPlan && dayPlan.customWorkout && Array.isArray(dayPlan.customWorkout.exercises)) {
+                        dayPlan.customWorkout.exercises = replaceExcludedInList(dayPlan.customWorkout.exercises);
+                        if (Array.isArray(dayPlan.exercises)) {
+                            delete dayPlan.exercises;
+                            schedChanged = true;
+                        }
+                    } else if (dayPlan && Array.isArray(dayPlan.exercises)) {
+                        dayPlan.exercises = replaceExcludedInList(dayPlan.exercises);
                     }
                 }
                 if (schedChanged) globalScope.saveWeeklySchedule(sched, uid);
@@ -488,6 +495,237 @@
         });
     }
 
+    // 8) BULUT BAĞLANTI ALT ŞEFİ (KOTA, PAKET BOYUTU & v2 ZARF GÖZCÜSÜ) -> Alıcı: [Yönetici İzleme, Profil]
+    const cloudSubChiefStats = {
+        readsCount: 0,
+        writesCount: 0,
+        savedWritesCount: 0,
+        savedReadsCount: 0,
+        timeoutsCount: 0,
+        quotaTripsCount: 0,
+        lastSyncAt: 0,
+        lastOperation: '',
+        recentOps: []
+    };
+
+    function measureUtf8Bytes(raw) {
+        try {
+            const s = typeof raw === 'string' ? raw : JSON.stringify(raw);
+            if (!s) return 0;
+            if (typeof TextEncoder !== 'undefined') return new TextEncoder().encode(s).length;
+            return s.length * 2;
+        } catch {
+            return 0;
+        }
+    }
+
+    function noteCloudSubChiefEvent(kind, target, detail, count = 1) {
+        const n = Math.max(1, Number(count) || 1);
+        const k = String(kind || 'info').trim();
+        if (k === 'read') {
+            cloudSubChiefStats.readsCount += n;
+            cloudSubChiefStats.lastSyncAt = Date.now();
+        } else if (k === 'write') {
+            cloudSubChiefStats.writesCount += n;
+            cloudSubChiefStats.lastSyncAt = Date.now();
+        } else if (k === 'saved_write') {
+            cloudSubChiefStats.savedWritesCount += n;
+        } else if (k === 'saved_read') {
+            cloudSubChiefStats.savedReadsCount += n;
+        } else if (k === 'timeout') {
+            cloudSubChiefStats.timeoutsCount += n;
+        } else if (k === 'quota') {
+            cloudSubChiefStats.quotaTripsCount += n;
+        }
+        const targetLabel = String(target || 'bulut').trim();
+        const detailLabel = String(detail || k).trim();
+        cloudSubChiefStats.lastOperation = `${targetLabel} (${detailLabel})`;
+        cloudSubChiefStats.recentOps.unshift({
+            at: Date.now(),
+            kind: k,
+            target: targetLabel,
+            detail: detailLabel,
+            count: n
+        });
+        if (cloudSubChiefStats.recentOps.length > 15) {
+            cloudSubChiefStats.recentOps.length = 15;
+        }
+        return cloudSubChiefStats;
+    }
+
+    function inspectCloudHealthSnapshot(uidOverride) {
+        const uid = String(uidOverride || resolveCanonicalActiveUid() || 'default');
+        const safeGetItem = (key) => {
+            try {
+                return (typeof localStorage !== 'undefined' && localStorage) ? localStorage.getItem(key) : null;
+            } catch {
+                return null;
+            }
+        };
+        const safeParseObj = (raw, fallback) => {
+            if (!raw) return fallback;
+            try {
+                const parsed = JSON.parse(raw);
+                return parsed && typeof parsed === 'object' ? parsed : fallback;
+            } catch {
+                return fallback;
+            }
+        };
+
+        const historyRaw = safeGetItem(`celik_kodu_history_${uid}`) || '[]';
+        const historyBytes = measureUtf8Bytes(historyRaw);
+        const logs = safeParseObj(historyRaw, []);
+        let workoutCount = 0;
+        let maxSingleWorkoutBytes = 0;
+        let sumSingleWorkoutBytes = 0;
+        if (Array.isArray(logs)) {
+            workoutCount = logs.length;
+            for (const log of logs) {
+                const b = measureUtf8Bytes(log);
+                if (b > maxSingleWorkoutBytes) maxSingleWorkoutBytes = b;
+                sumSingleWorkoutBytes += b;
+            }
+        }
+        const avgSingleWorkoutBytes = workoutCount > 0 ? Math.round(sumSingleWorkoutBytes / workoutCount) : 0;
+
+        const dateSchedRaw = safeGetItem(`celik_kodu_date_schedule_${uid}`) || '{}';
+        const dateScheduleBytes = measureUtf8Bytes(dateSchedRaw);
+        const dateSchedObj = safeParseObj(dateSchedRaw, {});
+        let calendarDayCount = 0;
+        let maxSingleDayBytes = 0;
+        if (dateSchedObj && typeof dateSchedObj === 'object' && !Array.isArray(dateSchedObj)) {
+            const entries = Object.values(dateSchedObj);
+            calendarDayCount = entries.length;
+            for (const dayEntry of entries) {
+                const b = measureUtf8Bytes(dayEntry);
+                if (b > maxSingleDayBytes) maxSingleDayBytes = b;
+            }
+        }
+
+        const weeklyBytes =
+            measureUtf8Bytes(safeGetItem(`celik_kodu_weekly_schedule_${uid}`) || '{}') +
+            measureUtf8Bytes(safeGetItem(`celik_kodu_next_weekly_schedule_${uid}`) || '{}');
+        const customProgramsBytes = measureUtf8Bytes(safeGetItem(`celik_kodu_custom_programs_${uid}`) || '[]');
+        const weightsBytes = measureUtf8Bytes(safeGetItem(`celik_kodu_last_weights_${uid}`) || '{}');
+
+        const workoutSigsObj = safeParseObj(safeGetItem(`celik_kodu_cloud_item_sigs_workout_${uid}`), {});
+        const daySigsObj = safeParseObj(safeGetItem(`celik_kodu_cloud_item_sigs_days_${uid}`), {});
+        const v2WorkoutSigsCount = (workoutSigsObj && !Array.isArray(workoutSigsObj)) ? Object.keys(workoutSigsObj).length : 0;
+        const v2CalendarDaySigsCount = (daySigsObj && !Array.isArray(daySigsObj)) ? Object.keys(daySigsObj).length : 0;
+
+        const v2Migrated = safeGetItem(`celik_kodu_v2_subdoc_migrated_${uid}`) === '1';
+        const v2DaysActive = v2Migrated || v2CalendarDaySigsCount > 0;
+        const estimatedParentStateBytes = weeklyBytes + customProgramsBytes + weightsBytes + (v2DaysActive ? 0 : dateScheduleBytes) + 12000;
+
+        const limitBytes = 1048576;
+        const parentStateLimitPct = Math.round((estimatedParentStateBytes / limitBytes) * 1000) / 10;
+        const maxSingleWorkoutLimitPct = Math.round((maxSingleWorkoutBytes / limitBytes) * 1000) / 10;
+        const legacyMonolithWorkoutPct = Math.round((historyBytes / limitBytes) * 1000) / 10;
+
+        const pendingWorkoutSync = safeGetItem(`celik_kodu_pending_workout_sync_${uid}`) === '1';
+        const pendingStateSync = safeGetItem(`celik_kodu_pending_state_sync_${uid}`) === '1';
+        const deferredWorkoutStateSync = safeGetItem(`celik_kodu_deferred_state_sync_${uid}`) === '1';
+        const pendingSystemLogSync = safeGetItem(`celik_kodu_pending_telemetry_sync_${uid}`) === '1';
+        const pendingTotalCount = [pendingWorkoutSync, pendingStateSync, deferredWorkoutStateSync, pendingSystemLogSync].filter(Boolean).length;
+
+        const lastWorkoutPullAt = Number(safeGetItem(`celik_kodu_cloud_pull_at_workout_${uid}`) || 0);
+        const lastDaysPullAt = Number(safeGetItem(`celik_kodu_cloud_pull_at_days_${uid}`) || 0);
+
+        let circuitState = { isOpen: false, reason: '', remainingMs: 0, slowStreak: 0, badgeText: 'Bulut Aktif', lastIssue: null };
+        try {
+            if (typeof globalScope.getCloudCircuitDiagnosticState === 'function') {
+                const rawCircuit = globalScope.getCloudCircuitDiagnosticState();
+                if (rawCircuit && typeof rawCircuit === 'object') {
+                    circuitState = Object.assign({}, circuitState, rawCircuit);
+                }
+            }
+        } catch {}
+
+        const appVer = (globalScope.CelikKaraKutu && typeof globalScope.CelikKaraKutu.getAppVersion === 'function')
+            ? globalScope.CelikKaraKutu.getAppVersion()
+            : 'v356';
+
+        return {
+            uid,
+            appVersion: appVer,
+            readsCount: cloudSubChiefStats.readsCount,
+            writesCount: cloudSubChiefStats.writesCount,
+            savedWritesCount: cloudSubChiefStats.savedWritesCount,
+            savedReadsCount: cloudSubChiefStats.savedReadsCount,
+            timeoutsCount: cloudSubChiefStats.timeoutsCount,
+            quotaTripsCount: cloudSubChiefStats.quotaTripsCount,
+            lastSyncAt: cloudSubChiefStats.lastSyncAt,
+            lastOperation: cloudSubChiefStats.lastOperation,
+            recentOps: cloudSubChiefStats.recentOps.slice(0, 8),
+            workoutCount,
+            historyBytes,
+            maxSingleWorkoutBytes,
+            avgSingleWorkoutBytes,
+            calendarDayCount,
+            dateScheduleBytes,
+            maxSingleDayBytes,
+            weeklyBytes,
+            customProgramsBytes,
+            weightsBytes,
+            estimatedParentStateBytes,
+            parentStateLimitPct,
+            maxSingleWorkoutLimitPct,
+            legacyMonolithWorkoutPct,
+            v2Migrated,
+            v2DaysActive,
+            v2WorkoutSigsCount,
+            v2CalendarDaySigsCount,
+            lastWorkoutPullAt,
+            lastDaysPullAt,
+            pendingWorkoutSync,
+            pendingStateSync,
+            deferredWorkoutStateSync,
+            pendingSystemLogSync,
+            pendingTotalCount,
+            circuitState
+        };
+    }
+
+    function buildCloudSubChiefDiagnosticReport(uidOverride) {
+        const snap = inspectCloudHealthSnapshot(uidOverride);
+        const toKb = (b) => `${(Number(b || 0) / 1024).toFixed(1)} KB`;
+        const fmtTs = (ts) => (ts > 0 ? new Date(ts).toISOString() : 'Yok');
+        const c = snap.circuitState || {};
+        const circuitLabel = c.isOpen
+            ? (c.reason === 'slow' ? 'Yavas Ag Korumasi Acik' : 'Kota Korumasi Acik') + ` (${Math.ceil(Number(c.remainingMs || 0) / 60000)} dk kaldi)`
+            : 'Normal (Devrede)';
+        const pendingTags = [];
+        if (snap.pendingWorkoutSync) pendingTags.push('Antrenman');
+        if (snap.pendingStateSync) pendingTags.push('Durum');
+        if (snap.deferredWorkoutStateSync) pendingTags.push('AntrenmanSonuErteli');
+        if (snap.pendingSystemLogSync) pendingTags.push('SistemKaydi');
+        const savedTotal = snap.savedWritesCount + snap.savedReadsCount;
+
+        const lines = [
+            'CELIK KODU BULUT ALT SEFI DIAGNOSTIK RAPORU',
+            `Sporcu: ${snap.uid} | Surum: ${snap.appVersion} | Zarf Yapisi v2: ${snap.v2Migrated ? 'Tam Gecildi' : (snap.v2DaysActive ? 'Kismi Aktif' : 'Bekliyor')}`,
+            `Kota / Devre Durumu: ${circuitLabel} (Ardisik Zaman Asimi: ${c.slowStreak || 0} | Son Sorun: ${c.lastIssue || 'Yok'})`,
+            `Oturum Trafigi: Okuma=${snap.readsCount}, Yazma=${snap.writesCount}, Tasarruf=${savedTotal} (Atlanan Yazma=${snap.savedWritesCount}, Onbellek Okuma=${snap.savedReadsCount}), ZamanAsimi=${snap.timeoutsCount}, KotaKesimi=${snap.quotaTripsCount}`,
+            `1 MB Paket Sagligi: Ana Durum=${toKb(snap.estimatedParentStateBytes)} (%${snap.parentStateLimitPct}) | En Buyuk Antrenman Zarfi=${toKb(snap.maxSingleWorkoutBytes)} (%${snap.maxSingleWorkoutLimitPct}, Ort=${toKb(snap.avgSingleWorkoutBytes)}) | Eski Tekil Gecmis Toplami=${toKb(snap.historyBytes)} (%${snap.legacyMonolithWorkoutPct})`,
+            `Takvim & Zarf Sayilari: Kayitli Antrenman=${snap.workoutCount} (v2 Zarf=${snap.v2WorkoutSigsCount}) | Takvim Gunu=${snap.calendarDayCount} (${toKb(snap.dateScheduleBytes)}, v2 Gun=${snap.v2CalendarDaySigsCount}, En Buyuk Gun=${toKb(snap.maxSingleDayBytes)})`,
+            `Bekleyen Kuyruk (${snap.pendingTotalCount}): ${pendingTags.length ? pendingTags.join(', ') : 'Temiz'}`,
+            `Son Cekme Zamanlari: Antrenman=${fmtTs(snap.lastWorkoutPullAt)} | Takvim=${fmtTs(snap.lastDaysPullAt)} | Son Islem=${snap.lastOperation || 'Yok'}`
+        ];
+        if (Array.isArray(snap.recentOps) && snap.recentOps.length > 0) {
+            lines.push('Son Oturum Islemleri:');
+            snap.recentOps.slice(0, 6).forEach((op, idx) => {
+                lines.push(`  ${idx + 1}. [${op.kind}] ${op.target} -> ${op.detail} (x${op.count}) @ ${fmtTs(op.at)}`);
+            });
+        }
+        const rawReport = lines.join('\n');
+        try {
+            if (globalScope.CelikKaraKutu && typeof globalScope.CelikKaraKutu.maskSecrets === 'function') {
+                return globalScope.CelikKaraKutu.maskSecrets(rawReport);
+            }
+        } catch {}
+        return rawReport;
+    }
+
     const api = {
         resolveCanonicalActiveUid,
         withLoopGuard,
@@ -499,6 +737,12 @@
         inspectScaleInputForReceivers,
         inspectProfileSyncForReceivers,
         inspectGarminIncomingForReceivers,
+        noteCloudSubChiefEvent,
+        inspectCloudHealthSnapshot,
+        buildCloudSubChiefDiagnosticReport,
+        getCloudSubChiefStats: () => Object.assign({}, cloudSubChiefStats, {
+            recentOps: cloudSubChiefStats.recentOps.slice()
+        }),
         getNotices: () => auditNotices.slice(),
         clearNotices: () => { auditNotices.length = 0; },
         getLoopBlockedCount: () => loopBlockedCount,
@@ -506,7 +750,10 @@
             totalFixesCount,
             totalQuarantinedCount,
             loopBlockedCount,
-            recentNoticesCount: auditNotices.length
+            recentNoticesCount: auditNotices.length,
+            cloudReads: cloudSubChiefStats.readsCount,
+            cloudWrites: cloudSubChiefStats.writesCount,
+            cloudSavedOps: cloudSubChiefStats.savedWritesCount + cloudSubChiefStats.savedReadsCount
         })
     };
 
