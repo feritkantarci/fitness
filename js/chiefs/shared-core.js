@@ -3627,6 +3627,7 @@
                 const id = _normMetricKey(t.id || t.exId);
                 const name = _normMetricKey(t.name);
                 if (id.includes('plank_jack') || name.includes('plank jack') || name.includes('aç-kapa')) return false;
+                if (/(pull_walkout|pass_through|pull_through)/.test(id) || /(dambıl geçiş|dambıl çekiş|pull-through|pass-through|walk-out)/.test(name)) return false;
             }
             const timeKeywords = ['plank', 'hollow', 'carry', 'farmers_walk', 'suitcase_carry', 'waiter', 'cross_body_carry', 'taşıma', 'çiftçi yürüyüşü', 'bavul', 'dead hang', 'wall sit', 'l-sit', 'izometrik', 'butt_kick', 'topuk kalçaya'];
             for (const t of targets) {
@@ -3648,6 +3649,9 @@
             if (!ex) return false;
             const dbEx = _findCanonicalDbExerciseRaw(ex);
             const targets = [typeof ex === 'object' ? ex : { id: ex, name: ex }, dbEx].filter(Boolean);
+            for (const t of targets) {
+                if (t.equipment && t.equipment !== 'bodyweight') return false;
+            }
             const bwKeywords = ['şınav', 'push-up', 'pushup', 'barfiks', 'pull-up', 'pullup', 'chin-up', 'chinup', 'dips', 'air squat', 'jump squat', 'glute bridge', 'hollow body', 'plank', 'burpee', 'mountain climber', 'hanging knee', 'barda dize', 'sissy squat'];
             for (const t of targets) {
                 if (t.equipment === 'bodyweight' || t.trackingType === 'bodyweight' || t.isBodyweight === true) return true;

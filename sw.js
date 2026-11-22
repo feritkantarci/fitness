@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v356';
+const CACHE_NAME = 'celik-kodu-cache-v357';
 const ASSETS = [
   './',
   './index.html',
@@ -257,6 +257,22 @@ const ASSETS = [
   './assets/opengym/stills/bw_seated_leg_overs.webp',
   './assets/opengym/clips/bw_seated_oblique_knee_tucks.mp4',
   './assets/opengym/stills/bw_seated_oblique_knee_tucks.webp',
+  './assets/opengym/clips/db_dead_bug.mp4',
+  './assets/opengym/stills/db_dead_bug.webp',
+  './assets/opengym/clips/4251.mp4',
+  './assets/opengym/stills/4251.webp',
+  './assets/opengym/clips/db_bear_plank_pull_walkout.mp4',
+  './assets/opengym/stills/db_bear_plank_pull_walkout.webp',
+  './assets/opengym/clips/db_single_arm_straight_leg_toe_touch.mp4',
+  './assets/opengym/stills/db_single_arm_straight_leg_toe_touch.webp',
+  './assets/opengym/clips/db_cross_toe_touch.mp4',
+  './assets/opengym/stills/db_cross_toe_touch.webp',
+  './assets/opengym/clips/db_toe_touch_crunch.mp4',
+  './assets/opengym/stills/db_toe_touch_crunch.webp',
+  './assets/opengym/clips/5497.mp4',
+  './assets/opengym/stills/5497.webp',
+  './assets/opengym/clips/db_jackknife_toe_reach.mp4',
+  './assets/opengym/stills/db_jackknife_toe_reach.webp',
   './assets/guides/guide_db_suitcase_carry_form.jpg',
   './assets/guides/guide_db_suitcase_carry_anatomi.jpg',
   './assets/guides/guide_bw_sissy_squat_form.jpg',

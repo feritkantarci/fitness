@@ -565,7 +565,15 @@
             'bw_tuck_crunch': { id: '0871', name: "Tuck Crunch (Dizler Havada Mekik)", clip: 'assets/opengym/clips/0871.mp4', still: 'assets/opengym/stills/0871.webp' },
             'bw_cross_body_crunch': { id: '0262', name: "Cross-Body Crunch (Çapraz Mekik)", clip: 'assets/opengym/clips/0262.mp4', still: 'assets/opengym/stills/0262.webp' },
             'bw_seated_leg_overs': { id: 'bw_seated_leg_overs', name: "Seated Leg Overs (Oturarak Bacak Aşırma)", clip: 'assets/opengym/clips/bw_seated_leg_overs.mp4', still: 'assets/opengym/stills/bw_seated_leg_overs.webp' },
-            'bw_seated_oblique_knee_tucks': { id: 'bw_seated_oblique_knee_tucks', name: "Seated Oblique Knee Tucks (Oturarak Yana Diz Çekme)", clip: 'assets/opengym/clips/bw_seated_oblique_knee_tucks.mp4', still: 'assets/opengym/stills/bw_seated_oblique_knee_tucks.webp' }
+            'bw_seated_oblique_knee_tucks': { id: 'bw_seated_oblique_knee_tucks', name: "Seated Oblique Knee Tucks (Oturarak Yana Diz Çekme)", clip: 'assets/opengym/clips/bw_seated_oblique_knee_tucks.mp4', still: 'assets/opengym/stills/bw_seated_oblique_knee_tucks.webp' },
+            'db_dead_bug': { id: 'db_dead_bug', name: "Dumbbell Dead Bug (Dambıl Dead Bug)", clip: 'assets/opengym/clips/db_dead_bug.mp4', still: 'assets/opengym/stills/db_dead_bug.webp' },
+            'db_alternating_twist_situp': { id: '4251', name: "Alternating Twist Sit-Up (Dambıllı Döner Mekik)", clip: 'assets/opengym/clips/4251.mp4', still: 'assets/opengym/stills/4251.webp' },
+            'db_bear_plank_pull_walkout': { id: 'db_bear_plank_pull_walkout', name: "Bear Plank DB Pull-Through Walk-Out (Ayı Duruşu Dambıl Çekiş & Adımlama)", clip: 'assets/opengym/clips/db_bear_plank_pull_walkout.mp4', still: 'assets/opengym/stills/db_bear_plank_pull_walkout.webp' },
+            'db_single_arm_straight_leg_toe_touch': { id: 'db_single_arm_straight_leg_toe_touch', name: "Single-Arm Dumbbell Straight-Leg Toe Touch (Tek Kol Dambıl Tek Düz Bacak Uzanış)", clip: 'assets/opengym/clips/db_single_arm_straight_leg_toe_touch.mp4', still: 'assets/opengym/stills/db_single_arm_straight_leg_toe_touch.webp' },
+            'db_cross_toe_touch': { id: 'db_cross_toe_touch', name: "Cross Toe Touch (Tek El Dambıl Çapraz Ayak Ucu Uzanış)", clip: 'assets/opengym/clips/db_cross_toe_touch.mp4', still: 'assets/opengym/stills/db_cross_toe_touch.webp' },
+            'db_toe_touch_crunch': { id: 'db_toe_touch_crunch', name: "Dumbbell Toe Touch Crunch (Dambıllar Havada Sabit Bacak İndirme)", clip: 'assets/opengym/clips/db_toe_touch_crunch.mp4', still: 'assets/opengym/stills/db_toe_touch_crunch.webp' },
+            'db_plank_pass_through': { id: '5497', name: "Dumbbell Plank Pass-Through (Plank Altından Dambıl Geçişi)", clip: 'assets/opengym/clips/5497.mp4', still: 'assets/opengym/stills/5497.webp' },
+            'db_jackknife_toe_reach': { id: 'db_jackknife_toe_reach', name: "Dumbbell Jackknife Toe Reach (Dambıl Jackknife / Dinamik Ayak Ucu Crunch)", clip: 'assets/opengym/clips/db_jackknife_toe_reach.mp4', still: 'assets/opengym/stills/db_jackknife_toe_reach.webp' }
         };
 
 
@@ -7852,7 +7860,15 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 'bw_tuck_crunch': { form: 'assets/opengym/stills/0871.webp', anatomi: null },
                 'bw_cross_body_crunch': { form: 'assets/opengym/stills/0262.webp', anatomi: null },
                 'bw_seated_leg_overs': { form: 'assets/opengym/stills/bw_seated_leg_overs.webp', anatomi: null },
-                'bw_seated_oblique_knee_tucks': { form: 'assets/opengym/stills/bw_seated_oblique_knee_tucks.webp', anatomi: null }
+                'bw_seated_oblique_knee_tucks': { form: 'assets/opengym/stills/bw_seated_oblique_knee_tucks.webp', anatomi: null },
+                'db_dead_bug': { form: 'assets/opengym/stills/db_dead_bug.webp', anatomi: null },
+                'db_alternating_twist_situp': { form: 'assets/opengym/stills/4251.webp', anatomi: null },
+                'db_bear_plank_pull_walkout': { form: 'assets/opengym/stills/db_bear_plank_pull_walkout.webp', anatomi: null },
+                'db_single_arm_straight_leg_toe_touch': { form: 'assets/opengym/stills/db_single_arm_straight_leg_toe_touch.webp', anatomi: null },
+                'db_cross_toe_touch': { form: 'assets/opengym/stills/db_cross_toe_touch.webp', anatomi: null },
+                'db_toe_touch_crunch': { form: 'assets/opengym/stills/db_toe_touch_crunch.webp', anatomi: null },
+                'db_plank_pass_through': { form: 'assets/opengym/stills/5497.webp', anatomi: null },
+                'db_jackknife_toe_reach': { form: 'assets/opengym/stills/db_jackknife_toe_reach.webp', anatomi: null }
             };
         window.guideLibrary = guideLibrary;
         window.exerciseGuideMap = exerciseGuideMap;

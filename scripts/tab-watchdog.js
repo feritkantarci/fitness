@@ -492,8 +492,8 @@ function runAcademicMathSuite(moduleSources, dbText) {
     {
       id: 'T6',
       owner: 'library-guard',
-      title: '3-Mod DB Denetimi (3 Cardio/8 Time/145 Rep) & Miras Hollow Body',
-      expected: 'cardio=3, time=8, reps=145; Hollow 12→10→8 normal_fatigue(sn), 40→20 early_drop',
+      title: '3-Mod DB Denetimi (3 Cardio/8 Time/153 Rep) & Miras Hollow Body',
+      expected: 'cardio=3, time=8, reps=153; Hollow 12→10→8 normal_fatigue(sn), 40→20 early_drop',
       run: () => {
         ctx.__seedState();
         const counts = vm.runInContext(`(() => {
@@ -532,7 +532,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
             availWithBand: ex ? isExerciseEquipmentAvailable(ex, ['bodyweight', 'mini_band']) : false
           };
         })()`, ctx);
-        const ok = counts.cardio_min === 3 && counts.time_sec === 8 && counts.reps === 145
+        const ok = counts.cardio_min === 3 && counts.time_sec === 8 && counts.reps === 153
           && eng.getExerciseMetricMode({ id: 'bw_butt_kicks', name: 'Topuk Kalçaya Koşu (Butt Kicks)' }) === 'time_sec'
           && latShuffle.equip === 'mini_band'
           && latShuffle.reqs.includes('mini_band')

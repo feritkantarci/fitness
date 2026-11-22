@@ -8696,5 +8696,406 @@
       "HIPS"
     ],
     "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Sırtüstü yatışta ayakları yerden kes, dambıllarla ters kol ve ters bacağı belini yerden kaldırmadan uzat.",
+    "diagram": "assets/opengym/stills/db_dead_bug.webp",
+    "equipment": "dumbbell",
+    "id": "db_dead_bug",
+    "isComplex": false,
+    "mechanic": "compound",
+    "muscle": "Ön Karın, Derin İç Karın",
+    "name": "Dumbbell Dead Bug (Dambıl Dead Bug)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Sırtüstü yat, iki elde birer dambıl göğüs üzerinde ve dizler 90 derece havada sabit.",
+        "phase": "1. Masa Kurulumu"
+      },
+      {
+        "badge": "action",
+        "desc": "Belini mattan kaldırmadan sağ kolu dambılla baş arkasına uzatırken sol bacağı ileri düz aç.",
+        "phase": "2. Ters Kol & Bacak Açılışı"
+      },
+      {
+        "badge": "finish",
+        "desc": "Karın merkezini sıkarak başlangıca dön ve hemen diğer kol ile bacağa geç.",
+        "phase": "3. Kontrollü Dönüş"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [],
+    "tags": [
+      "core"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Ön Karın, Derin İç Karın",
+    "secondarySubMuscles": "Yan Karın",
+    "biomechanicalProof": "Sırtüstü bel yeri kavrarken iki eldeki dambıllarla ters kol ve bacak açmak, omurgayı sabit tutmak için derin iç karın ve ön karın kaslarını sürekli gerilimde çalıştırır.",
+    "fitCategory": "crunch",
+    "fitName": "dumbbell_dead_bug",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS"
+    ],
+    "garminSecondaryMuscles": [],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Dizler bükülü yatıştan tek dambılı düz kollarla yukarı tutarak kalk ve gövdeyi sırayla sağa sola çevir.",
+    "diagram": "assets/opengym/stills/4251.webp",
+    "equipment": "dumbbell",
+    "id": "db_alternating_twist_situp",
+    "isComplex": false,
+    "mechanic": "compound",
+    "muscle": "Yan Karın, Ön Karın",
+    "name": "Alternating Twist Sit-Up (Dambıllı Döner Mekik)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Dizler bükülü sırtüstü yat, tek dambılı iki elinle göğüs hizasında düz kollarla tut.",
+        "phase": "1. Başlangıç Yatışı"
+      },
+      {
+        "badge": "action",
+        "desc": "Gövdeyi yukarı kaldırırken dambılı sağa doğru çevirerek yan karın kaslarını sık.",
+        "phase": "2. Kalkış & Dönüş"
+      },
+      {
+        "badge": "finish",
+        "desc": "Kontrollü biçimde yere inip sonraki tekrarda gövdeyi sol tarafa çevirerek kalk.",
+        "phase": "3. Ters Yana Geçiş"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [],
+    "tags": [
+      "core"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Yan Karın, Ön Karın",
+    "secondarySubMuscles": "Derin İç Karın",
+    "biomechanicalProof": "Düz kollarla tutulan dambılı kalkış anında sağa ve sola döndürmek, ön karın fleksiyonu ile yan karın rotasyonunu aynı anda yüksek dirençte birleştirir.",
+    "fitCategory": "sit_up",
+    "fitName": "dumbbell_alternating_twist_sit_up",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "OBLIQUES",
+      "ABS"
+    ],
+    "garminSecondaryMuscles": [],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Dizler havada ayı duruşunda dambılı alttan karşıya çek, ardından ayaklarla geriye plank adım at.",
+    "diagram": "assets/opengym/stills/db_bear_plank_pull_walkout.webp",
+    "equipment": "dumbbell",
+    "id": "db_bear_plank_pull_walkout",
+    "isComplex": false,
+    "mechanic": "compound",
+    "muscle": "Derin İç Karın, Yan Karın, Ön Karın",
+    "name": "Bear Plank DB Pull-Through Walk-Out (Ayı Duruşu Dambıl Çekiş & Adımlama)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Eller omuz altında, dizler yerden 3-5 cm havada ayı duruşuna geç; dambıl gövdenin yanında.",
+        "phase": "1. Asılı Ayı Duruşu"
+      },
+      {
+        "badge": "action",
+        "desc": "Kalçayı sallamadan karşı elinle dambılı gövde altından diğer yana çek ve eli yere sabitle.",
+        "phase": "2. Dambıl Altından Çekiş"
+      },
+      {
+        "badge": "finish",
+        "desc": "Ayakları sırayla geriye uzatarak düz planka açıl ve tekrar dizleri öne toplayıp ayı duruşuna dön.",
+        "phase": "3. Plank Adımlama & Dönüş"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [
+      "shoulders",
+      "quads"
+    ],
+    "tags": [
+      "core",
+      "conditioning"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Derin İç Karın, Yan Karın, Ön Karın",
+    "secondarySubMuscles": "Ön Omuz, Orta Ön Bacak",
+    "biomechanicalProof": "Asılı ayı duruşunda dambılı alttan çekip ardından düz planka adım atmak, anti-rotasyon ve anti-ekstansiyon yükünü kesintisiz birleştirir.",
+    "fitCategory": "core",
+    "fitName": "bear_plank_db_pull_through_walk_out",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS",
+      "OBLIQUES"
+    ],
+    "garminSecondaryMuscles": [
+      "SHOULDERS"
+    ],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Bir diz bükülü yerde sabitken tek eldeki dambılla düz kalkan karşı ayak parmak ucuna uzan.",
+    "diagram": "assets/opengym/stills/db_single_arm_straight_leg_toe_touch.webp",
+    "equipment": "dumbbell",
+    "id": "db_single_arm_straight_leg_toe_touch",
+    "isComplex": false,
+    "mechanic": "isolation",
+    "muscle": "Ön Karın, Yan Karın",
+    "name": "Single-Arm Dumbbell Straight-Leg Toe Touch (Tek Kol Dambıl Tek Düz Bacak Uzanış)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Sırtüstü yat, bir bacağı dizden büküp yere bas; diğer bacak düz, karşı elde dambıl yukarıda.",
+        "phase": "1. Tek Bacak Kurulumu"
+      },
+      {
+        "badge": "action",
+        "desc": "Düz bacağı yukarı kaldırırken tek eldeki dambılı karşı ayak ucuna doğru çapraz uzat.",
+        "phase": "2. Çapraz Ayak Ucuna Dokunuş"
+      },
+      {
+        "badge": "finish",
+        "desc": "Belin kontrolünü bozmadan yavaşça başlangıca in ve set bitiminde diğer tarafa geç.",
+        "phase": "3. Kontrollü İniş"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [],
+    "tags": [
+      "core"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Ön Karın, Yan Karın",
+    "secondarySubMuscles": "Derin İç Karın",
+    "biomechanicalProof": "Tek taraflı dambıl yüküyle karşı düz bacağa çapraz kalkış yapmak, ön karın ve yan karın kaslarında yüksek asimetrik gerilim oluşturur.",
+    "fitCategory": "crunch",
+    "fitName": "single_arm_dumbbell_straight_leg_toe_touch",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS",
+      "OBLIQUES"
+    ],
+    "garminSecondaryMuscles": [],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Sırtüstü düz yatıştan tek eldeki dambılı ve karşı düz bacağı aynı anda kaldırıp çaprazda buluştur.",
+    "diagram": "assets/opengym/stills/db_cross_toe_touch.webp",
+    "equipment": "dumbbell",
+    "id": "db_cross_toe_touch",
+    "isComplex": false,
+    "mechanic": "isolation",
+    "muscle": "Yan Karın, Ön Karın",
+    "name": "Cross Toe Touch (Tek El Dambıl Çapraz Ayak Ucu Uzanış)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Sırtüstü düz uzan, bir elde dambıl yukarıda sabit, diğer kol dengede ve bacaklar düz.",
+        "phase": "1. Düz Yatış Kurulumu"
+      },
+      {
+        "badge": "action",
+        "desc": "Dambılı tutan kolu ve karşı düz bacağı aynı anda yerden kesip çaprazda ayak ucuna dokun.",
+        "phase": "2. Çapraz V-Kalkış"
+      },
+      {
+        "badge": "finish",
+        "desc": "Yere çarpmadan yavaşça uzanıp bir sonraki tekrara geç.",
+        "phase": "3. Kontrollü Açılış"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [],
+    "tags": [
+      "core"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Yan Karın, Ön Karın",
+    "secondarySubMuscles": "Derin İç Karın",
+    "biomechanicalProof": "Düz bacak ve tek el dambılın gövde merkezini çapraz keserek buluşması, oblik liflerini ve alt-üst ön karnı güçlü şekilde kasar.",
+    "fitCategory": "crunch",
+    "fitName": "dumbbell_cross_toe_touch",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "OBLIQUES",
+      "ABS"
+    ],
+    "garminSecondaryMuscles": [],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "İki eldeki dambılı tavana doğru sabit tut; düz bacakları belini yerden kaldırmadan yere indirip kaldır.",
+    "diagram": "assets/opengym/stills/db_toe_touch_crunch.webp",
+    "equipment": "dumbbell",
+    "id": "db_toe_touch_crunch",
+    "isComplex": false,
+    "mechanic": "isolation",
+    "muscle": "Ön Karın, Derin İç Karın",
+    "name": "Dumbbell Toe Touch Crunch (Dambıllar Havada Sabit Bacak İndirme)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Sırtüstü yat, iki eldeki dambılları düz kollarla yukarıda sabitle ve bacakları dik konuma getir.",
+        "phase": "1. Havada Dambıl Sabitleme"
+      },
+      {
+        "badge": "action",
+        "desc": "Kolları hiç oynatmadan belini yere bastırıp düz bacakları kontrollü biçimde yere yaklaştır.",
+        "phase": "2. Kontrollü Bacak İndirme"
+      },
+      {
+        "badge": "finish",
+        "desc": "Topukları yere değdirmeden karın gücüyle bacakları tekrar başlangıç noktasına çek.",
+        "phase": "3. Yukarı Çekiş"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [
+      "quads"
+    ],
+    "tags": [
+      "core"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Ön Karın, Derin İç Karın",
+    "secondarySubMuscles": "Yan Karın, Orta Ön Bacak",
+    "biomechanicalProof": "Üst gövde dambıllarla sabitlenirken bacakları indirip kaldırmak, leğen kemiğini dengelemek için alt karın ve derin iç karın kaslarını yoğun çalıştırır.",
+    "fitCategory": "leg_raise",
+    "fitName": "dumbbell_hold_leg_raise",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS"
+    ],
+    "garminSecondaryMuscles": [
+      "HIPS"
+    ],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Düz plank pozisyonunda kalçayı hiç oynatmadan dambılı gövdenin altından karşı tarafa geçir.",
+    "diagram": "assets/opengym/stills/5497.webp",
+    "equipment": "dumbbell",
+    "id": "db_plank_pass_through",
+    "isComplex": false,
+    "mechanic": "compound",
+    "muscle": "Derin İç Karın, Yan Karın, Ön Karın",
+    "name": "Dumbbell Plank Pass-Through (Plank Altından Dambıl Geçişi)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Yüksek plank pozisyonuna geç, ayakları omuz genişliğinden biraz açık tut; dambıl bir elin yanında.",
+        "phase": "1. Yüksek Plank Kurulumu"
+      },
+      {
+        "badge": "action",
+        "desc": "Kalçayı döndürmeden karşı elinle gövde altından uzanıp dambılı diğer tarafa çek ve bırak.",
+        "phase": "2. Gövde Altı Geçiş"
+      },
+      {
+        "badge": "finish",
+        "desc": "Eli yere sabitleyip hemen diğer elinle dambılı başlangıç yönüne geri çek.",
+        "phase": "3. Zıt Yöne Tekrar"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [
+      "shoulders",
+      "triceps"
+    ],
+    "tags": [
+      "core"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Derin İç Karın, Yan Karın, Ön Karın",
+    "secondarySubMuscles": "Ön Omuz, Arka Kol Alt Baş",
+    "biomechanicalProof": "Üç destek noktası üzerinde ağırlığı yatay taşımak, gövde rotasyonunu frenleyen yan karın ve derin iç karın kaslarını maksimum seviyede devreye sokar.",
+    "fitCategory": "core",
+    "fitName": "dumbbell_plank_pass_through",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS",
+      "OBLIQUES"
+    ],
+    "garminSecondaryMuscles": [
+      "SHOULDERS",
+      "TRICEPS"
+    ],
+    "garminMatchType": "exact_verified"
+  },
+  {
+    "category": "core",
+    "cue": "Sırtüstü uzanıp dambılı iki elle tut; kolları baş arkasına, bacakları ileri açıp ortada ayak ucunda buluş.",
+    "diagram": "assets/opengym/stills/db_jackknife_toe_reach.webp",
+    "equipment": "dumbbell",
+    "id": "db_jackknife_toe_reach",
+    "isComplex": false,
+    "mechanic": "compound",
+    "muscle": "Ön Karın, Derin İç Karın",
+    "name": "Dumbbell Jackknife Toe Reach (Dambıl Jackknife / Dinamik Ayak Ucu Crunch)",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Sırtüstü yat, iki elle tek dambılı baş arkasına uzatırken düz bacakları yerden hafif kaldır.",
+        "phase": "1. Açık V Kurulumu"
+      },
+      {
+        "badge": "action",
+        "desc": "Omuzları ve düz bacakları aynı anda yukarı kaldırarak dambılı ayak parmak uçlarına doğru uzat.",
+        "phase": "2. Ortada Kapanış"
+      },
+      {
+        "badge": "finish",
+        "desc": "Bel kontrolünü koruyarak kolları baş arkasına, bacakları ileri yavaşça geri aç.",
+        "phase": "3. Kontrollü Açılış"
+      }
+    ],
+    "primaryMuscles": [
+      "core"
+    ],
+    "secondaryMuscles": [
+      "quads"
+    ],
+    "tags": [
+      "core"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Ön Karın, Derin İç Karın",
+    "secondarySubMuscles": "Yan Karın, Orta Ön Bacak",
+    "biomechanicalProof": "Açık vücut pozisyonundan kol ve bacakların ağırlıkla merkezde buluşması, üst ve alt ön karın liflerini tam hareket açıklığında kasar.",
+    "fitCategory": "sit_up",
+    "fitName": "dumbbell_jackknife_toe_reach",
+    "fitNote": "",
+    "garminPrimaryMuscles": [
+      "ABS"
+    ],
+    "garminSecondaryMuscles": [
+      "HIPS"
+    ],
+    "garminMatchType": "exact_verified"
   }
 ];
