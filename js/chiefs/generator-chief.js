@@ -549,7 +549,6 @@
             'bw_jumping_jack': { id: 'bw_jumping_jack', name: "Jumping Jack", clip: 'assets/opengym/clips/bw_jumping_jack.mp4', still: 'assets/opengym/stills/bw_jumping_jack.webp' },
             'bw_high_knees': { id: '3556', name: "High Knees (Dize Çekerek Koşu)", clip: 'assets/opengym/clips/bw_high_knees.mp4', still: 'assets/opengym/stills/bw_high_knees.webp' },
             'bw_jump_rope': { id: '3676', name: "İp Atlama (Gölge İp / Jump Rope)", clip: 'assets/opengym/clips/bw_jump_rope.mp4', still: 'assets/opengym/stills/bw_jump_rope.webp' },
-            'bw_butt_kicks': { id: '3037', name: "Topuk Kalçaya Koşu (Butt Kicks)", clip: 'assets/opengym/clips/bw_butt_kicks.mp4', still: 'assets/opengym/stills/bw_butt_kicks.webp' },
             'bw_skater_jumps': { id: '3361', name: "Skater Jumps (Paten Sıçraması)", clip: 'assets/opengym/clips/bw_skater_jumps.mp4', still: 'assets/opengym/stills/bw_skater_jumps.webp' },
             'bw_plank_jacks': { id: '1478', name: "Plank Jacks (Plank Bacak Aç-Kapa)", clip: 'assets/opengym/clips/bw_plank_jacks.mp4', still: 'assets/opengym/stills/bw_plank_jacks.webp' },
             'bw_squat_thrust': { id: '3705', name: "Squat Thrust (Yarım Burpee)", clip: 'assets/opengym/clips/bw_squat_thrust.mp4', still: 'assets/opengym/stills/bw_squat_thrust.webp' },
@@ -628,6 +627,7 @@
 
         function isExerciseFunctionalCategory(ex) {
             if (!ex) return false;
+            if (typeof isFunctionalFitnessExercise === 'function' && isFunctionalFitnessExercise(ex)) return true;
             const eq = (ex.equipment || '').toLowerCase();
             const cat = (ex.category || '').toLowerCase();
             const name = (ex.name || '').toLowerCase();
@@ -3590,7 +3590,6 @@ Aşağıdaki JSON şemasında çıktı ver:
             bw_jumping_jack: 'cardio_plyo_rebound',
             bw_jump_rope: 'cardio_plyo_rebound',
             bw_high_knees: 'cardio_running_drill',
-            bw_butt_kicks: 'cardio_running_drill',
             bw_skater_jumps: 'cardio_lateral_agility',
             bw_lateral_shuffle: 'cardio_lateral_agility',
             bw_plank_jacks: 'core_dynamic_climber'
@@ -3840,7 +3839,7 @@ Aşağıdaki JSON şemasında çıktı ver:
             const idLow = String(ex.id || '').toLowerCase();
             const isFlowOrCondMode = style === 'paced_conditioning' || style === 'complex' || style === 'flow';
             const isCond = effCat === 'conditioning' || effCat === 'cardio' || ex.category === 'conditioning' || ex.category === 'cardio'
-                || /jumping_jack|high_knees|butt_kicks|mountain_climber|skater_hops|lateral_shuffle|squat_thrust|burpee|jump_rope|running|walking/.test(idLow);
+                || /jumping_jack|high_knees|mountain_climber|skater_hops|lateral_shuffle|squat_thrust|burpee|jump_rope|running|walking/.test(idLow);
             if (isCond && !isFlowOrCondMode) return 4;
             if (effCat === 'core' || ex.category === 'core' || fam === 'loaded_carry' || (pk.length > 0 && pk.every(k => k.startsWith('core_')))) {
                 return 4;
@@ -5549,7 +5548,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                         appliedFilters.push("Omurga makaslama yükü olan hareketler elendi");
                     }
                     if (/diz|menisküs/.test(clause)) {
-                        excludedKeywords.push('jump', 'sıçra', 'pistol', 'thruster', 'burpee', 'high knees', 'high_knees', 'butt kicks', 'butt_kicks', 'skater', 'squat thrust', 'squat_thrust', 'lunge');
+                        excludedKeywords.push('jump', 'sıçra', 'pistol', 'thruster', 'burpee', 'high knees', 'high_knees', 'skater', 'squat thrust', 'squat_thrust', 'lunge');
                         appliedFilters.push("Dize patlayıcı yük bindiren hareketler elendi");
                     }
                     if (/(omuz|omz)/.test(clause) && hasPain) {
@@ -5762,10 +5761,10 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
 
                 const pk = (typeof getExercisePrimaryMuscleKeys === 'function') ? getExercisePrimaryMuscleKeys(ex) : [];
                 const effCat = (typeof getEffectiveExerciseCategory === 'function') ? getEffectiveExerciseCategory(ex) : ex.category;
-                const isCondAllowed = style === 'paced_conditioning' && (effCat === 'cardio' || ex.isComplex || /burpee|swing|thruster|mountain|jack|rope|skater|thrust|high_knees|butt_kicks|shuffle/i.test(ex.id || ''));
+                const isCondAllowed = style === 'paced_conditioning' && (effCat === 'cardio' || ex.isComplex || /burpee|swing|thruster|mountain|jack|rope|skater|thrust|high_knees|shuffle/i.test(ex.id || ''));
                 if (isCondAllowed) return true;
 
-                const isCardioJunk = effCat === 'cardio' || /jumping_jack|high_knees|butt_kicks|running|walking|jump_rope|skater|shuffle|squat_thrust/i.test(ex.id || '');
+                const isCardioJunk = effCat === 'cardio' || /jumping_jack|high_knees|running|walking|jump_rope|skater|shuffle|squat_thrust/i.test(ex.id || '');
                 if (isCardioJunk) return false;
 
                 const chosenCoreCount = chosenExercises.filter(c => {
@@ -6372,7 +6371,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     const isoExcludeRegex = /curl|extension|fly|raise|kickback|shrug|calf|wrist|face_pull|pullover|concentration|preacher|hammer/i;
                     const isCondCandidate = (e) => isConditioningMovementExercise(e) || (!isoExcludeRegex.test(e.id || '') && !isoExcludeRegex.test(e.name || '') && (
                         e.equipment === 'bodyweight' || e.isComplex ||
-                        /burpee|swing|thruster|snatch|clean|man_maker|manmaker|jump|mountain|jack|rope|row|carry|walk|skater|thrust|lunge|squat|pushup|push_up|plank|twist|bear|step|cardio|conditioning|butt_kick|high_knee/i.test((e.id || '') + ' ' + (e.name || ''))
+                        /burpee|swing|thruster|snatch|clean|man_maker|manmaker|jump|mountain|jack|rope|row|carry|walk|skater|thrust|lunge|squat|pushup|push_up|plank|twist|bear|step|cardio|conditioning|high_knee/i.test((e.id || '') + ' ' + (e.name || ''))
                     ));
                     let pureCond = finalPool.filter(isConditioningMovementExercise);
                     if (pureCond.length === 0 && typeof EXERCISES_DB !== 'undefined') {
@@ -6835,7 +6834,7 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                     for (let idx = chosenExercises.length - 1; idx >= 0; idx--) {
                         const ex = chosenExercises[idx];
                         const nameCue = `${ex.name || ''} ${ex.muscle || ''} ${ex.cue || ''}`.toLocaleLowerCase('tr-TR');
-                        const kneeStress = /diz/.test(wishLower) && /jump|sıçra|pistol|snatch|thruster|derin squat|burpee|high knees|butt kicks|skater|lunge/.test(nameCue);
+                        const kneeStress = /diz/.test(wishLower) && /jump|sıçra|pistol|snatch|thruster|derin squat|burpee|high knees|skater|lunge/.test(nameCue);
                         const backStress = /bel|fıtık|omurga/.test(wishLower) && /deadlift|rdl|swing|snatch|clean|good morning|bent over|pendlay/.test(nameCue);
                         const shoulderStress = /(omuz|omz)/.test(wishLower) && /overhead|arnold|snatch|strict press|push press|thruster|handstand|dips/.test(nameCue);
                         if (kneeStress || backStress || shoulderStress) {
@@ -7840,7 +7839,6 @@ Aşağıdaki JSON şemasında çıktı ver (kod bloğu içinde):
                 'bw_jumping_jack': { form: 'assets/exercises/bw_jumping_jack.gif', anatomi: null },
                 'bw_high_knees': { form: 'assets/exercises/bw_high_knees.webp', anatomi: null },
                 'bw_jump_rope': { form: 'assets/exercises/bw_jump_rope.webp', anatomi: null },
-                'bw_butt_kicks': { form: 'assets/exercises/bw_butt_kicks.webp', anatomi: null },
                 'bw_skater_jumps': { form: 'assets/exercises/bw_skater_jumps.webp', anatomi: null },
                 'bw_plank_jacks': { form: 'assets/exercises/bw_plank_jacks.webp', anatomi: null },
                 'bw_squat_thrust': { form: 'assets/exercises/bw_squat_thrust.webp', anatomi: null },
@@ -9862,7 +9860,16 @@ KESİN KURALLAR:
                     // Exclude all exercises already in current routine
                     if (existingIds.includes(ex.id)) return false;
 
-                    if (cat !== 'all' && ex.category !== cat) return false;
+                    if (cat !== 'all') {
+                        if (cat === 'conditioning') {
+                            const isFunc = typeof isFunctionalFitnessExercise === 'function'
+                                ? isFunctionalFitnessExercise(ex)
+                                : (Array.isArray(ex.tags) && ex.tags.includes('functional_fitness'));
+                            if (ex.category !== 'conditioning' && !isFunc) return false;
+                        } else if (ex.category !== cat) {
+                            return false;
+                        }
+                    }
                     if (q && !matchesExerciseSearch(ex, q)) return false;
                     return true;
                 });

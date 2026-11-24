@@ -1,4 +1,4 @@
-const CACHE_NAME = 'celik-kodu-cache-v357';
+const CACHE_NAME = 'celik-kodu-cache-v358';
 const ASSETS = [
   './',
   './index.html',
@@ -228,7 +228,6 @@ const ASSETS = [
   './assets/exercises/bw_jumping_jack.webp',
   './assets/exercises/bw_high_knees.webp',
   './assets/exercises/bw_jump_rope.webp',
-  './assets/exercises/bw_butt_kicks.webp',
   './assets/exercises/bw_skater_jumps.webp',
   './assets/exercises/bw_plank_jacks.webp',
   './assets/exercises/bw_squat_thrust.webp',

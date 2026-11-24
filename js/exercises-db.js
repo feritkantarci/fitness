@@ -676,7 +676,8 @@
     "tags": [
       "full_body",
       "legs",
-      "lower"
+      "lower",
+      "functional_fitness"
     ],
     "weightKey": "squat",
     "primarySubMuscles": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça",
@@ -1018,7 +1019,8 @@
     ],
     "tags": [
       "upper_pull",
-      "core"
+      "core",
+      "functional_fitness"
     ],
     "weightKey": "pull",
     "primarySubMuscles": "Orta Sırt, Kanatlar, Yan Karın, Derin İç Karın",
@@ -1233,7 +1235,8 @@
     "tags": [
       "full_body",
       "core",
-      "conditioning"
+      "conditioning",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Derin İç Karın, Üst Sırt & Trapez, Ön Kol & Dış Pazı",
@@ -1290,7 +1293,8 @@
       "forearms"
     ],
     "tags": [
-      "core"
+      "core",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Yan Karın, Derin İç Karın",
@@ -1343,7 +1347,8 @@
     ],
     "secondaryMuscles": [],
     "tags": [
-      "core"
+      "core",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Yan Karın",
@@ -1401,7 +1406,8 @@
     "tags": [
       "full_body",
       "power",
-      "conditioning"
+      "conditioning",
+      "functional_fitness"
     ],
     "weightKey": "hinge",
     "primarySubMuscles": "Ana Kalça, Arka Bacak, Ön Omuz",
@@ -1464,7 +1470,8 @@
     "tags": [
       "full_body",
       "legs",
-      "conditioning"
+      "conditioning",
+      "functional_fitness"
     ],
     "weightKey": "hinge",
     "primarySubMuscles": "Ana Kalça, Arka Bacak & Kalça Bağı, Arka Bacak",
@@ -1521,7 +1528,8 @@
     "tags": [
       "full_body",
       "legs",
-      "conditioning"
+      "conditioning",
+      "functional_fitness"
     ],
     "weightKey": "hinge",
     "primarySubMuscles": "Ana Kalça, Arka Bacak & Kalça Bağı, Arka Bacak",
@@ -1579,7 +1587,8 @@
     ],
     "tags": [
       "full_body",
-      "power"
+      "power",
+      "functional_fitness"
     ],
     "weightKey": "hinge",
     "primarySubMuscles": "Ana Kalça, Arka Bacak, Üst Sırt & Trapez, Orta Sırt",
@@ -1641,7 +1650,8 @@
     ],
     "tags": [
       "upper_push",
-      "upper"
+      "upper",
+      "functional_fitness"
     ],
     "weightKey": "press",
     "primarySubMuscles": "Ön Omuz",
@@ -1700,7 +1710,8 @@
     "tags": [
       "full_body",
       "power",
-      "conditioning"
+      "conditioning",
+      "functional_fitness"
     ],
     "weightKey": "hinge",
     "primarySubMuscles": "Ana Kalça, Arka Bacak, Ön Omuz",
@@ -1762,7 +1773,8 @@
     ],
     "tags": [
       "legs",
-      "lower"
+      "lower",
+      "functional_fitness"
     ],
     "weightKey": "squat",
     "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak",
@@ -1818,7 +1830,8 @@
     ],
     "tags": [
       "upper_pull",
-      "core"
+      "core",
+      "functional_fitness"
     ],
     "weightKey": "pull",
     "primarySubMuscles": "Kanatlar, Orta Sırt",
@@ -1875,7 +1888,8 @@
     ],
     "tags": [
       "core",
-      "mobility"
+      "mobility",
+      "functional_fitness"
     ],
     "weightKey": "press",
     "primarySubMuscles": "Yan Karın, Yan Kalça, Derin Kalça",
@@ -1929,7 +1943,8 @@
     "tags": [
       "full_body",
       "core",
-      "mobility"
+      "mobility",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Derin İç Karın, Ön Karın, Yan Karın, Ön Omuz",
@@ -1986,7 +2001,8 @@
     "tags": [
       "core",
       "mobility",
-      "upper_pull"
+      "upper_pull",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Arka Omuz, Yan Omuz",
@@ -2040,7 +2056,8 @@
     "tags": [
       "full_body",
       "legs",
-      "conditioning"
+      "conditioning",
+      "functional_fitness"
     ],
     "weightKey": "press",
     "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça, Ön Omuz",
@@ -3385,7 +3402,8 @@
     ],
     "tags": [
       "core",
-      "conditioning"
+      "conditioning",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Yan Karın, Derin İç Karın",
@@ -3936,7 +3954,8 @@
     ],
     "tags": [
       "legs",
-      "conditioning"
+      "conditioning",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Dış Ön Bacak, Orta Ön Bacak, Ana Kalça, Üst Baldır",
@@ -4099,7 +4118,8 @@
       "quads"
     ],
     "tags": [
-      "core"
+      "core",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Ön Karın, Derin İç Karın",
@@ -4150,7 +4170,8 @@
       "shoulders"
     ],
     "tags": [
-      "core"
+      "core",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Derin İç Karın, Ön Karın",
@@ -4207,7 +4228,8 @@
     ],
     "tags": [
       "full_body",
-      "conditioning"
+      "conditioning",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Dış Ön Bacak, Ana Kalça, Orta Göğüs",
@@ -4267,7 +4289,8 @@
     ],
     "tags": [
       "core",
-      "conditioning"
+      "conditioning",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Ön Karın, Derin İç Karın",
@@ -4377,7 +4400,8 @@
     "tags": [
       "core",
       "upper_push",
-      "conditioning"
+      "conditioning",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Yan Karın, Derin İç Karın",
@@ -4433,7 +4457,8 @@
     "tags": [
       "full_body",
       "legs",
-      "conditioning"
+      "conditioning",
+      "functional_fitness"
     ],
     "weightKey": "press",
     "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça, Ön Omuz",
@@ -4497,7 +4522,8 @@
     ],
     "tags": [
       "upper_push",
-      "upper"
+      "upper",
+      "functional_fitness"
     ],
     "weightKey": "press",
     "primarySubMuscles": "Ön Omuz",
@@ -4557,7 +4583,8 @@
     "tags": [
       "upper_push",
       "upper_pull",
-      "core"
+      "core",
+      "functional_fitness"
     ],
     "weightKey": "press",
     "primarySubMuscles": "Orta Göğüs, Kanatlar, Orta Sırt, Yan Karın",
@@ -4614,7 +4641,8 @@
     ],
     "tags": [
       "core",
-      "conditioning"
+      "conditioning",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Derin İç Karın, Yan Karın",
@@ -4674,7 +4702,8 @@
     ],
     "tags": [
       "full_body",
-      "power"
+      "power",
+      "functional_fitness"
     ],
     "weightKey": "press",
     "primarySubMuscles": "Ana Kalça, Arka Bacak, Ön Omuz",
@@ -4753,7 +4782,8 @@
     "tags": [
       "full_body",
       "conditioning",
-      "power"
+      "power",
+      "functional_fitness"
     ],
     "weightKey": "press",
     "primarySubMuscles": "Orta Göğüs, Kanatlar, Dış Ön Bacak, Ana Kalça, Ön Omuz",
@@ -4815,7 +4845,8 @@
     ],
     "tags": [
       "core",
-      "upper_push"
+      "upper_push",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Yan Karın, Derin İç Karın, Ön Omuz",
@@ -4867,7 +4898,8 @@
     ],
     "tags": [
       "core",
-      "full_body"
+      "full_body",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Yan Karın, Derin İç Karın, Ön Omuz",
@@ -4924,7 +4956,8 @@
     "tags": [
       "legs",
       "core",
-      "lower"
+      "lower",
+      "functional_fitness"
     ],
     "weightKey": "squat",
     "primarySubMuscles": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Yan Karın",
@@ -4983,7 +5016,8 @@
     "tags": [
       "legs",
       "upper_push",
-      "lower"
+      "lower",
+      "functional_fitness"
     ],
     "weightKey": "squat",
     "primarySubMuscles": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Ön Omuz",
@@ -5046,7 +5080,8 @@
       "full_body",
       "legs",
       "conditioning",
-      "power"
+      "power",
+      "functional_fitness"
     ],
     "weightKey": "press",
     "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça, Ön Omuz",
@@ -5115,7 +5150,8 @@
       "full_body",
       "upper_pull",
       "power",
-      "conditioning"
+      "conditioning",
+      "functional_fitness"
     ],
     "weightKey": "pull",
     "primarySubMuscles": "Ana Kalça, Arka Bacak, Üst Sırt & Trapez, Orta Sırt",
@@ -5178,7 +5214,8 @@
     "tags": [
       "upper_push",
       "upper",
-      "power"
+      "power",
+      "functional_fitness"
     ],
     "weightKey": "press",
     "primarySubMuscles": "Ön Omuz",
@@ -5237,7 +5274,8 @@
       "legs",
       "lower",
       "core",
-      "power"
+      "power",
+      "functional_fitness"
     ],
     "weightKey": "squat",
     "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça",
@@ -5300,7 +5338,8 @@
       "full_body",
       "legs",
       "upper_push",
-      "conditioning"
+      "conditioning",
+      "functional_fitness"
     ],
     "weightKey": "press",
     "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak, Ön Omuz, Üst Göğüs",
@@ -5526,7 +5565,8 @@
       "flow",
       "upper_pull",
       "mobility",
-      "dumbbell"
+      "dumbbell",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Kanatlar, Arka Omuz, Yan Omuz, Ön Karın",
@@ -5586,7 +5626,8 @@
       "legs",
       "lower",
       "unilateral",
-      "dumbbell"
+      "dumbbell",
+      "functional_fitness"
     ],
     "weightKey": "squat",
     "primarySubMuscles": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Yan Kalça",
@@ -5647,7 +5688,8 @@
       "full_body",
       "power",
       "conditioning",
-      "dumbbell"
+      "dumbbell",
+      "functional_fitness"
     ],
     "weightKey": "press",
     "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça, Ön Omuz",
@@ -5714,7 +5756,8 @@
       "upper_pull",
       "lower",
       "posterior_chain",
-      "dumbbell"
+      "dumbbell",
+      "functional_fitness"
     ],
     "weightKey": "hinge",
     "primarySubMuscles": "Arka Bacak, Ana Kalça, Üst Sırt & Trapez, Yan Omuz",
@@ -5777,7 +5820,8 @@
       "full_body",
       "legs",
       "conditioning",
-      "dumbbell"
+      "dumbbell",
+      "functional_fitness"
     ],
     "weightKey": "squat",
     "primarySubMuscles": "Ana Kalça, Arka Bacak & Kalça Bağı, Dış Ön Bacak, İç Ön Bacak",
@@ -5840,7 +5884,8 @@
       "legs",
       "arms",
       "push",
-      "dumbbell"
+      "dumbbell",
+      "functional_fitness"
     ],
     "weightKey": "press",
     "primarySubMuscles": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Ön Kol & Dış Pazı, Pazı Dış Baş, Ön Omuz",
@@ -5904,7 +5949,8 @@
       "upper_pull",
       "posterior_chain",
       "core",
-      "dumbbell"
+      "dumbbell",
+      "functional_fitness"
     ],
     "weightKey": "row",
     "primarySubMuscles": "Kanatlar, Orta Sırt, Üst Sırt & Trapez, Ana Kalça",
@@ -5969,7 +6015,8 @@
       "chest",
       "legs_glutes",
       "posterior_chain",
-      "dumbbell"
+      "dumbbell",
+      "functional_fitness"
     ],
     "weightKey": "press",
     "primarySubMuscles": "Orta Göğüs, Ana Kalça, Arka Kol Dış Baş, Arka Kol Alt Baş",
@@ -6036,7 +6083,8 @@
       "legs_quad",
       "shoulders_front",
       "core_obliques",
-      "dumbbell"
+      "dumbbell",
+      "functional_fitness"
     ],
     "weightKey": "press",
     "primarySubMuscles": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Ön Omuz",
@@ -6098,7 +6146,8 @@
       "mobility",
       "chest",
       "core",
-      "bodyweight"
+      "bodyweight",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Orta Göğüs, Ön Karın, Derin İç Karın",
@@ -6271,7 +6320,8 @@
       "legs",
       "core",
       "power",
-      "dumbbell"
+      "dumbbell",
+      "functional_fitness"
     ],
     "weightKey": "squat",
     "primarySubMuscles": "İç Ön Bacak, Dış Ön Bacak, Ana Kalça, Yan Karın",
@@ -6332,7 +6382,8 @@
       "upper_pull",
       "back",
       "core",
-      "dumbbell"
+      "dumbbell",
+      "functional_fitness"
     ],
     "weightKey": "pull",
     "primarySubMuscles": "Kanatlar, Orta Sırt",
@@ -6502,7 +6553,8 @@
       "upper_pull",
       "shoulders",
       "rotator_cuff",
-      "dumbbell"
+      "dumbbell",
+      "functional_fitness"
     ],
     "weightKey": "pull",
     "primarySubMuscles": "Arka Omuz, Orta Sırt, Üst Sırt & Trapez",
@@ -6612,7 +6664,8 @@
       "shoulders",
       "rotator_cuff",
       "isolation",
-      "dumbbell"
+      "dumbbell",
+      "functional_fitness"
     ],
     "weightKey": "press",
     "primarySubMuscles": "Arka Omuz",
@@ -6673,7 +6726,8 @@
       "full_body",
       "conditioning",
       "bodyweight",
-      "aerobic"
+      "aerobic",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Üst Baldır, Alt Baldır, Yan Omuz, Yan Kalça",
@@ -6733,7 +6787,8 @@
       "full_body",
       "conditioning",
       "bodyweight",
-      "cardio"
+      "cardio",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Ön Karın, Orta Ön Bacak, Üst Baldır",
@@ -6789,7 +6844,8 @@
       "conditioning",
       "bodyweight",
       "aerobic",
-      "calves"
+      "calves",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Üst Baldır, Alt Baldır, Ön Kaval & Bilek",
@@ -6803,65 +6859,6 @@
     ],
     "garminSecondaryMuscles": [
       "HAMSTRINGS",
-      "GLUTES"
-    ],
-    "garminMatchType": "exact_verified"
-  },
-  {
-    "category": "conditioning",
-    "cue": "Dizleri öne değil yere doğru tutarak topukları seri şekilde kalçaya vur, gövdeyi dik tut.",
-    "diagram": "assets/diagrams/seq_escalera.svg",
-    "equipment": "bodyweight",
-    "id": "bw_butt_kicks",
-    "isComplex": false,
-    "isTimeBased": true,
-    "mechanic": "compound",
-    "muscle": "Diz Büken Arka Bacak, Üst Baldır, Alt Baldır",
-    "name": "Topuk Kalçaya Koşu (Butt Kicks)",
-    "positions": [
-      {
-        "badge": "setup",
-        "desc": "Ayakta dik duruş, ağırlık parmak uçlarında, omuzlar rahat ve serbest.",
-        "phase": "1. Dik Başlangıç"
-      },
-      {
-        "badge": "action",
-        "desc": "Sağ topuğu kalçaya seri şekilde vur, dizi aşağı ve geride tut.",
-        "phase": "2. Sağ Topuk Kalçaya"
-      },
-      {
-        "badge": "finish",
-        "desc": "Hızla sol bacağa geçip sol topuğu kalçaya vur, hamstringleri dinamik esnet.",
-        "phase": "3. Sol Topuk Vuruşu & Ritim"
-      }
-    ],
-    "primaryMuscles": [
-      "hamstrings",
-      "calves"
-    ],
-    "secondaryMuscles": [
-      "glutes",
-      "core"
-    ],
-    "tags": [
-      "legs",
-      "conditioning",
-      "bodyweight",
-      "warmup"
-    ],
-    "weightKey": "",
-    "primarySubMuscles": "Diz Büken Arka Bacak, Üst Baldır, Alt Baldır",
-    "secondarySubMuscles": "Ana Kalça, Derin İç Karın",
-    "biomechanicalProof": "Koşarken topukları hızla kalçaya vurmak dizleri büken arka bacak kaslarını, parmak ucunda yaylanmak ise kalf (baldır) kaslarını çalıştırır.",
-    "fitCategory": "cardio",
-    "fitName": "jump_rope_jog",
-    "fitNote": "Butt Kicks",
-    "trackingType": "time",
-    "garminPrimaryMuscles": [
-      "HAMSTRINGS",
-      "CALVES"
-    ],
-    "garminSecondaryMuscles": [
       "GLUTES"
     ],
     "garminMatchType": "exact_verified"
@@ -6905,7 +6902,8 @@
       "legs",
       "conditioning",
       "power",
-      "bodyweight"
+      "bodyweight",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Yan Kalça, Ana Kalça, Dış Ön Bacak",
@@ -6964,7 +6962,8 @@
     "tags": [
       "core",
       "conditioning",
-      "bodyweight"
+      "bodyweight",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Derin İç Karın, Ön Karın",
@@ -7022,7 +7021,8 @@
     "tags": [
       "full_body",
       "conditioning",
-      "bodyweight"
+      "bodyweight",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Dış Ön Bacak, Ana Kalça, Ön Karın, Derin İç Karın",
@@ -7085,7 +7085,8 @@
       "legs",
       "conditioning",
       "mini_band",
-      "agility"
+      "agility",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Yan Kalça, Dış Ön Bacak, İç Ön Bacak",
@@ -7335,7 +7336,8 @@
       "legs",
       "glutes",
       "mini_band",
-      "activation"
+      "activation",
+      "functional_fitness"
     ],
     "weightKey": "",
     "fitCategory": "squat",
@@ -8130,7 +8132,8 @@
     ],
     "tags": [
       "core",
-      "bodyweight"
+      "bodyweight",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Derin İç Karın, Ön Karın",
@@ -8379,7 +8382,8 @@
     ],
     "tags": [
       "core",
-      "bodyweight"
+      "bodyweight",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Yan Karın, Derin İç Karın",
@@ -8432,7 +8436,8 @@
     ],
     "tags": [
       "core",
-      "bodyweight"
+      "bodyweight",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Ön Karın, Derin İç Karın",
@@ -8628,7 +8633,8 @@
     ],
     "tags": [
       "core",
-      "bodyweight"
+      "bodyweight",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Ön Karın, Yan Karın",
@@ -8680,7 +8686,8 @@
     ],
     "tags": [
       "core",
-      "bodyweight"
+      "bodyweight",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Yan Karın, Ön Karın",
@@ -8729,7 +8736,8 @@
     ],
     "secondaryMuscles": [],
     "tags": [
-      "core"
+      "core",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Ön Karın, Derin İç Karın",
@@ -8776,7 +8784,8 @@
     ],
     "secondaryMuscles": [],
     "tags": [
-      "core"
+      "core",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Yan Karın, Ön Karın",
@@ -8828,7 +8837,8 @@
     ],
     "tags": [
       "core",
-      "conditioning"
+      "conditioning",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Derin İç Karın, Yan Karın, Ön Karın",
@@ -8878,7 +8888,8 @@
     ],
     "secondaryMuscles": [],
     "tags": [
-      "core"
+      "core",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Ön Karın, Yan Karın",
@@ -8926,7 +8937,8 @@
     ],
     "secondaryMuscles": [],
     "tags": [
-      "core"
+      "core",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Yan Karın, Ön Karın",
@@ -8976,7 +8988,8 @@
       "quads"
     ],
     "tags": [
-      "core"
+      "core",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Ön Karın, Derin İç Karın",
@@ -9028,7 +9041,8 @@
       "triceps"
     ],
     "tags": [
-      "core"
+      "core",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Derin İç Karın, Yan Karın, Ön Karın",
@@ -9081,7 +9095,8 @@
       "quads"
     ],
     "tags": [
-      "core"
+      "core",
+      "functional_fitness"
     ],
     "weightKey": "",
     "primarySubMuscles": "Ön Karın, Derin İç Karın",

@@ -614,13 +614,15 @@
         const v2CalendarDaySigsCount = (daySigsObj && !Array.isArray(daySigsObj)) ? Object.keys(daySigsObj).length : 0;
 
         const v2Migrated = safeGetItem(`celik_kodu_v2_subdoc_migrated_${uid}`) === '1';
+        const v2LegacyPurged = safeGetItem(`celik_kodu_v2_legacy_purged_${uid}`) === '1';
         const v2DaysActive = v2Migrated || v2CalendarDaySigsCount > 0;
         const estimatedParentStateBytes = weeklyBytes + customProgramsBytes + weightsBytes + (v2DaysActive ? 0 : dateScheduleBytes) + 12000;
 
         const limitBytes = 1048576;
         const parentStateLimitPct = Math.round((estimatedParentStateBytes / limitBytes) * 1000) / 10;
         const maxSingleWorkoutLimitPct = Math.round((maxSingleWorkoutBytes / limitBytes) * 1000) / 10;
-        const legacyMonolithWorkoutPct = Math.round((historyBytes / limitBytes) * 1000) / 10;
+        const legacyMonolithBytes = (v2Migrated && v2LegacyPurged) ? 0 : historyBytes;
+        const legacyMonolithWorkoutPct = Math.round((legacyMonolithBytes / limitBytes) * 1000) / 10;
 
         const pendingWorkoutSync = safeGetItem(`celik_kodu_pending_workout_sync_${uid}`) === '1';
         const pendingStateSync = safeGetItem(`celik_kodu_pending_state_sync_${uid}`) === '1';
@@ -670,8 +672,10 @@
             estimatedParentStateBytes,
             parentStateLimitPct,
             maxSingleWorkoutLimitPct,
+            legacyMonolithBytes,
             legacyMonolithWorkoutPct,
             v2Migrated,
+            v2LegacyPurged,
             v2DaysActive,
             v2WorkoutSigsCount,
             v2CalendarDaySigsCount,
@@ -706,7 +710,7 @@
             `Sporcu: ${snap.uid} | Surum: ${snap.appVersion} | Zarf Yapisi v2: ${snap.v2Migrated ? 'Tam Gecildi' : (snap.v2DaysActive ? 'Kismi Aktif' : 'Bekliyor')}`,
             `Kota / Devre Durumu: ${circuitLabel} (Ardisik Zaman Asimi: ${c.slowStreak || 0} | Son Sorun: ${c.lastIssue || 'Yok'})`,
             `Oturum Trafigi: Okuma=${snap.readsCount}, Yazma=${snap.writesCount}, Tasarruf=${savedTotal} (Atlanan Yazma=${snap.savedWritesCount}, Onbellek Okuma=${snap.savedReadsCount}), ZamanAsimi=${snap.timeoutsCount}, KotaKesimi=${snap.quotaTripsCount}`,
-            `1 MB Paket Sagligi: Ana Durum=${toKb(snap.estimatedParentStateBytes)} (%${snap.parentStateLimitPct}) | En Buyuk Antrenman Zarfi=${toKb(snap.maxSingleWorkoutBytes)} (%${snap.maxSingleWorkoutLimitPct}, Ort=${toKb(snap.avgSingleWorkoutBytes)}) | Eski Tekil Gecmis Toplami=${toKb(snap.historyBytes)} (%${snap.legacyMonolithWorkoutPct})`,
+            `1 MB Paket Sagligi: Ana Durum=${toKb(snap.estimatedParentStateBytes)} (%${snap.parentStateLimitPct}) | En Buyuk Antrenman Zarfi=${toKb(snap.maxSingleWorkoutBytes)} (%${snap.maxSingleWorkoutLimitPct}, Ort=${toKb(snap.avgSingleWorkoutBytes)}) | Eski Tekil Gecmis Toplami=${toKb(snap.legacyMonolithBytes)} (%${snap.legacyMonolithWorkoutPct})`,
             `Takvim & Zarf Sayilari: Kayitli Antrenman=${snap.workoutCount} (v2 Zarf=${snap.v2WorkoutSigsCount}) | Takvim Gunu=${snap.calendarDayCount} (${toKb(snap.dateScheduleBytes)}, v2 Gun=${snap.v2CalendarDaySigsCount}, En Buyuk Gun=${toKb(snap.maxSingleDayBytes)})`,
             `Bekleyen Kuyruk (${snap.pendingTotalCount}): ${pendingTags.length ? pendingTags.join(', ') : 'Temiz'}`,
             `Son Cekme Zamanlari: Antrenman=${fmtTs(snap.lastWorkoutPullAt)} | Takvim=${fmtTs(snap.lastDaysPullAt)} | Son Islem=${snap.lastOperation || 'Yok'}`

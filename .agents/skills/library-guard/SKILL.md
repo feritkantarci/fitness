@@ -14,7 +14,7 @@ description: Çelik Kodu Kütüphane sekmesini (#libraryTab, js/chiefs/library-c
 3. Eski kayıtlarda eksik olan bayrakları (`isTimeBased`, `isBodyweight`, `category`, `metricUnit`) kanonik çözümleyici (`resolveCanonicalDbExercise`) ile tamamlar.
 
 ## Kırmızı Çizgiler ve Kurallar
-- **Ana Havuz Dokunulmazlığı:** Kullanıcı bir hareketi kapattığında kaynak koddan asla silinmez; yalnızca kullanıcının kişisel yerel ayarında gizlenir ve istendiğinde geri açılır.
+- **Ana Havuz Dokunulmazlığı & Emeklilik İstisnası:** Kullanıcı bir hareketi kapattığında kaynak koddan silinmez; yalnızca kişisel yerel ayarında gizlenir. Yalnızca yönetici tarafından kalıcı olarak emekli edilen kimlikler (`RETIRED_CATALOG_EXERCISE_IDS`) yerel paketten, buluttan ve yerel önbellekten arındırılır; bayat önbellekten geri dirilemeyeceği `T6` ile doğrulanır.
 - **TR/EN Metin Normalizasyonu:** Türkçe (`İ`, `ı`) ve İngilizce (`I`, `i`) kas/hareket eşleştirmelerinde `normSearchText` kullanılır; `'lat'` gibi kısa dizgiler kelime sınırı olmadan eşleştirilmez.
 - **Birim, Ekipman & Kategori Tutarlılığı:** Süreli izometrikler (`plank`, `hollow`, `carry`), dakikalık kardiyolar (`cond_*`, `indoor_row`) ve kondisyon hareketleri (`conditioning`) tek merkezden sınıflandırılır; önerilen tüm `recId` kimlikleri `EXERCISES_DB` içinde mevcuttur. Animasyonunda kısa direnç bandı kullanılan `bw_lateral_shuffle` (`Lateral Shuffle (Kısa Bantlı Yanal Adımlama)`) hareketi `equipment: "mini_band"` (`Kısa Bant`) olarak tanımlanır ve kısa bant seçili olmadığında ekipman filtresinden elenir.
 - **Hata Hafızası Sicili:** Kullanıcının kütüphane veya egzersiz sınıflandırmasında yakaladığı her hata `scripts/tab-watchdog.js` sınavına kalıcı madde olarak eklenir.

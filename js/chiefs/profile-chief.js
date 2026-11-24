@@ -247,13 +247,86 @@
 
         const CLOUD_MASTER_CATALOG_STORAGE_KEY = 'celik_kodu_cloud_master_catalog_v1';
         const CENTRAL_BRIDGE_URL_KEY = 'celik_kodu_central_bridge_url';
+        const RETIRED_CATALOG_EXERCISE_IDS = Object.freeze(['bw_butt_kicks']);
+
+        function getRetiredCatalogExerciseIdSet(payload) {
+            const set = new Set(RETIRED_CATALOG_EXERCISE_IDS);
+            if (payload && typeof payload === 'object') {
+                let extra = null;
+                if (Array.isArray(payload.retiredExerciseIds)) {
+                    extra = payload.retiredExerciseIds;
+                } else if (typeof payload.retiredExerciseIdsJson === 'string' && payload.retiredExerciseIdsJson.trim()) {
+                    try { extra = JSON.parse(payload.retiredExerciseIdsJson); } catch {}
+                }
+                if (Array.isArray(extra)) {
+                    extra.forEach(id => {
+                        const clean = String(id || '').trim();
+                        if (clean) set.add(clean);
+                    });
+                }
+            }
+            return set;
+        }
+
+        function stripRetiredIdsFromCatalogMap(mapObj, retiredSet) {
+            if (!mapObj || typeof mapObj !== 'object' || Array.isArray(mapObj)) {
+                return { filtered: null, stripped: false };
+            }
+            const filtered = {};
+            let stripped = false;
+            Object.keys(mapObj).forEach(k => {
+                if (retiredSet.has(k)) {
+                    stripped = true;
+                    return;
+                }
+                filtered[k] = mapObj[k];
+            });
+            return { filtered, stripped };
+        }
+
+        function purgeRetiredCatalogEntriesInMemory(retiredSet) {
+            if (!retiredSet || retiredSet.size === 0) return false;
+            let purged = false;
+            if (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) {
+                for (let i = EXERCISES_DB.length - 1; i >= 0; i--) {
+                    const ex = EXERCISES_DB[i];
+                    if (ex && ex.id && retiredSet.has(ex.id)) {
+                        EXERCISES_DB.splice(i, 1);
+                        purged = true;
+                    }
+                }
+            }
+            if (typeof window !== 'undefined') {
+                [
+                    window.OPENGYM_GLOBAL_CATALOG,
+                    window._pendingCloudOpengymCatalog,
+                    window.exerciseGuideMap,
+                    window._pendingCloudGuideMap
+                ].forEach(mapObj => {
+                    if (!mapObj || typeof mapObj !== 'object') return;
+                    retiredSet.forEach(id => {
+                        if (Object.prototype.hasOwnProperty.call(mapObj, id)) {
+                            delete mapObj[id];
+                            purged = true;
+                        }
+                    });
+                });
+            }
+            return purged;
+        }
+
         const _BUNDLED_EXERCISES_SNAPSHOT = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB))
-            ? EXERCISES_DB.map(ex => (ex && typeof ex === 'object' ? { ...ex } : ex))
+            ? EXERCISES_DB
+                .filter(ex => !(ex && ex.id && RETIRED_CATALOG_EXERCISE_IDS.includes(ex.id)))
+                .map(ex => (ex && typeof ex === 'object' ? { ...ex } : ex))
             : [];
 
         function applyCloudMasterCatalogPayload(payload, persistLocal = true) {
             if (!payload || typeof payload !== 'object') return false;
             try {
+                const retiredSet = getRetiredCatalogExerciseIdSet(payload);
+                let hadRetiredInPayload = false;
+
                 const parsedExercises = Array.isArray(payload.exercises)
                     ? payload.exercises
                     : (typeof payload.exercisesJson === 'string' && payload.exercisesJson.trim() ? JSON.parse(payload.exercisesJson) : null);
@@ -264,21 +337,40 @@
                     ? payload.exerciseGuideMap
                     : (typeof payload.exerciseGuideMapJson === 'string' && payload.exerciseGuideMapJson.trim() ? JSON.parse(payload.exerciseGuideMapJson) : null);
 
-                const bundledHasNewerEntries = (typeof _BUNDLED_EXERCISES_SNAPSHOT !== 'undefined' && Array.isArray(_BUNDLED_EXERCISES_SNAPSHOT) && Array.isArray(parsedExercises) && parsedExercises.length > 0)
-                    ? _BUNDLED_EXERCISES_SNAPSHOT.some(ex => ex && ex.id && !new Set(parsedExercises.map(p => p && p.id).filter(Boolean)).has(ex.id))
+                const filteredExercises = Array.isArray(parsedExercises)
+                    ? parsedExercises.filter(ex => {
+                        if (ex && ex.id && retiredSet.has(ex.id)) {
+                            hadRetiredInPayload = true;
+                            return false;
+                        }
+                        return true;
+                    })
+                    : null;
+
+                const ogClean = stripRetiredIdsFromCatalogMap(parsedOpengym, retiredSet);
+                const filteredOpengym = ogClean.filtered;
+                if (ogClean.stripped) hadRetiredInPayload = true;
+
+                const gmClean = stripRetiredIdsFromCatalogMap(parsedGuideMap, retiredSet);
+                const filteredGuideMap = gmClean.filtered;
+                if (gmClean.stripped) hadRetiredInPayload = true;
+
+                const filteredParsedIds = new Set((filteredExercises || []).map(p => p && p.id).filter(Boolean));
+                const bundledHasNewerEntries = (typeof _BUNDLED_EXERCISES_SNAPSHOT !== 'undefined' && Array.isArray(_BUNDLED_EXERCISES_SNAPSHOT) && Array.isArray(filteredExercises) && filteredExercises.length > 0)
+                    ? _BUNDLED_EXERCISES_SNAPSHOT.some(ex => ex && ex.id && !retiredSet.has(ex.id) && !filteredParsedIds.has(ex.id))
                     : false;
 
-                if (Array.isArray(parsedExercises) && parsedExercises.length > 0 && typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) {
+                if (Array.isArray(filteredExercises) && filteredExercises.length > 0 && typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) {
                     const mergedMap = new Map();
 
                     if (bundledHasNewerEntries) {
                         // Güncel uygulama paketi eski bulut kopyasından silinemez: yerel paket esas alınır, yalnızca buluttaki ek hareketler eklenir
-                        _BUNDLED_EXERCISES_SNAPSHOT.forEach(ex => { if (ex && ex.id) mergedMap.set(ex.id, ex); });
-                        parsedExercises.forEach(ex => { if (ex && ex.id && !mergedMap.has(ex.id)) mergedMap.set(ex.id, ex); });
+                        _BUNDLED_EXERCISES_SNAPSHOT.forEach(ex => { if (ex && ex.id && !retiredSet.has(ex.id)) mergedMap.set(ex.id, ex); });
+                        filteredExercises.forEach(ex => { if (ex && ex.id && !retiredSet.has(ex.id) && !mergedMap.has(ex.id)) mergedMap.set(ex.id, ex); });
                     } else {
                         // Bulut kataloğu tüm paket hareketlerini içeriyorsa bulut güncellemelerini uygula, paket dışı kalanları da koru
-                        _BUNDLED_EXERCISES_SNAPSHOT.forEach(ex => { if (ex && ex.id) mergedMap.set(ex.id, ex); });
-                        parsedExercises.forEach(ex => { if (ex && ex.id) mergedMap.set(ex.id, ex); });
+                        _BUNDLED_EXERCISES_SNAPSHOT.forEach(ex => { if (ex && ex.id && !retiredSet.has(ex.id)) mergedMap.set(ex.id, ex); });
+                        filteredExercises.forEach(ex => { if (ex && ex.id && !retiredSet.has(ex.id)) mergedMap.set(ex.id, ex); });
                     }
 
                     EXERCISES_DB.splice(0, EXERCISES_DB.length, ...Array.from(mergedMap.values()));
@@ -287,52 +379,59 @@
                 const mergeCatalogMap = (target, incoming, preserveExisting) => {
                     if (!target || !incoming) return;
                     Object.keys(incoming).forEach(k => {
+                        if (retiredSet.has(k)) return;
                         if (!preserveExisting || !Object.prototype.hasOwnProperty.call(target, k)) {
                             target[k] = incoming[k];
                         }
                     });
                 };
-                if (parsedOpengym && typeof parsedOpengym === 'object' && !Array.isArray(parsedOpengym) && typeof window !== 'undefined') {
+                if (filteredOpengym && typeof window !== 'undefined') {
                     if (window.OPENGYM_GLOBAL_CATALOG && typeof window.OPENGYM_GLOBAL_CATALOG === 'object') {
-                        mergeCatalogMap(window.OPENGYM_GLOBAL_CATALOG, parsedOpengym, bundledHasNewerEntries);
+                        mergeCatalogMap(window.OPENGYM_GLOBAL_CATALOG, filteredOpengym, bundledHasNewerEntries);
                     } else {
                         window._pendingCloudOpengymCatalog = window._pendingCloudOpengymCatalog || {};
-                        mergeCatalogMap(window._pendingCloudOpengymCatalog, parsedOpengym, bundledHasNewerEntries);
+                        mergeCatalogMap(window._pendingCloudOpengymCatalog, filteredOpengym, bundledHasNewerEntries);
                     }
                 }
-                if (parsedGuideMap && typeof parsedGuideMap === 'object' && !Array.isArray(parsedGuideMap) && typeof window !== 'undefined') {
+                if (filteredGuideMap && typeof window !== 'undefined') {
                     if (window.exerciseGuideMap && typeof window.exerciseGuideMap === 'object') {
-                        mergeCatalogMap(window.exerciseGuideMap, parsedGuideMap, bundledHasNewerEntries);
+                        mergeCatalogMap(window.exerciseGuideMap, filteredGuideMap, bundledHasNewerEntries);
                     } else {
                         window._pendingCloudGuideMap = window._pendingCloudGuideMap || {};
-                        mergeCatalogMap(window._pendingCloudGuideMap, parsedGuideMap, bundledHasNewerEntries);
+                        mergeCatalogMap(window._pendingCloudGuideMap, filteredGuideMap, bundledHasNewerEntries);
                     }
                 }
 
+                purgeRetiredCatalogEntriesInMemory(retiredSet);
+
+                const filteredExCount = Array.isArray(filteredExercises) ? filteredExercises.length : 0;
+                const filteredOgCount = filteredOpengym ? Object.keys(filteredOpengym).length : 0;
+                const filteredGmCount = filteredGuideMap ? Object.keys(filteredGuideMap).length : 0;
                 const metaObj = {
                     version: Number(payload.version || 0),
-                    exerciseCount: Number(payload.exerciseCount || (Array.isArray(parsedExercises) ? parsedExercises.length : 0)),
-                    totalCatalogIds: Number(payload.totalCatalogIds || 0),
-                    opengymCount: Number(payload.opengymCount || 0),
-                    guideCount: Number(payload.guideCount || 0),
-                    updatedAt: Number(payload.updatedAt || Date.now())
+                    exerciseCount: filteredExercises ? filteredExCount : Number(payload.exerciseCount || 0),
+                    totalCatalogIds: filteredExercises ? filteredExCount : Number(payload.totalCatalogIds || 0),
+                    opengymCount: filteredOpengym ? filteredOgCount : Number(payload.opengymCount || 0),
+                    guideCount: filteredGuideMap ? filteredGmCount : Number(payload.guideCount || 0),
+                    updatedAt: Number(payload.updatedAt || Date.now()),
+                    retiredExerciseIds: Array.from(retiredSet)
                 };
                 if (typeof window !== 'undefined') {
                     window.CELIK_MASTER_CATALOG_META = Object.assign({}, window.CELIK_MASTER_CATALOG_META || {}, metaObj);
                 }
 
-                if (persistLocal) {
+                if (persistLocal || hadRetiredInPayload) {
                     const cacheRecord = {
                         ...metaObj,
-                        exercisesJson: typeof payload.exercisesJson === 'string'
+                        exercisesJson: (!hadRetiredInPayload && typeof payload.exercisesJson === 'string')
                             ? payload.exercisesJson
-                            : (Array.isArray(parsedExercises) ? JSON.stringify(parsedExercises) : ''),
-                        opengymCatalogJson: typeof payload.opengymCatalogJson === 'string'
+                            : (Array.isArray(filteredExercises) ? JSON.stringify(filteredExercises) : ''),
+                        opengymCatalogJson: (!hadRetiredInPayload && typeof payload.opengymCatalogJson === 'string')
                             ? payload.opengymCatalogJson
-                            : (parsedOpengym ? JSON.stringify(parsedOpengym) : ''),
-                        exerciseGuideMapJson: typeof payload.exerciseGuideMapJson === 'string'
+                            : (filteredOpengym ? JSON.stringify(filteredOpengym) : ''),
+                        exerciseGuideMapJson: (!hadRetiredInPayload && typeof payload.exerciseGuideMapJson === 'string')
                             ? payload.exerciseGuideMapJson
-                            : (parsedGuideMap ? JSON.stringify(parsedGuideMap) : '')
+                            : (filteredGuideMap ? JSON.stringify(filteredGuideMap) : '')
                     };
                     localStorage.setItem(CLOUD_MASTER_CATALOG_STORAGE_KEY, JSON.stringify(cacheRecord));
                 }
@@ -344,11 +443,14 @@
         }
 
         function loadCachedCloudMasterCatalogOnBoot() {
+            purgeRetiredCatalogEntriesInMemory(getRetiredCatalogExerciseIdSet());
             try {
                 const raw = localStorage.getItem(CLOUD_MASTER_CATALOG_STORAGE_KEY);
                 if (!raw) return false;
                 const parsed = JSON.parse(raw);
-                return applyCloudMasterCatalogPayload(parsed, false);
+                const ok = applyCloudMasterCatalogPayload(parsed, false);
+                purgeRetiredCatalogEntriesInMemory(getRetiredCatalogExerciseIdSet(parsed));
+                return ok;
             } catch {
                 return false;
             }
@@ -431,10 +533,15 @@
         async function publishMasterCatalogToCloud(newVersion) {
             if (typeof isVerifiedAdminSession === 'function' && !isVerifiedAdminSession()) return false;
             if (!isFirebaseReady || !fbDb) return false;
-            const versionNum = Number(newVersion || (Number(window.CELIK_MASTER_CATALOG_META?.version || 293) + 1));
-            const exercisesArr = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB)) ? EXERCISES_DB : [];
-            const opengymObj = (typeof window !== 'undefined' && window.OPENGYM_GLOBAL_CATALOG) ? window.OPENGYM_GLOBAL_CATALOG : {};
-            const guideObj = (typeof window !== 'undefined' && window.exerciseGuideMap) ? window.exerciseGuideMap : {};
+            const retiredSet = getRetiredCatalogExerciseIdSet();
+            const versionNum = Number(newVersion || (Number(window.CELIK_MASTER_CATALOG_META?.version || 358) + 1));
+            const exercisesArr = (typeof EXERCISES_DB !== 'undefined' && Array.isArray(EXERCISES_DB))
+                ? EXERCISES_DB.filter(ex => !(ex && ex.id && retiredSet.has(ex.id)))
+                : [];
+            const rawOpengym = (typeof window !== 'undefined' && window.OPENGYM_GLOBAL_CATALOG) ? window.OPENGYM_GLOBAL_CATALOG : {};
+            const rawGuide = (typeof window !== 'undefined' && window.exerciseGuideMap) ? window.exerciseGuideMap : {};
+            const opengymObj = stripRetiredIdsFromCatalogMap(rawOpengym, retiredSet).filtered || {};
+            const guideObj = stripRetiredIdsFromCatalogMap(rawGuide, retiredSet).filtered || {};
             const nowTs = Date.now();
             const payload = {
                 version: versionNum,
@@ -443,6 +550,7 @@
                 totalCatalogIds: exercisesArr.length,
                 opengymCount: Object.keys(opengymObj).length,
                 guideCount: Object.keys(guideObj).length,
+                retiredExerciseIds: Array.from(retiredSet),
                 exercisesJson: JSON.stringify(exercisesArr),
                 opengymCatalogJson: JSON.stringify(opengymObj),
                 exerciseGuideMapJson: JSON.stringify(guideObj)
@@ -476,6 +584,7 @@
             window.applyCloudMasterCatalogPayload = applyCloudMasterCatalogPayload;
             window.syncMasterCatalogFromCloud = syncMasterCatalogFromCloud;
             window.publishMasterCatalogToCloud = publishMasterCatalogToCloud;
+            window.RETIRED_CATALOG_EXERCISE_IDS = RETIRED_CATALOG_EXERCISE_IDS;
             window.CelikVaultCodec = {
                 sealWithKey,
                 unsealWithKey,
@@ -483,6 +592,8 @@
                 unsealSystemAiKey,
                 applyMasterCatalogMeta,
                 applyCloudMasterCatalogPayload,
+                getRetiredCatalogExerciseIdSet,
+                RETIRED_CATALOG_EXERCISE_IDS,
                 SYSTEM_AI_VAULT_KEY,
                 MASTER_CATALOG_META_KEY,
                 CLOUD_MASTER_CATALOG_STORAGE_KEY,
@@ -1669,12 +1780,55 @@
             window.location.protocol === 'file:'
         );
 
-        async function hydrateLocalSnapshotIfDev() {
+        let _localSnapshotHydrationInFlight = null;
+
+        async function loadLocalDevSnapshotPayload() {
+            let snap = null;
+            const isFileProto = typeof window !== 'undefined' && window.location && window.location.protocol === 'file:';
+            if (!isFileProto && typeof fetch === 'function') {
+                try {
+                    const res = await fetch('./data/local-cloud-snapshot.json', { cache: 'no-store' });
+                    if (res && res.ok) snap = await res.json();
+                } catch {}
+            }
+            if (!snap && typeof document !== 'undefined') {
+                snap = await new Promise((resolve) => {
+                    const host = document.head || document.documentElement;
+                    if (!host) { resolve(null); return; }
+                    let settled = false;
+                    const s = document.createElement('script');
+                    const clearGlobal = () => {
+                        try { delete window.__CELIK_LOCAL_SNAPSHOT__; } catch { try { window.__CELIK_LOCAL_SNAPSHOT__ = undefined; } catch {} }
+                    };
+                    const finish = (val) => {
+                        if (settled) return;
+                        settled = true;
+                        clearTimeout(timer);
+                        try { s.remove(); } catch {}
+                        clearGlobal();
+                        resolve(val || null);
+                    };
+                    clearGlobal();
+                    s.src = './data/local-cloud-snapshot.js';
+                    s.async = false;
+                    const timer = setTimeout(() => finish(null), 2500);
+                    s.onload = () => finish(window.__CELIK_LOCAL_SNAPSHOT__ || null);
+                    s.onerror = () => finish(null);
+                    try {
+                        host.appendChild(s);
+                    } catch {
+                        finish(null);
+                    }
+                });
+            }
+            return (snap && typeof snap === 'object') ? snap : null;
+        }
+
+        async function _hydrateLocalSnapshotInternal() {
             if (!IS_LOCAL_DEV) return false;
             try {
-                const res = await fetch('./data/local-cloud-snapshot.json', { cache: 'no-store' });
-                if (!res.ok) return false;
-                const snap = await res.json();
+                const snap = await loadLocalDevSnapshotPayload();
+                if (!snap) return false;
                 let didHydrate = false;
 
                 const snapUsersArr = Array.isArray(snap.users)
@@ -1770,6 +1924,15 @@
                 console.warn('Yerel snapshot yüklenemedi:', e);
                 return false;
             }
+        }
+
+        function hydrateLocalSnapshotIfDev() {
+            if (!IS_LOCAL_DEV) return Promise.resolve(false);
+            if (_localSnapshotHydrationInFlight) return _localSnapshotHydrationInFlight;
+            _localSnapshotHydrationInFlight = _hydrateLocalSnapshotInternal().finally(() => {
+                _localSnapshotHydrationInFlight = null;
+            });
+            return _localSnapshotHydrationInFlight;
         }
         window.hydrateLocalSnapshotIfDev = hydrateLocalSnapshotIfDev;
 
@@ -3436,6 +3599,7 @@
         const V2_MIGRATION_COMPLETED_PREFIX = 'celik_kodu_v2_subdoc_migrated_';
         const V2_BACKUP_META_PREFIX = 'celik_kodu_v2_legacy_backup_meta_';
         const V2_BACKUP_DATESCHED_PREFIX = 'celik_kodu_v2_legacy_datesched_backup_';
+        const V2_LEGACY_PURGED_PREFIX = 'celik_kodu_v2_legacy_purged_';
         const V2_ROLLOUT_ALL_KEY = 'celik_kodu_v2_rollout_all';
         const V2_BACKUP_RETENTION_MS = 30 * 86400000;
 
@@ -3603,6 +3767,7 @@
                     localStorage.setItem(`celik_kodu_date_schedule_${uid}`, backupRaw);
                 }
                 localStorage.removeItem(V2_MIGRATION_COMPLETED_PREFIX + uid);
+                localStorage.removeItem(V2_LEGACY_PURGED_PREFIX + uid);
                 localStorage.removeItem(WORKOUT_CLOUD_PULL_AT_PREFIX + uid);
                 localStorage.removeItem(DAYS_CLOUD_PULL_AT_PREFIX + uid);
                 localStorage.removeItem(WORKOUT_CLOUD_ITEM_SIGS_PREFIX + uid);
@@ -3619,6 +3784,59 @@
             }
         }
 
+        async function purgeLegacyMonolithBackupForUser(targetUid, options = {}) {
+            const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
+            const opts = options && typeof options === 'object' ? options : {};
+            if (!uid || uid === DEMO_GUEST_UID || isDemoGuestSession()) {
+                return { purged: false, skipped: true, reason: 'invalid-uid' };
+            }
+            const v2Migrated = localStorage.getItem(V2_MIGRATION_COMPLETED_PREFIX + uid) === '1';
+            const workoutSigsCount = Object.keys(readWorkoutCloudItemSigs(uid)).length;
+            const localLogCount = getUserLogsById(uid).length;
+            if (!opts.force && (!v2Migrated || workoutSigsCount < localLogCount)) {
+                return { purged: false, skipped: true, reason: 'v2-not-verified' };
+            }
+            if (!opts.force && localStorage.getItem(V2_LEGACY_PURGED_PREFIX + uid) === '1') {
+                return { purged: true, alreadyPurged: true };
+            }
+            if (!IS_LOCAL_DEV) {
+                if (!isFirebaseReady || !fbDb || isFirestoreQuotaCircuitOpen() || (typeof navigator !== 'undefined' && navigator.onLine === false)) {
+                    return { purged: false, skipped: true, reason: 'offline-or-cloud-unavailable' };
+                }
+                try {
+                    await writeAthleteDocWithSealHeal('workout_logs', uid, (seal) => ({
+                        logs: [],
+                        clientUpdatedAt: Date.now(),
+                        syncSeal: seal,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }));
+                    notifyCloudSubChief('write', 'workout_logs', 'Eski tekil geçmiş paketi boşaltıldı', 1);
+                    delete _lastCloudWritePayloadSig[`workout_logs:${uid}`];
+                } catch (err) {
+                    tripFirestoreQuotaCircuitIfNeeded(err);
+                    return { purged: false, error: String((err && err.message) || err || 'legacy-purge-failed') };
+                }
+            }
+            try {
+                localStorage.removeItem(V2_BACKUP_DATESCHED_PREFIX + uid);
+                let meta = {};
+                try {
+                    meta = JSON.parse(localStorage.getItem(V2_BACKUP_META_PREFIX + uid) || '{}') || {};
+                } catch {
+                    meta = {};
+                }
+                meta.uid = uid;
+                meta.legacyParentWorkoutDocPreserved = false;
+                meta.legacyPurgedAt = Date.now();
+                localStorage.setItem(V2_BACKUP_META_PREFIX + uid, JSON.stringify(meta));
+                localStorage.setItem(V2_LEGACY_PURGED_PREFIX + uid, '1');
+            } catch {}
+            return { purged: true, uid, clearedParentWorkoutDoc: true };
+        }
+        if (typeof window !== 'undefined') {
+            window.purgeLegacyMonolithBackupForUser = purgeLegacyMonolithBackupForUser;
+        }
+
         async function migrateLegacyAthleteDocsToSubcollections(targetUid, options = {}) {
             const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
             const opts = options && typeof options === 'object' ? options : {};
@@ -3626,6 +3844,10 @@
                 return { migrated: false, skipped: true, reason: 'rollout-gated' };
             }
             if (!opts.force && localStorage.getItem(V2_MIGRATION_COMPLETED_PREFIX + uid) === '1') {
+                if (localStorage.getItem(V2_LEGACY_PURGED_PREFIX + uid) !== '1') {
+                    const purgeRes = await purgeLegacyMonolithBackupForUser(uid);
+                    return { migrated: false, skipped: true, reason: 'already-migrated', legacyPurged: Boolean(purgeRes && purgeRes.purged) };
+                }
                 return { migrated: false, skipped: true, reason: 'already-migrated' };
             }
             const plan = buildLegacyToSubcollectionMigrationPlan(uid, opts);
@@ -3656,11 +3878,13 @@
                 }
                 commitSubcollectionMigrationSuccess(uid, plan);
                 await syncUserStateToCloud(uid);
+                const purgeRes = await purgeLegacyMonolithBackupForUser(uid);
                 return {
                     migrated: true,
                     workoutItemCount: plan.workoutItems.length,
                     calendarDayCount: plan.calendarDayItems.length,
-                    backupMeta: plan.backupMeta
+                    backupMeta: plan.backupMeta,
+                    legacyPurged: Boolean(purgeRes && purgeRes.purged)
                 };
             } catch (err) {
                 tripFirestoreQuotaCircuitIfNeeded(err);
@@ -5623,7 +5847,7 @@
             }) || null;
 
             let targetEmail = matchedUser ? getCanonicalFbAuthEmail(matchedUser) : (emailId.includes('@') ? emailId : '');
-            if ((!targetEmail || targetEmail.endsWith('@auth.celikkodu.app')) && !emailId.includes('@') && isFirebaseReady && fbDb && !IS_LOCAL_DEV) {
+            if ((!targetEmail || targetEmail.endsWith('@auth.celikkodu.app')) && !emailId.includes('@') && isFirebaseReady && fbDb) {
                 const unameKey = toUsernameDocId(rawIdentity);
                 if (unameKey && /^[a-z0-9._-]{2,40}$/.test(unameKey)) {
                     try {
@@ -6043,6 +6267,34 @@
 
         let isAuthLoginInProgress = false;
 
+        async function backfillUsernameMappingsForAuthUser(fbUser, appUser, targetEmail, hasAdminClaim) {
+            if (!fbUser || !fbUser.uid || !appUser || !appUser.id || !targetEmail) return;
+            if (!isFirebaseReady || !fbDb || isFirestoreQuotaCircuitOpen()) return;
+            if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+            if (appUser.id === 'usr_admin' && !hasAdminClaim) return;
+            if (!/^usr_[a-zA-Z0-9_-]{1,64}$/.test(String(appUser.id))) return;
+            const rawKeys = [appUser.username, ...(Array.isArray(appUser.aliases) ? appUser.aliases : [])];
+            const uniqueKeys = Array.from(new Set(
+                rawKeys
+                    .map(k => toUsernameDocId(k))
+                    .filter(k => Boolean(k) && k !== 'admin' && /^[a-z0-9._-]{2,40}$/.test(k))
+            ));
+            for (const key of uniqueKeys) {
+                try {
+                    const docRef = fbDb.collection('usernames').doc(key);
+                    const snap = await withAuthTimeout(docRef.get(), 2200, null);
+                    if (snap && !snap.exists) {
+                        await withAuthTimeout(docRef.set({
+                            authUid: String(fbUser.uid),
+                            appUid: String(appUser.id),
+                            authEmail: String(targetEmail).trim().toLowerCase(),
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        }), 2200, null);
+                    }
+                } catch {}
+            }
+        }
+
         async function handleAuthLogin(e) {
             e.preventDefault();
             if (isAuthLoginInProgress) return;
@@ -6086,7 +6338,11 @@
             }
 
             try {
-                const users = getAuthUsers();
+                let users = getAuthUsers();
+                if (users.length === 0 && IS_LOCAL_DEV && typeof hydrateLocalSnapshotIfDev === 'function') {
+                    try { await hydrateLocalSnapshotIfDev(); } catch {}
+                    users = getAuthUsers();
+                }
                 const candidates = users.filter(u => {
                     if (!u) return false;
                     const uUsername = normalizeAuthString(u.username);
@@ -6103,6 +6359,7 @@
                 let matched = null;
                 let rateLimitedByServer = false;
                 let fbNetworkUnavailable = (navigator.onLine === false || !fbAuth);
+                let fbRefererBlocked = false;
                 let targetEmail = '';
 
                 if (rawInput.includes('@')) {
@@ -6112,7 +6369,7 @@
                     if (localWithEmail) {
                         targetEmail = getCanonicalFbAuthEmail(localWithEmail);
                     }
-                    if (!targetEmail && isFirebaseReady && fbDb && !IS_LOCAL_DEV && navigator.onLine !== false) {
+                    if (!targetEmail && isFirebaseReady && fbDb && navigator.onLine !== false) {
                         const unameDocKey = toUsernameDocId(rawInput);
                         if (unameDocKey && /^[a-z0-9._-]{2,40}$/.test(unameDocKey)) {
                             try {
@@ -6137,7 +6394,7 @@
                             const hasAdminClaim = await refreshVerifiedAdminClaim(fbUser);
                             let cloudProfile = null;
                             let cloudRoleDoc = null;
-                            if (isFirebaseReady && fbDb && !IS_LOCAL_DEV) {
+                            if (isFirebaseReady && fbDb) {
                                 try {
                                     const [profSnap, roleSnap] = await Promise.all([
                                         withAuthTimeout(fbDb.collection('user_profiles').doc(fbUser.uid).get().catch(() => null), 2200, null),
@@ -6202,12 +6459,21 @@
                             });
 
                             try { syncUserRoleDocument(fbUser, mergedMatched).catch(() => {}); } catch {}
+                            try { backfillUsernameMappingsForAuthUser(fbUser, mergedMatched, targetEmail, hasAdminClaim).catch(() => {}); } catch {}
                             matched = mergedMatched;
                         }
                     } catch (fbErr) {
                         const code = (fbErr && fbErr.code) || '';
+                        const errMsg = String((fbErr && fbErr.message) || '');
                         if (code === 'auth/too-many-requests') {
                             rateLimitedByServer = true;
+                        } else if (
+                            code === 'auth/requests-from-referer-null-are-blocked.' ||
+                            code === 'auth/operation-not-supported-in-this-environment' ||
+                            /referer-null-are-blocked/i.test(errMsg)
+                        ) {
+                            fbNetworkUnavailable = true;
+                            fbRefererBlocked = true;
                         } else if (code === 'auth/network-request-failed' || code === 'auth/internal-error') {
                             fbNetworkUnavailable = true;
                         }
@@ -6276,6 +6542,11 @@
                     }
 
                     completeAuthenticatedLogin(matched);
+                } else if (fbRefererBlocked && candidates.length === 0) {
+                    if (errorBox) {
+                        errorBox.innerText = "Dosya doğrudan (file://) açıldığı için bulut girişi tarayıcı tarafından engelleniyor. Lütfen yerel sunucu (http://127.0.0.1:3000) üzerinden açın.";
+                        errorBox.style.display = 'block';
+                    }
                 } else {
                     const newLockSec = recordAuthFailure(uname);
                     if (errorBox) {

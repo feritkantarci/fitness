@@ -2718,29 +2718,6 @@
                     "isComplex": false,
                     "proof": "Parmak ucunda ritmik sıçramak doğrudan üst ve alt kalf (baldır) ile ayak bileği kaslarını, ip çevirme hareketi ise ön kol ve omuzları çalıştırır."
           },
-          "bw_butt_kicks": {
-                    "primary": "Diz Büken Arka Bacak, Üst Baldır, Alt Baldır",
-                    "secondary": "Ana Kalça, Derin İç Karın",
-                    "subKey": "legs_hamstrings",
-                    "primarySubKeys": [
-                              "legs_ham_curl",
-                              "calves_gastroc",
-                              "calves_soleus"
-                    ],
-                    "secondarySubKeys": [
-                              "legs_glutes_max",
-                              "core_deep"
-                    ],
-                    "allSubKeys": [
-                              "legs_hamstrings",
-                              "legs_calves",
-                              "legs_ham_curl",
-                              "calves_gastroc",
-                              "calves_soleus"
-                    ],
-                    "isComplex": false,
-                    "proof": "Koşarken topukları hızla kalçaya vurmak dizleri büken arka bacak kaslarını, parmak ucunda yaylanmak ise kalf (baldır) kaslarını çalıştırır."
-          },
           "bw_skater_jumps": {
                     "primary": "Yan Kalça, Ana Kalça, Dış Ön Bacak",
                     "secondary": "Üst Baldır, Ön Kaval & Bilek, Yan Karın",
@@ -3589,7 +3566,6 @@
                 if (id.startsWith('bw_')
                     || id.includes('farmers_walk')
                     || id.includes('walking_lunge')
-                    || id.includes('butt_kick')
                     || id.includes('high_knee')
                     || id.includes('jump_rope')
                     || id.includes('jumping_jack')
@@ -3598,8 +3574,7 @@
                     || name.includes('yürüyüş lunge')
                     || name.includes('ip atlama')
                     || name.includes('yildiz siçrama')
-                    || name.includes('yıldız sıçrama')
-                    || name.includes('topuk kalçaya')) {
+                    || name.includes('yıldız sıçrama')) {
                     return false;
                 }
             }
@@ -3629,7 +3604,7 @@
                 if (id.includes('plank_jack') || name.includes('plank jack') || name.includes('aç-kapa')) return false;
                 if (/(pull_walkout|pass_through|pull_through)/.test(id) || /(dambıl geçiş|dambıl çekiş|pull-through|pass-through|walk-out)/.test(name)) return false;
             }
-            const timeKeywords = ['plank', 'hollow', 'carry', 'farmers_walk', 'suitcase_carry', 'waiter', 'cross_body_carry', 'taşıma', 'çiftçi yürüyüşü', 'bavul', 'dead hang', 'wall sit', 'l-sit', 'izometrik', 'butt_kick', 'topuk kalçaya'];
+            const timeKeywords = ['plank', 'hollow', 'carry', 'farmers_walk', 'suitcase_carry', 'waiter', 'cross_body_carry', 'taşıma', 'çiftçi yürüyüşü', 'bavul', 'dead hang', 'wall sit', 'l-sit', 'izometrik'];
             for (const t of targets) {
                 const id = _normMetricKey(t.id || t.exId);
                 const name = _normMetricKey(t.name);
@@ -3662,6 +3637,13 @@
                 if (bwKeywords.some(kw => id.includes(kw) || name.includes(kw))) return true;
             }
             return false;
+        }
+
+        function isFunctionalFitnessExercise(ex) {
+            if (!ex) return false;
+            const dbEx = _findCanonicalDbExerciseRaw(ex);
+            const targets = [typeof ex === 'object' ? ex : { id: ex, name: ex }, dbEx].filter(Boolean);
+            return targets.some(t => Array.isArray(t.tags) && t.tags.includes('functional_fitness'));
         }
 
         function getUserActiveBodyweightKg() {

@@ -3153,17 +3153,6 @@
                     "sfr": "MODERATE",
                     "lengthened": false
           },
-          "bw_butt_kicks": {
-                    "primary": "Arka Bacak",
-                    "pFactor": 0.35,
-                    "sec": {
-                              "Kalf": 0.3,
-                              "Glute": 0.15
-                    },
-                    "type": "BALLISTIC_POWER",
-                    "sfr": "MODERATE",
-                    "lengthened": false
-          },
           "bw_skater_jumps": {
                     "primary": null,
                     "pFactor": 0,
@@ -3274,7 +3263,7 @@
             }
 
             const text = normSearchText(`${name} ${rawMuscle} ${category}`);
-            if (text.includes('burpee') || text.includes('climber') || text.includes('cardio') || text.includes('kondisyon') || text.includes('jumping') || text.includes('manmaker') || text.includes('ip atlama') || text.includes('lateral shuffle') || text.includes('high knees') || text.includes('butt kicks') || text.includes('skater') || text.includes('plank jack')) {
+            if (text.includes('burpee') || text.includes('climber') || text.includes('cardio') || text.includes('kondisyon') || text.includes('jumping') || text.includes('manmaker') || text.includes('ip atlama') || text.includes('lateral shuffle') || text.includes('high knees') || text.includes('skater') || text.includes('plank jack')) {
                 return { primary: null, pFactor: 0.0, sec: {}, type: 'CONDITIONING', sfr: 'N/A', lengthened: false };
             }
             let primary = 'Göğüs';
@@ -4308,7 +4297,7 @@
             hamstrings: {
                 title: 'ARKA BACAK',
                 columns: [
-                    { key: 'biceps_fem', label: 'ARKA BACAK (DİZ BÜKME)', subKeys: ['legs_ham_curl'], recId: 'mach_leg_curl', recName: 'Arka Bacak Bükme (Leg Curl)', keywords: ['leg curl', 'diz bükme', 'diz büken', 'butt kicks'] },
+                    { key: 'biceps_fem', label: 'ARKA BACAK (DİZ BÜKME)', subKeys: ['legs_ham_curl'], recId: 'mach_leg_curl', recName: 'Arka Bacak Bükme (Leg Curl)', keywords: ['leg curl', 'diz bükme', 'diz büken'] },
                     { key: 'semitend', label: 'ARKA BACAK (ÖNE EĞİLME)', subKeys: ['legs_ham_hinge'], recId: 'db_rdl', recName: 'Romen Deadlift (RDL)', keywords: ['öne eğilme', 'dambıl rdl', 'barbell rdl', 'rdl to', 'romanian', 'deadlift', 'inchworm'] },
                     { key: 'hinge_chain', label: 'ARKA BACAK & BEL BAĞLANTISI', subKeys: ['legs_ham_chain'], recId: 'db_swing', recName: 'Kettlebell Savurma (Swing)', keywords: ['swing', 'single leg rdl', 'tek bacak rdl', 'good morning', 'hiperekstansiyon', 'hyperextension'] }
                 ]
@@ -5740,8 +5729,7 @@
                 text.includes('jumping jack') ||
                 text.includes('ip atlama') ||
                 text.includes('jump rope') ||
-                text.includes('high knees') ||
-                text.includes('butt kicks')
+                text.includes('high knees')
             ) {
                 return {
                     isIsolation: true,

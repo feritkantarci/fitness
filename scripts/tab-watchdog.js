@@ -492,8 +492,8 @@ function runAcademicMathSuite(moduleSources, dbText) {
     {
       id: 'T6',
       owner: 'library-guard',
-      title: '3-Mod DB Denetimi (3 Cardio/8 Time/153 Rep) & Miras Hollow Body',
-      expected: 'cardio=3, time=8, reps=153; Hollow 12→10→8 normal_fatigue(sn), 40→20 early_drop',
+      title: '3-Mod DB Denetimi (3 Cardio/7 Time/153 Rep), Emekli Katalog Koruması & Miras Hollow Body',
+      expected: 'cardio=3, time=7, reps=153, func=74, retired(bw_butt_kicks)=purged; Hollow 12→10→8 normal_fatigue(sn), 40→20 early_drop',
       run: () => {
         ctx.__seedState();
         const counts = vm.runInContext(`(() => {
@@ -525,23 +525,65 @@ function runAcademicMathSuite(moduleSources, dbText) {
         }]).items[0];
         const latShuffle = vm.runInContext(`(() => {
           const ex = EXERCISES_DB.find(e => e.id === 'bw_lateral_shuffle');
+          const funcItems = EXERCISES_DB.filter(e => typeof isFunctionalFitnessExercise === 'function' && isFunctionalFitnessExercise(e));
+          const hasAllNew8 = ['db_dead_bug','db_alternating_twist_situp','db_bear_plank_pull_walkout','db_single_arm_straight_leg_toe_touch','db_cross_toe_touch','db_toe_touch_crunch','db_plank_pass_through','db_jackknife_toe_reach'].every(id => funcItems.some(e => e.id === id));
+          const absentFromDb = !EXERCISES_DB.some(e => e.id === 'bw_butt_kicks');
+          const prevMeta = window.CELIK_MASTER_CATALOG_META ? Object.assign({}, window.CELIK_MASTER_CATALOG_META) : null;
+          const stalePayload = {
+            version: 293,
+            exercises: EXERCISES_DB.concat([{
+              id: 'bw_butt_kicks',
+              name: 'Topuk Kalçaya Koşu (Butt Kicks)',
+              category: 'conditioning',
+              equipment: 'bodyweight',
+              primaryMuscles: ['hamstrings'],
+              secondaryMuscles: []
+            }]),
+            opengymCatalog: { bw_butt_kicks: { id: '3037', clip: 'assets/opengym/clips/bw_butt_kicks.mp4' } },
+            exerciseGuideMap: { bw_butt_kicks: { form: 'assets/exercises/bw_butt_kicks.webp', anatomi: null } }
+          };
+          localStorage.setItem('celik_kodu_cloud_master_catalog_v1', JSON.stringify(stalePayload));
+          const applyRes = window.applyCloudMasterCatalogPayload(stalePayload, false);
+          const bootRes = loadCachedCloudMasterCatalogOnBoot();
+          const cleanedCacheObj = JSON.parse(localStorage.getItem('celik_kodu_cloud_master_catalog_v1') || '{}');
+          const retiredPurged = absentFromDb
+            && applyRes === true
+            && bootRes === true
+            && !EXERCISES_DB.some(e => e.id === 'bw_butt_kicks')
+            && !(window.OPENGYM_GLOBAL_CATALOG && window.OPENGYM_GLOBAL_CATALOG.bw_butt_kicks)
+            && !(window.exerciseGuideMap && window.exerciseGuideMap.bw_butt_kicks)
+            && !String(cleanedCacheObj.exercisesJson || '').includes('bw_butt_kicks')
+            && !String(cleanedCacheObj.opengymCatalogJson || '').includes('bw_butt_kicks')
+            && !String(cleanedCacheObj.exerciseGuideMapJson || '').includes('bw_butt_kicks')
+            && Array.isArray(cleanedCacheObj.retiredExerciseIds)
+            && cleanedCacheObj.retiredExerciseIds.includes('bw_butt_kicks');
+          localStorage.removeItem('celik_kodu_cloud_master_catalog_v1');
+          if (prevMeta) window.CELIK_MASTER_CATALOG_META = prevMeta;
+          else delete window.CELIK_MASTER_CATALOG_META;
           return {
             equip: ex && ex.equipment,
             reqs: ex ? getExerciseRequiredEquipments(ex) : [],
             availWithoutBand: ex ? isExerciseEquipmentAvailable(ex, ['bodyweight', 'dumbbell']) : true,
-            availWithBand: ex ? isExerciseEquipmentAvailable(ex, ['bodyweight', 'mini_band']) : false
+            availWithBand: ex ? isExerciseEquipmentAvailable(ex, ['bodyweight', 'mini_band']) : false,
+            funcCount: funcItems.length,
+            funcNoCond: !funcItems.some(e => /^cond_/.test(e.id)),
+            hasAllNew8,
+            retiredPurged
           };
         })()`, ctx);
-        const ok = counts.cardio_min === 3 && counts.time_sec === 8 && counts.reps === 153
-          && eng.getExerciseMetricMode({ id: 'bw_butt_kicks', name: 'Topuk Kalçaya Koşu (Butt Kicks)' }) === 'time_sec'
+        const ok = counts.cardio_min === 3 && counts.time_sec === 7 && counts.reps === 153
+          && latShuffle.retiredPurged === true
           && latShuffle.equip === 'mini_band'
           && latShuffle.reqs.includes('mini_band')
           && latShuffle.availWithoutBand === false
           && latShuffle.availWithBand === true
+          && latShuffle.funcCount === 74
+          && latShuffle.funcNoCond === true
+          && latShuffle.hasAllNew8 === true
           && hMode === 'time_sec'
           && Boolean(h1 && h1.category === 'normal_fatigue' && String(h1.setChainText).includes('sn') && !String(h1.adviceText).includes('kiloya'))
           && Boolean(h2 && h2.category === 'early_drop' && String(h2.badgeText).includes('Süre Düşüşü'));
-        return { ok, actual: `DB=${counts.cardio_min}/${counts.time_sec}/${counts.reps}, LatShuffle=${latShuffle.equip}, H1=${h1?.category}, H2=${h2?.category}(${h2?.badgeText})` };
+        return { ok, actual: `DB=${counts.cardio_min}/${counts.time_sec}/${counts.reps}, Func=${latShuffle.funcCount}, RetiredPurged=${latShuffle.retiredPurged}, LatShuffle=${latShuffle.equip}, H1=${h1?.category}, H2=${h2?.category}(${h2?.badgeText})` };
       }
     },
     {
@@ -3536,6 +3578,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
             document.getElementById('customWorkoutTitleInput').value = 'Pazartesi Takvim Revize';
             document.getElementById('customWorkoutRestSelect').value = '60';
             saveEditingRoutineToDay();
+            const mondayTitleOk = Boolean(getWeeklySchedule()[1] && getWeeklySchedule()[1].title === 'Pazartesi Takvim Revize');
             const c4 = getUserCustomPrograms(uid).length;
 
             localStorage.setItem('celik_kodu_coach_directive_' + uid, JSON.stringify({
@@ -3553,7 +3596,6 @@ function runAcademicMathSuite(moduleSources, dbText) {
 
             renderSavedProgramsPane();
             const btnTextBeforeSave = document.getElementById('libSubTabProgramsBtn').textContent;
-            const mondayTitleOk = getWeeklySchedule()[1] && getWeeklySchedule()[1].title === 'Pazartesi Takvim Revize';
 
             prompt = () => 'Manuel Kayıtlı Program';
             currentGeneratedWorkout = w1;
@@ -3606,14 +3648,14 @@ function runAcademicMathSuite(moduleSources, dbText) {
           document.getElementById('paramGoal').value = 'endurance';
           window.CelikBridgeCustoms.resetStats();
           window.CelikLiaisonSubChiefs.clearNotices();
-          handleGenerateWorkout('bb_hybrid', 'kondisyon butt kicks plank');
+          handleGenerateWorkout('bb_hybrid', 'kondisyon plank side plank');
           const condCustoms = window.CelikBridgeCustoms.getStats();
           const condLiaison = window.CelikLiaisonSubChiefs.getNotices();
 
           const badGen = window.CelikLiaisonSubChiefs.inspectGeneratedWorkoutForReceivers({
             id: 'gen_t58_edge',
             exercises: [
-              { id: 'bw_butt_kicks', name: 'Butt Kicks', targetSets: 3, targetReps: '8-12' },
+              { id: 'db_farmers_walk', name: "Çiftçi Yürüyüşü (Farmer's Walk / Carry)", targetSets: 3, targetReps: '8-12' },
               { id: 'bw_plank', name: 'Plank', targetSets: 3, targetReps: '15 tk' },
               { id: 'bw_side_plank', name: 'Side Plank', targetSets: 3, targetReps: '8–12' },
               { id: 'bw_hollow_body', name: 'Hollow Body', targetSets: 3, targetReps: '25' },
@@ -3666,7 +3708,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
       id: 'T59',
       owner: 'history-guard',
       title: 'Hata Hafızası Sicili: Güncel Tartıyla Sessiz Vücut Ağırlığı Tonajı & Garmin Birim Doğruluğu',
-      expected: 'tartı 75->78 olunca eski vücut ağırlığı tonajı sessiz güncellenir (alarm=0), Garmin pushup+plank+butt_kicks temiz doğar',
+      expected: 'tartı 75->78 olunca eski vücut ağırlığı tonajı sessiz güncellenir (alarm=0), Garmin plank+side_plank temiz doğar',
       run: () => {
         ctx.__seedState();
         const res = vm.runInContext(`(() => {
@@ -3705,10 +3747,10 @@ function runAcademicMathSuite(moduleSources, dbText) {
           localStorage.setItem('celik_garmin_enabled_' + uid, 'true');
           const gt = window.GarminTredictChief;
           const exPlank = EXERCISES_DB.find(e => e.id === 'bw_plank');
-          const exButt = EXERCISES_DB.find(e => e.id === 'bw_butt_kicks');
+          const exSidePlank = EXERCISES_DB.find(e => e.id === 'bw_side_plank');
           gt.saveSentWorkoutManifest('Saat Birim Testi', [
             Object.assign({}, exPlank, { sets: 1, targetReps: '30 sn' }),
-            Object.assign({}, exButt, { sets: 1, targetReps: '30 sn' })
+            Object.assign({}, exSidePlank, { sets: 1, targetReps: '30 sn' })
           ], 'g_t59');
           localStorage.setItem('celik_garmin_telemetry_v2_' + uid, JSON.stringify([{
             id: 'g_t59',
@@ -3719,7 +3761,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
             summary: { duration: 600, durationTotal: 600, calories: 80, heartrate: 120, heartrateMax: 140 },
             rounds: [
               { roundIndex: 0, type: 'active', exerciseCategory: 'PLANK', exerciseName: 'PLANK', repetitions: 30, weight: 0, duration: 30, heartrate: 118, heartrateMax: 130 },
-              { roundIndex: 1, type: 'active', exerciseCategory: 'CARDIO', exerciseName: 'JUMP_ROPE_JOG', repetitions: 30, weight: 0, duration: 30, heartrate: 125, heartrateMax: 140 }
+              { roundIndex: 1, type: 'active', exerciseCategory: 'PLANK', exerciseName: 'SIDE_PLANK', repetitions: 30, weight: 0, duration: 30, heartrate: 125, heartrateMax: 140 }
             ]
           }]));
           window.CelikLiaisonSubChiefs.clearNotices();
@@ -3752,7 +3794,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
       id: 'T60',
       owner: 'workout-guard',
       title: 'Hata Hafızası Sicili: Liste/Kart Görünümü, Canlı Liste, Dinlenme, Resmi Plan & Saat Aktarımı 3-Modlu Birim Bütünlüğü',
-      expected: 'Liste & Kart eşleşir (Butt Kicks=4x30 sn, Kürek=1x20 dk), Canlı Liste & Dinlenme=30 sn/20 dk, celik_kodu_day2 Farmer=30 sn',
+      expected: 'Liste & Kart eşleşir (Plank=4x30 sn, Kürek=1x20 dk), Canlı Liste & Dinlenme=30 sn/20 dk, celik_kodu_day2 Farmer=30 sn',
       run: () => {
         ctx.__seedState();
         const res = vm.runInContext(`(() => {
@@ -3761,7 +3803,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
             title: 'Tüm Vücut Antrenmanı',
             scheme: { sets: 4, reps: '10 - 12', rest: 25 },
             exercises: [
-              Object.assign({}, EXERCISES_DB.find(e => e.id === 'bw_butt_kicks'), { targetSets: 4, targetReps: '30 sn', customRest: 25 }),
+              Object.assign({}, EXERCISES_DB.find(e => e.id === 'bw_plank'), { targetSets: 4, targetReps: '30 sn', customRest: 25 }),
               Object.assign({}, EXERCISES_DB.find(e => e.id === 'cond_indoor_row'), { targetSets: 1, targetReps: '20 dk', customRest: 25 }),
               Object.assign({}, EXERCISES_DB.find(e => e.id === 'bw_skater_jumps'), { targetSets: 4, targetReps: '10 - 12', customRest: 25 })
             ]
@@ -3773,7 +3815,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
 
           activeWorkoutSession = Object.assign({}, w, { id: 't60_act' });
           activeWorkoutSetsData = {
-            bw_butt_kicks: [{ setNo: 1, weight: 0, reps: 30, completed: false }],
+            bw_plank: [{ setNo: 1, weight: 0, reps: 30, completed: false }],
             cond_indoor_row: [{ setNo: 1, weight: '', reps: 20, completed: false }],
             bw_skater_jumps: [{ setNo: 1, weight: 0, reps: 10, completed: false }]
           };
@@ -3787,7 +3829,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
           const offPlan = getWorkoutDetailsForPlan({ id: 'celik_kodu_day2' });
           const farmerEx = offPlan && offPlan.exercises ? offPlan.exercises.find(e => e.id === 'db_farmers_walk') : null;
           const ev = window.GarminTredictChief.buildIntervalsWorkoutEvent('2026-11-21', 'Kondisyon', [
-            { id: 'bw_butt_kicks', name: 'Topuk Kalçaya Koşu (Butt Kicks)', sets: 4, reps: '30 sn', rest: 25 },
+            { id: 'bw_plank', name: 'Plank', sets: 4, reps: '30 sn', rest: 25 },
             { id: 'cond_indoor_row', name: 'Kürek Çekme', sets: 1, reps: '20 dk', rest: 25 }
           ]);
 
@@ -4322,6 +4364,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
           const clearV2Keys = (u) => {
             [
               'celik_kodu_v2_subdoc_migrated_',
+              'celik_kodu_v2_legacy_purged_',
               'celik_kodu_v2_legacy_backup_meta_',
               'celik_kodu_v2_legacy_datesched_backup_',
               'celik_kodu_cloud_pull_at_workout_',
@@ -4450,6 +4493,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
           const clearKeys = () => {
             [
               'celik_kodu_v2_subdoc_migrated_',
+              'celik_kodu_v2_legacy_purged_',
               'celik_kodu_v2_legacy_backup_meta_',
               'celik_kodu_v2_legacy_datesched_backup_',
               'celik_kodu_cloud_pull_at_workout_',
@@ -4493,8 +4537,8 @@ function runAcademicMathSuite(moduleSources, dbText) {
             },
             {
               id: 'p6_w2',
-              date: yesterdayYmd,
-              timestamp: nowMs - 86400000,
+              date: todayYmd,
+              timestamp: nowMs - 7200000,
               program: 'Çekiş + Kardiyo',
               totalVolumeKg: 900,
               totalSetsCompleted: 4,
@@ -4598,6 +4642,18 @@ function runAcademicMathSuite(moduleSources, dbText) {
             !todayEntry.exercises
           );
 
+          // Eski tekil geçmiş yedeğini güvenli biçimde boşalt ve aktif veri paritesini koru
+          purgeLegacyMonolithBackupForUser(uid);
+          const afterPurgeSnap = captureAnalyticsSnapshot();
+          const legacyDateschedCleared = localStorage.getItem('celik_kodu_v2_legacy_datesched_backup_' + uid) === null;
+          const backupMetaAfterPurge = JSON.parse(localStorage.getItem('celik_kodu_v2_legacy_backup_meta_' + uid) || '{}');
+          const purgeParityOk = Boolean(
+            getUserLogsById(uid).length === 2 &&
+            legacyDateschedCleared &&
+            backupMetaAfterPurge.legacyParentWorkoutDocPreserved === false &&
+            JSON.stringify(beforeSnap) === JSON.stringify(afterPurgeSnap)
+          );
+
           // Bulut Alt Şefi doğrulaması
           const subApi = window.CelikLiaisonSubChiefs;
           const prevStats = subApi.getCloudSubChiefStats();
@@ -4634,22 +4690,81 @@ function runAcademicMathSuite(moduleSources, dbText) {
             nextStats.savedWritesCount >= prevStats.savedWritesCount + 3 &&
             nextStats.savedReadsCount >= prevStats.savedReadsCount + 1 &&
             health.v2Migrated === true &&
+            health.v2LegacyPurged === true &&
+            health.legacyMonolithBytes === 0 &&
+            health.legacyMonolithWorkoutPct === 0 &&
             health.v2WorkoutSigsCount >= 2 &&
             health.v2CalendarDaySigsCount >= 3 &&
             health.parentStateLimitPct < 20 &&
             health.maxSingleWorkoutLimitPct < 5 &&
             typeof reportText === 'string' &&
             reportText.includes('CELIK KODU BULUT ALT SEFI DIAGNOSTIK RAPORU') &&
+            reportText.includes('Eski Tekil Gecmis Toplami=0.0 KB (%0)') &&
             typeof copyCloudSubChiefReportToClipboard === 'function' &&
             cardRenderedOk
           );
 
           clearKeys();
-          return { parityOk, scheduleCompactionOk, cloudSubChiefOk };
+          return { parityOk, scheduleCompactionOk, purgeParityOk, cloudSubChiefOk };
         })()`, ctx);
 
         const ok = Object.values(res).every(Boolean);
         return { ok, actual: JSON.stringify(res) };
+      }
+    },
+    {
+      id: 'T68',
+      owner: 'profile-guard',
+      title: 'Yerel file:// Snapshot Köprüsü, IS_LOCAL_DEV Bulut Kullanıcı Adı Çözümlemesi & Referer Blokaj Uyarısı',
+      expected: 'file:// üzerinde ./data/local-cloud-snapshot.js script köprüsü mevcut, handleAuthLogin/sendForgotResetStage1 usernames ve user_profiles okumalarında !IS_LOCAL_DEV engeli yok, auth/requests-from-referer-null-are-blocked. yakalanıyor ve backfillUsernameMappingsForAuthUser tanımlı',
+      run: () => {
+        const profileCode = fs.readFileSync(path.join(ROOT, 'js', 'chiefs', 'profile-chief.js'), 'utf8');
+        const gitignoreText = fs.readFileSync(path.join(ROOT, '.gitignore'), 'utf8');
+
+        const loginStart = profileCode.indexOf('async function handleAuthLogin(e)');
+        const loginEnd = profileCode.indexOf('function handleAuthLogout()', loginStart);
+        const loginBody = (loginStart >= 0 && loginEnd > loginStart) ? profileCode.slice(loginStart, loginEnd) : '';
+
+        const forgotStart = profileCode.indexOf('async function sendForgotResetStage1(');
+        const forgotNextAsync = profileCode.indexOf('\n        async function ', forgotStart + 30);
+        const forgotNextSync = profileCode.indexOf('\n        function ', forgotStart + 30);
+        const forgotEnd = [forgotNextAsync, forgotNextSync].filter(i => i > forgotStart).sort((a, b) => a - b)[0] || (forgotStart + 6000);
+        const forgotBody = forgotStart >= 0 ? profileCode.slice(forgotStart, forgotEnd) : '';
+
+        const hasLocalScriptBridge =
+          profileCode.includes('loadLocalDevSnapshotPayload') &&
+          profileCode.includes('./data/local-cloud-snapshot.js') &&
+          profileCode.includes('__CELIK_LOCAL_SNAPSHOT__') &&
+          gitignoreText.includes('data/local-cloud-snapshot.js');
+
+        const hasPreLoginHydration = loginBody.includes('hydrateLocalSnapshotIfDev');
+        const loginUnameMatch = loginBody.match(/if\s*\(([^\n]+fbDb[^\n]*)\)\s*\{\s*\n\s*const unameDocKey/);
+        const loginProfMatch = loginBody.match(/if\s*\(([^\n]+fbDb[^\n]*)\)\s*\{\s*\n\s*try\s*\{\s*\n[\s\S]{0,220}user_profiles/);
+        const forgotUnameMatch = forgotBody.match(/if\s*\(([^\n]+fbDb[^\n]*)\)\s*\{\s*\n\s*const unameKey/);
+
+        const noLocalDevGateOnLoginUname = Boolean(loginUnameMatch && !loginUnameMatch[1].includes('IS_LOCAL_DEV'));
+        const noLocalDevGateOnLoginProf = Boolean(loginProfMatch && !loginProfMatch[1].includes('IS_LOCAL_DEV'));
+        const noLocalDevGateOnForgotUname = Boolean(forgotUnameMatch && !forgotUnameMatch[1].includes('IS_LOCAL_DEV'));
+        const hasRefererBlockHandling =
+          loginBody.includes('auth/requests-from-referer-null-are-blocked.') &&
+          loginBody.includes('fbRefererBlocked');
+        const hasUsernameBackfill =
+          profileCode.includes('function backfillUsernameMappingsForAuthUser') ||
+          profileCode.includes('async function backfillUsernameMappingsForAuthUser');
+        const backfillCalledInLogin = loginBody.includes('backfillUsernameMappingsForAuthUser(');
+
+        const checks = {
+          hasLocalScriptBridge,
+          hasPreLoginHydration,
+          noLocalDevGateOnLoginUname,
+          noLocalDevGateOnLoginProf,
+          noLocalDevGateOnForgotUname,
+          hasRefererBlockHandling,
+          hasUsernameBackfill,
+          backfillCalledInLogin
+        };
+        const ok = Object.values(checks).every(Boolean);
+        return { ok, actual: JSON.stringify(checks) };
       }
     }
   ];

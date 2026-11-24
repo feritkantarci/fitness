@@ -452,7 +452,6 @@
             bw_jumping_jack: "jumping jack yildiz sicrama ziplama kardiyo kondisyon isinma",
             bw_high_knees: "high knees dize cekerek kosu diz cekme kardiyo isinma",
             bw_jump_rope: "jump rope ip atlama golge ip sicrama kalf kardiyo",
-            bw_butt_kicks: "butt kicks topuk kalcaya kosu hamstring isinma kardiyo",
             bw_skater_jumps: "skater jumps paten sicramasi yanal sicrama",
             bw_plank_jacks: "plank jacks plank bacak ac kapa karin kardiyo",
             bw_squat_thrust: "squat thrust yarim burpee kondisyon",
@@ -477,6 +476,7 @@
                 (ex.equipment || '') + ' ' +
                 eqLabel + ' ' +
                 (ex.category || '') + ' ' +
+                ((Array.isArray(ex.tags) && ex.tags.includes('functional_fitness')) ? 'fonksiyonel fitness functional ' : '') +
                 syn
             );
             return ex._cachedSearchHaystack;
@@ -608,7 +608,7 @@
                 || (typeof window !== 'undefined' && window.SUBREGION_FILTER_OPTIONS && window.SUBREGION_FILTER_OPTIONS[muscle])
                 || null;
 
-            if (muscle === 'all' || muscle === 'conditioning' || !subOpts) {
+            if (muscle === 'all' || muscle === 'conditioning' || muscle === 'functional_fitness' || !subOpts) {
                 container.style.display = 'none';
                 container.innerHTML = '';
                 return;
@@ -711,6 +711,11 @@
                         if (!p.some(m => ['biceps', 'triceps', 'forearms'].includes(m))) return false;
                     } else if (muscle === 'conditioning') {
                         if (ex.category !== 'conditioning' && !(ex.tags || []).includes('conditioning') && !ex.isComplex) return false;
+                    } else if (muscle === 'functional_fitness') {
+                        const isFunc = typeof isFunctionalFitnessExercise === 'function'
+                            ? isFunctionalFitnessExercise(ex)
+                            : ((ex.tags || []).includes('functional_fitness'));
+                        if (!isFunc) return false;
                     }
 
                     if (activeLibSubRegion !== 'all') {
