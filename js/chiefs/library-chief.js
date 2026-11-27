@@ -582,7 +582,7 @@
                                         Geri Al
                                     </button>
                                 ` : `
-                                    <button type="button" class="stitch-ex-swap-pill" style="background:#6D28D9; color:#FFFFFF; border-color:rgba(167, 139, 250, 0.4); padding:6px 12px; font-size:11.5px; font-weight:800;" onclick="event.stopPropagation(); openAddToProgramOptions('${ex.id}')">
+                                    <button type="button" data-lib-add-btn="${ex.id}" style="background:#6D28D9; color:#FFFFFF; border:1px solid rgba(167, 139, 250, 0.45); border-radius:999px; padding:6px 12px; font-size:11.5px; font-weight:800; cursor:pointer; white-space:nowrap;" onclick="event.stopPropagation(); toggleLibraryTrayExercise('${ex.id}')">
                                         + Ekle
                                     </button>
                                 `}
@@ -765,6 +765,7 @@
                     emptyEl.style.display = 'none';
                 }
             }
+            syncLibraryProgramTrayUI();
         }
 
         function toggleLibExerciseForm(exId) {
@@ -833,15 +834,15 @@
             let html = `
                 <div style="display:flex; flex-direction:column; gap:8px;">
                     <div class="add-to-prog-card" style="padding:10px 12px;" onclick="closeAddToProgramOptionsModal(); openQuickAddToDayModal(decodeURIComponent('${encodeURIComponent(ex.id)}'));">
-                        <div style="width:20px; height:20px; color:#6D28D9; flex-shrink:0; display:flex; align-items:center; justify-content:center;">${CANVA_ICONS.calendar}</div>
-                        <div style="flex:1; font-size:13px; font-weight:800; color:#0F172A;">Haftalık Güne Planla</div>
-                        <div style="font-size:12px; color:#C2410C; font-weight:800;">Güne Ata ➔</div>
+                        <div style="width:20px; height:20px; color:#A78BFA; flex-shrink:0; display:flex; align-items:center; justify-content:center;">${CANVA_ICONS.calendar}</div>
+                        <div style="flex:1; font-size:13px; font-weight:800; color:#F8FAFC;">Haftalık Güne Planla</div>
+                        <div style="font-size:12px; color:#FB923C; font-weight:800;">Güne Ata ➔</div>
                     </div>
 
                     <div class="add-to-prog-card" style="padding:10px 12px; cursor:default;">
-                        <div style="width:20px; height:20px; color:#6D28D9; flex-shrink:0; display:flex; align-items:center; justify-content:center;">${CANVA_ICONS.sliders}</div>
+                        <div style="width:20px; height:20px; color:#A78BFA; flex-shrink:0; display:flex; align-items:center; justify-content:center;">${CANVA_ICONS.sliders}</div>
                         <div style="flex:1;">
-                            <div style="font-size:13px; font-weight:800; color:#0F172A; margin-bottom:6px;">Program Atölyesine Ekle</div>
+                            <div style="font-size:13px; font-weight:800; color:#F8FAFC; margin-bottom:6px;">Program Atölyesine Ekle</div>
                             <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                                 <select id="addToStudioSetsSelect" class="form-input" style="width:74px; padding:5px 6px; font-size:11.5px;">
                                     <option value="2">2 Set</option>
@@ -857,7 +858,7 @@
                                     <option value="12-15">12-15 T.</option>
                                     <option value="Maks">Maks</option>
                                 </select>
-                                <button type="button" class="stitch-ex-swap-pill" style="background:#6D28D9; color:#FFFFFF; border-color:rgba(167, 139, 250, 0.4); padding:6px 12px; font-size:11.5px; font-weight:800;" onclick="applyAddToStudioRoutine(decodeURIComponent('${encodeURIComponent(ex.id)}'))">
+                                <button type="button" class="stitch-ex-swap-pill" style="background:#8B5CF6; color:#FFFFFF; border-color:rgba(167, 139, 250, 0.45); padding:6px 12px; font-size:11.5px; font-weight:800;" onclick="applyAddToStudioRoutine(decodeURIComponent('${encodeURIComponent(ex.id)}'))">
                                     + Ekle
                                 </button>
                             </div>
@@ -868,17 +869,17 @@
             if (isWorkoutActive) {
                 html += `
                     <div class="add-to-prog-card active-workout-highlight" style="padding:10px 12px;" onclick="applyAddToActiveWorkout('${ex.id}')">
-                        <div style="width:20px; height:20px; color:#15803D; flex-shrink:0; display:flex; align-items:center; justify-content:center;">${CANVA_ICONS.play}</div>
-                        <div style="flex:1; font-size:13px; font-weight:800; color:#0F172A;">Canlı Antrenmana Ekle</div>
-                        <div style="font-size:12px; color:#15803D; font-weight:800;">Ekle ➔</div>
+                        <div style="width:20px; height:20px; color:#4ADE80; flex-shrink:0; display:flex; align-items:center; justify-content:center;">${CANVA_ICONS.play}</div>
+                        <div style="flex:1; font-size:13px; font-weight:800; color:#F8FAFC;">Canlı Antrenmana Ekle</div>
+                        <div style="font-size:12px; color:#4ADE80; font-weight:800;">Ekle ➔</div>
                     </div>
                 `;
             } else {
                 html += `
                     <div class="add-to-prog-card" style="padding:10px 12px;" onclick="startQuickWorkoutWithExercise('${ex.id}')">
-                        <div style="width:20px; height:20px; color:#0369A1; flex-shrink:0; display:flex; align-items:center; justify-content:center;">${CANVA_ICONS.bolt}</div>
-                        <div style="flex:1; font-size:13px; font-weight:800; color:#0F172A;">Hızlı Seans Başlat</div>
-                        <div style="font-size:12px; color:#0369A1; font-weight:800;">Başlat ➔</div>
+                        <div style="width:20px; height:20px; color:#38BDF8; flex-shrink:0; display:flex; align-items:center; justify-content:center;">${CANVA_ICONS.bolt}</div>
+                        <div style="flex:1; font-size:13px; font-weight:800; color:#F8FAFC;">Hızlı Seans Başlat</div>
+                        <div style="font-size:12px; color:#38BDF8; font-weight:800;">Başlat ➔</div>
                     </div>
                 `;
             }
@@ -891,6 +892,246 @@
         function closeAddToProgramOptionsModal() {
             const modal = document.getElementById('addToProgramOptionsModal');
             if (modal) modal.classList.remove('active');
+        }
+
+        /**
+         * Toggles an exercise directly in the Library program tray without opening a modal.
+         */
+        function toggleLibraryTrayExercise(exId) {
+            const ex = EXERCISES_DB.find(e => e.id === exId);
+            if (!ex || typeof customRoutineState === 'undefined' || !customRoutineState) return;
+            if (!Array.isArray(customRoutineState.exercises)) customRoutineState.exercises = [];
+
+            const existingIdx = customRoutineState.exercises.findIndex(item => item.exId === exId);
+            if (existingIdx !== -1) {
+                customRoutineState.exercises.splice(existingIdx, 1);
+            } else {
+                const normT = (typeof normalizeExerciseTargetByMetricMode === 'function')
+                    ? normalizeExerciseTargetByMetricMode(ex, 3, '8-12')
+                    : { sets: 3, reps: '8-12' };
+                customRoutineState.exercises.push({
+                    exId: exId,
+                    sets: normT.sets,
+                    reps: normT.reps,
+                    weight: ''
+                });
+            }
+
+            syncLibraryProgramTrayUI();
+            if (typeof renderCustomRoutine === 'function') renderCustomRoutine();
+            if (typeof renderRegionStatus === 'function') renderRegionStatus();
+        }
+
+        /**
+         * Updates Library '+ Ekle' buttons in-place and syncs the sticky bottom tray bar.
+         */
+        function syncLibraryProgramTrayUI() {
+            const list = (typeof customRoutineState !== 'undefined' && customRoutineState && Array.isArray(customRoutineState.exercises))
+                ? customRoutineState.exercises
+                : [];
+            const selectedIds = new Set(list.map(item => item.exId));
+
+            document.querySelectorAll('[data-lib-add-btn]').forEach(btn => {
+                const exId = btn.getAttribute('data-lib-add-btn');
+                const isSelected = selectedIds.has(exId);
+                btn.textContent = isSelected ? '✓ Eklendi' : '+ Ekle';
+                btn.style.background = isSelected ? '#15803D' : '#6D28D9';
+                btn.style.borderColor = isSelected ? '#22C55E' : 'rgba(167, 139, 250, 0.45)';
+            });
+
+            const trayBar = document.getElementById('libProgramTrayBar');
+            const trayCount = document.getElementById('libProgramTrayCount');
+            if (trayBar) {
+                trayBar.style.display = list.length > 0 ? 'flex' : 'none';
+            }
+            if (trayCount) {
+                trayCount.textContent = `${list.length} Hareket Seçildi`;
+            }
+        }
+
+        /**
+         * Clears all selected exercises from the Library tray and closes any open summary modal.
+         */
+        function clearLibraryProgramTray() {
+            if (typeof customRoutineState !== 'undefined' && customRoutineState) {
+                customRoutineState.exercises = [];
+            }
+            syncLibraryProgramTrayUI();
+            if (typeof renderCustomRoutine === 'function') renderCustomRoutine();
+            if (typeof renderRegionStatus === 'function') renderRegionStatus();
+            closeAddToProgramOptionsModal();
+        }
+
+        /**
+         * Syncs program title across the summary modal and studio title input.
+         */
+        function syncLibraryTrayTitle(val) {
+            if (typeof customRoutineState !== 'undefined' && customRoutineState) {
+                customRoutineState.title = val;
+            }
+            const mainInput = document.getElementById('customWorkoutTitleInput');
+            if (mainInput) mainInput.value = val;
+        }
+
+        /**
+         * Updates set count for a selected exercise inside the Library summary modal.
+         */
+        function updateLibraryTrayExerciseSets(idx, val) {
+            if (typeof updateCustomExerciseSets === 'function') {
+                updateCustomExerciseSets(idx, val);
+            }
+        }
+
+        /**
+         * Updates reps/seconds/minutes for a selected exercise inside the Library summary modal.
+         */
+        function updateLibraryTrayExerciseReps(idx, val) {
+            if (typeof updateCustomExerciseReps === 'function') {
+                updateCustomExerciseReps(idx, val);
+            }
+        }
+
+        /**
+         * Removes an exercise from the Library summary modal and refreshes or closes it.
+         */
+        function removeLibraryTrayExercise(idx) {
+            if (typeof customRoutineState === 'undefined' || !Array.isArray(customRoutineState.exercises)) return;
+            customRoutineState.exercises.splice(idx, 1);
+            syncLibraryProgramTrayUI();
+            if (typeof renderCustomRoutine === 'function') renderCustomRoutine();
+            if (typeof renderRegionStatus === 'function') renderRegionStatus();
+            if (customRoutineState.exercises.length > 0) {
+                openLibraryProgramSummaryModal();
+            } else {
+                closeAddToProgramOptionsModal();
+            }
+        }
+
+        /**
+         * Opens the final summary modal where the user names the program, adjusts sets, and picks an action.
+         */
+        function openLibraryProgramSummaryModal() {
+            const list = (typeof customRoutineState !== 'undefined' && customRoutineState && Array.isArray(customRoutineState.exercises))
+                ? customRoutineState.exercises
+                : [];
+            if (list.length === 0) {
+                showToast('Önce en az 1 hareket seçin.');
+                return;
+            }
+
+            const modal = document.getElementById('addToProgramOptionsModal');
+            const titleEl = document.getElementById('addToProgModalTitle');
+            const subEl = document.getElementById('addToProgModalSubtitle');
+            const dynamicBody = document.getElementById('addToProgModalBody');
+            if (!modal || !dynamicBody) return;
+
+            if (titleEl) titleEl.innerText = 'Programını Özelleştir';
+            if (subEl) subEl.style.display = 'none';
+
+            const currentTitle = (document.getElementById('customWorkoutTitleInput')?.value || customRoutineState.title || '').trim();
+            const inputValue = (currentTitle && currentTitle !== 'Özel Programım') ? currentTitle : '';
+
+            const rowsHtml = list.map((item, idx) => {
+                const ex = EXERCISES_DB.find(e => e.id === item.exId);
+                if (!ex) return '';
+                const media = getExerciseVisualMedia(ex.id, ex.category);
+                const thumb = media.still || '';
+                const mode = (typeof getExerciseMetricMode === 'function') ? getExerciseMetricMode(ex) : 'reps';
+                const normVal = String(item.reps || (mode === 'cardio_min' ? '20 dk' : (mode === 'time_sec' ? '30 sn' : '8-12'))).trim();
+
+                let setsHtml = '';
+                let repsOpts = [];
+                if (mode === 'cardio_min') {
+                    setsHtml = `<span style="font-size:11px; font-weight:700; color:#94A3B8; white-space:nowrap; padding:0 4px;">1 Set</span>`;
+                    const baseCardio = ['10 dk', '15 dk', '20 dk', '30 dk', '45 dk', '60 dk'];
+                    repsOpts = baseCardio.includes(normVal) ? baseCardio : [normVal, ...baseCardio];
+                } else {
+                    setsHtml = `
+                        <select class="form-input" style="width:66px; padding:4px 6px; font-size:11.5px; font-weight:700; background:#121024; color:#F8FAFC; border:1px solid rgba(167,139,250,0.3); height:30px;" onchange="updateLibraryTrayExerciseSets(${idx}, this.value)">
+                            ${[2, 3, 4, 5].map(n => `<option value="${n}" ${Number(item.sets) === n ? 'selected' : ''}>${n} Set</option>`).join('')}
+                        </select>
+                    `;
+                    if (mode === 'time_sec') {
+                        const baseSec = ['20 sn', '30 sn', '45 sn', '60 sn', '90 sn'];
+                        repsOpts = baseSec.includes(normVal) ? baseSec : [normVal, ...baseSec];
+                    } else {
+                        const compactVal = normVal.replace(/\s+/g, '');
+                        const baseReps = ['5-6', '6-8', '8-10', '8-12', '10-12', '12-15', '15-20', 'Maks'];
+                        repsOpts = baseReps.includes(compactVal) ? baseReps : [compactVal, ...baseReps];
+                    }
+                }
+
+                const selectedCheck = mode === 'reps' ? normVal.replace(/\s+/g, '') : normVal;
+                const repsHtml = `
+                    <select class="form-input" style="width:82px; padding:4px 6px; font-size:11.5px; font-weight:700; background:#121024; color:#F8FAFC; border:1px solid rgba(167,139,250,0.3); height:30px;" onchange="updateLibraryTrayExerciseReps(${idx}, this.value)">
+                        ${repsOpts.map(opt => {
+                            const label = (mode === 'reps' && opt !== 'Maks') ? `${opt} T.` : opt;
+                            return `<option value="${escapeHTML(opt)}" ${selectedCheck === opt ? 'selected' : ''}>${escapeHTML(label)}</option>`;
+                        }).join('')}
+                    </select>
+                `;
+
+                return `
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 2px; border-bottom:1px solid rgba(255,255,255,0.06);">
+                        <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
+                            <div style="width:32px; height:32px; border-radius:7px; background:${thumb ? '#FFFFFF' : '#121024'}; border:1px solid rgba(167,139,250,0.22); overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+                                ${thumb ? `<img src="${escapeHTML(thumb)}" alt="${escapeHTML(ex.name)}" style="width:100%; height:100%; object-fit:contain; display:block;">` : `<span style="font-size:12px; color:#C4B5FD;">•</span>`}
+                            </div>
+                            <div style="font-size:12.5px; font-weight:700; color:#F8FAFC; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(ex.name)}</div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:5px; flex-shrink:0;">
+                            ${setsHtml}
+                            ${repsHtml}
+                            <button type="button" aria-label="Çıkar" onclick="removeLibraryTrayExercise(${idx})" style="width:26px; height:26px; border-radius:6px; border:1px solid rgba(248,113,113,0.35); background:rgba(239,68,68,0.12); color:#FCA5A5; font-size:11px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;">✕</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            dynamicBody.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div>
+                        <label for="libTrayTitleInput" style="display:block; font-size:10.5px; font-weight:800; color:#94A3B8; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:5px;">Program Adı</label>
+                        <input type="text" id="libTrayTitleInput" class="form-input" value="${escapeHTML(inputValue)}" placeholder="Program adını yazın (örn: Üst Vücut)" autocomplete="off" style="width:100%; padding:9px 12px; font-size:13.5px; font-weight:700; background:#0B0A14; color:#FFFFFF; border:1px solid rgba(167,139,250,0.35); border-radius:10px;" oninput="syncLibraryTrayTitle(this.value)">
+                    </div>
+                    <div style="max-height:42vh; overflow-y:auto; padding-right:2px;">
+                        ${rowsHtml}
+                    </div>
+                    <div style="padding-top:4px;">
+                        <button type="button" onclick="finishLibraryTrayAction('save')" style="width:100%; padding:11px 14px; border-radius:10px; border:1px solid rgba(167,139,250,0.5); background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); background-color:#6D28D9; color:#FFFFFF; font-size:13.5px; font-weight:800; cursor:pointer;">
+                            Programı Kaydet
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        /**
+         * Finalizes the Library summary modal into starting, scheduling, or saving the program.
+         */
+        function finishLibraryTrayAction(mode) {
+            const titleVal = (document.getElementById('libTrayTitleInput')?.value || '').trim() || 'Özel Programım';
+            syncLibraryTrayTitle(titleVal);
+            closeAddToProgramOptionsModal();
+
+            if (mode === 'start' && typeof startActiveWorkoutFromCustom === 'function') {
+                startActiveWorkoutFromCustom();
+                return;
+            }
+            if (mode === 'assign_day' && typeof promptAssignStudioRoutineToDay === 'function') {
+                promptAssignStudioRoutineToDay();
+                return;
+            }
+            if (mode === 'save' && typeof saveCustomRoutineToLibrary === 'function') {
+                saveCustomRoutineToLibrary();
+                syncLibraryTrayTitle('Özel Programım');
+                syncLibraryProgramTrayUI();
+                if (typeof switchLibrarySubTab === 'function') {
+                    switchLibrarySubTab('programs');
+                }
+            }
         }
 
         function applyAddToStudioRoutine(exId) {
@@ -1089,8 +1330,8 @@
                                     </div>
                                 </div>
                                 <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                                    <button type="button" onclick="loadSavedProgram(decodeURIComponent('${encodedId}'))" style="flex:1; min-width:80px; padding:8px 10px; font-size:12px; font-weight:800; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.35); background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); background-color:#6D28D9; color:#FFFFFF; cursor:pointer; white-space:nowrap;">Başlat</button>
-                                    <button type="button" onclick="assignSavedProgramToCalendar(decodeURIComponent('${encodedId}'))" style="flex:1; min-width:96px; padding:8px 10px; font-size:12px; font-weight:800; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.35); background:#2C2550; color:#F3E8FF; cursor:pointer; white-space:nowrap;">Takvime Ekle</button>
+                                    <button type="button" onclick="loadSavedProgram(decodeURIComponent('${encodedId}'))" style="flex:1; min-width:76px; padding:8px 10px; font-size:12px; font-weight:800; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.35); background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); background-color:#6D28D9; color:#FFFFFF; cursor:pointer; white-space:nowrap;">Başlat</button>
+                                    <button type="button" onclick="assignSavedProgramToCalendar(decodeURIComponent('${encodedId}'))" style="flex:1; min-width:76px; padding:8px 10px; font-size:12px; font-weight:800; border-radius:8px; border:1px solid rgba(167, 139, 250, 0.35); background:#2C2550; color:#F8FAFC; cursor:pointer; white-space:nowrap;">Planla</button>
                                     <button type="button" onclick="deleteSavedProgram(decodeURIComponent('${encodedId}'))" style="padding:8px 12px; font-size:12px; font-weight:800; border-radius:8px; border:1px solid rgba(248, 113, 113, 0.4); background:#3B1219; color:#FCA5A5; cursor:pointer; white-space:nowrap;">Sil</button>
                                 </div>
                             </div>
@@ -1605,10 +1846,11 @@
                     };
                 }
                 if (btnAdd) {
-                    btnAdd.innerText = '+ Programa Ekle';
+                    const inTray = Boolean(typeof customRoutineState !== 'undefined' && customRoutineState && Array.isArray(customRoutineState.exercises) && customRoutineState.exercises.some(item => item.exId === ex.id));
+                    btnAdd.innerText = inTray ? '✓ Seçildi (Çıkar)' : '+ Programa Ekle';
                     btnAdd.onclick = () => {
+                        toggleLibraryTrayExercise(ex.id);
                         closeExerciseDetailModal();
-                        openAddToProgramOptions(ex.id);
                     };
                 }
             }
@@ -1631,6 +1873,16 @@
         function closeExerciseDetailModal() {
             document.getElementById('exerciseDetailModal').classList.remove('active');
         }
+
+        window.toggleLibraryTrayExercise = toggleLibraryTrayExercise;
+        window.syncLibraryProgramTrayUI = syncLibraryProgramTrayUI;
+        window.clearLibraryProgramTray = clearLibraryProgramTray;
+        window.openLibraryProgramSummaryModal = openLibraryProgramSummaryModal;
+        window.syncLibraryTrayTitle = syncLibraryTrayTitle;
+        window.updateLibraryTrayExerciseSets = updateLibraryTrayExerciseSets;
+        window.updateLibraryTrayExerciseReps = updateLibraryTrayExerciseReps;
+        window.removeLibraryTrayExercise = removeLibraryTrayExercise;
+        window.finishLibraryTrayAction = finishLibraryTrayAction;
 
         function switchExDetailTab(tab) {
             document.getElementById('btnExDetailTabForm').classList.toggle('active', tab === 'form');

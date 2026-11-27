@@ -1586,6 +1586,23 @@
 
             const isLastSet = activeSetIdx === sets.length - 1;
             const isLastEx = cardIdx === s.exercises.length - 1;
+            const nextEx = !isLastEx ? s.exercises[cardIdx + 1] : null;
+            const nextMedia = nextEx ? getDaylightExerciseMedia(nextEx) : null;
+            const nextPreviewHtml = nextEx ? `
+                <button type="button" onclick="jumpToExercise(${cardIdx + 1})" style="width:100%; display:flex; align-items:center; gap:10px; padding:8px 14px 10px; background:rgba(17, 14, 36, 0.98); border:none; border-top:1px solid rgba(255, 255, 255, 0.06); cursor:pointer; text-align:left;" title="${escapeHTML(nextEx.name)}">
+                    <span style="width:36px; height:36px; border-radius:8px; overflow:hidden; background:${nextMedia && nextMedia.still ? '#FFFFFF' : '#0B0A14'}; border:1px solid rgba(167, 139, 250, 0.22); flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+                        ${nextMedia && nextMedia.still ? `
+                            <img src="${escapeHTML(nextMedia.still)}" alt="${escapeHTML(nextEx.name)}" style="width:100%; height:100%; object-fit:contain; display:block;">
+                        ` : `
+                            <span style="font-size:13px; font-weight:800; color:#C4B5FD;">•</span>
+                        `}
+                    </span>
+                    <span style="flex:1; min-width:0; display:flex; flex-direction:column; gap:1px;">
+                        <span style="font-size:10px; font-weight:800; color:#94A3B8; letter-spacing:0.4px; text-transform:uppercase; line-height:1.1;">Sonraki Hareket</span>
+                        <span style="font-size:13px; font-weight:700; color:#F8FAFC; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.25;">${escapeHTML(nextEx.name)}</span>
+                    </span>
+                </button>
+            ` : '';
             let ctaLabel = `SETİ TAMAMLA VE DİNLEN (${activeSetIdx + 1} / ${sets.length})`;
             if (pairObj && cardEx.supersetRole === 1) {
                 const partnerName = pairObj.secondEx ? (pairObj.secondEx.name || pairObj.secondEx.blockLabel || '2. Hareket') : '2. Hareket';
@@ -1745,6 +1762,7 @@
                                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 3 11 8 6 13"/></svg>
                             </button>
                         </div>
+                        ${nextPreviewHtml}
                     </div>
                 </div>
             `;
@@ -6463,6 +6481,7 @@ KURALLAR:
         // ==================== UNIFIED WORKOUT ASSIGNMENT TO CALENDAR ENGINE ====================
         let pendingWorkoutToAssign = null;
         let assignModalTargetWeek = 'current';
+        let assignModalAnchorDate = new Date();
 
         function openAssignWorkoutCalendarModal(workoutObj, preferredWeek = 'current') {
             if (!workoutObj) {
@@ -6471,6 +6490,8 @@ KURALLAR:
             }
             pendingWorkoutToAssign = workoutObj;
             assignModalTargetWeek = preferredWeek === 'next' ? 'next' : 'current';
+            const baseDate = new Date();
+            assignModalAnchorDate = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
             renderAssignWorkoutCalendarModal();
             const modal = document.getElementById('assignWorkoutCalendarModal');
             if (modal) modal.classList.add('active');
@@ -6490,132 +6511,106 @@ KURALLAR:
         }
         window.switchAssignModalWeek = switchAssignModalWeek;
 
+        function stepAssignCalendarMonth(delta) {
+            const cur = assignModalAnchorDate instanceof Date && !isNaN(assignModalAnchorDate.getTime())
+                ? assignModalAnchorDate
+                : new Date();
+            assignModalAnchorDate = new Date(cur.getFullYear(), cur.getMonth() + Number(delta || 0), 1);
+            renderAssignWorkoutCalendarModal();
+        }
+        window.stepAssignCalendarMonth = stepAssignCalendarMonth;
+
         function renderAssignWorkoutCalendarModal() {
             const workout = pendingWorkoutToAssign;
             if (!workout) return;
 
-            const infoEl = document.getElementById('assignModalWorkoutInfo');
-            const todayBox = document.getElementById('assignModalQuickTodayBox');
+            const titleEl = document.getElementById('assignModalProgramTitle');
             const gridEl = document.getElementById('assignModalDaysGrid');
-            const currBtn = document.getElementById('assignModalWeekCurrentBtn');
-            const nextBtn = document.getElementById('assignModalWeekNextBtn');
 
-            const isNext = assignModalTargetWeek === 'next';
-            if (currBtn) {
-                currBtn.style.background = isNext ? 'transparent' : '#84CC16';
-                currBtn.style.color = isNext ? 'var(--text-secondary)' : '#0A0E17';
-                currBtn.style.borderColor = isNext ? 'transparent' : '#65A30D';
-            }
-            if (nextBtn) {
-                nextBtn.style.background = isNext ? '#84CC16' : 'transparent';
-                nextBtn.style.color = isNext ? '#0A0E17' : 'var(--text-secondary)';
-                nextBtn.style.borderColor = isNext ? '#65A30D' : 'transparent';
-            }
-
-            const details = (workout.exercises && Array.isArray(workout.exercises)) 
-                ? workout 
+            const details = (workout.exercises && Array.isArray(workout.exercises))
+                ? workout
                 : ((typeof getWorkoutDetailsForPlan === 'function' ? getWorkoutDetailsForPlan(workout) : null) || workout);
-            const exCount = (details.exercises || []).length;
-            const duration = details.duration || Math.round(exCount * 7) || 45;
             const titleStr = details.title || workout.title || 'Antrenman Programı';
+            if (titleEl) titleEl.textContent = titleStr;
 
-            if (infoEl) {
-                infoEl.innerHTML = `
-                    <div style="background:rgba(245,158,11,0.1); border:1.5px solid var(--gold); border-radius:10px; padding:12px 14px;">
-                        <span style="font-size:9.5px; font-weight:900; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px;">ATANACAK PROGRAM</span>
-                        <h4 style="font-size:15px; font-weight:900; color:#0F172A; margin:4px 0 2px;">${escapeHTML(titleStr)}</h4>
-                        <div style="font-size:11px; color:var(--text-secondary);">
-                            ${duration} Dk • ${exCount} Hareket • ${(details.scheme && details.scheme.rest) || details.rest || 60}s Dinlenme
-                        </div>
-                    </div>
-                `;
-            }
+            if (!gridEl) return;
+
+            const anchor = assignModalAnchorDate instanceof Date && !isNaN(assignModalAnchorDate.getTime())
+                ? assignModalAnchorDate
+                : new Date();
+            const year = anchor.getFullYear();
+            const month = anchor.getMonth();
+            const monthLabel = `${CAL_MONTH_NAMES_TR[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1);
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const firstDow = firstDay.getDay();
+            const startOffset = firstDow === 0 ? 6 : firstDow - 1;
+            const prevMonthLastDay = new Date(year, month, 0).getDate();
 
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            const todayIdx = today.getDay();
             const todayYMD = typeof formatDateYMD === 'function' ? formatDateYMD(today) : '';
-            const tomorrow = new Date(today);
-            tomorrow.setDate(today.getDate() + 1);
-            const tomorrowIdx = tomorrow.getDay();
-            const tomorrowYMD = typeof formatDateYMD === 'function' ? formatDateYMD(tomorrow) : '';
 
-            // Compute Monday of target week
-            const diffToMonday = todayIdx === 0 ? -6 : 1 - todayIdx;
-            const baseMonday = new Date(today);
-            baseMonday.setDate(today.getDate() + diffToMonday);
-            if (isNext) {
-                baseMonday.setDate(baseMonday.getDate() + 7);
+            const weekHeaders = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz']
+                .map(lbl => `<div style="font-size:11px; font-weight:800; color:#94A3B8; text-align:center; padding-bottom:4px;">${lbl}</div>`)
+                .join('');
+
+            let cellsHtml = '';
+            for (let p = startOffset - 1; p >= 0; p--) {
+                const prevDayNum = prevMonthLastDay - p;
+                cellsHtml += `<div style="height:42px; border-radius:9px; background:#0F0D1D; border:1px solid rgba(167,139,250,0.08); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; color:#64748B; opacity:0.28; pointer-events:none;">${prevDayNum}</div>`;
             }
 
-            if (todayBox) {
-                if (!isNext) {
-                    todayBox.innerHTML = `
-                        <button type="button" class="btn btn-gold" style="width:100%; font-size:13px; font-weight:900; padding:12px; display:flex; justify-content:center; align-items:center; gap:8px; box-shadow:0 0 18px rgba(245,158,11,0.35); border-radius:8px;" onclick="executeAssignWorkoutToDay(${todayIdx}, '${todayYMD}', 'current')">
-                            HEMEN BUGÜNE ATA & BAŞLAT (${DAY_NAMES_TR[todayIdx].toUpperCase()})
-                        </button>
-                    `;
-                } else {
-                    todayBox.innerHTML = `
-                        <button type="button" class="btn btn-gold" style="width:100%; font-size:12.5px; font-weight:900; padding:11px; display:flex; justify-content:center; align-items:center; gap:8px; box-shadow:0 0 15px rgba(245,158,11,0.25); border-radius:8px;" onclick="executeAssignWorkoutToDay(1, null, 'next')">
-                            GELECEK HAFTA PAZARTESİYE ATA
-                        </button>
-                    `;
-                }
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayDate = new Date(year, month, d);
+                const dYMD = typeof formatDateYMD === 'function' ? formatDateYMD(dayDate) : '';
+                const dIdx = dayDate.getDay();
+                const isToday = dYMD === todayYMD;
+                const isNextWeek = typeof isDateInNextWeek === 'function' && isDateInNextWeek(dYMD);
+                const weekMode = isNextWeek ? 'next' : 'current';
+
+                const completedLogs = typeof getCompletedWorkoutsForDate === 'function' ? getCompletedWorkoutsForDate(dayDate) : [];
+                const hasCompleted = completedLogs.length > 0;
+                const plan = typeof getPlanForDate === 'function' ? getPlanForDate(dayDate) : { rest: true };
+                const hasScheduled = Boolean(plan && !plan.rest && plan.type !== 'rest');
+
+                const dotColor = hasCompleted ? '#22C55E' : (hasScheduled ? '#A78BFA' : 'transparent');
+                const cellBg = isToday ? 'rgba(139,92,246,0.22)' : '#121024';
+                const cellBorder = isToday ? '1.5px solid #A78BFA' : '1px solid rgba(167,139,250,0.2)';
+                const numColor = isToday ? '#FFFFFF' : '#E2E8F0';
+
+                cellsHtml += `
+                    <button type="button" onclick="executeAssignWorkoutToDay(${dIdx}, '${dYMD}', '${weekMode}')" style="height:42px; border-radius:9px; background:${cellBg}; border:${cellBorder}; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; cursor:pointer; padding:2px 0; transition:border-color 0.15s ease;">
+                        <span style="font-size:12.5px; font-weight:${isToday ? '900' : '700'}; color:${numColor}; line-height:1;">${d}</span>
+                        <span style="width:5px; height:5px; border-radius:50%; background:${dotColor};"></span>
+                    </button>
+                `;
             }
 
-            if (gridEl) {
-                const user = getActiveUser();
-                const uid = user ? user.id : 'default';
-                const nextSched = isNext ? getNextWeeklySchedule(uid) : null;
-                const dayOrder = [1, 2, 3, 4, 5, 6, 0]; // Mon through Sun
-
-                gridEl.innerHTML = dayOrder.map(dIdx => {
-                    const dayDate = new Date(baseMonday);
-                    dayDate.setDate(baseMonday.getDate() + (dIdx === 0 ? 6 : dIdx - 1));
-                    const dYMD = typeof formatDateYMD === 'function' ? formatDateYMD(dayDate) : '';
-                    const isCardToday = !isNext && dYMD === todayYMD;
-                    const isCardTomorrow = !isNext && dYMD === tomorrowYMD;
-
-                    const dayName = DAY_NAMES_TR[dIdx];
-                    const dateFormatted = `${dayDate.getDate()} ${CAL_MONTH_NAMES_TR[dayDate.getMonth()]}`;
-
-                    let plan;
-                    if (isNext) {
-                        plan = (nextSched && nextSched[dIdx]) ? nextSched[dIdx] : { rest: true };
-                    } else {
-                        plan = (typeof getPlanForDate === 'function') ? getPlanForDate(dayDate) : { rest: true };
-                    }
-
-                    const isRest = plan.rest || plan.type === 'rest';
-                    const currentTitle = isRest ? 'Dinlenme & Toparlanma' : (plan.title || 'Mevcut Antrenman');
-
-                    let badgeHtml = '';
-                    if (isCardToday) {
-                        badgeHtml = `<span style="font-size:9.5px; font-weight:900; background:var(--gold); color:#000; padding:2px 6px; border-radius:4px;">BUGÜN</span>`;
-                    } else if (isCardTomorrow) {
-                        badgeHtml = `<span style="font-size:9.5px; font-weight:800; background:rgba(56,189,248,0.2); color:var(--cyan); border:1px solid rgba(56,189,248,0.4); padding:2px 6px; border-radius:4px;">YARIN</span>`;
-                    }
-
-                    return `
-                        <div style="background:#FFFFFF; border:1.5px solid ${isCardToday ? 'var(--gold)' : '#E2E8F0'}; border-radius:10px; padding:9px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer; transition:all 0.15s ease;" onclick="executeAssignWorkoutToDay(${dIdx}, '${dYMD}', '${isNext ? 'next' : 'current'}')">
-                            <div style="min-width:0; flex:1;">
-                                <div style="display:flex; align-items:center; gap:6px;">
-                                    <strong style="font-size:13px; color:${isCardToday ? '#B45309' : '#0F172A'};">${dayName}</strong>
-                                    <span style="font-size:11px; color:var(--text-secondary);">${dateFormatted}</span>
-                                    ${badgeHtml}
-                                </div>
-                                <div style="font-size:11px; color:${isRest ? '#64748B' : '#334155'}; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                    ${isRest ? 'Dinlenme' : escapeHTML(currentTitle)}
-                                </div>
-                            </div>
-                            <button type="button" class="btn ${isCardToday ? 'btn-gold' : 'btn-outline'}" style="font-size:11px; padding:6px 12px; font-weight:800; flex-shrink:0;" onclick="event.stopPropagation(); executeAssignWorkoutToDay(${dIdx}, '${dYMD}', '${isNext ? 'next' : 'current'}')">
-                                ${isCardToday ? 'Bugüne Ata' : 'Seç & Ata'}
-                            </button>
-                        </div>
-                    `;
-                }).join('');
+            const totalCells = startOffset + daysInMonth;
+            const trailingCells = (7 - (totalCells % 7)) % 7;
+            for (let n = 1; n <= trailingCells; n++) {
+                cellsHtml += `<div style="height:42px; border-radius:9px; background:#0F0D1D; border:1px solid rgba(167,139,250,0.08); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; color:#64748B; opacity:0.28; pointer-events:none;">${n}</div>`;
             }
+
+            gridEl.innerHTML = `
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; padding:6px 8px; background:#121024; border:1px solid rgba(167,139,250,0.22); border-radius:10px;">
+                    <button type="button" aria-label="Önceki Ay" onclick="stepAssignCalendarMonth(-1)" style="width:30px; height:30px; border-radius:8px; border:1px solid rgba(167,139,250,0.25); background:#181530; color:#F8FAFC; font-size:14px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;">‹</button>
+                    <span style="font-size:13.5px; font-weight:800; color:#FFFFFF; letter-spacing:0.2px;">${escapeHTML(monthLabel)}</span>
+                    <button type="button" aria-label="Sonraki Ay" onclick="stepAssignCalendarMonth(1)" style="width:30px; height:30px; border-radius:8px; border:1px solid rgba(167,139,250,0.25); background:#181530; color:#F8FAFC; font-size:14px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;">›</button>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; margin-bottom:4px;">
+                    ${weekHeaders}
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(7, 1fr); gap:6px;">
+                    ${cellsHtml}
+                </div>
+                <div style="display:flex; align-items:center; justify-content:center; gap:14px; margin-top:10px; font-size:11px; font-weight:600; color:#94A3B8;">
+                    <span style="display:inline-flex; align-items:center; gap:5px;"><span style="width:6px; height:6px; border-radius:50%; background:#A78BFA;"></span>Planlı</span>
+                    <span style="display:inline-flex; align-items:center; gap:5px;"><span style="width:6px; height:6px; border-radius:50%; background:#22C55E;"></span>Tamamlandı</span>
+                </div>
+            `;
         }
         window.renderAssignWorkoutCalendarModal = renderAssignWorkoutCalendarModal;
 
@@ -6645,8 +6640,14 @@ KURALLAR:
                 customWorkout: JSON.parse(JSON.stringify(details))
             };
 
-            const resolvedTargetDateStr = resolveScheduleDateStr(dayIdx, dateStr || (dayIdx === todayIdx && targetWeek !== 'next' ? todayYMD : null), targetWeek === 'next' ? 1 : 0);
+            const resolvedTargetDateStr = (dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr))
+                ? dateStr
+                : resolveScheduleDateStr(dayIdx, dateStr || (dayIdx === todayIdx && targetWeek !== 'next' ? todayYMD : null), targetWeek === 'next' ? 1 : 0);
             syncDayPlanToDateAndWeek(dayIdx, resolvedTargetDateStr, planObj, uid, targetWeek === 'next');
+            if (typeof calendarScreenState !== 'undefined' && resolvedTargetDateStr) {
+                calendarScreenState.anchorDate = new Date(resolvedTargetDateStr + 'T00:00:00');
+                calendarScreenState.selectedDayYMD = resolvedTargetDateStr;
+            }
             if (targetWeek === 'next' || (resolvedTargetDateStr && isDateInNextWeek(resolvedTargetDateStr))) {
                 activePlannerWeek = 'next';
             } else if (resolvedTargetDateStr && isDateInCurrentWeek(resolvedTargetDateStr)) {
@@ -6674,11 +6675,16 @@ KURALLAR:
 
             switchTab('activeWorkoutTab');
 
-            const targetLabel = isAssigningToToday
+            let targetLabel = isAssigningToToday
                 ? `BUGÜNE (${dayName})`
                 : (targetWeek === 'next' ? `Gelecek Hafta ${dayName}` : dayName);
+            if (resolvedTargetDateStr && /^\d{4}-\d{2}-\d{2}$/.test(resolvedTargetDateStr)) {
+                const p = resolvedTargetDateStr.split('-').map(Number);
+                const mName = (typeof CAL_MONTH_NAMES_TR !== 'undefined' && CAL_MONTH_NAMES_TR[p[1] - 1]) ? CAL_MONTH_NAMES_TR[p[1] - 1] : '';
+                if (mName) targetLabel = `${p[2]} ${mName} (${dayName})`;
+            }
             if (typeof showToast === 'function') {
-                showToast(`"${cleanTitle}" başarıyla ${targetLabel} gününe atandı.`);
+                showToast(`"${cleanTitle}" ${targetLabel} gününe planlandı.`);
             }
         }
         window.executeAssignWorkoutToDay = executeAssignWorkoutToDay;

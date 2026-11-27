@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=358">
+    <link rel="stylesheet" href="css/style.css?v=359">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH */
         html, body { background-color: #0B0A14; color: #F8FAFC; color-scheme: dark; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -260,7 +260,7 @@
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" style="display:none;">v358</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" style="display:none;">v359</span>
                         </div>
                     </div>
                 </div>
@@ -292,7 +292,7 @@
                         <div class="header-popup-status-row">
                             <span class="header-popup-status-label">Sistem Durumu</span>
                             <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
-                                <span id="headerPopupVersionLabel" translate="no" style="font-size:10px; font-weight:700; color:#94A3B8; line-height:1.1; letter-spacing:0.3px;">v358</span>
+                                <span id="headerPopupVersionLabel" translate="no" style="font-size:10px; font-weight:700; color:#94A3B8; line-height:1.1; letter-spacing:0.3px;">v359</span>
                                 <span class="cloud-sync-badge" id="headerCloudSyncBadge" onclick="if(this.classList.contains('auth-required') && typeof reauthToLoginScreenPreservingLocalData === 'function'){ closeHeaderPopupMenu(); reauthToLoginScreenPreservingLocalData(); }" title="Bulut Eşitleme Durumu">Bulut Aktif</span>
                             </div>
                         </div>
@@ -1011,6 +1011,17 @@
                         <div id="libExercisesCatalogGrid" style="display:flex; flex-direction:column; gap:6px;">
                             <!-- Populated dynamically -->
                         </div>
+
+                        <!-- STICKY PROGRAM TRAY BAR -->
+                        <div id="libProgramTrayBar" style="display:none; position:sticky; bottom:calc(76px + env(safe-area-inset-bottom, 0px)); z-index:9995; margin-top:10px; padding:10px 12px; border-radius:12px; background:rgba(24, 21, 48, 0.98); border:1.5px solid rgba(167, 139, 250, 0.55); box-shadow:0 10px 28px rgba(0, 0, 0, 0.65); align-items:center; justify-content:space-between; gap:10px;">
+                            <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                                <span id="libProgramTrayCount" style="font-size:13px; font-weight:800; color:#F8FAFC; white-space:nowrap;">0 Hareket</span>
+                                <button type="button" onclick="clearLibraryProgramTray()" style="background:none; border:none; padding:2px 6px; font-size:11.5px; font-weight:700; color:#94A3B8; cursor:pointer;">Temizle</button>
+                            </div>
+                            <button type="button" onclick="openLibraryProgramSummaryModal()" style="padding:8px 14px; border-radius:9px; border:1px solid rgba(167, 139, 250, 0.5); background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); color:#FFFFFF; font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap;">
+                                Bitir &amp; Düzenle ➔
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1273,7 +1284,7 @@
         <div class="modal-box" style="max-width: 520px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
                 <div>
-                    <span class="auth-role-tag role-admin" style="font-size:10px; background:rgba(245,158,11,0.2); color:var(--gold);">PROGRAMA EKLE</span>
+                    <span style="display:inline-block; padding:3px 9px; border-radius:999px; font-size:10px; font-weight:800; letter-spacing:0.5px; background:rgba(139,92,246,0.16); border:1px solid rgba(167,139,250,0.3); color:#C4B5FD;">PROGRAMA EKLE</span>
                     <h3 class="modal-title" id="addToProgModalTitle" style="font-size:16px; margin-top:4px;">Egzersizi Ekle</h3>
                     <div id="addToProgModalSubtitle" style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;"></div>
                 </div>
@@ -1290,7 +1301,7 @@
         <div class="modal-box" style="max-width: 480px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
                 <div>
-                    <span class="auth-role-tag role-admin" style="font-size:10px; background:rgba(245,158,11,0.2); color:var(--gold);">HIZLI KAS DENGESİ</span>
+                    <span style="display:inline-block; padding:3px 9px; border-radius:999px; font-size:10px; font-weight:800; letter-spacing:0.5px; background:rgba(139,92,246,0.16); border:1px solid rgba(167,139,250,0.3); color:#C4B5FD;">HIZLI KAS DENGESİ</span>
                     <h3 class="modal-title" id="quickAddModalTitle" style="font-size:16px; margin-top:4px;">Egzersizi Güne Ekle</h3>
                 </div>
                 <button type="button" class="modal-close" aria-label="Kapat" onclick="closeQuickAddToDayModal()">✕</button>
@@ -1302,37 +1313,17 @@
     </div>
 
     <!-- ==================== UNIFIED WORKOUT ASSIGNMENT MODAL (ANTRENMANI TAKVİME / GÜNE ATA) ==================== -->
-    <div id="assignWorkoutCalendarModal" class="modal-overlay">
-        <div class="modal-box" style="max-width: 520px; max-height: 92vh; overflow-y: auto;">
-            <div class="modal-header">
-                <div>
-                    <span class="auth-role-tag role-admin" style="font-size:10px; background:rgba(245,158,11,0.2); color:var(--gold);">TAKVİM MİMARI</span>
-                    <h3 class="modal-title" style="font-size:16px; margin-top:4px;">Antrenmanı Takvime Ata</h3>
+    <div id="assignWorkoutCalendarModal" class="modal-overlay" onclick="if(event.target===this) closeAssignWorkoutCalendarModal()">
+        <div class="modal-box" style="max-width: 420px; max-height: 92vh; overflow-y: auto; padding: 16px;">
+            <div class="modal-header" style="margin-bottom: 10px;">
+                <div style="min-width:0; flex:1;">
+                    <span style="display:inline-block; padding:3px 9px; border-radius:999px; font-size:10px; font-weight:800; letter-spacing:0.5px; background:rgba(139,92,246,0.16); border:1px solid rgba(167,139,250,0.3); color:#C4B5FD;">TAKVİME PLANLA</span>
+                    <h3 class="modal-title" id="assignModalProgramTitle" style="font-size:15.5px; margin-top:4px; color:#FFFFFF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Programı Güne Ata</h3>
                 </div>
                 <button type="button" class="modal-close" aria-label="Kapat" onclick="closeAssignWorkoutCalendarModal()">✕</button>
             </div>
-
-            <!-- WORKOUT INFO CARD -->
-            <div id="assignModalWorkoutInfo" style="margin-top: 10px; margin-bottom: 12px;"></div>
-
-            <!-- WEEK SELECTOR TABS (Bu Hafta / Gelecek Hafta) -->
-            <div style="display:flex; gap:6px; margin-bottom:12px; background:#F1F5F9; padding:4px; border-radius:10px; border:1.5px solid #E2E8F0;">
-                <button type="button" id="assignModalWeekCurrentBtn" class="btn" style="flex:1; font-size:12px; padding:8px 10px; font-weight:800; border-radius:7px; background:var(--gold); color:#000;" onclick="switchAssignModalWeek('current')">
-                    Bu Hafta
-                </button>
-                <button type="button" id="assignModalWeekNextBtn" class="btn btn-outline" style="flex:1; font-size:12px; padding:8px 10px; font-weight:800; border-radius:7px; border:none; color:var(--text-secondary);" onclick="switchAssignModalWeek('next')">
-                    Gelecek Hafta
-                </button>
-            </div>
-
-            <!-- QUICK ONE-CLICK ACTION: BUGÜNE ATA (SADECE BU HAFTA İÇİN) -->
-            <div id="assignModalQuickTodayBox" style="margin-bottom: 12px;"></div>
-
-            <!-- 7-DAY CALENDAR GRID -->
-            <div style="font-size:11px; font-weight:900; color:var(--gold); text-transform:uppercase; margin-bottom:8px; letter-spacing:0.5px;">
-                VEYA BİR GÜN SEÇİN
-            </div>
-            <div id="assignModalDaysGrid" style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px;"></div>
+            <div id="assignModalWorkoutInfo" style="display:none;"></div>
+            <div id="assignModalDaysGrid"></div>
         </div>
     </div>
 
@@ -2495,17 +2486,17 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v=358"></script>
-    <script src="js/chiefs/shared-core.js?v=358"></script>
-    <script src="js/chiefs/bridge-customs.js?v=358"></script>
-    <script src="js/chiefs/liaison-subchiefs.js?v=358"></script>
-    <script src="js/chiefs/profile-chief.js?v=358"></script>
-    <script src="js/chiefs/library-chief.js?v=358"></script>
-    <script src="js/chiefs/history-chief.js?v=358"></script>
-    <script src="js/chiefs/analytics-chief.js?v=358"></script>
-    <script src="js/chiefs/generator-chief.js?v=358"></script>
-    <script src="js/chiefs/workout-chief.js?v=358"></script>
-    <script src="js/app.js?v=358"></script>
+    <script src="js/exercises-db.js?v=359"></script>
+    <script src="js/chiefs/shared-core.js?v=359"></script>
+    <script src="js/chiefs/bridge-customs.js?v=359"></script>
+    <script src="js/chiefs/liaison-subchiefs.js?v=359"></script>
+    <script src="js/chiefs/profile-chief.js?v=359"></script>
+    <script src="js/chiefs/library-chief.js?v=359"></script>
+    <script src="js/chiefs/history-chief.js?v=359"></script>
+    <script src="js/chiefs/analytics-chief.js?v=359"></script>
+    <script src="js/chiefs/generator-chief.js?v=359"></script>
+    <script src="js/chiefs/workout-chief.js?v=359"></script>
+    <script src="js/app.js?v=359"></script>
     <script>
         function getNotifStorageKey() {
             const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';
@@ -2702,6 +2693,6 @@
             </div>
         </div>
     </div>
-    <script src="js/garmin-tredict-bridge.js?v=358" defer></script>
+    <script src="js/garmin-tredict-bridge.js?v=359" defer></script>
 </body>
 </html>
