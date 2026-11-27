@@ -598,6 +598,159 @@
         }
 
         var activeLibSubRegion = 'all';
+        var activeLibSmartRecoveryFilter = false;
+        const LIB_MUSCLE_GROUP_LABELS = {
+            chest: 'Göğüs',
+            back: 'Sırt',
+            shoulders: 'Omuz',
+            legs: 'Bacak',
+            core: 'Karın',
+            arms: 'Kol'
+        };
+
+        /**
+         * Maps an exercise's primary muscles into Library muscle group keys.
+         */
+        function getLibraryMuscleGroupsForExercise(ex) {
+            const p = (ex && Array.isArray(ex.primaryMuscles)) ? ex.primaryMuscles : [];
+            const groups = [];
+            if (p.includes('chest')) groups.push('chest');
+            if (p.includes('back') || p.includes('lats')) groups.push('back');
+            if (p.includes('shoulders')) groups.push('shoulders');
+            if (p.some(m => ['quads', 'hamstrings', 'glutes', 'calves'].includes(m))) groups.push('legs');
+            if (p.includes('core')) groups.push('core');
+            if (p.some(m => ['biceps', 'triceps', 'forearms'].includes(m))) groups.push('arms');
+            return groups;
+        }
+
+        /**
+         * Resolves completed exercise set counts per muscle group for a workout log entry.
+         */
+        function collectLibraryLogMuscleSets(log, groupSetsOut, exerciseIdsOut) {
+            if (!log || !Array.isArray(log.exercises)) return;
+            const hasAnyExplicitCompleted = log.exercises.some(e =>
+                (e && e.completedSetsCount !== undefined && Number(e.completedSetsCount) > 0) ||
+                (e && Array.isArray(e.sets) && e.sets.some(s => s && s.completed))
+            );
+            log.exercises.forEach(ex => {
+                if (!ex) return;
+                if (hasAnyExplicitCompleted) {
+                    const explicitZero = (ex.completedSetsCount !== undefined && ex.completedSetsCount !== null && Number(ex.completedSetsCount) === 0) ||
+                        (Array.isArray(ex.sets) && ex.sets.length > 0 && ex.sets.every(s => s && s.completed === false));
+                    if (explicitZero) return;
+                }
+                const dbEx = (typeof resolveDbExercise === 'function')
+                    ? resolveDbExercise(ex)
+                    : EXERCISES_DB.find(e => e.id === (ex.id || ex.exId) || e.name === ex.name);
+                const resolvedId = (dbEx && dbEx.id) ? dbEx.id : (ex.id || ex.exId || '');
+                if (resolvedId && exerciseIdsOut && !ex.isInterSetExtra) {
+                    exerciseIdsOut.add(resolvedId);
+                }
+                const completedCount = (ex.completedSetsCount !== undefined && Number(ex.completedSetsCount) > 0)
+                    ? Number(ex.completedSetsCount)
+                    : (Array.isArray(ex.sets) ? (ex.sets.filter(s => s && s.completed).length || ex.sets.length) : (Number(ex.targetSets || ex.sets) || 3));
+                const groups = getLibraryMuscleGroupsForExercise(dbEx || ex);
+                groups.forEach(g => {
+                    groupSetsOut[g] = (groupSetsOut[g] || 0) + completedCount;
+                });
+            });
+        }
+
+        /**
+         * Evaluates the most recent workout (48h cooldown vs. 7-day weekly balance) to determine excluded muscles.
+         */
+        function evaluateLibraryRecentWorkoutFilter() {
+            const rawLogs = typeof getWorkoutLogs === 'function' ? getWorkoutLogs() : [];
+            const nowMs = Date.now();
+            const parsedLogs = (Array.isArray(rawLogs) ? rawLogs : [])
+                .map(lg => {
+                    const dObj = typeof parseWorkoutLogDateLocal === 'function'
+                        ? parseWorkoutLogDateLocal(lg)
+                        : new Date(lg && (lg.completedAt || lg.timestamp || lg.date || 0));
+                    return { log: lg, dateObj: dObj };
+                })
+                .filter(item => item.log && item.dateObj && !isNaN(item.dateObj.getTime()) && item.dateObj.getTime() <= nowMs + 60000)
+                .sort((a, b) => b.dateObj.getTime() - a.dateObj.getTime());
+
+            if (parsedLogs.length === 0) {
+                return { hasHistory: false, excludedGroups: new Set(), excludedExIds: new Set(), statusText: 'Geçmiş antrenman bulunamadı' };
+            }
+
+            const latest = parsedLogs[0];
+            const hoursAgo = Math.max(0, (nowMs - latest.dateObj.getTime()) / 3600000);
+            const excludedExIds = new Set();
+            const excludedGroups = new Set();
+
+            if (hoursAgo <= 48) {
+                const latestGroupSets = {};
+                collectLibraryLogMuscleSets(latest.log, latestGroupSets, excludedExIds);
+                const sortedGroups = Object.entries(latestGroupSets)
+                    .filter(([, sets]) => sets > 0)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([g]) => g);
+                sortedGroups.slice(0, 4).forEach(g => excludedGroups.add(g));
+                const names = Array.from(excludedGroups).map(g => LIB_MUSCLE_GROUP_LABELS[g] || g);
+                return {
+                    hasHistory: true,
+                    mode: 'recent_48h',
+                    excludedGroups,
+                    excludedExIds,
+                    statusText: names.length ? `Son seans (<48s): ${names.join(', ')} elendi` : 'Son seans kas bilgisi bulunamadı'
+                };
+            }
+
+            const weekGroupSets = {};
+            parsedLogs.forEach(item => {
+                const ageHours = (nowMs - item.dateObj.getTime()) / 3600000;
+                if (ageHours <= 168) {
+                    collectLibraryLogMuscleSets(item.log, weekGroupSets, null);
+                }
+            });
+            const weekSorted = Object.entries(weekGroupSets)
+                .filter(([, sets]) => sets > 0)
+                .sort((a, b) => b[1] - a[1]);
+
+            const overTarget = weekSorted.filter(([, sets]) => sets >= 9).map(([g]) => g);
+            if (overTarget.length > 0) {
+                overTarget.slice(0, 4).forEach(g => excludedGroups.add(g));
+            } else if (weekSorted.length > 0) {
+                weekSorted.slice(0, 2).map(([g]) => g).forEach(g => excludedGroups.add(g));
+            } else {
+                const fallbackSets = {};
+                collectLibraryLogMuscleSets(latest.log, fallbackSets, null);
+                Object.entries(fallbackSets)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 2)
+                    .map(([g]) => g)
+                    .forEach(g => excludedGroups.add(g));
+            }
+
+            const names = Array.from(excludedGroups).map(g => LIB_MUSCLE_GROUP_LABELS[g] || g);
+            return {
+                hasHistory: true,
+                mode: 'weekly_balance',
+                excludedGroups,
+                excludedExIds,
+                statusText: names.length ? `Haftalık denge (>48s): ${names.join(', ')} elendi` : 'Haftalık kas geçmişi bulunamadı'
+            };
+        }
+
+        /**
+         * Toggles the recent-workout muscle filter in the Library tab.
+         */
+        function toggleLibrarySmartRecoveryFilter() {
+            activeLibSmartRecoveryFilter = !activeLibSmartRecoveryFilter;
+            if (activeLibSmartRecoveryFilter) {
+                const mFilter = document.getElementById('libExMuscleFilter');
+                const eFilter = document.getElementById('libExEquipFilter');
+                if (mFilter) mFilter.value = 'all';
+                if (eFilter) eFilter.value = 'all';
+                activeLibSubRegion = 'all';
+            }
+            renderLibraryExerciseCatalog();
+        }
+        window.toggleLibrarySmartRecoveryFilter = toggleLibrarySmartRecoveryFilter;
+        window.evaluateLibraryRecentWorkoutFilter = evaluateLibraryRecentWorkoutFilter;
 
         function renderLibSubRegionChips() {
             const container = document.getElementById('libSubRegionChips');
@@ -638,6 +791,8 @@
         }
 
         function onLibraryMuscleFilterChange() {
+            const muscle = document.getElementById('libExMuscleFilter')?.value || 'all';
+            if (muscle !== 'all') activeLibSmartRecoveryFilter = false;
             activeLibSubRegion = 'all';
             renderLibSubRegionChips();
             renderLibraryExerciseCatalog();
@@ -660,6 +815,33 @@
             const muscle = document.getElementById('libExMuscleFilter')?.value || 'all';
             const equip = document.getElementById('libExEquipFilter')?.value || 'all';
             const showExcluded = !!document.getElementById('chkLibShowExcluded')?.checked;
+            const recoveryEval = activeLibSmartRecoveryFilter ? evaluateLibraryRecentWorkoutFilter() : null;
+            const smartBtn = document.getElementById('libSmartRecoveryFilterBtn');
+            const smartStatus = document.getElementById('libSmartRecoveryStatus');
+            if (smartBtn) {
+                if (activeLibSmartRecoveryFilter) {
+                    smartBtn.textContent = '✓ Son Seansa Göre Süzüldü';
+                    smartBtn.style.background = 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)';
+                    smartBtn.style.backgroundColor = '#6D28D9';
+                    smartBtn.style.color = '#FFFFFF';
+                    smartBtn.style.borderColor = '#A78BFA';
+                } else {
+                    smartBtn.textContent = 'Son Seansa Göre Süz';
+                    smartBtn.style.background = '#181530';
+                    smartBtn.style.backgroundColor = '#181530';
+                    smartBtn.style.color = '#E2E8F0';
+                    smartBtn.style.borderColor = 'rgba(167, 139, 250, 0.35)';
+                }
+            }
+            if (smartStatus) {
+                if (activeLibSmartRecoveryFilter && recoveryEval) {
+                    smartStatus.style.display = 'inline';
+                    smartStatus.textContent = recoveryEval.statusText;
+                } else {
+                    smartStatus.style.display = 'none';
+                    smartStatus.textContent = '';
+                }
+            }
             const excludedIds = getUserExcludedExerciseIds();
             const excludedSet = new Set(excludedIds);
 
@@ -725,6 +907,14 @@
 
                 if (qTokens && qTokens.length > 0 && !matchesExerciseSearch(ex, q, qTokens)) return false;
 
+                if (!q && recoveryEval && recoveryEval.hasHistory) {
+                    if (recoveryEval.excludedExIds.has(ex.id)) return false;
+                    const exGroups = getLibraryMuscleGroupsForExercise(ex);
+                    if (exGroups.length > 0 && exGroups.every(g => recoveryEval.excludedGroups.has(g))) {
+                        return false;
+                    }
+                }
+
                 return true;
             });
 
@@ -759,7 +949,7 @@
                     emptyEl.innerHTML = `
                         <div style="font-size:13.5px; font-weight:800; color:#FFFFFF; margin-bottom:4px;">${showExcluded ? 'Kişisel Havuzunuzdan Gizlenmiş Egzersiz Yok' : 'Aramanıza Uygun Egzersiz Bulunamadı'}</div>
                         <div style="font-size:12px; color:#CBD5E1; margin-bottom:12px;">${showExcluded ? 'Bir hareketi istemediğinizde "Gizle" butonuna basarak bu listeye alabilirsiniz.' : 'Filtreleri veya arama kelimesini değiştirerek tekrar deneyebilirsiniz.'}</div>
-                        ${!showExcluded ? `<button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px; background:#181530; color:#F3E8FF; border:1px solid rgba(167, 139, 250, 0.35);" onclick="document.getElementById('libExSearchInput').value=''; document.getElementById('libExMuscleFilter').value='all'; document.getElementById('libExEquipFilter').value='all'; renderLibraryExerciseCatalog();">Filtreleri Sıfırla</button>` : ''}
+                        ${!showExcluded ? `<button type="button" class="btn btn-outline" style="font-size:11px; padding:6px 12px; background:#181530; color:#F3E8FF; border:1px solid rgba(167, 139, 250, 0.35);" onclick="activeLibSmartRecoveryFilter=false; document.getElementById('libExSearchInput').value=''; document.getElementById('libExMuscleFilter').value='all'; document.getElementById('libExEquipFilter').value='all'; renderLibraryExerciseCatalog();">Filtreleri Sıfırla</button>` : ''}
                     `;
                 } else {
                     emptyEl.style.display = 'none';
