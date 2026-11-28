@@ -610,8 +610,26 @@
 
         const workoutSigsObj = safeParseObj(safeGetItem(`celik_kodu_cloud_item_sigs_workout_${uid}`), {});
         const daySigsObj = safeParseObj(safeGetItem(`celik_kodu_cloud_item_sigs_days_${uid}`), {});
-        const v2WorkoutSigsCount = (workoutSigsObj && !Array.isArray(workoutSigsObj)) ? Object.keys(workoutSigsObj).length : 0;
-        const v2CalendarDaySigsCount = (daySigsObj && !Array.isArray(daySigsObj)) ? Object.keys(daySigsObj).length : 0;
+        const activeWorkoutDocIds = new Set();
+        if (Array.isArray(logs)) {
+            for (const log of logs) {
+                if (!log || !log.id) continue;
+                const safeId = String(log.id).trim().replace(/[\/\\]/g, '_').slice(0, 128);
+                if (safeId && safeId !== '.' && safeId !== '..') activeWorkoutDocIds.add(safeId);
+            }
+        }
+        const activeCalendarDayKeys = new Set();
+        if (dateSchedObj && typeof dateSchedObj === 'object' && !Array.isArray(dateSchedObj)) {
+            for (const dtKey of Object.keys(dateSchedObj)) {
+                if (/^\d{4}-\d{2}-\d{2}$/.test(dtKey)) activeCalendarDayKeys.add(dtKey);
+            }
+        }
+        const v2WorkoutSigsCount = (workoutSigsObj && !Array.isArray(workoutSigsObj))
+            ? Object.entries(workoutSigsObj).filter(([k, v]) => Boolean(v && v !== '__DELETED__' && (activeWorkoutDocIds.size === 0 || activeWorkoutDocIds.has(k)))).length
+            : 0;
+        const v2CalendarDaySigsCount = (daySigsObj && !Array.isArray(daySigsObj))
+            ? Object.entries(daySigsObj).filter(([k, v]) => Boolean(v && v !== '__DELETED__' && (activeCalendarDayKeys.size === 0 || activeCalendarDayKeys.has(k)))).length
+            : 0;
 
         const v2Migrated = safeGetItem(`celik_kodu_v2_subdoc_migrated_${uid}`) === '1';
         const v2LegacyPurged = safeGetItem(`celik_kodu_v2_legacy_purged_${uid}`) === '1';
@@ -645,7 +663,7 @@
 
         const appVer = (globalScope.CelikKaraKutu && typeof globalScope.CelikKaraKutu.getAppVersion === 'function')
             ? globalScope.CelikKaraKutu.getAppVersion()
-            : 'v356';
+            : 'v362';
 
         return {
             uid,

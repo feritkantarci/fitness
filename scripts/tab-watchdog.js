@@ -4672,8 +4672,50 @@ function runAcademicMathSuite(moduleSources, dbText) {
           subApi.noteCloudSubChiefEvent('saved_read', 'user_roles', '10dk önbellek', 1);
           const nextStats = subApi.getCloudSubChiefStats();
 
+          // Key-order & updatedAt determinism + tombstone/orphan envelope count guard
+          const sigObjA = {
+            id: 'log_keyorder_1',
+            date: todayYmd,
+            program: 'Test',
+            healthSummary: { calories: 250, heartrateAvg: 128, heartrateMax: 155 },
+            exercises: [{ id: 'db_bench_press', name: 'Dambıl Bench Press', sets: [{ setNo: 1, weight: 20, reps: 10 }] }]
+          };
+          const sigObjB = {
+            exercises: [{ sets: [{ reps: 10, weight: 20, setNo: 1 }], name: 'Dambıl Bench Press', id: 'db_bench_press' }],
+            healthSummary: { heartrateMax: 155, heartrateAvg: 128, calories: 250 },
+            program: 'Test',
+            date: todayYmd,
+            id: 'log_keyorder_1'
+          };
+          const workoutKeyOrderOk =
+            computeCanonicalWorkoutLogSig(sigObjA) !== '' &&
+            computeCanonicalWorkoutLogSig(sigObjA) === computeCanonicalWorkoutLogSig(sigObjB);
+
+          const daySigA = computeCanonicalCalendarDaySig({
+            date: todayYmd,
+            title: 'Bugün Planı',
+            type: 'custom_generated',
+            rest: false,
+            updatedAt: nowMs - 5000,
+            customWorkout: { id: 'd_t', title: 'Bugün Planı', exercises: [{ id: 'db_bench_press', targetSets: 3 }] }
+          }, todayYmd);
+          const daySigB = computeCanonicalCalendarDaySig({
+            customWorkout: { exercises: [{ targetSets: 3, id: 'db_bench_press' }], title: 'Bugün Planı', id: 'd_t' },
+            rest: false,
+            type: 'custom_generated',
+            title: 'Bugün Planı',
+            updatedAt: nowMs + 90000
+          }, todayYmd);
+          const daySigDeterminismOk = daySigA !== '' && daySigA === daySigB;
+
+          const curWSigs = JSON.parse(localStorage.getItem('celik_kodu_cloud_item_sigs_workout_' + uid) || '{}');
+          curWSigs['deleted_tombstone_1'] = '__DELETED__';
+          curWSigs['orphan_ghost_1'] = '{"id":"orphan_ghost_1"}';
+          localStorage.setItem('celik_kodu_cloud_item_sigs_workout_' + uid, JSON.stringify(curWSigs));
+
           const health = subApi.inspectCloudHealthSnapshot(uid);
           const reportText = subApi.buildCloudSubChiefDiagnosticReport(uid);
+          const activeEnvelopeCountOk = health.v2WorkoutSigsCount === health.workoutCount;
 
           let cardRenderedOk = false;
           if (typeof CelikAdminPortal !== 'undefined' && typeof CelikAdminPortal.mountAdminPortalDOM === 'function') {
@@ -4694,6 +4736,9 @@ function runAcademicMathSuite(moduleSources, dbText) {
           }
 
           const cloudSubChiefOk = Boolean(
+            workoutKeyOrderOk &&
+            daySigDeterminismOk &&
+            activeEnvelopeCountOk &&
             nextStats.readsCount >= prevStats.readsCount + 2 &&
             nextStats.writesCount >= prevStats.writesCount + 1 &&
             nextStats.savedWritesCount >= prevStats.savedWritesCount + 3 &&
@@ -4714,7 +4759,7 @@ function runAcademicMathSuite(moduleSources, dbText) {
           );
 
           clearKeys();
-          return { parityOk, scheduleCompactionOk, purgeParityOk, cloudSubChiefOk };
+          return { parityOk, scheduleCompactionOk, purgeParityOk, workoutKeyOrderOk, daySigDeterminismOk, activeEnvelopeCountOk, cloudSubChiefOk };
         })()`, ctx);
 
         const ok = Object.values(res).every(Boolean);

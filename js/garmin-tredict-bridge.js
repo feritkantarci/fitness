@@ -2028,7 +2028,33 @@
     return true;
   }
 
-  function handoffCompletedActivitiesToTabChiefs() {
+  function localCanonicalJsonStringify(val) {
+    if (typeof window !== 'undefined' && typeof window.stableCanonicalJsonStringify === 'function') {
+      return window.stableCanonicalJsonStringify(val);
+    }
+    const sortDeep = (v, depth = 0) => {
+      if (v === null || v === undefined || typeof v !== 'object' || depth > 20) return v;
+      if (typeof v.toJSON === 'function') return sortDeep(v.toJSON(), depth + 1);
+      if (Array.isArray(v)) return v.map(x => (x === undefined ? null : sortDeep(x, depth + 1)));
+      const out = {};
+      Object.keys(v).sort().forEach(k => {
+        if (v[k] === undefined) return;
+        const n = sortDeep(v[k], depth + 1);
+        if (n !== undefined) out[k] = n;
+      });
+      return out;
+    };
+    try { return JSON.stringify(sortDeep(val, 0)) || ''; } catch { return ''; }
+  }
+
+  function isSameCanonicalJson(a, b) {
+    if (a === b) return true;
+    if (!a || !b) return false;
+    return localCanonicalJsonStringify(a) === localCanonicalJsonStringify(b);
+  }
+
+  function handoffCompletedActivitiesToTabChiefs(options = {}) {
+    const opts = options && typeof options === 'object' ? options : {};
     if (!isGarminEnabledForCurrentUser() || typeof EXERCISES_DB === 'undefined') return;
     const activities = getStoredActivities();
     try {
@@ -2129,7 +2155,7 @@
             userAppLog.garminActivityId = act.id;
             changed = true;
           }
-          if (JSON.stringify(userAppLog.healthSummary) !== JSON.stringify(healthSummaryObj)) {
+          if (!isSameCanonicalJson(userAppLog.healthSummary, healthSummaryObj)) {
             userAppLog.healthSummary = healthSummaryObj;
             changed = true;
           }
@@ -2137,7 +2163,7 @@
             userAppLog.exercises.forEach((ex, exIdx) => {
               const matchGrp = resolvedGroups[exIdx] || resolvedGroups.find(g => g.originalId === ex.id || g.originalName === ex.name);
               if (matchGrp && matchGrp.healthTelemetry) {
-                if (JSON.stringify(ex.healthTelemetry) !== JSON.stringify(matchGrp.healthTelemetry)) {
+                if (!isSameCanonicalJson(ex.healthTelemetry, matchGrp.healthTelemetry)) {
                   ex.healthTelemetry = matchGrp.healthTelemetry;
                   changed = true;
                 }
@@ -2145,7 +2171,7 @@
                   ex.sets.forEach((stObj, sIdx) => {
                     const mSet = matchGrp.sets[Math.min(sIdx, matchGrp.sets.length - 1)];
                     if (mSet && stObj && typeof stObj === 'object') {
-                      if (stObj.heartrate !== mSet.heartrate || stObj.heartrateMax !== mSet.heartrateMax) {
+                      if ((stObj.heartrate ?? null) !== (mSet.heartrate ?? null) || (stObj.heartrateMax ?? null) !== (mSet.heartrateMax ?? null)) {
                         stObj.heartrate = mSet.heartrate;
                         stObj.heartrateMax = mSet.heartrateMax;
                         stObj.durationSec = Math.round(Number(mSet.duration || 0));
@@ -2290,7 +2316,10 @@
             existingLog.totalSetsCompleted = totalSetsCount;
             changed = true;
           }
-          existingLog.healthSummary = healthSummaryObj;
+          if (!isSameCanonicalJson(existingLog.healthSummary, healthSummaryObj)) {
+            existingLog.healthSummary = healthSummaryObj;
+            changed = true;
+          }
         }
 
         resolvedGroups.forEach(grp => {
@@ -2369,7 +2398,7 @@
           });
         }
         localStorage.setItem(historyKey, JSON.stringify(logs));
-        if (typeof window.syncWorkoutLogsToCloud === 'function' && window._initialWorkoutLogsCloudSyncDone === true) {
+        if (!opts.skipCloudSync && typeof window.syncWorkoutLogsToCloud === 'function' && window._initialWorkoutLogsCloudSyncDone === true) {
           try { window.syncWorkoutLogsToCloud(logs, uid); } catch {}
         }
         if (typeof renderCalendarScreen === 'function') renderCalendarScreen();

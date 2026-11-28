@@ -660,7 +660,7 @@
             try {
                 const ver = (typeof window !== 'undefined' && window.CelikKaraKutu && typeof window.CelikKaraKutu.getAppVersion === 'function')
                     ? window.CelikKaraKutu.getAppVersion()
-                    : 'v356';
+                    : 'v362';
                 const keys = payload && typeof payload === 'object' ? Object.keys(payload) : [];
                 const undefKeys = [];
                 const overLimit = [];
@@ -1356,6 +1356,7 @@
                         }
                         _bootCloudSyncTriggered = true;
                         if (fbAuth && fbAuth.currentUser) {
+                            lastForegroundCloudRefreshAt = Date.now();
                             await syncAllFromCloud();
                             if (!isFirestoreQuotaCircuitOpen()) {
                                 await flushPendingCloudOutbox();
@@ -1644,7 +1645,11 @@
             }
         }
 
-        async function syncAllFromCloud() {
+        let _syncAllFromCloudInFlight = null;
+        let _lastSyncAllFromCloudDoneAt = 0;
+
+        async function syncAllFromCloud(options = {}) {
+            const opts = options && typeof options === 'object' ? options : {};
             if (isDemoGuestSession()) {
                 updateCloudSyncBadge('synced', 'Demo Modu');
                 return;
@@ -1654,88 +1659,102 @@
                 updateCloudSyncBadge('offline', getFirestoreCircuitBadgeText());
                 return;
             }
-            _cloudSyncLastIssue = null;
-            updateCloudSyncBadge('syncing', 'Eşitleniyor...');
-
-            try {
-                if (!IS_LOCAL_DEV && typeof fbAuth !== 'undefined' && fbAuth && !_firebaseInitialAuthResolved) {
-                    await waitForFirebaseAuthReady(fbAuth, 2500);
-                }
-
-                // 1. Oturum açılmadan app_system/ai_config veya app_system/users kesinlikle okunmaz
-                const uid = getActiveUserId();
-                const isCloudUserSignedIn = Boolean(IS_LOCAL_DEV || !fbAuth || fbAuth.currentUser);
-                if (!isCloudUserSignedIn) {
-                    if (typeof window !== 'undefined') window._initialWorkoutLogsCloudSyncDone = true;
-                    if (typeof syncMasterCatalogFromCloud === 'function') {
-                        try { await syncMasterCatalogFromCloud(0); } catch {}
-                    }
-                    updateCloudSyncBadge(uid ? 'auth-required' : 'offline', uid ? 'Bulut Girişi Gerekli' : 'Bulut Hazır');
-                    return;
-                }
-
-                // Vücut ağırlığı tonaj fırtınasını önlemek için önce tartı verisi çekilir
-                if (uid) {
-                    await syncUserScaleLogsFromCloud(uid);
-                }
-
-                const priorityTasks = [];
-                if (IS_LOCAL_DEV || (typeof fbAuth !== 'undefined' && fbAuth && fbAuth.currentUser)) {
-                    priorityTasks.push(syncAiConfigFromCloud());
-                }
-                if (uid) priorityTasks.push(syncUserWorkoutLogsFromCloud(uid, { forceServer: true }));
-                await Promise.all(priorityTasks);
-
-                // 2. Kişisel profili (user_profiles/{authUid}) eşitle; yöneticiyse tam listeyi yönetici portalından eşitle
-                if (typeof fbAuth !== 'undefined' && fbAuth && fbAuth.currentUser) {
-                    await syncOwnUserProfileFromCloud(fbAuth.currentUser);
-                }
-                if (typeof isVerifiedAdminSession === 'function' && isVerifiedAdminSession()) {
-                    if (typeof ensureAdminPortalLoadedAndMounted === 'function') {
-                        await ensureAdminPortalLoadedAndMounted();
-                    }
-                    if (!isFirestoreQuotaCircuitOpen() && typeof window !== 'undefined' && typeof window.syncAllUsersForAdmin === 'function') {
-                        await withAuthTimeout(window.syncAllUsersForAdmin(), 2500, null);
-                    }
-                }
-
-                // 3. Kalan aktif kullanıcı verilerini eşitle
-                if (uid && !isFirestoreQuotaCircuitOpen()) {
-                    await syncUserMeasurementsFromCloud(uid);
-                    await syncUserStateFromCloud(uid);
-                    if (isSubcollectionMigrationEnabledForUser(uid)) {
-                        await migrateLegacyAthleteDocsToSubcollections(uid);
-                    }
-                }
-
-                const hasPendingWorkout = Boolean(uid && localStorage.getItem(`celik_kodu_pending_workout_sync_${uid}`) === '1');
-                if (isFirestoreQuotaCircuitOpen()) {
-                    updateCloudSyncBadge('offline', getFirestoreCircuitBadgeText());
-                } else if (_cloudSyncLastIssue === 'auth-required') {
-                    updateCloudSyncBadge('auth-required', 'Bulut Girişi Gerekli');
-                } else if (_cloudSyncLastIssue === 'permission-denied') {
-                    updateCloudSyncBadge('auth-required', 'Bulut Yetki Hatası');
-                } else if (_cloudSyncLastIssue === 'offline' || navigator.onLine === false) {
-                    updateCloudSyncBadge('offline', 'Kuyrukta (İnternet Bekleniyor)');
-                } else if (_cloudSyncLastIssue || hasPendingWorkout) {
-                    updateCloudSyncBadge('offline', 'Eşitleme Bekliyor');
-                } else {
-                    updateCloudSyncBadge('synced', 'Bulut Aktif');
-                }
-            } catch (e) {
-                console.warn("Bulut eşitleme gecikti:", e);
-                const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
-                const authMissing = Boolean(!IS_LOCAL_DEV && typeof fbAuth !== 'undefined' && fbAuth && !fbAuth.currentUser);
-                if (isFirestoreQuotaCircuitOpen()) {
-                    updateCloudSyncBadge('offline', getFirestoreCircuitBadgeText());
-                } else if (authMissing) {
-                    updateCloudSyncBadge('auth-required', 'Bulut Girişi Gerekli');
-                } else if (offline) {
-                    updateCloudSyncBadge('offline', 'Kuyrukta (İnternet Bekleniyor)');
-                } else {
-                    updateCloudSyncBadge('offline', 'Çevrimdışı');
-                }
+            if (_syncAllFromCloudInFlight) {
+                return _syncAllFromCloudInFlight;
             }
+            if (!opts.force && _lastSyncAllFromCloudDoneAt > 0 && (Date.now() - _lastSyncAllFromCloudDoneAt) < 3500) {
+                notifyCloudSubChief('saved_read', 'sync_all', 'Mükerrer açılış eşitlemesi önlendi', 1);
+                return;
+            }
+
+            _syncAllFromCloudInFlight = (async () => {
+                _cloudSyncLastIssue = null;
+                updateCloudSyncBadge('syncing', 'Eşitleniyor...');
+
+                try {
+                    if (!IS_LOCAL_DEV && typeof fbAuth !== 'undefined' && fbAuth && !_firebaseInitialAuthResolved) {
+                        await waitForFirebaseAuthReady(fbAuth, 2500);
+                    }
+
+                    // 1. Oturum açılmadan app_system/ai_config veya app_system/users kesinlikle okunmaz
+                    const uid = getActiveUserId();
+                    const isCloudUserSignedIn = Boolean(IS_LOCAL_DEV || !fbAuth || fbAuth.currentUser);
+                    if (!isCloudUserSignedIn) {
+                        if (typeof window !== 'undefined') window._initialWorkoutLogsCloudSyncDone = true;
+                        if (typeof syncMasterCatalogFromCloud === 'function') {
+                            try { await syncMasterCatalogFromCloud(0); } catch {}
+                        }
+                        updateCloudSyncBadge(uid ? 'auth-required' : 'offline', uid ? 'Bulut Girişi Gerekli' : 'Bulut Hazır');
+                        return;
+                    }
+
+                    // Vücut ağırlığı tonaj fırtınasını önlemek için önce tartı verisi çekilir
+                    if (uid) {
+                        await syncUserScaleLogsFromCloud(uid);
+                    }
+
+                    const priorityTasks = [];
+                    if (IS_LOCAL_DEV || (typeof fbAuth !== 'undefined' && fbAuth && fbAuth.currentUser)) {
+                        priorityTasks.push(syncAiConfigFromCloud());
+                    }
+                    if (uid) priorityTasks.push(syncUserWorkoutLogsFromCloud(uid, { forceServer: true }));
+                    await Promise.all(priorityTasks);
+
+                    // 2. Kişisel profili (user_profiles/{authUid}) eşitle; yöneticiyse tam listeyi yönetici portalından eşitle
+                    if (typeof fbAuth !== 'undefined' && fbAuth && fbAuth.currentUser) {
+                        await syncOwnUserProfileFromCloud(fbAuth.currentUser);
+                    }
+                    if (typeof isVerifiedAdminSession === 'function' && isVerifiedAdminSession()) {
+                        if (typeof ensureAdminPortalLoadedAndMounted === 'function') {
+                            await ensureAdminPortalLoadedAndMounted();
+                        }
+                        if (!isFirestoreQuotaCircuitOpen() && typeof window !== 'undefined' && typeof window.syncAllUsersForAdmin === 'function') {
+                            await withAuthTimeout(window.syncAllUsersForAdmin(), 2500, null);
+                        }
+                    }
+
+                    // 3. Kalan aktif kullanıcı verilerini eşitle
+                    if (uid && !isFirestoreQuotaCircuitOpen()) {
+                        await syncUserMeasurementsFromCloud(uid);
+                        await syncUserStateFromCloud(uid);
+                        if (isSubcollectionMigrationEnabledForUser(uid)) {
+                            await migrateLegacyAthleteDocsToSubcollections(uid);
+                        }
+                    }
+
+                    const hasPendingWorkout = Boolean(uid && localStorage.getItem(`celik_kodu_pending_workout_sync_${uid}`) === '1');
+                    if (isFirestoreQuotaCircuitOpen()) {
+                        updateCloudSyncBadge('offline', getFirestoreCircuitBadgeText());
+                    } else if (_cloudSyncLastIssue === 'auth-required') {
+                        updateCloudSyncBadge('auth-required', 'Bulut Girişi Gerekli');
+                    } else if (_cloudSyncLastIssue === 'permission-denied') {
+                        updateCloudSyncBadge('auth-required', 'Bulut Yetki Hatası');
+                    } else if (_cloudSyncLastIssue === 'offline' || navigator.onLine === false) {
+                        updateCloudSyncBadge('offline', 'Kuyrukta (İnternet Bekleniyor)');
+                    } else if (_cloudSyncLastIssue || hasPendingWorkout) {
+                        updateCloudSyncBadge('offline', 'Eşitleme Bekliyor');
+                    } else {
+                        updateCloudSyncBadge('synced', 'Bulut Aktif');
+                    }
+                } catch (e) {
+                    console.warn("Bulut eşitleme gecikti:", e);
+                    const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+                    const authMissing = Boolean(!IS_LOCAL_DEV && typeof fbAuth !== 'undefined' && fbAuth && !fbAuth.currentUser);
+                    if (isFirestoreQuotaCircuitOpen()) {
+                        updateCloudSyncBadge('offline', getFirestoreCircuitBadgeText());
+                    } else if (authMissing) {
+                        updateCloudSyncBadge('auth-required', 'Bulut Girişi Gerekli');
+                    } else if (offline) {
+                        updateCloudSyncBadge('offline', 'Kuyrukta (İnternet Bekleniyor)');
+                    } else {
+                        updateCloudSyncBadge('offline', 'Çevrimdışı');
+                    }
+                }
+            })().finally(() => {
+                _lastSyncAllFromCloudDoneAt = Date.now();
+                _syncAllFromCloudInFlight = null;
+            });
+            return _syncAllFromCloudInFlight;
         }
 
         async function syncAiConfigFromCloud() {
@@ -2101,10 +2120,42 @@
             return copy;
         }
 
+        function toCanonicalSortedValue(val, depth = 0) {
+            if (val === null || val === undefined) return val;
+            if (typeof val !== 'object') return val;
+            if (depth > 20) return val;
+            if (typeof val.toJSON === 'function') {
+                return toCanonicalSortedValue(val.toJSON(), depth + 1);
+            }
+            if (Array.isArray(val)) {
+                return val.map(item => (item === undefined ? null : toCanonicalSortedValue(item, depth + 1)));
+            }
+            const sortedObj = {};
+            const keys = Object.keys(val).sort();
+            for (const k of keys) {
+                const v = val[k];
+                if (v === undefined) continue;
+                const normalized = toCanonicalSortedValue(v, depth + 1);
+                if (normalized !== undefined) sortedObj[k] = normalized;
+            }
+            return sortedObj;
+        }
+
+        function stableCanonicalJsonStringify(val) {
+            try {
+                return JSON.stringify(toCanonicalSortedValue(val, 0)) || '';
+            } catch {
+                return '';
+            }
+        }
+        if (typeof window !== 'undefined') {
+            window.stableCanonicalJsonStringify = stableCanonicalJsonStringify;
+        }
+
         function computeCanonicalWorkoutLogSig(logObj) {
             const clean = stripWorkoutLogCloudEnvelope(logObj);
             if (!clean) return '';
-            try { return JSON.stringify(clean); } catch { return ''; }
+            return stableCanonicalJsonStringify(clean);
         }
 
         function computeWorkoutLogsCloudDiff(logs, uid) {
@@ -2190,7 +2241,12 @@
             }
 
             const localLogs = getUserLogsById(uid);
-            const { mergedLogs, filteredCloudDeletion } = mergeWorkoutLogCollections(localLogs, incomingLogs, uid);
+            const mergeRes = mergeWorkoutLogCollections(localLogs, incomingLogs, uid);
+            let mergedLogs = mergeRes.mergedLogs;
+            const filteredCloudDeletion = mergeRes.filteredCloudDeletion;
+            if (window.CelikBridgeCustoms && typeof window.CelikBridgeCustoms.sanitizeWorkoutLogsList === 'function') {
+                mergedLogs = window.CelikBridgeCustoms.sanitizeWorkoutLogsList(mergedLogs);
+            }
             let normalizedCloudLogs = false;
             if (typeof window.recalculateWorkoutLogMetrics === 'function') {
                 mergedLogs.forEach(logItem => {
@@ -2199,14 +2255,26 @@
                 });
             }
 
+            const mergedActiveDocIds = new Set();
+            mergedLogs.forEach(m => {
+                const docId = m && m.id ? toSafeCloudSubDocId(m.id) : '';
+                if (docId) mergedActiveDocIds.add(docId);
+            });
+            const incomingIdSet = new Set(incomingLogs.map(l => toSafeCloudSubDocId(l.id)));
+
             if (!normalizedCloudLogs) {
-                const incomingIdSet = new Set(incomingLogs.map(l => toSafeCloudSubDocId(l.id)));
                 mergedLogs.forEach(m => {
                     const docId = m && m.id ? toSafeCloudSubDocId(m.id) : '';
                     if (docId && incomingIdSet.has(docId)) {
                         knownSigs[docId] = computeCanonicalWorkoutLogSig(m);
                     }
                 });
+            }
+            for (const existingDocId of Object.keys(knownSigs)) {
+                if (knownSigs[existingDocId] === '__DELETED__') continue;
+                if (!mergedActiveDocIds.has(existingDocId)) {
+                    delete knownSigs[existingDocId];
+                }
             }
 
             if (mergedLogs.length > 0 || appliedDeletions > 0 || filteredCloudDeletion) {
@@ -2232,7 +2300,7 @@
                 window.GarminTredictChief.syncWatchTitlesFromWorkoutLogs(mergedLogs, uid);
             }
             if (!isFromRealtimeSnapshot && window.GarminTredictChief && typeof window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs === 'function') {
-                window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs();
+                window.GarminTredictChief.handoffCompletedActivitiesToTabChiefs({ skipCloudSync: true });
             }
             if (typeof renderHistory === 'function') renderHistory();
             if (window.GarminTredictChief && typeof window.GarminTredictChief.renderHistoryGarminSyncPanel === 'function') {
@@ -3413,15 +3481,28 @@
             delete copy.deleted;
             delete copy.syncSeal;
             delete copy.serverUpdatedAt;
+            delete copy.clientUpdatedAt;
             delete copy.date;
             Object.keys(copy).forEach(k => { if (copy[k] === undefined) delete copy[k]; });
             return copy;
         }
 
-        function computeCanonicalCalendarDaySig(entry) {
-            const clean = stripCalendarDayCloudEnvelope(entry);
-            if (!clean) return '';
-            try { return JSON.stringify(clean); } catch { return ''; }
+        function computeCanonicalCalendarDaySig(entry, dateStrOverride) {
+            const base = stripCalendarDayCloudEnvelope(entry);
+            if (!base) return '';
+            const dateHint = (typeof dateStrOverride === 'string' && dateStrOverride)
+                ? dateStrOverride
+                : (entry && typeof entry.date === 'string' ? entry.date : '');
+            const slimmed = (typeof slimStaleCalendarDayEntry === 'function' && dateHint)
+                ? slimStaleCalendarDayEntry(dateHint, base)
+                : base;
+            const clean = stripWatchBridgeSecretsFromObj(slimmed, 0);
+            if (!clean || typeof clean !== 'object') return '';
+            const sigCopy = Object.assign({}, clean);
+            delete sigCopy.updatedAt;
+            delete sigCopy.clientUpdatedAt;
+            delete sigCopy.date;
+            return stableCanonicalJsonStringify(sigCopy);
         }
 
         function computeCalendarDaysCloudDiff(dateSchedMap, uid) {
@@ -3441,7 +3522,7 @@
                     ? slimStaleCalendarDayEntry(dateStr, baseEntry)
                     : baseEntry;
                 const cleanEntry = stripWatchBridgeSecretsFromObj(slimmedEntry, 0);
-                const sig = computeCanonicalCalendarDaySig(cleanEntry);
+                const sig = computeCanonicalCalendarDaySig(cleanEntry, dateStr);
                 if (sig && knownSigs[dateStr] === sig) {
                     unchangedCount++;
                 } else {
@@ -3504,14 +3585,18 @@
                     }
                 } else {
                     const cleanEnvelope = stripCalendarDayCloudEnvelope(data);
-                    const cleanEntry = (cleanEnvelope && typeof slimStaleCalendarDayEntry === 'function')
+                    const slimmedEntry = (cleanEnvelope && typeof slimStaleCalendarDayEntry === 'function')
                         ? slimStaleCalendarDayEntry(dateStr, cleanEnvelope)
                         : cleanEnvelope;
+                    const cleanEntry = slimmedEntry ? stripWatchBridgeSecretsFromObj(slimmedEntry, 0) : null;
                     if (!cleanEntry) continue;
+                    if (remoteTs > 0) cleanEntry.updatedAt = remoteTs;
                     if (!locEntry || (!hasPendingLocalState && remoteTs >= locTs)) {
                         localDateSched[dateStr] = cleanEntry;
-                        knownSigs[dateStr] = computeCanonicalCalendarDaySig(cleanEntry);
+                        knownSigs[dateStr] = computeCanonicalCalendarDaySig(cleanEntry, dateStr);
                         appliedUpserts++;
+                    } else if (locEntry && computeCanonicalCalendarDaySig(locEntry, dateStr) === computeCanonicalCalendarDaySig(cleanEntry, dateStr)) {
+                        knownSigs[dateStr] = computeCanonicalCalendarDaySig(locEntry, dateStr);
                     }
                 }
             }
@@ -3543,6 +3628,7 @@
                 return { subcollectionActive: true, allDaysSyncedToSubcollection: diff.totalValidDays === diff.unchangedCount };
             }
             try {
+                let touchedLocalTs = false;
                 for (const item of [...diff.upserts, ...diff.tombstones]) {
                     await writeAthleteSubDocWithSealHeal('user_state', uid, 'days', item.dateStr, (seal) =>
                         Object.assign({}, item.payload, {
@@ -3551,6 +3637,13 @@
                         })
                     );
                     knownSigs[item.dateStr] = item.sig;
+                    if (!item.payload.deleted && localDateSched[item.dateStr] && item.payload && item.payload.updatedAt) {
+                        localDateSched[item.dateStr].updatedAt = item.payload.updatedAt;
+                        touchedLocalTs = true;
+                    }
+                }
+                if (touchedLocalTs) {
+                    try { localStorage.setItem(`celik_kodu_date_schedule_${uid}`, JSON.stringify(localDateSched)); } catch {}
                 }
                 writeCalendarDayCloudItemSigs(uid, knownSigs);
                 try { localStorage.setItem(DAYS_CLOUD_PULL_AT_PREFIX + uid, String(Date.now())); } catch {}
@@ -3892,6 +3985,223 @@
             }
         }
 
+        function buildUserStatePayloadCore(uid, options = {}) {
+            const opts = options && typeof options === 'object' ? options : {};
+            const safeParse = (k, fallback) => {
+                try {
+                    const r = localStorage.getItem(k);
+                    return r ? JSON.parse(r) : fallback;
+                } catch { return fallback; }
+            };
+            const activeUid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
+            let lastGenVal = safeParse(`celik_kodu_last_generated_workout_${uid}`, null);
+            if (!lastGenVal && activeUid === uid) {
+                const activeGen = safeParse('celik_kodu_last_generated_workout', null);
+                if (activeGen && (!activeGen.userId || activeGen.userId === uid)) {
+                    lastGenVal = activeGen;
+                }
+            }
+            if (lastGenVal && isGeneratedWorkoutDraftExpired(lastGenVal)) {
+                if (opts.pruneExpiredDrafts !== false) {
+                    try {
+                        localStorage.removeItem(`celik_kodu_last_generated_workout_${uid}`);
+                        if (activeUid === uid) localStorage.removeItem('celik_kodu_last_generated_workout');
+                    } catch {}
+                }
+                lastGenVal = null;
+            }
+            const cleanLastGen = lastGenVal ? stripWatchBridgeSecretsFromObj(lastGenVal, 0) : null;
+            const safeLastGen = (
+                cleanLastGen &&
+                typeof cleanLastGen === 'object' &&
+                !Array.isArray(cleanLastGen) &&
+                Object.keys(cleanLastGen).length <= 100 &&
+                getJsonByteSize(cleanLastGen) <= 256000
+            ) ? cleanLastGen : null;
+
+            const safeExclIds = sanitizeExcludedExerciseIds(safeParse(getExcludedExercisesStorageKey(uid), []));
+            const exclUpdatedAt = typeof getExcludedExercisesUpdatedAt === 'function'
+                ? getExcludedExercisesUpdatedAt(uid)
+                : 0;
+            const safeCustomPrograms = typeof getUserCustomPrograms === 'function'
+                ? getUserCustomPrograms(uid)
+                : [];
+            const safeDeletedIds = typeof getDeletedCustomProgramIds === 'function'
+                ? getDeletedCustomProgramIds(uid)
+                : [];
+            const safeMobilityTests = sanitizeMobilityTestsPayload(
+                safeParse(`celik_kodu_mobility_tests_${uid}`, { history: [], updatedAt: 0 })
+            );
+
+            const manifestsMerged = Object.assign(
+                {},
+                safeParse(`celik_kodu_garmin_sent_manifests_v1__${uid}`, {}),
+                safeParse(`celik_garmin_sent_manifests_v1_${uid}`, {})
+            );
+            delete manifestsMerged.__watchVault;
+            delete manifestsMerged.__watchActivities;
+            delete manifestsMerged.__wellnessSteps;
+            delete manifestsMerged.__approvedWatchIds;
+            delete manifestsMerged.__dismissedWatchIds;
+
+            const localHistoryLogs = safeParse(`celik_kodu_history_${uid}`, []);
+            const rawWatchTelemetry = safeParse(`celik_garmin_telemetry_v2_${uid}`, []);
+            const approvedWatchIds = (Array.isArray(safeParse(`celik_garmin_approved_activities_v1_${uid}`, []))
+                ? safeParse(`celik_garmin_approved_activities_v1_${uid}`, [])
+                : []).map(String).filter(Boolean).slice(-40);
+            const dismissedWatchIds = (Array.isArray(safeParse(`celik_garmin_dismissed_activities_v1_${uid}`, []))
+                ? safeParse(`celik_garmin_dismissed_activities_v1_${uid}`, [])
+                : []).map(String).filter(Boolean).slice(-40);
+            const deletedWorkoutLogIds = (Array.isArray(safeParse(`celik_kodu_deleted_logs_${uid}`, []))
+                ? safeParse(`celik_kodu_deleted_logs_${uid}`, [])
+                : []).map(String).filter(Boolean).slice(-60);
+
+            let refDayMs = NaN;
+            const considerRefDate = (val) => {
+                if (!val) return;
+                const iso = String(val).slice(0, 10);
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return;
+                const ms = Date.parse(iso + 'T12:00:00Z');
+                if (Number.isFinite(ms) && (!Number.isFinite(refDayMs) || ms > refDayMs)) refDayMs = ms;
+            };
+            if (Array.isArray(localHistoryLogs)) localHistoryLogs.forEach(l => considerRefDate(l?.date));
+            if (Array.isArray(rawWatchTelemetry)) rawWatchTelemetry.forEach(a => considerRefDate(a?.date));
+            refDayMs = Math.max(Date.now(), Number.isFinite(refDayMs) ? refDayMs : 0);
+
+            const prunedManifestEntries = Object.entries(manifestsMerged)
+                .filter(([k, v]) => {
+                    if (!v || typeof v !== 'object') return false;
+                    if (k === '__lastSent') return true;
+                    const mDate = String(k).match(/^date_(\d{4}-\d{2}-\d{2})$/);
+                    const iso = mDate ? mDate[1] : String(v.sentAt || '').slice(0, 10);
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+                        const dMs = Date.parse(iso + 'T12:00:00Z');
+                        if (Number.isFinite(dMs) && (refDayMs - dMs) > SEVEN_DAYS_RETENTION_MS) return false;
+                    }
+                    return true;
+                })
+                .sort((a, b) => {
+                    if (a[0] === '__lastSent') return -1;
+                    if (b[0] === '__lastSent') return 1;
+                    return String(b[1]?.sentAt || b[0]).localeCompare(String(a[1]?.sentAt || a[0]));
+                })
+                .slice(0, 12);
+            const leanManifests = Object.fromEntries(prunedManifestEntries);
+            if (approvedWatchIds.length > 0) leanManifests.__approvedWatchIds = approvedWatchIds;
+            if (dismissedWatchIds.length > 0) leanManifests.__dismissedWatchIds = dismissedWatchIds;
+
+            const localWatchVault = safeParse(`celik_garmin_watch_vault_v1_${uid}`, null);
+            if (localWatchVault && typeof localWatchVault === 'object' && !Array.isArray(localWatchVault)) {
+                leanManifests.__watchVault = {
+                    enabled: localWatchVault.enabled !== false,
+                    sealedTredict: typeof localWatchVault.sealedTredict === 'string' ? localWatchVault.sealedTredict : '',
+                    sealedIntervals: typeof localWatchVault.sealedIntervals === 'string' ? localWatchVault.sealedIntervals : '',
+                    sealedGateway: typeof localWatchVault.sealedGateway === 'string' ? localWatchVault.sealedGateway : '',
+                    sealRef: typeof localWatchVault.sealRef === 'string' ? localWatchVault.sealRef : '',
+                    updatedAt: Number(localWatchVault.updatedAt || Date.now())
+                };
+            }
+
+            if (Array.isArray(rawWatchTelemetry) && rawWatchTelemetry.length > 0) {
+                const approvedSet = new Set(approvedWatchIds);
+                const dismissedSet = new Set(dismissedWatchIds);
+                const deletedSet = new Set(deletedWorkoutLogIds);
+                const historyActIds = new Set();
+                if (Array.isArray(localHistoryLogs)) {
+                    localHistoryLogs.forEach(l => {
+                        if (!l) return;
+                        if (l.garminActivityId) historyActIds.add(String(l.garminActivityId));
+                        const lid = String(l.id || '');
+                        if (lid.startsWith('garmin_')) historyActIds.add(lid.slice('garmin_'.length));
+                    });
+                }
+                const compactWatchList = rawWatchTelemetry
+                    .filter(a => {
+                        if (!a || typeof a !== 'object' || !a.id) return false;
+                        const aid = String(a.id);
+                        if (dismissedSet.has(aid) || approvedSet.has(aid) || historyActIds.has(aid) || deletedSet.has(aid) || deletedSet.has(`garmin_${aid}`)) {
+                            return false;
+                        }
+                        const iso = String(a.date || '').slice(0, 10);
+                        if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+                            const dMs = Date.parse(iso + 'T12:00:00Z');
+                            if (Number.isFinite(dMs) && (refDayMs - dMs) > 7 * 86400000) return false;
+                        }
+                        return true;
+                    })
+                    .slice(0, 5)
+                    .map(a => {
+                        const sm = (a.summary && typeof a.summary === 'object') ? a.summary : a;
+                        return {
+                            id: String(a.id),
+                            date: String(a.date || ''),
+                            title: String(a.title || ''),
+                            sportType: String(a.sportType || ''),
+                            subSportType: String(a.subSportType || ''),
+                            summary: {
+                                duration: Number(sm.duration || 0),
+                                durationTotal: Number(sm.durationTotal || sm.duration || 0),
+                                distance: Number(sm.distance || 0),
+                                calories: Number(sm.calories || 0),
+                                heartrate: Number(sm.heartrate || 0),
+                                heartrateMax: Number(sm.heartrateMax || 0),
+                                pace: Number(sm.pace || 0),
+                                cadence: Number(sm.cadence || 0),
+                                cadenceMax: Number(sm.cadenceMax || 0)
+                            },
+                            sourceProvider: String(a.sourceProvider || '')
+                        };
+                    });
+                if (compactWatchList.length > 0) {
+                    leanManifests.__watchActivities = compactWatchList;
+                }
+            }
+
+            const rawWellnessSteps = safeParse(`celik_garmin_wellness_steps_v1_${uid}`, null);
+            if (rawWellnessSteps && typeof rawWellnessSteps === 'object' && !Array.isArray(rawWellnessSteps)) {
+                const stepDates = Object.keys(rawWellnessSteps)
+                    .filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k))
+                    .sort()
+                    .slice(-30);
+                if (stepDates.length > 0) {
+                    const compactWellness = {};
+                    stepDates.forEach(dt => {
+                        const entry = rawWellnessSteps[dt];
+                        if (entry && typeof entry === 'object') compactWellness[dt] = entry;
+                    });
+                    leanManifests.__wellnessSteps = compactWellness;
+                }
+            }
+
+            const ensureMapOr = (val, maxKeys, fallback) => {
+                if (!val || typeof val !== 'object' || Array.isArray(val)) return fallback;
+                return Object.keys(val).length <= maxKeys ? val : fallback;
+            };
+            const ensureListMax = (val, maxItems) => (Array.isArray(val) ? val.slice(0, maxItems) : []);
+
+            return stripWatchBridgeSecretsFromObj({
+                weeklySchedule: ensureMapOr(safeParse(`celik_kodu_weekly_schedule_${uid}`, {}), 50, {}),
+                nextWeeklySchedule: ensureMapOr(safeParse(`celik_kodu_next_weekly_schedule_${uid}`, {}), 50, {}),
+                dateSchedule: opts.allDaysSyncedToSubcollection
+                    ? {}
+                    : ensureMapOr(safeParse(`celik_kodu_date_schedule_${uid}`, {}), 1500, {}),
+                rememberedWeights: ensureMapOr(safeParse(`celik_kodu_last_weights_${uid}`, {}), 1500, {}),
+                excludedExercises: ensureListMax(safeExclIds, 1000),
+                excludedExercisesUpdatedAt: Number.isFinite(Number(exclUpdatedAt)) ? Number(exclUpdatedAt) : 0,
+                customPrograms: ensureListMax(safeCustomPrograms, 200),
+                deletedCustomProgramIds: ensureListMax(safeDeletedIds, 500),
+                deletedWorkoutLogIds: ensureListMax(deletedWorkoutLogIds, 500),
+                mobilityTests: ensureMapOr(safeMobilityTests, 20, { history: [], updatedAt: 0 }),
+                selectedEquipments: ensureListMax(Array.isArray(selectedEquipments) ? selectedEquipments : [], 200),
+                customGyms: ensureListMax(safeParse(`celik_kodu_custom_gyms_${uid}`, []), 200),
+                aiDoctrine: String(currentSelectedDoctrine || 'bb_hybrid').slice(0, 120),
+                aiCoachSummary: ensureMapOr(safeParse(`celik_kodu_ai_program_${uid}`, null), 100, null),
+                lastGeneratedWorkout: ensureMapOr(safeLastGen, 100, null),
+                activeWorkoutDraft: ensureMapOr(safeParse(`celik_kodu_active_state_${uid}`, null), 100, null),
+                garminManifests: ensureMapOr(leanManifests, 1500, {})
+            });
+        }
+
         async function syncUserStateToCloud(targetUid) {
             if (IS_LOCAL_DEV || isFirestoreQuotaCircuitOpen()) return;
             const uid = targetUid || (typeof getActiveUserId === 'function' ? getActiveUserId() : null);
@@ -3902,223 +4212,15 @@
                 return;
             }
             try {
-                const safeParse = (k, fallback) => {
-                    try {
-                        const r = localStorage.getItem(k);
-                        return r ? JSON.parse(r) : fallback;
-                    } catch { return fallback; }
-                };
-                const activeUid = typeof getActiveUserId === 'function' ? getActiveUserId() : null;
-                let lastGenVal = safeParse(`celik_kodu_last_generated_workout_${uid}`, null);
-                if (!lastGenVal && activeUid === uid) {
-                    const activeGen = safeParse('celik_kodu_last_generated_workout', null);
-                    if (activeGen && (!activeGen.userId || activeGen.userId === uid)) {
-                        lastGenVal = activeGen;
-                    }
-                }
-                if (lastGenVal && isGeneratedWorkoutDraftExpired(lastGenVal)) {
-                    try {
-                        localStorage.removeItem(`celik_kodu_last_generated_workout_${uid}`);
-                        if (activeUid === uid) localStorage.removeItem('celik_kodu_last_generated_workout');
-                    } catch {}
-                    lastGenVal = null;
-                }
-                const cleanLastGen = lastGenVal ? stripWatchBridgeSecretsFromObj(lastGenVal, 0) : null;
-                const safeLastGen = (
-                    cleanLastGen &&
-                    typeof cleanLastGen === 'object' &&
-                    !Array.isArray(cleanLastGen) &&
-                    Object.keys(cleanLastGen).length <= 100 &&
-                    getJsonByteSize(cleanLastGen) <= 256000
-                ) ? cleanLastGen : null;
-
-                const safeExclIds = sanitizeExcludedExerciseIds(safeParse(getExcludedExercisesStorageKey(uid), []));
-                const exclUpdatedAt = typeof getExcludedExercisesUpdatedAt === 'function'
-                    ? getExcludedExercisesUpdatedAt(uid)
-                    : 0;
-                const safeCustomPrograms = typeof getUserCustomPrograms === 'function'
-                    ? getUserCustomPrograms(uid)
-                    : [];
-                const safeDeletedIds = typeof getDeletedCustomProgramIds === 'function'
-                    ? getDeletedCustomProgramIds(uid)
-                    : [];
-                const safeMobilityTests = sanitizeMobilityTestsPayload(
-                    safeParse(`celik_kodu_mobility_tests_${uid}`, { history: [], updatedAt: 0 })
-                );
-
-                const manifestsMerged = Object.assign(
-                    {},
-                    safeParse(`celik_kodu_garmin_sent_manifests_v1__${uid}`, {}),
-                    safeParse(`celik_garmin_sent_manifests_v1_${uid}`, {})
-                );
-                delete manifestsMerged.__watchVault;
-                delete manifestsMerged.__watchActivities;
-                delete manifestsMerged.__wellnessSteps;
-                delete manifestsMerged.__approvedWatchIds;
-                delete manifestsMerged.__dismissedWatchIds;
-
-                const localHistoryLogs = safeParse(`celik_kodu_history_${uid}`, []);
-                const rawWatchTelemetry = safeParse(`celik_garmin_telemetry_v2_${uid}`, []);
-                const approvedWatchIds = (Array.isArray(safeParse(`celik_garmin_approved_activities_v1_${uid}`, []))
-                    ? safeParse(`celik_garmin_approved_activities_v1_${uid}`, [])
-                    : []).map(String).filter(Boolean).slice(-40);
-                const dismissedWatchIds = (Array.isArray(safeParse(`celik_garmin_dismissed_activities_v1_${uid}`, []))
-                    ? safeParse(`celik_garmin_dismissed_activities_v1_${uid}`, [])
-                    : []).map(String).filter(Boolean).slice(-40);
-                const deletedWorkoutLogIds = (Array.isArray(safeParse(`celik_kodu_deleted_logs_${uid}`, []))
-                    ? safeParse(`celik_kodu_deleted_logs_${uid}`, [])
-                    : []).map(String).filter(Boolean).slice(-60);
-
-                let refDayMs = NaN;
-                const considerRefDate = (val) => {
-                    if (!val) return;
-                    const iso = String(val).slice(0, 10);
-                    if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return;
-                    const ms = Date.parse(iso + 'T12:00:00Z');
-                    if (Number.isFinite(ms) && (!Number.isFinite(refDayMs) || ms > refDayMs)) refDayMs = ms;
-                };
-                if (Array.isArray(localHistoryLogs)) localHistoryLogs.forEach(l => considerRefDate(l?.date));
-                if (Array.isArray(rawWatchTelemetry)) rawWatchTelemetry.forEach(a => considerRefDate(a?.date));
-                refDayMs = Math.max(Date.now(), Number.isFinite(refDayMs) ? refDayMs : 0);
-
-                const prunedManifestEntries = Object.entries(manifestsMerged)
-                    .filter(([k, v]) => {
-                        if (!v || typeof v !== 'object') return false;
-                        if (k === '__lastSent') return true;
-                        const mDate = String(k).match(/^date_(\d{4}-\d{2}-\d{2})$/);
-                        const iso = mDate ? mDate[1] : String(v.sentAt || '').slice(0, 10);
-                        if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
-                            const dMs = Date.parse(iso + 'T12:00:00Z');
-                            if (Number.isFinite(dMs) && (refDayMs - dMs) > SEVEN_DAYS_RETENTION_MS) return false;
-                        }
-                        return true;
-                    })
-                    .sort((a, b) => {
-                        if (a[0] === '__lastSent') return -1;
-                        if (b[0] === '__lastSent') return 1;
-                        return String(b[1]?.sentAt || b[0]).localeCompare(String(a[1]?.sentAt || a[0]));
-                    })
-                    .slice(0, 12);
-                const leanManifests = Object.fromEntries(prunedManifestEntries);
-                if (approvedWatchIds.length > 0) leanManifests.__approvedWatchIds = approvedWatchIds;
-                if (dismissedWatchIds.length > 0) leanManifests.__dismissedWatchIds = dismissedWatchIds;
-
-                const localWatchVault = safeParse(`celik_garmin_watch_vault_v1_${uid}`, null);
-                if (localWatchVault && typeof localWatchVault === 'object' && !Array.isArray(localWatchVault)) {
-                    leanManifests.__watchVault = {
-                        enabled: localWatchVault.enabled !== false,
-                        sealedTredict: typeof localWatchVault.sealedTredict === 'string' ? localWatchVault.sealedTredict : '',
-                        sealedIntervals: typeof localWatchVault.sealedIntervals === 'string' ? localWatchVault.sealedIntervals : '',
-                        sealedGateway: typeof localWatchVault.sealedGateway === 'string' ? localWatchVault.sealedGateway : '',
-                        sealRef: typeof localWatchVault.sealRef === 'string' ? localWatchVault.sealRef : '',
-                        updatedAt: Number(localWatchVault.updatedAt || Date.now())
-                    };
-                }
-
-                if (Array.isArray(rawWatchTelemetry) && rawWatchTelemetry.length > 0) {
-                    const approvedSet = new Set(approvedWatchIds);
-                    const dismissedSet = new Set(dismissedWatchIds);
-                    const deletedSet = new Set(deletedWorkoutLogIds);
-                    const historyActIds = new Set();
-                    if (Array.isArray(localHistoryLogs)) {
-                        localHistoryLogs.forEach(l => {
-                            if (!l) return;
-                            if (l.garminActivityId) historyActIds.add(String(l.garminActivityId));
-                            const lid = String(l.id || '');
-                            if (lid.startsWith('garmin_')) historyActIds.add(lid.slice('garmin_'.length));
-                        });
-                    }
-                    const compactWatchList = rawWatchTelemetry
-                        .filter(a => {
-                            if (!a || typeof a !== 'object' || !a.id) return false;
-                            const aid = String(a.id);
-                            if (dismissedSet.has(aid) || approvedSet.has(aid) || historyActIds.has(aid) || deletedSet.has(aid) || deletedSet.has(`garmin_${aid}`)) {
-                                return false;
-                            }
-                            const iso = String(a.date || '').slice(0, 10);
-                            if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
-                                const dMs = Date.parse(iso + 'T12:00:00Z');
-                                if (Number.isFinite(dMs) && (refDayMs - dMs) > 7 * 86400000) return false;
-                            }
-                            return true;
-                        })
-                        .slice(0, 5)
-                        .map(a => {
-                            const sm = (a.summary && typeof a.summary === 'object') ? a.summary : a;
-                            return {
-                                id: String(a.id),
-                                date: String(a.date || ''),
-                                title: String(a.title || ''),
-                                sportType: String(a.sportType || ''),
-                                subSportType: String(a.subSportType || ''),
-                                summary: {
-                                    duration: Number(sm.duration || 0),
-                                    durationTotal: Number(sm.durationTotal || sm.duration || 0),
-                                    distance: Number(sm.distance || 0),
-                                    calories: Number(sm.calories || 0),
-                                    heartrate: Number(sm.heartrate || 0),
-                                    heartrateMax: Number(sm.heartrateMax || 0),
-                                    pace: Number(sm.pace || 0),
-                                    cadence: Number(sm.cadence || 0),
-                                    cadenceMax: Number(sm.cadenceMax || 0)
-                                },
-                                sourceProvider: String(a.sourceProvider || '')
-                            };
-                        });
-                    if (compactWatchList.length > 0) {
-                        leanManifests.__watchActivities = compactWatchList;
-                    }
-                }
-
-                const rawWellnessSteps = safeParse(`celik_garmin_wellness_steps_v1_${uid}`, null);
-                if (rawWellnessSteps && typeof rawWellnessSteps === 'object' && !Array.isArray(rawWellnessSteps)) {
-                    const stepDates = Object.keys(rawWellnessSteps)
-                        .filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k))
-                        .sort()
-                        .slice(-30);
-                    if (stepDates.length > 0) {
-                        const compactWellness = {};
-                        stepDates.forEach(dt => {
-                            const entry = rawWellnessSteps[dt];
-                            if (entry && typeof entry === 'object') compactWellness[dt] = entry;
-                        });
-                        leanManifests.__wellnessSteps = compactWellness;
-                    }
-                }
-
-                const ensureMapOr = (val, maxKeys, fallback) => {
-                    if (!val || typeof val !== 'object' || Array.isArray(val)) return fallback;
-                    return Object.keys(val).length <= maxKeys ? val : fallback;
-                };
-                const ensureListMax = (val, maxItems) => (Array.isArray(val) ? val.slice(0, maxItems) : []);
-
                 let diagForCatch = uid;
                 try {
                     const daysSyncRes = await syncUserCalendarDaysToCloud(uid);
                     const clientUpdatedAt = Number(localStorage.getItem(`celik_kodu_state_updated_at_${uid}`) || Date.now());
-                    const statePayloadCore = stripWatchBridgeSecretsFromObj({
-                        weeklySchedule: ensureMapOr(safeParse(`celik_kodu_weekly_schedule_${uid}`, {}), 50, {}),
-                        nextWeeklySchedule: ensureMapOr(safeParse(`celik_kodu_next_weekly_schedule_${uid}`, {}), 50, {}),
-                        dateSchedule: daysSyncRes.allDaysSyncedToSubcollection
-                            ? {}
-                            : ensureMapOr(safeParse(`celik_kodu_date_schedule_${uid}`, {}), 1500, {}),
-                        rememberedWeights: ensureMapOr(safeParse(`celik_kodu_last_weights_${uid}`, {}), 1500, {}),
-                        excludedExercises: ensureListMax(safeExclIds, 1000),
-                        excludedExercisesUpdatedAt: Number.isFinite(Number(exclUpdatedAt)) ? Number(exclUpdatedAt) : 0,
-                        customPrograms: ensureListMax(safeCustomPrograms, 200),
-                        deletedCustomProgramIds: ensureListMax(safeDeletedIds, 500),
-                        deletedWorkoutLogIds: ensureListMax(deletedWorkoutLogIds, 500),
-                        mobilityTests: ensureMapOr(safeMobilityTests, 20, { history: [], updatedAt: 0 }),
-                        selectedEquipments: ensureListMax(Array.isArray(selectedEquipments) ? selectedEquipments : [], 200),
-                        customGyms: ensureListMax(safeParse(`celik_kodu_custom_gyms_${uid}`, []), 200),
-                        aiDoctrine: String(currentSelectedDoctrine || 'bb_hybrid').slice(0, 120),
-                        aiCoachSummary: ensureMapOr(safeParse(`celik_kodu_ai_program_${uid}`, null), 100, null),
-                        lastGeneratedWorkout: ensureMapOr(safeLastGen, 100, null),
-                        activeWorkoutDraft: ensureMapOr(safeParse(`celik_kodu_active_state_${uid}`, null), 100, null),
-                        garminManifests: ensureMapOr(leanManifests, 1500, {})
+                    const statePayloadCore = buildUserStatePayloadCore(uid, {
+                        allDaysSyncedToSubcollection: Boolean(daysSyncRes && daysSyncRes.allDaysSyncedToSubcollection),
+                        pruneExpiredDrafts: true
                     });
-                    let stateSig = '';
-                    try { stateSig = JSON.stringify(statePayloadCore); } catch {}
+                    const stateSig = stableCanonicalJsonStringify(statePayloadCore);
                     const sigKey = `user_state:${uid}`;
                     if (stateSig && _lastCloudWritePayloadSig[sigKey] === stateSig) {
                         notifyCloudSubChief('saved_write', 'user_state', 'Değişmeyen paket yazımı önlendi', 1);
@@ -4591,6 +4693,17 @@
                 }
                 if (!hasPendingLocalState && cloudUpdatedAt > localUpdatedAt && !hasUnsyncedLocalDiff) {
                     localStorage.setItem(`celik_kodu_state_updated_at_${uid}`, String(cloudUpdatedAt));
+                }
+                if (!hasUnsyncedLocalDiff && !hasPendingLocalState && localUpdatedAt <= cloudUpdatedAt) {
+                    try {
+                        const allDaysSynced = Number(localStorage.getItem(DAYS_CLOUD_PULL_AT_PREFIX + uid) || 0) > 0 && legacyDateSchedCount === 0;
+                        const seedCore = buildUserStatePayloadCore(uid, {
+                            allDaysSyncedToSubcollection: allDaysSynced,
+                            pruneExpiredDrafts: false
+                        });
+                        const seedSig = stableCanonicalJsonStringify(seedCore);
+                        if (seedSig) _lastCloudWritePayloadSig[`user_state:${uid}`] = seedSig;
+                    } catch {}
                 } else if (!IS_LOCAL_DEV && (hasPendingLocalState || localUpdatedAt > cloudUpdatedAt || hasUnsyncedLocalDiff)) {
                     const onlyDeferredWorkoutChanges =
                         localStorage.getItem(`celik_kodu_deferred_state_sync_${uid}`) === '1' &&
@@ -5162,7 +5275,7 @@
                 _adminPortalScriptLoadingPromise = new Promise((resolve) => {
                     try {
                         const script = document.createElement('script');
-                        script.src = 'js/chiefs/admin-portal.js?v=356';
+                        script.src = 'js/chiefs/admin-portal.js?v=362';
                         script.async = false;
                         script.onload = () => resolve(true);
                         script.onerror = () => {

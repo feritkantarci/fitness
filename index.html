@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v">
+    <link rel="stylesheet" href="css/style.css?v=362">
     <style>
         /* CRITICAL STYLES TO PREVENT FOUC / UNSTYLED FLASH */
         html, body { background-color: #0B0A14; color: #F8FAFC; color-scheme: dark; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -260,7 +260,7 @@
                         <span class="modern-brand-title" translate="no">Çelik Kodu</span>
                         <div class="modern-brand-subrow">
                             <span id="headerActiveTabLabel">ÜRETİCİ</span>
-                            <span class="app-version-badge" id="appVersionBadge" translate="no" style="display:none;">v</span>
+                            <span class="app-version-badge" id="appVersionBadge" translate="no" style="display:none;">v362</span>
                         </div>
                     </div>
                 </div>
@@ -292,7 +292,7 @@
                         <div class="header-popup-status-row">
                             <span class="header-popup-status-label">Sistem Durumu</span>
                             <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
-                                <span id="headerPopupVersionLabel" translate="no" style="font-size:10px; font-weight:700; color:#94A3B8; line-height:1.1; letter-spacing:0.3px;">v</span>
+                                <span id="headerPopupVersionLabel" translate="no" style="font-size:10px; font-weight:700; color:#94A3B8; line-height:1.1; letter-spacing:0.3px;">v362</span>
                                 <span class="cloud-sync-badge" id="headerCloudSyncBadge" onclick="if(this.classList.contains('auth-required') && typeof reauthToLoginScreenPreservingLocalData === 'function'){ closeHeaderPopupMenu(); reauthToLoginScreenPreservingLocalData(); }" title="Bulut Eşitleme Durumu">Bulut Aktif</span>
                             </div>
                         </div>
@@ -2496,17 +2496,17 @@
     </script>
 
     <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
-    <script src="js/exercises-db.js?v"></script>
-    <script src="js/chiefs/shared-core.js?v"></script>
-    <script src="js/chiefs/bridge-customs.js?v"></script>
-    <script src="js/chiefs/liaison-subchiefs.js?v"></script>
-    <script src="js/chiefs/profile-chief.js?v"></script>
-    <script src="js/chiefs/library-chief.js?v"></script>
-    <script src="js/chiefs/history-chief.js?v"></script>
-    <script src="js/chiefs/analytics-chief.js?v"></script>
-    <script src="js/chiefs/generator-chief.js?v"></script>
-    <script src="js/chiefs/workout-chief.js?v"></script>
-    <script src="js/app.js?v"></script>
+    <script src="js/exercises-db.js?v=362"></script>
+    <script src="js/chiefs/shared-core.js?v=362"></script>
+    <script src="js/chiefs/bridge-customs.js?v=362"></script>
+    <script src="js/chiefs/liaison-subchiefs.js?v=362"></script>
+    <script src="js/chiefs/profile-chief.js?v=362"></script>
+    <script src="js/chiefs/library-chief.js?v=362"></script>
+    <script src="js/chiefs/history-chief.js?v=362"></script>
+    <script src="js/chiefs/analytics-chief.js?v=362"></script>
+    <script src="js/chiefs/generator-chief.js?v=362"></script>
+    <script src="js/chiefs/workout-chief.js?v=362"></script>
+    <script src="js/app.js?v=362"></script>
     <script>
         function getNotifStorageKey() {
             const uid = localStorage.getItem('celik_kodu_active_user_id') || 'default';
@@ -2703,6 +2703,6 @@
             </div>
         </div>
     </div>
-    <script src="js/garmin-tredict-bridge.js?v" defer></script>
+    <script src="js/garmin-tredict-bridge.js?v=362" defer></script>
 </body>
 </html>
