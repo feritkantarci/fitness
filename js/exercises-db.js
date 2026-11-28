@@ -2018,6 +2018,70 @@
     "garminMatchType": "exact_verified"
   },
   {
+    "category": "legs",
+    "cue": "Plakayı iki yanından tutup geniş duruşla derin çömel, kalkışta gövdeyi sabit tutarak plakayı başının etrafında sağa ve sola döndür.",
+    "diagram": "assets/diagrams/plate_squat_halo.webp",
+    "equipment": "dumbbell",
+    "id": "db_plate_squat_halo",
+    "isComplex": true,
+    "mechanic": "compound",
+    "muscle": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça, Arka Omuz, Yan Omuz, Ön Omuz",
+    "name": "Plaka Squat & Halo",
+    "positions": [
+      {
+        "badge": "setup",
+        "desc": "Ayaklar omuz genişliğinden biraz açık, ağırlık plakası iki yanından kavranır; karın ve kalça sıkı.",
+        "phase": "1. Geniş Duruş & Plaka Tutuş"
+      },
+      {
+        "badge": "action",
+        "desc": "Dizleri dışa açarak kalçayı geriye ve aşağı indir; plaka bacak arasında yere paralel konuma gelir.",
+        "phase": "2. Derin Squat Çöküşü"
+      },
+      {
+        "badge": "finish",
+        "desc": "Topuklardan iterek ayağa kalk ve plakayı başın etrafında tam daire döndür; her tekrarda yön değiştir.",
+        "phase": "3. Kalkış & Baş Çevresi Halo"
+      }
+    ],
+    "primaryMuscles": [
+      "quads",
+      "shoulders",
+      "glutes"
+    ],
+    "secondaryMuscles": [
+      "core",
+      "back",
+      "biceps"
+    ],
+    "tags": [
+      "full_body",
+      "legs",
+      "core",
+      "mobility",
+      "functional_fitness"
+    ],
+    "weightKey": "",
+    "primarySubMuscles": "Dış Ön Bacak, İç Ön Bacak, Ana Kalça, Arka Omuz, Yan Omuz, Ön Omuz",
+    "secondarySubMuscles": "Ön Karın, Yan Karın, Derin İç Karın, Üst Sırt & Trapez, Orta Sırt, Ön Kol & Bilek",
+    "biomechanicalProof": "Geniş duruşlu squat ile baş çevresi halo dönüşünü birleştirmek alt vücut gücünü, omuz mobilitesini ve anti-rotasyon gövde stabilitesini tek akışta çalıştırır.",
+    "fitCategory": "squat",
+    "fitName": "",
+    "fitNote": "Plaka Squat & Halo [id:db_plate_squat_halo]",
+    "garminPrimaryMuscles": [
+      "QUADS",
+      "GLUTES",
+      "SHOULDERS"
+    ],
+    "garminSecondaryMuscles": [
+      "ABS",
+      "OBLIQUES",
+      "UPPER_BACK",
+      "FOREARMS"
+    ],
+    "garminMatchType": "unmapped_noted"
+  },
+  {
     "category": "push",
     "cue": "Derin squat yap, kalkışın patlayıcı momentumunu hiç kesmeden doğrudan baş üstü pres ile birleştir.",
     "diagram": "assets/diagrams/seq_thruster.svg",

@@ -492,8 +492,8 @@ function runAcademicMathSuite(moduleSources, dbText) {
     {
       id: 'T6',
       owner: 'library-guard',
-      title: '3-Mod DB Denetimi (3 Cardio/7 Time/153 Rep), Emekli Katalog Koruması & Miras Hollow Body',
-      expected: 'cardio=3, time=7, reps=153, func=74, retired(bw_butt_kicks)=purged; Hollow 12→10→8 normal_fatigue(sn), 40→20 early_drop',
+      title: '3-Mod DB Denetimi (3 Cardio/7 Time/154 Rep), Emekli Katalog Koruması & Miras Hollow Body',
+      expected: 'cardio=3, time=7, reps=154, func=75, retired(bw_butt_kicks)=purged; Hollow 12→10→8 normal_fatigue(sn), 40→20 early_drop',
       run: () => {
         ctx.__seedState();
         const counts = vm.runInContext(`(() => {
@@ -560,6 +560,13 @@ function runAcademicMathSuite(moduleSources, dbText) {
           localStorage.removeItem('celik_kodu_cloud_master_catalog_v1');
           if (prevMeta) window.CELIK_MASTER_CATALOG_META = prevMeta;
           else delete window.CELIK_MASTER_CATALOG_META;
+          const libModeCounts = {};
+          ['fitness', 'functional', 'cardio'].forEach(mode => {
+            switchLibraryExerciseMode(mode);
+            const badge = document.getElementById('libExCountBadge');
+            libModeCounts[mode] = badge ? parseInt(String(badge.innerText || '0'), 10) : 0;
+          });
+          switchLibraryExerciseMode('fitness');
           return {
             equip: ex && ex.equipment,
             reqs: ex ? getExerciseRequiredEquipments(ex) : [],
@@ -568,18 +575,20 @@ function runAcademicMathSuite(moduleSources, dbText) {
             funcCount: funcItems.length,
             funcNoCond: !funcItems.some(e => /^cond_/.test(e.id)),
             hasAllNew8,
-            retiredPurged
+            retiredPurged,
+            libModeCounts
           };
         })()`, ctx);
-        const ok = counts.cardio_min === 3 && counts.time_sec === 7 && counts.reps === 153
+        const ok = counts.cardio_min === 3 && counts.time_sec === 7 && counts.reps === 154
           && latShuffle.retiredPurged === true
           && latShuffle.equip === 'mini_band'
           && latShuffle.reqs.includes('mini_band')
           && latShuffle.availWithoutBand === false
           && latShuffle.availWithBand === true
-          && latShuffle.funcCount === 74
+          && latShuffle.funcCount === 75
           && latShuffle.funcNoCond === true
           && latShuffle.hasAllNew8 === true
+          && latShuffle.libModeCounts && latShuffle.libModeCounts.fitness === 86 && latShuffle.libModeCounts.functional === 75 && latShuffle.libModeCounts.cardio === 3
           && hMode === 'time_sec'
           && Boolean(h1 && h1.category === 'normal_fatigue' && String(h1.setChainText).includes('sn') && !String(h1.adviceText).includes('kiloya'))
           && Boolean(h2 && h2.category === 'early_drop' && String(h2.badgeText).includes('Süre Düşüşü'));

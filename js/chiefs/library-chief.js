@@ -499,43 +499,28 @@
         let currentLibraryExerciseMode = 'fitness'; // 'fitness' | 'cardio'
 
         function updateLibraryModeButtons() {
-            const fitBtn = document.getElementById('libModeFitnessBtn');
-            const carBtn = document.getElementById('libModeCardioBtn');
-            const isCar = currentLibraryExerciseMode === 'cardio';
+            const modes = [
+                ['fitness', document.getElementById('libModeFitnessBtn')],
+                ['functional', document.getElementById('libModeFunctionalBtn')],
+                ['cardio', document.getElementById('libModeCardioBtn')]
+            ];
+            const fitBtn = modes[0][1];
             if (fitBtn && fitBtn.parentElement) {
                 fitBtn.parentElement.style.background = '#121024';
                 fitBtn.parentElement.style.borderColor = 'rgba(167, 139, 250, 0.25)';
             }
-            if (fitBtn) {
-                if (!isCar) {
-                    fitBtn.style.background = 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)';
-                    fitBtn.style.backgroundColor = '#6D28D9';
-                    fitBtn.style.color = '#FFFFFF';
-                    fitBtn.style.borderColor = 'rgba(167, 139, 250, 0.35)';
-                } else {
-                    fitBtn.style.background = 'transparent';
-                    fitBtn.style.backgroundColor = 'transparent';
-                    fitBtn.style.color = '#CBD5E1';
-                    fitBtn.style.borderColor = 'transparent';
-                }
-            }
-            if (carBtn) {
-                if (isCar) {
-                    carBtn.style.background = 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)';
-                    carBtn.style.backgroundColor = '#6D28D9';
-                    carBtn.style.color = '#FFFFFF';
-                    carBtn.style.borderColor = 'rgba(167, 139, 250, 0.35)';
-                } else {
-                    carBtn.style.background = 'transparent';
-                    carBtn.style.backgroundColor = 'transparent';
-                    carBtn.style.color = '#CBD5E1';
-                    carBtn.style.borderColor = 'transparent';
-                }
-            }
+            modes.forEach(([modeKey, btn]) => {
+                if (!btn) return;
+                const active = currentLibraryExerciseMode === modeKey;
+                btn.style.background = active ? 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)' : 'transparent';
+                btn.style.backgroundColor = active ? '#6D28D9' : 'transparent';
+                btn.style.color = active ? '#FFFFFF' : '#CBD5E1';
+                btn.style.borderColor = active ? 'rgba(167, 139, 250, 0.35)' : 'transparent';
+            });
         }
 
         function switchLibraryExerciseMode(mode) {
-            currentLibraryExerciseMode = mode === 'cardio' ? 'cardio' : 'fitness';
+            currentLibraryExerciseMode = (mode === 'cardio' || mode === 'functional') ? mode : 'fitness';
             updateLibraryModeButtons();
             renderLibraryExerciseCatalog();
         }
@@ -863,10 +848,16 @@
             const filtered = EXERCISES_DB.filter(ex => {
                 const isExcluded = excludedSet.has(ex.id);
                 const isStandaloneCardio = /^cond_/.test(String(ex.id || ''));
+                const isFuncEx = typeof isFunctionalFitnessExercise === 'function'
+                    ? isFunctionalFitnessExercise(ex)
+                    : (Array.isArray(ex.tags) && ex.tags.includes('functional_fitness'));
                 if (currentLibraryExerciseMode === 'cardio') {
                     if (!isStandaloneCardio) return false;
+                } else if (currentLibraryExerciseMode === 'functional') {
+                    if (isStandaloneCardio || !isFuncEx) return false;
                 } else if (!q) {
                     if (isStandaloneCardio) return false;
+                    if (isFuncEx && muscle !== 'functional_fitness') return false;
                 }
                 // Arama kutusu doluyken (q varsa) gizlenmiş egzersiz de aramayla eşleşiyorsa kullanıcıya gösterilsin (Gizli etiketiyle)
                 if (!q && (showExcluded ? !isExcluded : isExcluded)) return false;
